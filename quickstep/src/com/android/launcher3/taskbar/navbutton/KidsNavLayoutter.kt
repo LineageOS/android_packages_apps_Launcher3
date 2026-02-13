@@ -32,11 +32,12 @@ import com.android.launcher3.taskbar.navbutton.LayoutResourceHelper.*
 
 class KidsNavLayoutter(
     resources: Resources,
-    navBarContainer: LinearLayout,
+    navButtonContainer: LinearLayout,
     endContextualContainer: ViewGroup,
     startContextualContainer: ViewGroup,
     imeSwitcher: ImageView?,
     a11yButton: ImageView?,
+    moreOptionsButton: ImageView?,
     space: Space?,
     backButton: ImageView?,
     homeButton: ImageView?,
@@ -44,11 +45,12 @@ class KidsNavLayoutter(
 ) :
     AbstractNavButtonLayoutter(
         resources,
-        navBarContainer,
+        navButtonContainer,
         endContextualContainer,
         startContextualContainer,
         imeSwitcher,
         a11yButton,
+        moreOptionsButton,
         space,
         backButton,
         homeButton,

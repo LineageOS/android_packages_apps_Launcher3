@@ -26,11 +26,13 @@ import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.taskbar.LauncherTaskbarUIController.IME_PROGRESS_INDEX;
 import static com.android.launcher3.taskbar.LauncherTaskbarUIController.SYSUI_SURFACE_PROGRESS_INDEX;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar;
+import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableTaskbarA11yMoreOptionsButton;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_A11Y;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_BACK;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_HOME;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_IME_SWITCH;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_RECENTS;
+import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_MORE_OPTIONS;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_SPACE;
 import static com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_KEYGUARD;
 import static com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_SMALL_SCREEN;
@@ -245,6 +247,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     private TaskbarControllers mControllers;
     private boolean mIsImeRenderingNavButtons;
     private ImageView mA11yButton;
+    private ImageView mMoreOptionsButton;
     @SystemUiStateFlags
     private long mSysuiStateFlags;
     private ImageView mBackButton;
@@ -532,6 +535,15 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         mPropertyHolders.add(new StatePropertyHolder(mA11yButton,
                 flags -> (flags & FLAG_A11Y_VISIBLE) != 0));
 
+        if (enableTaskbarA11yMoreOptionsButton.isTrue()) {
+            mMoreOptionsButton = addButton(R.drawable.ic_more_vert_dots,
+                    BUTTON_MORE_OPTIONS, endContainer,
+                    navButtonController, R.id.more_options_button,
+                    R.layout.taskbar_contextual_button);
+            mPropertyHolders.add(new StatePropertyHolder(mMoreOptionsButton,
+                    flags -> (flags & FLAG_A11Y_VISIBLE) != 0));
+        }
+
         mSpace = new Space(mNavButtonsView.getContext());
         mSpace.setOnClickListener(view -> navButtonController.onButtonClick(BUTTON_SPACE, view));
         mSpace.setOnLongClickListener(view ->
@@ -542,7 +554,10 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
                     .getListenableRef(mButtonOrderChangedUri).forEach(
                             getTaskbarUiThread(), (isEnabled) -> {
                                 getLayoutterForCurrentState().layoutButtons(
-                                        mContext, isA11yButtonPersistent());
+                                        mContext,
+                                        isA11yButtonPersistent(),
+                                        isA11yButtonVisible(),
+                                        isMoreOptionsButtonVisible());
                                 return null;
                             });
         }
@@ -658,10 +673,26 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     }
 
     /**
+     * @return {@code true} if the A11y button should be considered visible based on current flags.
+     */
+    private boolean isA11yButtonVisible() {
+        return (mState & FLAG_A11Y_VISIBLE) != 0;
+    }
+
+    /**
+     * @return {@code true} if the More Options button should be visible.
+     * Dependencies: Feature flag must be on, AND A11y button must be visible.
+     */
+    private boolean isMoreOptionsButtonVisible() {
+        return enableTaskbarA11yMoreOptionsButton.isTrue()
+                && isA11yButtonVisible();
+    }
+
+    /**
      * @return {@code true} if A11y is showing in 3 button nav taskbar
      */
     private boolean isA11yButtonPersistent() {
-        return mContext.isThreeButtonNav() && (mState & FLAG_A11Y_VISIBLE) != 0;
+        return mContext.isThreeButtonNav() && isA11yButtonVisible();
     }
 
     /**
@@ -1139,7 +1170,9 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
      */
     private void updateButtonLayoutSpacing() {
         NavButtonLayoutter navButtonLayoutter = getLayoutterForCurrentState();
-        navButtonLayoutter.layoutButtons(mContext, isA11yButtonPersistent());
+
+        navButtonLayoutter.layoutButtons(mContext, isA11yButtonPersistent(),
+                isA11yButtonVisible(), isMoreOptionsButtonVisible());
         updateButtonsBackground();
         updateNavButtonColor();
     }
@@ -1147,7 +1180,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     private NavButtonLayoutter getLayoutterForCurrentState() {
         return NavButtonLayoutFactory.Companion.getUiLayoutter(
                         mContext.getDeviceProfile(), mNavButtonsView, mImeSwitcherButton,
-                        mA11yButton, mSpace, mContext.getResources(),
+                        mA11yButton, mMoreOptionsButton, mSpace, mContext.getResources(),
                         mContext.isNavBarKidsModeActive(),
                         !mContext.isUserSetupComplete(), mContext.isThreeButtonNav(),
                         mContext.isPhoneMode(), mWindowManagerProxy.getRotation(mContext));

@@ -46,6 +46,7 @@ class AbstractNavButtonLayoutterTest(private val order: AbstractButtonOrder) :
             startContextualContainer,
             imeSwitcher,
             a11yButton,
+            moreOptionsButton,
             space,
             backButton,
             homeButton,

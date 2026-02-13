@@ -51,6 +51,7 @@ abstract class AbstractNavButtonLayoutter(
     protected val startContextualContainer: ViewGroup,
     protected val imeSwitcher: ImageView?,
     protected val a11yButton: ImageView?,
+    protected val moreOptionsButton: ImageView?,
     protected val space: Space?,
     protected val backButton: ImageView? = navButtonContainer.findViewById(R.id.back),
     protected val homeButton: ImageView? = navButtonContainer.findViewById(R.id.home),

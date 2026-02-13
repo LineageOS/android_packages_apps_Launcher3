@@ -320,6 +320,8 @@
     <string name="taskbar_button_notifications">Notifications</string>
     <!-- Content description for quick settings button [CHAR_LIMIT=16] -->
     <string name="taskbar_button_quick_settings">Quick Settings</string>
+    <!-- Content description for more options button [CHAR_LIMIT=16] -->
+    <string name="taskbar_button_more_options">More options</string>
     <!-- Accessibility title for the Taskbar window. [CHAR_LIMIT=NONE] -->
     <string name="taskbar_a11y_title">Taskbar</string>
     <!-- Accessibility title for the Bubble Bar. [CHAR_LIMIT=NONE] -->

@@ -59,6 +59,7 @@ class NavButtonLayoutFactory {
             navButtonsView: NearestTouchFrame,
             imeSwitcher: ImageView?,
             a11yButton: ImageView?,
+            moreOptionsButton: ImageView?,
             space: Space?,
             resources: Resources,
             isKidsMode: Boolean,
@@ -88,6 +89,7 @@ class NavButtonLayoutFactory {
                         startContextualContainer,
                         imeSwitcher,
                         a11yButton,
+                        moreOptionsButton,
                         space,
                         backButton,
                         homeButton,
@@ -104,6 +106,7 @@ class NavButtonLayoutFactory {
                             startContextualContainer,
                             imeSwitcher,
                             a11yButton,
+                            moreOptionsButton,
                             space,
                             backButton,
                             homeButton,
@@ -118,6 +121,7 @@ class NavButtonLayoutFactory {
                             startContextualContainer,
                             imeSwitcher,
                             a11yButton,
+                            moreOptionsButton,
                             space,
                             backButton,
                             homeButton,
@@ -132,6 +136,7 @@ class NavButtonLayoutFactory {
                             startContextualContainer,
                             imeSwitcher,
                             a11yButton,
+                            moreOptionsButton,
                             space,
                             backButton,
                             homeButton,
@@ -147,6 +152,7 @@ class NavButtonLayoutFactory {
                         startContextualContainer,
                         imeSwitcher,
                         a11yButton,
+                        moreOptionsButton,
                         space,
                     )
                 }
@@ -160,6 +166,7 @@ class NavButtonLayoutFactory {
                                 startContextualContainer,
                                 imeSwitcher,
                                 a11yButton,
+                                moreOptionsButton,
                                 space,
                                 backButton,
                                 homeButton,
@@ -174,6 +181,7 @@ class NavButtonLayoutFactory {
                                 startContextualContainer,
                                 imeSwitcher,
                                 a11yButton,
+                                moreOptionsButton,
                                 space,
                                 backButton,
                                 homeButton,
@@ -189,6 +197,15 @@ class NavButtonLayoutFactory {
     /** Lays out and provides access to the home, recents, and back buttons for various mischief */
     interface NavButtonLayoutter {
         fun layoutButtons(context: TaskbarActivityContext, isA11yButtonPersistent: Boolean)
+
+        fun layoutButtons(
+            context: TaskbarActivityContext,
+            isA11yButtonPersistent: Boolean,
+            isA11yVisible: Boolean,
+            isMoreOptionsVisible: Boolean,
+        ) {
+            layoutButtons(context, isA11yButtonPersistent)
+        }
 
         /** Isolated logic for updating the order of the 3 buttons. */
         fun addThreeButtons()

@@ -27,4 +27,5 @@
 
     <!-- Whether taskbar icon has a hover listener. -->
     <item type="id" name="taskbar_icon_has_hover_listener" />
+    <item type="id" name="more_options_button" />
 </resources>

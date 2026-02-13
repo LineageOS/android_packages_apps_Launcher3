@@ -44,6 +44,7 @@ class PhoneLandscapeNavLayoutterTest(private val order: LandscapeButtonOrder) :
             startContextualContainer,
             imeSwitcher,
             a11yButton,
+            moreOptionsButton,
             space,
             backButton,
             homeButton,

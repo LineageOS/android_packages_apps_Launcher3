@@ -26,20 +26,22 @@ import com.android.launcher3.taskbar.TaskbarActivityContext
 /** Layoutter for showing gesture navigation on phone screen. No buttons here, no-op container */
 class PhoneGestureLayoutter(
     resources: Resources,
-    navBarContainer: LinearLayout,
+    navButtonContainer: LinearLayout,
     endContextualContainer: ViewGroup,
     startContextualContainer: ViewGroup,
     imeSwitcher: ImageView?,
     a11yButton: ImageView?,
+    moreOptionsButton: ImageView?,
     space: Space?,
 ) :
     AbstractNavButtonLayoutter(
         resources,
-        navBarContainer,
+        navButtonContainer,
         endContextualContainer,
         startContextualContainer,
         imeSwitcher,
         a11yButton,
+        moreOptionsButton,
         space,
     ) {
 
