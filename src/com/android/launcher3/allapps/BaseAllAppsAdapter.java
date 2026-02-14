@@ -139,7 +139,19 @@ public abstract class BaseAllAppsAdapter
          * Returns true if the items represent the same object
          */
         public boolean isSameAs(AdapterItem other) {
-            return (other.viewType == viewType) && (other.getClass() == getClass());
+            if (other == null || other.viewType != viewType || other.getClass() != getClass()) {
+                return false;
+            }
+            if (viewType == VIEW_TYPE_ICON || viewType == VIEW_TYPE_PRIVATE_SPACE_APP_ICON) {
+                if (itemInfo == null || other.itemInfo == null) {
+                    return itemInfo == other.itemInfo;
+                }
+                // Both itemInfo and other.itemInfo are non-null here
+                return java.util.Objects.equals(itemInfo.user, other.itemInfo.user)
+                        && java.util.Objects.equals(itemInfo.getTargetComponent(),
+                                other.itemInfo.getTargetComponent());
+            }
+            return true;
         }
 
         /**
