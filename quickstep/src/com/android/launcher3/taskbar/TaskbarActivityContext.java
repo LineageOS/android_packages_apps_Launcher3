@@ -203,6 +203,8 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.unfold.updates.RotationChangeProvider;
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider;
+import com.android.wm.shell.shared.bubbles.BubbleFeatureConfig;
+import com.android.wm.shell.shared.bubbles.BubbleFeatureConfigImpl;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
 import com.android.wm.shell.shared.desktopmode.DesktopTaskToFrontReason;
@@ -316,6 +318,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     private int mFolderCount = 0;
     private int mVisiblePopupCount = 0;
 
+    private BubbleFeatureConfig mBubbleFeatureConfig;
+
     public TaskbarActivityContext(int displayId, Context windowContext,
             @Nullable Context navigationBarPanelContext, DeviceProfile launcherDp,
             TaskbarNavButtonController buttonController,
@@ -336,6 +340,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         SettingsCache settingsCache = SettingsCache.INSTANCE.get(this);
         mIsUserSetupComplete = settingsCache.getValue(URI_USER_SETUP_COMPLETE);
         mIsNavBarKidsMode = settingsCache.getValue(URI_NAV_BAR_KIDS_MODE);
+        mBubbleFeatureConfig = new BubbleFeatureConfigImpl(mWindowContext);
 
         applyDeviceProfile(launcherDp);
         mTaskbarSpecsEvaluator = new TaskbarSpecsEvaluator(
@@ -401,7 +406,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                     new BubbleDragController(this, mWindowContext, mDragLayer, mTaskbarUiState),
                     new BubbleDismissController(this, mDragLayer),
                     bubbleBarSwipeController,
-                    new DragToBubbleController(mWindowContext, bubbleBarContainer),
+                    new DragToBubbleController(mWindowContext, bubbleBarContainer, this),
                     new BubbleCreator(this)
             ));
         }
@@ -578,6 +583,19 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     public void bubbleBarVisibilityChanged(boolean isVisible) {
         mControllers.uiController.adjustHotseatForBubbleBar(isVisible);
         mControllers.taskbarViewController.adjustTaskbarForBubbleBar();
+    }
+
+    /** Whether app bubbles are supported on this device. */
+    public boolean areAppBubblesSupported() {
+        return mBubbleFeatureConfig.areAppBubblesSupported();
+    }
+
+    /**
+     * Sets an override for {@link #mBubbleFeatureConfig} for testing.
+     */
+    @VisibleForTesting
+    public void overrideBubbleFeatureConfigForTests(BubbleFeatureConfig featureConfig) {
+        mBubbleFeatureConfig = featureConfig;
     }
 
     /**

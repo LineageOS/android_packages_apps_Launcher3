@@ -655,7 +655,8 @@ public final class TaskViewUtils {
 
         boolean skipLauncherChanges = !launcherClosing;
 
-        TaskView taskView = findTaskViewToLaunch(recentsView, v, AnimatedSurface.from(appTargets));
+        TaskView taskView = findTaskViewToLaunch(recentsView, v,
+                AnimatedSurface.mapFromTargets(appTargets));
         if (taskView == null) {
             Log.w(TAG, "composeRecentsLaunchAnimator - no TaskView to launch");
             return;

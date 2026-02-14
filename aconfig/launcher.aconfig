@@ -348,13 +348,6 @@ flag {
 }
 
 flag {
-  name: "refactor_taskbar_ui_state"
-  namespace: "launcher"
-  description: "Refactor taskbar ui states into TaskbarUiState class."
-  bug: "404636836"
-}
-
-flag {
   name: "enable_expressive_folder_expansion"
   namespace: "launcher"
   description: "Enables expressive folder expansion motion"

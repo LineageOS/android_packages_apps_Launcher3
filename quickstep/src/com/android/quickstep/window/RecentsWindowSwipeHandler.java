@@ -20,6 +20,7 @@ import static android.content.Intent.EXTRA_COMPONENT_NAME;
 import static android.content.Intent.EXTRA_USER;
 
 import static com.android.app.animation.Interpolators.ACCELERATE;
+import static com.android.app.animation.Interpolators.DECELERATE;
 import static com.android.launcher3.GestureNavContract.EXTRA_ENABLE_GESTURE_CONTRACT;
 import static com.android.launcher3.GestureNavContract.EXTRA_GESTURE_CONTRACT;
 import static com.android.launcher3.GestureNavContract.EXTRA_ICON_POSITION;
@@ -61,7 +62,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
-import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.anim.AnimationSuccessListener;
@@ -106,6 +106,10 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
 
     private static final String TAG = "RecentsWindowSwipeHandler";
 
+    private static final float HOME_SWIPE_UP_SCALE = 0.9f;
+    private static final float HOME_SWIPE_UP_ALPHA = 0.75f;
+    private static final Interpolator HOME_SWIPE_UP_INTERPOLATOR = DECELERATE;
+
     /**
      * Message used for receiving gesture nav contract information. We use a static messenger to
      * avoid leaking too make binders in case the receiving launcher does not handle the contract
@@ -119,7 +123,6 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
     private final boolean mRunningOverHome;
 
     private final Matrix mTmpMatrix = new Matrix();
-    private float mMaxLauncherScale = 1;
 
     private boolean mAppCanEnterPip;
 
@@ -155,16 +158,6 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
                         RecentsWindowSwipeHandler.this::updateHomeActivityTransformDuringSwipeUp));
     }
 
-    @Override
-    protected void initTransitionEndpoints(DeviceProfile dp) {
-        super.initTransitionEndpoints(dp);
-        if (mRunningOverHome) {
-            // Full screen scale should be independent of remote target handle
-            mMaxLauncherScale = 1 / mRemoteTargetHandles[0].getTaskViewSimulator()
-                    .getFullScreenScale();
-        }
-    }
-
     @UiThread
     @Override
     protected void animateGestureEnd(
@@ -188,25 +181,45 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
                 velocityPxPerMs);
     }
 
-    private void updateHomeActivityTransformDuringSwipeUp(SurfaceProperties builder,
-            RemoteAnimationTarget app, TransformParams params) {
+    private void updateHomeActivityTransformDuringSwipeUp(
+            SurfaceProperties builder, RemoteAnimationTarget app, TransformParams params) {
         if (mActiveAnimationFactory != null) {
             return;
         }
+        // The currentShift is already interpolated by the magnetic swipe detach effect
         float currentShift = getCurrentShiftValue();
         setHomeScaleAndAlpha(
                 builder,
                 app,
                 currentShift,
-                mRunningOverHome ? Utilities.boundToRange(1 - currentShift, 0, 1) : 0f);
+                mRunningOverHome
+                        ? Utilities.mapBoundToRange(
+                                currentShift,
+                                /* lowerBound= */ 0f,
+                                /* upperBound= */ mDragLengthFactor,
+                                /* toMin= */ 1f,
+                                /* toMax= */ HOME_SWIPE_UP_ALPHA,
+                                /* interpolator= */ HOME_SWIPE_UP_INTERPOLATOR)
+                        : 0f);
     }
 
-    private void setHomeScaleAndAlpha(SurfaceProperties builder,
-            RemoteAnimationTarget app, float verticalShift, float alpha) {
+    private void setHomeScaleAndAlpha(
+            SurfaceProperties builder,
+            RemoteAnimationTarget app,
+            float verticalShift,
+            float alpha) {
         if (app.windowConfiguration.getActivityType() != ACTIVITY_TYPE_HOME) {
             return;
         }
-        float scale = Utilities.mapRange(verticalShift, 1, mMaxLauncherScale);
+        float scale = mRunningOverHome
+                ? Utilities.mapBoundToRange(
+                        verticalShift,
+                        /* lowerBound= */ 0f,
+                        /* upperBound= */ mDragLengthFactor,
+                        /* toMin= */ 1f,
+                        /* toMax= */ HOME_SWIPE_UP_SCALE,
+                        /* interpolator= */ HOME_SWIPE_UP_INTERPOLATOR)
+                : 1f;
         mTmpMatrix.setScale(scale, scale,
                 app.localBounds.exactCenterX(), app.localBounds.exactCenterY());
         builder.setMatrix(mTmpMatrix).setAlpha(alpha);

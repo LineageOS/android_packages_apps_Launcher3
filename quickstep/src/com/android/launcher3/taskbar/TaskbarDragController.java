@@ -93,7 +93,6 @@ import com.android.quickstep.util.LogUtils;
 import com.android.quickstep.util.MultiValueUpdateListener;
 import com.android.quickstep.util.SingleTask;
 import com.android.systemui.shared.recents.model.Task;
-import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
 import com.android.wm.shell.shared.draganddrop.DragAndDropConstants;
 
 import java.io.PrintWriter;
@@ -532,7 +531,8 @@ public class TaskbarDragController extends DragController implements
                     intent.putExtra(Intent.EXTRA_PACKAGE_NAME, item.getIntent().getPackage());
                     intent.putExtra(Intent.EXTRA_SHORTCUT_ID, deepShortcutId);
                     ShortcutInfo shortcutInfo = ((WorkspaceItemInfo) item).getDeepShortcutInfo();
-                    if (BubbleFlagHelper.enableCreateAnyBubble() && shortcutInfo != null) {
+                    if (mControllers.taskbarActivityContext.areAppBubblesSupported()
+                            && shortcutInfo != null) {
                         intent.putExtra(DragAndDropConstants.EXTRA_SHORTCUT_INFO, shortcutInfo);
                     }
                 } else if (item.itemType == ITEM_TYPE_SEARCH_ACTION) {
