@@ -1771,7 +1771,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
      * Closing window animator that moves the window down and offscreen.
      */
     private Animator getFallbackClosingWindowAnimators(RemoteAnimationTarget[] appTargets) {
-        AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
+        AnimatedSurface[] appSurfaces = AnimatedSurface.mapFromTargets(appTargets);
         final int rotationChange = getRotationChange(appSurfaces);
         SurfaceTransactionApplier surfaceApplier = new SurfaceTransactionApplier(mDragLayer);
         Matrix matrix = new Matrix();
@@ -1944,7 +1944,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         RectFSpringAnim rectFSpringAnim = null;
 
         final boolean launcherIsForceInvisibleOrOpening = mLauncher.isForceInvisible()
-                || launcherIsASurfaceWithMode(AnimatedSurface.from(appTargets),
+                || launcherIsASurfaceWithMode(AnimatedSurface.mapFromTargets(appTargets),
                 AnimatedSurface.Mode.OPENING);
 
         boolean playFallBackAnimation = (launcherView == null
@@ -2095,7 +2095,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 mLauncher.getStateManager().moveToRestState();
             }
 
-            AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
+            AnimatedSurface[] appSurfaces = AnimatedSurface.mapFromTargets(appTargets);
 
             RectF windowTargetBounds =
                     new RectF(getWindowTargetBounds(appSurfaces, getRotationChange(appSurfaces)));
@@ -2141,9 +2141,9 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 RemoteAnimationTarget[] wallpaperTargets,
                 RemoteAnimationTarget[] nonAppTargets,
                 LauncherAnimationRunner.AnimationResult result) {
-            AnimatedSurface[] appSurfaces = AnimatedSurface.from(appTargets);
-            AnimatedSurface[] wallpaperSurfaces = AnimatedSurface.from(wallpaperTargets);
-            AnimatedSurface[] nonAppSurfaces = AnimatedSurface.from(nonAppTargets);
+            AnimatedSurface[] appSurfaces = AnimatedSurface.mapFromTargets(appTargets);
+            AnimatedSurface[] wallpaperSurfaces = AnimatedSurface.mapFromTargets(wallpaperTargets);
+            AnimatedSurface[] nonAppSurfaces = AnimatedSurface.mapFromTargets(nonAppTargets);
 
             AnimatorSet anim = new AnimatorSet();
             boolean launcherClosing =
