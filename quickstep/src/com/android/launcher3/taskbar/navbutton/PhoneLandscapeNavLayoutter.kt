@@ -30,11 +30,12 @@ import com.android.launcher3.taskbar.TaskbarActivityContext
 
 open class PhoneLandscapeNavLayoutter(
     resources: Resources,
-    navBarContainer: LinearLayout,
+    navButtonContainer: LinearLayout,
     endContextualContainer: ViewGroup,
     startContextualContainer: ViewGroup,
     imeSwitcher: ImageView?,
     a11yButton: ImageView?,
+    moreOptionsButton: ImageView?,
     space: Space?,
     backButton: ImageView?,
     homeButton: ImageView?,
@@ -42,11 +43,12 @@ open class PhoneLandscapeNavLayoutter(
 ) :
     AbstractNavButtonLayoutter(
         resources,
-        navBarContainer,
+        navButtonContainer,
         endContextualContainer,
         startContextualContainer,
         imeSwitcher,
         a11yButton,
+        moreOptionsButton,
         space,
         backButton,
         homeButton,

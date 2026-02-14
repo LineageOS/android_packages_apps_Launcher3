@@ -480,10 +480,18 @@
 
     <!--  Taskbar 3 button spacing  -->
     <dimen name="taskbar_button_space_inbetween">24dp</dimen>
+    <!-- This is half of taskbar_button_space_inbetween -->
+    <dimen name="taskbar_nav_button_space_inbetween">12dp</dimen>
     <dimen name="taskbar_button_space_inbetween_phone">40dp</dimen>
     <dimen name="taskbar_button_margin_split">48dp</dimen>
     <dimen name="taskbar_button_margin_6_5">75dp</dimen>
     <dimen name="taskbar_button_margin_default">48dp</dimen>
+
+    <!--  Taskbar contextual button group pill  -->
+    <dimen name="taskbar_contextual_group_padding_start">12dp</dimen>
+    <dimen name="taskbar_contextual_group_padding_end">10dp</dimen>
+    <dimen name="taskbar_contextual_group_padding_top">10dp</dimen>
+    <dimen name="taskbar_contextual_group_padding_bottom">12dp</dimen>
 
     <!-- Taskbar education tooltip -->
     <dimen name="taskbar_edu_tooltip_elevation">14dp</dimen>

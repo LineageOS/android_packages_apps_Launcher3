@@ -12,6 +12,7 @@ import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_A1
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_BACK;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_HOME;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_IME_SWITCH;
+import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_MORE_OPTIONS;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_RECENTS;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.SCREEN_PIN_LONG_PRESS_THRESHOLD;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
@@ -30,24 +31,30 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.contextualsearch.ContextualSearchConfig;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.launcher3.logging.StatsLogManager;
+import com.android.launcher3.logging.StatsLogManager.LauncherEvent;
 import com.android.launcher3.taskbar.TaskbarNavButtonController.TaskbarNavButtonCallbacks;
 import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.TouchInteractionHandler;
 import com.android.quickstep.util.ContextualSearchInvoker;
 import com.android.systemui.contextualeducation.GestureType;
+import com.android.systemui.shared.system.QuickStepContract;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -61,49 +68,40 @@ import org.mockito.junit.MockitoRule;
 @RunWith(AndroidJUnit4.class)
 public class TaskbarNavButtonControllerTest {
 
-    private final static int DISPLAY_ID = 2;
-
+    private static final int DISPLAY_ID = 2;
 
     @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-    @Mock
-    SystemUiProxy mockSystemUiProxy;
+    @Mock SystemUiProxy mockSystemUiProxy;
 
-    @Mock
-    TouchInteractionHandler mockService;
-    @Mock
-    Handler mockHandler;
-    @Mock
-    ContextualSearchInvoker mockContextualSearchInvoker;
-    @Mock
-    StatsLogManager mockStatsLogManager;
-    @Mock
-    StatsLogManager.StatsLogger mockStatsLogger;
-    @Mock
-    TaskbarControllers mockTaskbarControllers;
-    @Mock
-    TaskbarActivityContext mockTaskbarActivityContext;
-    @Mock
-    TaskbarSharedState mockSharedState;
-    @Mock
-    View mockView;
+    @Mock TouchInteractionHandler mockService;
+    @Mock Handler mockHandler;
+    @Mock ContextualSearchInvoker mockContextualSearchInvoker;
+    @Mock StatsLogManager mockStatsLogManager;
+    @Mock StatsLogManager.StatsLogger mockStatsLogger;
+    @Mock TaskbarControllers mockTaskbarControllers;
+    @Mock TaskbarActivityContext mockTaskbarActivityContext;
+    @Mock TaskbarSharedState mockSharedState;
+    @Mock View mockView;
+    @Mock private ImageView mMoreOptionsButton;
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private int mHomePressCount;
     private int mOverviewToggleCount;
-    private final TaskbarNavButtonCallbacks mCallbacks = new TaskbarNavButtonCallbacks() {
-        @Override
-        public void onNavigateHome(int displayId) {
-            mHomePressCount++;
-        }
+    private final TaskbarNavButtonCallbacks mCallbacks =
+            new TaskbarNavButtonCallbacks() {
+                @Override
+                public void onNavigateHome(int displayId) {
+                    mHomePressCount++;
+                }
 
-        @Override
-        public void onToggleOverview(int displayId) {
-            mOverviewToggleCount++;
-        }
-    };
+                @Override
+                public void onToggleOverview(int displayId) {
+                    mOverviewToggleCount++;
+                }
+            };
 
     private TaskbarNavButtonController mNavButtonController;
 
@@ -111,20 +109,23 @@ public class TaskbarNavButtonControllerTest {
     public void setup() {
         when(mockService.getDisplayId()).thenReturn(DISPLAY_ID);
         when(mockService.getApplicationContext())
-                .thenReturn(InstrumentationRegistry.getInstrumentation().getTargetContext()
-                        .getApplicationContext());
+                .thenReturn(
+                        InstrumentationRegistry.getInstrumentation()
+                                .getTargetContext()
+                                .getApplicationContext());
         when(mockStatsLogManager.logger()).thenReturn(mockStatsLogger);
         when(mockTaskbarControllers.getTaskbarActivityContext())
                 .thenReturn(mockTaskbarActivityContext);
         when(mockTaskbarControllers.getSharedState()).thenReturn(mockSharedState);
         doReturn(mockStatsLogManager).when(mockTaskbarActivityContext).getStatsLogManager();
         when(mockTaskbarActivityContext.getDisplayId()).thenReturn(DISPLAY_ID);
-        mNavButtonController = new TaskbarNavButtonController(
-                DISPLAY_ID,
-                mCallbacks,
-                mockSystemUiProxy,
-                mockHandler,
-                mockContextualSearchInvoker);
+        mNavButtonController =
+                new TaskbarNavButtonController(
+                        DISPLAY_ID,
+                        mCallbacks,
+                        mockSystemUiProxy,
+                        mockHandler,
+                        mockContextualSearchInvoker);
         assertThat(mNavButtonController.hasControllersSet()).isFalse();
         mNavButtonController.init(mockTaskbarControllers);
     }
@@ -235,8 +236,7 @@ public class TaskbarNavButtonControllerTest {
     @Test
     public void testPressA11yShortClick() {
         mNavButtonController.onButtonClick(BUTTON_A11Y, mockView);
-        verify(mockSystemUiProxy, times(1))
-                .notifyAccessibilityButtonClicked(DISPLAY_ID);
+        verify(mockSystemUiProxy, times(1)).notifyAccessibilityButtonClicked(DISPLAY_ID);
     }
 
     @Test
@@ -246,10 +246,57 @@ public class TaskbarNavButtonControllerTest {
     }
 
     @Test
+    public void testPressMoreOptionsShortClick() {
+        mNavButtonController.onButtonClick(BUTTON_MORE_OPTIONS, mockView);
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mockTaskbarActivityContext).sendBroadcastAsUser(intentCaptor.capture(),
+                eq(UserHandle.CURRENT));
+        Intent intent = intentCaptor.getValue();
+        assertThat(intent.getAction()).isEqualTo(
+                QuickStepContract.ACTION_LAUNCH_ACCESSIBILITY_SHORTCUT_CHOOSER_DIALOG);
+        assertThat(intent.getPackage()).isEqualTo(QuickStepContract.SYSUI_PACKAGE);
+        assertThat(intent.getIntExtra(QuickStepContract.EXTRA_ACCESSIBILITY_DISPLAY_ID, -1))
+                .isEqualTo(DISPLAY_ID);
+        assertThat(intent.getIntExtra(QuickStepContract.EXTRA_ACCESSIBILITY_SHORTCUT_TYPE, -1))
+                .isEqualTo(UserShortcutType.SOFTWARE);
+    }
+
+    @Test
+    public void testPressMoreOptionsLongClick() {
+        mNavButtonController.onButtonLongClick(BUTTON_MORE_OPTIONS, mockView);
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mockTaskbarActivityContext).sendBroadcastAsUser(intentCaptor.capture(),
+                eq(UserHandle.CURRENT));
+        Intent intent = intentCaptor.getValue();
+        assertThat(intent.getAction()).isEqualTo(
+                QuickStepContract.ACTION_LAUNCH_ACCESSIBILITY_SHORTCUT_CHOOSER_DIALOG);
+        assertThat(intent.getPackage()).isEqualTo(QuickStepContract.SYSUI_PACKAGE);
+        assertThat(intent.getIntExtra(QuickStepContract.EXTRA_ACCESSIBILITY_DISPLAY_ID, -1))
+                .isEqualTo(DISPLAY_ID);
+        assertThat(intent.getIntExtra(QuickStepContract.EXTRA_ACCESSIBILITY_SHORTCUT_TYPE, -1))
+                .isEqualTo(UserShortcutType.SOFTWARE);
+    }
+
+    @Test
+    public void testMoreOptionsLogOnTap() {
+        mNavButtonController.onButtonClick(BUTTON_MORE_OPTIONS, mockView);
+        verify(mockStatsLogger, times(1))
+                .log(LauncherEvent.LAUNCHER_TASKBAR_MORE_OPTIONS_A11Y_BUTTON_TAP);
+    }
+
+    @Test
+    public void testMoreOptionsLogOnLongpress() {
+        mNavButtonController.onButtonLongClick(BUTTON_MORE_OPTIONS, mockView);
+        verify(mockStatsLogger, never())
+                .log(LauncherEvent.LAUNCHER_TASKBAR_MORE_OPTIONS_A11Y_BUTTON_TAP);
+    }
+
+    @Test
     public void testLongPressHome_enabled_withoutOverride() {
         mockSharedState.assistantLongPressEnabled = true;
-        when(mockContextualSearchInvoker.tryStartAssistOverride(anyInt(),
-                any(ContextualSearchConfig.class))).thenReturn(false);
+        when(mockContextualSearchInvoker.tryStartAssistOverride(
+                        anyInt(), any(ContextualSearchConfig.class)))
+                .thenReturn(false);
 
         mNavButtonController.onButtonLongClick(BUTTON_HOME, mockView);
         verify(mockContextualSearchInvoker, times(1))
@@ -260,8 +307,9 @@ public class TaskbarNavButtonControllerTest {
     @Test
     public void testLongPressHome_enabled_withOverride() {
         mockSharedState.assistantLongPressEnabled = true;
-        when(mockContextualSearchInvoker.tryStartAssistOverride(anyInt(),
-                any(ContextualSearchConfig.class))).thenReturn(true);
+        when(mockContextualSearchInvoker.tryStartAssistOverride(
+                        anyInt(), any(ContextualSearchConfig.class)))
+                .thenReturn(true);
 
         mNavButtonController.onButtonLongClick(BUTTON_HOME, mockView);
         verify(mockContextualSearchInvoker, times(1))
@@ -272,8 +320,9 @@ public class TaskbarNavButtonControllerTest {
     @Test
     public void testLongPressHome_disabled_withoutOverride() {
         mockSharedState.assistantLongPressEnabled = false;
-        when(mockContextualSearchInvoker.tryStartAssistOverride(anyInt(),
-                any(ContextualSearchConfig.class))).thenReturn(false);
+        when(mockContextualSearchInvoker.tryStartAssistOverride(
+                        anyInt(), any(ContextualSearchConfig.class)))
+                .thenReturn(false);
 
         mNavButtonController.onButtonLongClick(BUTTON_HOME, mockView);
         verify(mockContextualSearchInvoker, never())
@@ -284,8 +333,9 @@ public class TaskbarNavButtonControllerTest {
     @Test
     public void testLongPressHome_disabled_withOverride() {
         mockSharedState.assistantLongPressEnabled = false;
-        when(mockContextualSearchInvoker.tryStartAssistOverride(anyInt(),
-                any(ContextualSearchConfig.class))).thenReturn(true);
+        when(mockContextualSearchInvoker.tryStartAssistOverride(
+                        anyInt(), any(ContextualSearchConfig.class)))
+                .thenReturn(true);
 
         mNavButtonController.onButtonLongClick(BUTTON_HOME, mockView);
         verify(mockContextualSearchInvoker, never())
@@ -385,8 +435,7 @@ public class TaskbarNavButtonControllerTest {
         doReturn(null).when(mockTaskbarActivityContext).getStatsLogManager();
         mNavButtonController.init(mockTaskbarControllers);
         mNavButtonController.onButtonClick(BUTTON_HOME, mockView);
-        verify(mockStatsLogManager, times(0)).logger();
-        verify(mockStatsLogger, times(0)).log(any());
+        verify(mockStatsLogManager, never()).logger();
     }
 
     @Test
@@ -439,8 +488,8 @@ public class TaskbarNavButtonControllerTest {
         ArgumentCaptor<Integer> displayIdCaptor = ArgumentCaptor.forClass(Integer.class);
         mNavButtonController.sendBackKeyEvent(KeyEvent.ACTION_DOWN, false);
         mNavButtonController.sendBackKeyEvent(KeyEvent.ACTION_UP, false);
-        verify(mockSystemUiProxy, times(2)).onBackEvent(keyEventCaptor.capture(),
-                displayIdCaptor.capture());
+        verify(mockSystemUiProxy, times(2))
+                .onBackEvent(keyEventCaptor.capture(), displayIdCaptor.capture());
         verifyKeyEvent(keyEventCaptor.getAllValues().getFirst(), KeyEvent.ACTION_DOWN, false);
         verifyKeyEvent(keyEventCaptor.getAllValues().getLast(), KeyEvent.ACTION_UP, false);
         assertTrue(displayIdCaptor.getAllValues().stream().allMatch(v -> v == DISPLAY_ID));
@@ -452,8 +501,8 @@ public class TaskbarNavButtonControllerTest {
         ArgumentCaptor<Integer> displayIdCaptor = ArgumentCaptor.forClass(Integer.class);
         mNavButtonController.sendBackKeyEvent(KeyEvent.ACTION_DOWN, false);
         mNavButtonController.sendBackKeyEvent(KeyEvent.ACTION_UP, true);
-        verify(mockSystemUiProxy, times(2)).onBackEvent(keyEventCaptor.capture(),
-                displayIdCaptor.capture());
+        verify(mockSystemUiProxy, times(2))
+                .onBackEvent(keyEventCaptor.capture(), displayIdCaptor.capture());
         verifyKeyEvent(keyEventCaptor.getAllValues().getFirst(), KeyEvent.ACTION_DOWN, false);
         verifyKeyEvent(keyEventCaptor.getAllValues().getLast(), KeyEvent.ACTION_UP, true);
         assertTrue(displayIdCaptor.getAllValues().stream().allMatch(v -> v == DISPLAY_ID));

@@ -41,12 +41,14 @@ import java.util.regex.Pattern
 open class QuickstepWidgetPickerActivity : WidgetPickerActivity(), WidgetPickerProgressHandler {
     private var wallpaperManager: WallpaperManager? = null
     private var isBlurEnabled = false
+    private var isWallpaperZoomEnabled = false
     private var blurRadius: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         wallpaperManager = getSystemService(WallpaperManager::class.java)
         isBlurEnabled =
             !shouldReduceWorkspaceBlurUsage(this) && WindowBlurState.getInstance(this).value
+        isWallpaperZoomEnabled = !shouldReduceWorkspaceBlurUsage(this)
         blurRadius = resources.getDimensionPixelSize(R.dimen.max_depth_blur_radius_enhanced)
 
         widgetPickerConfig = parseIntentExtras()
@@ -62,7 +64,9 @@ open class QuickstepWidgetPickerActivity : WidgetPickerActivity(), WidgetPickerP
 
     override fun onProgress(progress: Float) {
         rootView.windowToken?.let { token ->
-            wallpaperManager?.setWallpaperZoomOut(token, progress)
+            if (isWallpaperZoomEnabled) {
+                wallpaperManager?.setWallpaperZoomOut(token, progress)
+            }
 
             if (isBlurEnabled) {
                 updateBlurBackground(progress)

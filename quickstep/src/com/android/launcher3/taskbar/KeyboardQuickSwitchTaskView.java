@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
 import androidx.annotation.ColorInt;
@@ -101,6 +102,16 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
                 attrs, R.styleable.TaskView, defStyleAttr, defStyleRes);
 
         setWillNotDraw(false);
+        setAccessibilityDelegate(new AccessibilityDelegate() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(@NonNull View host,
+                    @NonNull AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
+                info.setClickable(false);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SELECT);
+            }
+        });
 
         mFocusBorderColor = ta.getColor(
                 R.styleable.TaskView_focusBorderColor, DEFAULT_BORDER_COLOR);
@@ -203,7 +214,7 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
         // be updated once the task metadata has been loaded - the delay should be very short, and
         // the content description when task titles are not available still gives some useful
         // information to the user (the task's position in the list).
-        updateContentDesctiptionForTasks(task1, task2);
+        updateContentDescriptionForTasks(task1, task2);
 
         if (iconUpdateFunction == null) {
             applyIcon(mIcon1, task1);
@@ -216,7 +227,7 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
             if (task2 != null) {
                 return;
             }
-            updateContentDesctiptionForTasks(task1, null);
+            updateContentDescriptionForTasks(task1, null);
         });
 
         if (task2 == null) {
@@ -224,7 +235,7 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
         }
         iconUpdateFunction.updateIconInBackground(task2, t -> {
             applyIcon(mIcon2, task2);
-            updateContentDesctiptionForTasks(task1, task2);
+            updateContentDescriptionForTasks(task1, task2);
         });
     }
 
@@ -351,7 +362,7 @@ public class KeyboardQuickSwitchTaskView extends ConstraintLayout {
     /**
      * Updates the task view's content description to reflect tasks represented by the view.
      */
-    private void updateContentDesctiptionForTasks(@NonNull Task task1, @Nullable Task task2) {
+    private void updateContentDescriptionForTasks(@NonNull Task task1, @Nullable Task task2) {
         String tasksDescription = task1.titleDescription == null || task2 == null
                 ? task1.titleDescription
                 : getContext().getString(
