@@ -18,12 +18,13 @@ package com.android.quickstep.window
 
 import android.window.DesktopExperienceFlags.DesktopExperienceFlag
 import com.android.launcher3.Flags
+import com.android.launcher3.util.OverviewReleaseFlags
 
 object RecentsWindowFlags {
     @JvmField
     val enableLauncherOverviewInWindow: DesktopExperienceFlag =
         DesktopExperienceFlag(
-            Flags::enableLauncherOverviewInWindow,
+            OverviewReleaseFlags::enableLauncherOverviewInWindow,
             false,
             Flags.FLAG_ENABLE_LAUNCHER_OVERVIEW_IN_WINDOW,
         )
@@ -31,7 +32,7 @@ object RecentsWindowFlags {
     @JvmField
     val enableFallbackOverviewInWindow: DesktopExperienceFlag =
         DesktopExperienceFlag(
-            Flags::enableFallbackOverviewInWindow,
+            OverviewReleaseFlags::enableFallbackOverviewInWindow,
             false,
             Flags.FLAG_ENABLE_FALLBACK_OVERVIEW_IN_WINDOW,
         )

@@ -17,8 +17,6 @@ package com.android.launcher3.testing;
 
 import static androidx.lifecycle.Lifecycle.State.DESTROYED;
 
-import static com.android.launcher3.Flags.enableFallbackOverviewInWindow;
-import static com.android.launcher3.Flags.enableLauncherOverviewInWindow;
 import static com.android.launcher3.Flags.enableTaskbarUiThread;
 import static com.android.launcher3.InvariantDeviceProfile.TYPE_PHONE;
 import static com.android.launcher3.LauncherPrefs.FIXED_LANDSCAPE_MODE;
@@ -28,6 +26,8 @@ import static com.android.launcher3.testing.shared.TestProtocol.TEST_INFO_RESPON
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 import static com.android.launcher3.util.Executors.getTaskbarUiThread;
+import static com.android.launcher3.util.OverviewReleaseFlags.enableFallbackOverviewInWindow;
+import static com.android.launcher3.util.OverviewReleaseFlags.enableLauncherOverviewInWindow;
 
 import android.app.Activity;
 import android.app.Application;

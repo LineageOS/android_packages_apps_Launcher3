@@ -16,9 +16,9 @@
 package com.android.launcher3.uioverrides.states;
 
 import static com.android.app.animation.Interpolators.DECELERATE_2;
-import static com.android.launcher3.Flags.enablePredictiveBackInOverview;
 import static com.android.launcher3.Flags.enableReplaceSharesheetAndEmptyMessageRo;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_OVERVIEW;
+import static com.android.launcher3.util.OverviewReleaseFlags.enablePredictiveBackInOverview;
 
 import android.graphics.Color;
 import android.graphics.Rect;

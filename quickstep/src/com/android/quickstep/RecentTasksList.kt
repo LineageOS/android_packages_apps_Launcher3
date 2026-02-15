@@ -29,7 +29,6 @@ import android.view.Display
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import androidx.core.content.getSystemService
-import com.android.launcher3.Flags.enableLaterIsLockedCheck
 import com.android.launcher3.Flags.hideAutomatedTasksInOverview
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.concurrent.annotations.LightweightBackground
@@ -39,6 +38,7 @@ import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.LooperExecutor
+import com.android.launcher3.util.OverviewReleaseFlags.enableLaterIsLockedCheck
 import com.android.quickstep.RecentsModel.RecentTasksChangedListener
 import com.android.quickstep.SystemUiProxy.GetRecentTasksException
 import com.android.quickstep.recents.data.RecentTasksKeysDataSource
