@@ -39,8 +39,6 @@ constructor(
 
             val packageName = task.topComponent.packageName
 
-            // TODO(b/405359794): If getTask for a single task ends up being called multiple
-            //  times by the UI, explore alternatives of loading the timer info only once.
             val remainingDuration =
                 if (enableRefactorDigitalWellbeingToast()) {
                     getRemainingAppTimerDurationUseCase(
