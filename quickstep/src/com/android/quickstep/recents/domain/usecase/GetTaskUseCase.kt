@@ -17,8 +17,8 @@
 package com.android.quickstep.recents.domain.usecase
 
 import android.os.UserHandle
-import com.android.launcher3.Flags.enableLaterIsLockedCheck
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
+import com.android.launcher3.util.OverviewReleaseFlags.enableLaterIsLockedCheck
 import com.android.quickstep.recents.data.RecentTasksRepository
 import com.android.quickstep.recents.data.UserLockedStateRepository
 import com.android.quickstep.recents.domain.model.TaskModel
