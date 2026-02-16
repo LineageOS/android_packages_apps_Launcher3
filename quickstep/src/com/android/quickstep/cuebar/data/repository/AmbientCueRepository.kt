@@ -322,7 +322,7 @@ constructor(
             is ActionableInsight -> {
                 actionType = MA_ACTION_TYPE_NAME
                 val action = insight.actionDetails
-                val actionIntent = action.createActionIntent()
+                val actionIntent = action.getIntent()
                 extras = actionIntent?.extras
                 if (activityId == null) {
                     activityId = extras?.getParcelable(EXTRA_ACTIVITY_ID)
