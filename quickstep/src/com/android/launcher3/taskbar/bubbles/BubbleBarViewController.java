@@ -1107,7 +1107,14 @@ public class BubbleBarViewController {
      */
     public void removeBubble(BubbleBarBubble b) {
         if (b != null) {
-            mBarView.removeBubble(b.getView());
+            if (Flags.updateBubbleBarTaskbarIntersection()) {
+                mBarView.removeBubble(
+                        b.getView(),
+                        () -> adjustTaskbarToBubbleBarState(isExpanded())
+                );
+            } else {
+                mBarView.removeBubble(b.getView());
+            }
             b.getView().setController(null);
         } else {
             Log.w(TAG, "removeBubble, bubble was null!");
@@ -1143,6 +1150,9 @@ public class BubbleBarViewController {
         mOverflowAdded = showOverflow;
         if (mOverflowAdded) {
             mBarView.addBubble(mOverflowBubble.getView(), /* suppressAnimation= */ true);
+            if (Flags.updateBubbleBarTaskbarIntersection()) {
+                adjustTaskbarToBubbleBarState(isExpanded());
+            }
             mOverflowBubble.getView().setOnClickListener(mBubbleClickListener);
             mOverflowBubble.getView().setController(mBubbleViewController);
             // the drag controller sets up touch listener on the overflow so that click events
@@ -1193,7 +1203,10 @@ public class BubbleBarViewController {
             BubbleView bubbleToSelectView =
                     bubbleToSelect == null ? null : bubbleToSelect.getView();
             addBubbleView(b.getView(), suppressAnimation, bubbleToSelectView);
-
+            if (Flags.updateBubbleBarTaskbarIntersection()) {
+                adjustTaskbarToBubbleBarState(/* isBubbleBarExpanded = */
+                        isExpanding || isExpanded());
+            }
             if (suppressAnimation || !(b instanceof BubbleBarBubble bubble)) {
                 // the bubble bar and handle are initialized as part of the first bubble animation.
                 // if the animation is suppressed, immediately stash or show the bubble bar to
