@@ -304,7 +304,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     private RecentsComponent mRecentsComponent;
 
-    private BubbleFeatureConfig mBubbleFeatureConfig = new BubbleFeatureConfigImpl(asContext());
+    private BubbleFeatureConfig mBubbleFeatureConfig;
 
     private void setupBlurState() {
         ListenableRef<Boolean> blurState = WindowBlurState.getInstance(this);
@@ -374,6 +374,9 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         addBackAnimationCallback(mSplitSelectStateController.getSplitBackHandler());
         mTaskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(this)
                 .getTaskbarUiState(getDisplayId());
+
+        mBubbleFeatureConfig = new BubbleFeatureConfigImpl(this,
+                DesktopState.getInstance(this));
     }
 
     @Override
