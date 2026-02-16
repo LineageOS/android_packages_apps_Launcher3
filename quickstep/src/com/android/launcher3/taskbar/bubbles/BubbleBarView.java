@@ -1092,6 +1092,11 @@ public class BubbleBarView extends FrameLayout {
         Rect boundsOnScreen = mTempRect;
         getBoundsOnScreen(boundsOnScreen);
 
+        if (boundsOnScreen.height() == 0 || boundsOnScreen.width() == 0) {
+            // if the bubble bar needs to do some measuring return the default margin
+            return mDefaultMargin;
+        }
+
         // The opposite margin avoids the cutout during a preview of changing the bubble bar
         // location. We flip the coordinates to calculate where the bubble bar will be when it
         // is moved and have the appropriate margin.
@@ -1114,7 +1119,7 @@ public class BubbleBarView extends FrameLayout {
         if (isLeftSide) {
             int rightMostBound = windowBounds.left;
             for (Rect rect : displayCutoutRects) {
-                if (rect.left < midpoint && Rect.intersects(boundsOnScreen, rect)) {
+                if (rect.left < midpoint && adjustForCutout(boundsOnScreen, rect)) {
                     rightMostBound = Math.max(rightMostBound, rect.right);
                 }
             }
@@ -1122,7 +1127,7 @@ public class BubbleBarView extends FrameLayout {
         } else { // is on the right
             int leftMostBound = windowBounds.right;
             for (Rect rect : displayCutoutRects) {
-                if (rect.right > midpoint && Rect.intersects(boundsOnScreen, rect)) {
+                if (rect.right > midpoint && adjustForCutout(boundsOnScreen, rect)) {
                     leftMostBound = Math.min(leftMostBound, rect.left);
                 }
             }
@@ -1133,6 +1138,21 @@ public class BubbleBarView extends FrameLayout {
             return cutoutMargin + mCutoutPadding;
         }
         return originalMargin;
+    }
+
+    private static boolean adjustForCutout(Rect bubbleBarBounds, Rect cutout) {
+        if (bubbleBarBounds.top > cutout.bottom) {
+            // no need to adjust if the cutout is completely above the bubble bar
+            return false;
+        }
+        // we can't check if the cutout intersects the bubble bar because the bubble bar may be
+        // above it if hotseat was already adjusted for the cutout, so we have to check if there's
+        // an overlap on the x axis
+        return rectsOverlapOnXAxis(bubbleBarBounds, cutout);
+    }
+
+    private static boolean rectsOverlapOnXAxis(Rect a, Rect b) {
+        return a.left < b.right && a.right > b.left;
     }
 
     private DisplayCutout getDisplayCutout() {

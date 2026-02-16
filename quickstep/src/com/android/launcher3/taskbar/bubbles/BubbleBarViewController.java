@@ -412,6 +412,11 @@ public class BubbleBarViewController {
             public float getDistanceToRevealTriangle() {
                 return getDistanceToCollapsedPosition().y - mBarView.getPointerSize();
             }
+
+            @Override
+            public int getHorizontalMargin() {
+                return BubbleBarViewController.this.getHorizontalMargin();
+            }
         };
     }
 
