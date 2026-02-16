@@ -53,12 +53,14 @@ class TaskbarViewDragDropController(
 
     private val taskbarPinDelegate = taskbarView
     @VisibleForTesting val taskbarPinningDropTarget = PinningDropTarget(taskbarPinDelegate, false)
+    private var overflowPinDelegate: PinnedAppsContainerDelegate? = null
+    @VisibleForTesting var overflowPinningDropTarget: PinningDropTarget? = null
     @VisibleForTesting val unpinDropTarget = UnpinDropTarget()
     @VisibleForTesting var targetPinIndex = -1
-    @VisibleForTesting var overflowPinningDropTarget: PinningDropTarget? = null
     private var modelCallbacks: TaskbarModelCallbacks? = null
     @VisibleForTesting val tooltipController = TaskbarDragViewTooltip(activityContext)
     @VisibleForTesting val overflowContainerAlarm = Alarm(activityContext.mainLooper)
+    private var isItemDropped = false
 
     private enum class AlarmState {
         RUNNING_OPEN,
@@ -91,21 +93,33 @@ class TaskbarViewDragDropController(
     }
 
     fun onTaskbarItemViewDragStart(itemView: View) {
-        taskbarPinDelegate.updateItemViewVisibilityForDragState(itemView, /*isDragged */ true)
-
-        // TODO("Handle overflow icon drag start")
+        if (
+            taskbarPinDelegate.updateItemViewVisibilityForDragState(itemView, /*isDragged */ true)
+        ) {
+            return
+        }
+        overflowPinDelegate?.updateItemViewVisibilityForDragState(itemView, /*isDragged */ true)
     }
 
     fun onTaskbarItemViewDragEnd(itemView: View) {
-        taskbarPinDelegate.updateItemViewVisibilityForDragState(itemView, /*isDragged */ false)
+        taskbarView.cleanUpOverflowDragState(isItemDropped)
+        isItemDropped = false
+        if (
+            !taskbarPinDelegate.updateItemViewVisibilityForDragState(itemView, /*isDragged */ false)
+        ) {
+            overflowPinDelegate?.updateItemViewVisibilityForDragState(
+                itemView, /*isDragged */
+                false,
+            )
+        }
         taskbarView.rearrangeItemsForDrag()
-        // TODO("Handle overflow icon drag end")
     }
 
     fun addOverflowDropTarget(
         dragController: DragController,
         delegate: PinnedAppsContainerDelegate,
     ) {
+        overflowPinDelegate = delegate
         overflowPinningDropTarget = PinningDropTarget(delegate, true)
         dragController.addDropTarget(overflowPinningDropTarget)
     }
@@ -113,6 +127,7 @@ class TaskbarViewDragDropController(
     fun removeOverflowDropTarget(dragController: DragController) {
         dragController.removeDropTarget(overflowPinningDropTarget)
         overflowPinningDropTarget = null
+        overflowPinDelegate = null
     }
 
     private fun startOpenOverflowAlarm() {
@@ -313,6 +328,7 @@ class TaskbarViewDragDropController(
             tooltipController.hide()
             if (dragObject == null) return
 
+            isItemDropped = true
             val itemToUnpin = extractItemInfoFromDragObject(dragObject) ?: return
             val undoDeleteController = activityContext.undoDeleteController
             undoDeleteController.prepareToUndoDelete()
@@ -428,6 +444,7 @@ class TaskbarViewDragDropController(
         override fun onDrop(dragObject: DropTarget.DragObject?, options: DragOptions?) {
             val newInfo = extractItemInfoFromDragObject(dragObject) ?: return
 
+            isItemDropped = true
             addOrMoveItemInDatabase(newInfo)
             endDrag(delegate)
         }
@@ -515,7 +532,10 @@ class TaskbarViewDragDropController(
          */
         fun getPinIndex(startingIndex: Int): Int
 
-        /** Updates the visibility of the dragged Taskbar item view based on its drag state. */
-        fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean)
+        /**
+         * Updates the visibility of the dragged Taskbar item view based on its drag state. Return
+         * true if [itemView] should be and was successfully handled by this delegate.
+         */
+        fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean): Boolean
     }
 }

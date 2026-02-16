@@ -211,8 +211,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         return dragDelegate.getPinIndex(startingIndex)
     }
 
-    override fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean) {
-        dragDelegate.updateItemViewVisibilityForDragState(itemView, isDragged)
+    override fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean): Boolean {
+        if (dragDelegate.updateItemViewVisibilityForDragState(itemView, isDragged)) {
+            overflowIcon.onOverflowItemDragged(itemView.tag as ItemInfo)
+            return true
+        }
+        return false
     }
 
     private val dragDelegate by lazy {

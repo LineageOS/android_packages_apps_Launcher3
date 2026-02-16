@@ -76,14 +76,15 @@ abstract class PinnedAppsDragHelper(
         }
     }
 
-    override fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean) {
+    override fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean): Boolean {
         val index = container.indexOfChild(itemView)
         if (index == -1) {
             indexOfChildHiddenForDrag = -1
-            return
+            return false
         }
         indexOfChildHiddenForDrag = if (isDragged) index else -1
         itemView.visibility = if (isDragged) View.GONE else View.VISIBLE
+        return true
     }
 
     override fun reserveDropSlotForDragLocation(onScreenLocationX: Int) {
