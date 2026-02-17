@@ -281,6 +281,10 @@ class PersistentBubbleStashController(
         // no op since does not have a handle view
     }
 
+    override fun updateHandleBounds() {
+        // no op
+    }
+
     private fun updateExpandedState(expand: Boolean, bubbleBarGesture: Boolean = false) {
         if (bubbleBarViewController.isHiddenForNoBubbles) {
             // If there are no bubbles the bar is invisible, nothing to do here.

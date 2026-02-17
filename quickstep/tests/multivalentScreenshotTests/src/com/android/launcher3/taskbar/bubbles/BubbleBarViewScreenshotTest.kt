@@ -176,6 +176,8 @@ class BubbleBarViewScreenshotTest(emulationSpec: DeviceEmulationSpec) :
                 override fun setIsDragging(dragging: Boolean) {}
 
                 override fun onBubbleBarExpandedStateChanged(expanded: Boolean) {}
+
+                override fun onMarginUpdated() {}
             }
         )
         bubbleBarView.visibility = View.VISIBLE

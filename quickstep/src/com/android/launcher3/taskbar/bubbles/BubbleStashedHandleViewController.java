@@ -152,6 +152,11 @@ public class BubbleStashedHandleViewController {
         return PhysicsAnimator.getInstance(mStashedHandleView);
     }
 
+    /** Updates the handle bounds. */
+    public void updateBounds() {
+        updateBounds(mBarViewController.getBubbleBarLocation());
+    }
+
     private void updateBounds(BubbleBarLocation bubbleBarLocation) {
         // As more bubbles get added, the icon bounds become larger. To ensure a consistent
         // handle bar position, we pin it to the edge of the screen.
