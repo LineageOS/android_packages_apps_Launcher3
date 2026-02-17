@@ -29,6 +29,7 @@ import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY
 import android.net.Uri
+import android.os.IBinder
 import android.provider.Settings
 import android.provider.Settings.Secure.USER_SETUP_COMPLETE
 import android.util.Log
@@ -37,11 +38,12 @@ import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.DaggerSingletonTracker
+import com.android.launcher3.util.LooperExecutor
+import com.android.launcher3.util.RetryingExecutor
 import com.android.launcher3.util.SettingsCache
 import com.android.quickstep.OverviewCommandHelper
 import com.android.quickstep.sysuiconnection.SysUIConnectionTracker
 import com.android.window.flags.Flags
-import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
@@ -54,7 +56,7 @@ class QuickstepKeyGestureEventsManager
 constructor(
     @ApplicationContext private val context: Context,
     sysUIConnectionTracker: SysUIConnectionTracker,
-    @Ui private val uiExecutor: Executor,
+    @Ui private val uiExecutor: LooperExecutor,
     lifecycle: DaggerSingletonTracker,
     private val settingsCache: SettingsCache,
 ) {
@@ -66,48 +68,69 @@ constructor(
     private val isUserSetupCompleted: Boolean
         get() = settingsCache.getValue(USER_SETUP_COMPLETE_URI)
 
-    @VisibleForTesting
-    val overviewKeyGestureEventHandler = KeyGestureEventHandler { event: KeyGestureEvent, _ ->
-        if (!isUserSetupCompleted) return@KeyGestureEventHandler
-        val component = sysUIComponent.value ?: return@KeyGestureEventHandler
-        if (!hasPermission) return@KeyGestureEventHandler
-
-        when (event.keyGestureType) {
-            KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY ->
-                component.overviewCommandHelper
-                    .getIfReady()
-                    ?.addCommand(OverviewCommandHelper.CommandType.HOME, event.displayId)
-            KEY_GESTURE_TYPE_RECENT_APPS -> {
-                if (event.action == ACTION_GESTURE_COMPLETE && !event.isCancelled) {
-                    component.binder.onOverviewShown(triggeredFromAltTab = false)
-                }
-            }
-            KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER -> {
-                if (event.action == KeyGestureEvent.ACTION_GESTURE_START) {
-                    component.binder.onOverviewShown(triggeredFromAltTab = true)
-                } else {
-                    component.binder.onOverviewHidden(
-                        triggeredFromAltTab = true,
-                        triggeredFromHomeKey = false,
-                    )
-                }
-            }
-            else ->
-                Log.e(
-                    TAG,
-                    "Ignore unsupported overview key gesture event type: ${event.keyGestureType}",
-                )
-        }
-    }
-
-    private var overviewKeyHandlerRegistered = false
-
     private val inputManager =
         if (Flags.grantManageKeyGesturesToRecents() && hasPermission)
             context.getSystemService(InputManager::class.java)
         else null
 
+    @VisibleForTesting
+    val overviewKeyGestureHelper =
+        KeyGestureHelper(
+            listOf(
+                KEY_GESTURE_TYPE_RECENT_APPS,
+                KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER,
+                KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY,
+            )
+        ) { event: KeyGestureEvent ->
+            if (!isUserSetupCompleted) return@KeyGestureHelper
+            val component = sysUIComponent.value ?: return@KeyGestureHelper
+            if (!hasPermission) return@KeyGestureHelper
+
+            when (event.keyGestureType) {
+                KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY ->
+                    component.overviewCommandHelper
+                        .getIfReady()
+                        ?.addCommand(OverviewCommandHelper.CommandType.HOME, event.displayId)
+                KEY_GESTURE_TYPE_RECENT_APPS -> {
+                    if (event.action == ACTION_GESTURE_COMPLETE && !event.isCancelled) {
+                        component.binder.onOverviewShown(triggeredFromAltTab = false)
+                    }
+                }
+                KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER -> {
+                    if (event.action == KeyGestureEvent.ACTION_GESTURE_START) {
+                        component.binder.onOverviewShown(triggeredFromAltTab = true)
+                    } else {
+                        component.binder.onOverviewHidden(
+                            triggeredFromAltTab = true,
+                            triggeredFromHomeKey = false,
+                        )
+                    }
+                }
+                else ->
+                    Log.e(
+                        TAG,
+                        "Ignore unsupported overview key gesture event type: ${event.keyGestureType}",
+                    )
+            }
+        }
+
     private var allAppsPendingIntent: PendingIntent? = null
+
+    @VisibleForTesting
+    val allAppsKeyGestureHelper =
+        KeyGestureHelper(listOf(KEY_GESTURE_TYPE_ALL_APPS)) { event ->
+            if (!isUserSetupCompleted) return@KeyGestureHelper
+            if (!hasPermission) return@KeyGestureHelper
+
+            if (event.keyGestureType != KEY_GESTURE_TYPE_ALL_APPS) {
+                Log.e(TAG, "Ignore unsupported key gesture event type: ${event.keyGestureType}")
+                return@KeyGestureHelper
+            }
+
+            // Ignore the display ID from the KeyGestureEvent as we will use the focus display
+            // from the SysUi proxy as the source of truth.
+            allAppsPendingIntent?.send()
+        }
 
     init {
         // Listen on UI executor as TISBinder calls destroy on UIExecutor as well
@@ -119,72 +142,69 @@ constructor(
         )
     }
 
-    @VisibleForTesting
-    val allAppsKeyGestureEventHandler = KeyGestureEventHandler { event: KeyGestureEvent, _ ->
-        if (!isUserSetupCompleted) return@KeyGestureEventHandler
-        if (!hasPermission) return@KeyGestureEventHandler
-
-        if (event.keyGestureType != KEY_GESTURE_TYPE_ALL_APPS) {
-            Log.e(TAG, "Ignore unsupported key gesture event type: ${event.keyGestureType}")
-            return@KeyGestureEventHandler
-        }
-
-        // Ignore the display ID from the KeyGestureEvent as we will use the focus display
-        // from the SysUi proxy as the source of truth.
-        allAppsPendingIntent?.send()
-    }
-
     /**
      * Registers the all apps key gesture events.
      *
      * Subsequent registrations are ignored until [unregisterAllAppsKeyGestureEvent] is called.
      */
     fun registerAllAppsKeyGestureEvent(allAppsPendingIntent: PendingIntent) {
-        synchronized(allAppsKeyGestureEventHandler) {
-            if (this.allAppsPendingIntent != null) {
-                Log.w(TAG, "All apps key gesture has already been registered. Ignored.")
-                return
-            }
-            this.allAppsPendingIntent = allAppsPendingIntent
-            inputManager?.registerKeyGestureEventHandler(
-                listOf(KEY_GESTURE_TYPE_ALL_APPS),
-                allAppsKeyGestureEventHandler,
-            )
-        }
+        this.allAppsPendingIntent = allAppsPendingIntent
+        allAppsKeyGestureHelper.register()
     }
 
     /** Unregisters the all apps key gesture events. */
     fun unregisterAllAppsKeyGestureEvent() {
-        synchronized(allAppsKeyGestureEventHandler) {
-            inputManager?.unregisterKeyGestureEventHandler(allAppsKeyGestureEventHandler)
-            allAppsPendingIntent = null
-        }
+        allAppsPendingIntent = null
+        allAppsKeyGestureHelper.unregister()
     }
 
     private fun registerOverviewKeyGestureEventHandler() {
-        synchronized(overviewKeyGestureEventHandler) {
-            if (!overviewKeyHandlerRegistered) {
-                inputManager?.registerKeyGestureEventHandler(
-                    listOf(
-                        KEY_GESTURE_TYPE_RECENT_APPS,
-                        KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER,
-                        KEY_GESTURE_TYPE_REJECT_HOME_ON_EXTERNAL_DISPLAY,
-                    ),
-                    overviewKeyGestureEventHandler,
-                )
-                overviewKeyHandlerRegistered = true
-            }
-        }
+        overviewKeyGestureHelper.register()
     }
 
     fun onDestroy() {
-        synchronized(overviewKeyGestureEventHandler) {
-            if (overviewKeyHandlerRegistered) {
-                inputManager?.unregisterKeyGestureEventHandler(overviewKeyGestureEventHandler)
-                overviewKeyHandlerRegistered = false
+        overviewKeyGestureHelper.unregister()
+        unregisterAllAppsKeyGestureEvent()
+    }
+
+    inner class KeyGestureHelper(
+        private val keyGesturesToHandle: List<Int>,
+        private val callback: (event: KeyGestureEvent) -> Unit,
+    ) : KeyGestureEventHandler {
+
+        private val retryingExecutor = RetryingExecutor(uiExecutor.handler)
+        private val syncToken = Any()
+
+        private var keyHandlerRegistered = false
+
+        fun register() {
+            retryingExecutor.execute {
+                try {
+                    synchronized(syncToken) {
+                        if (!keyHandlerRegistered) {
+                            inputManager?.registerKeyGestureEventHandler(keyGesturesToHandle, this)
+                            keyHandlerRegistered = true
+                        }
+                    }
+                    true
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error registering key event for: $keyGesturesToHandle", e)
+                    false
+                }
             }
         }
-        unregisterAllAppsKeyGestureEvent()
+
+        fun unregister() {
+            retryingExecutor.cancel()
+            synchronized(syncToken) {
+                inputManager?.unregisterKeyGestureEventHandler(this)
+                keyHandlerRegistered = false
+            }
+        }
+
+        override fun handleKeyGestureEvent(event: KeyGestureEvent, focusedToken: IBinder?) {
+            callback.invoke(event)
+        }
     }
 
     private companion object {
