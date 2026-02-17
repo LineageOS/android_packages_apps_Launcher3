@@ -584,6 +584,11 @@ public class BubbleBarViewController {
         return mBarView.getVisibility() == VISIBLE;
     }
 
+    /** Returns whether the bubble bar container is visible. */
+    public boolean isBubbleBarContainerVisible() {
+        return mBubbleBarContainer.getVisibility() == VISIBLE;
+    }
+
     /** Whether the bubble bar has bubbles. */
     public boolean hasBubbles() {
         return mBarView.getBubbleChildCount() > 0;
@@ -859,6 +864,14 @@ public class BubbleBarViewController {
             mBarView.setVisibility(INVISIBLE);
         } else {
             mBarView.setVisibility(VISIBLE);
+        }
+
+        if (Flags.fixBubbleNotificationShowingInLockScreen()) {
+            if (mHiddenForSysui || mHiddenForNoBubbles) {
+                mBubbleBarContainer.setVisibility(INVISIBLE);
+            } else {
+                mBubbleBarContainer.setVisibility(VISIBLE);
+            }
         }
     }
 
