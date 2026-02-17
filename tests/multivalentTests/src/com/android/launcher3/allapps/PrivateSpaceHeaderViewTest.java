@@ -60,6 +60,7 @@ import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.util.TestActivityContext;
 import com.android.launcher3.util.UserIconInfo;
+import com.android.users.UserType;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -81,9 +82,9 @@ public class PrivateSpaceHeaderViewTest {
     private static final UserHandle MAIN_HANDLE = Process.myUserHandle();
     private static final UserHandle PRIVATE_HANDLE = new UserHandle(11);
     private static final UserIconInfo MAIN_ICON_INFO =
-            new UserIconInfo(MAIN_HANDLE, UserIconInfo.TYPE_MAIN);
+            new UserIconInfo(MAIN_HANDLE, UserType.MAIN);
     private static final UserIconInfo PRIVATE_ICON_INFO =
-            new UserIconInfo(PRIVATE_HANDLE, UserIconInfo.TYPE_PRIVATE);
+            new UserIconInfo(PRIVATE_HANDLE, UserType.PRIVATE);
     private static final String CAMERA_PACKAGE_NAME = "com.android.launcher3.tests.camera";
     private static final int CONTAINER_HEADER_ELEMENT_COUNT = 1;
     private static final int LOCK_UNLOCK_BUTTON_COUNT = 1;

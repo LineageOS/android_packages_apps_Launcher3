@@ -27,9 +27,9 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
-import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -52,7 +52,7 @@ class NavbarButtonsViewControllerTest {
 
     @Test
     @TaskbarMode(THREE_BUTTONS)
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun userLocked_keyguardOccluded_homeButtonHidden() {
         runOnTaskbarUiThreadSync {
             navbarButtonsViewController.setKeyguardVisible(
@@ -83,7 +83,7 @@ class NavbarButtonsViewControllerTest {
 
     @Test
     @TaskbarMode(THREE_BUTTONS)
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun userLocked_keyguardVisible_backButtonHidden() {
         runOnTaskbarUiThreadSync {
             navbarButtonsViewController.setKeyguardVisible(
@@ -99,7 +99,7 @@ class NavbarButtonsViewControllerTest {
 
     @Test
     @TaskbarMode(THREE_BUTTONS)
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun userLocked_keyguardBouncerVisible_backButtonShown() {
         runOnTaskbarUiThreadSync {
             navbarButtonsViewController.setKeyguardVisible(

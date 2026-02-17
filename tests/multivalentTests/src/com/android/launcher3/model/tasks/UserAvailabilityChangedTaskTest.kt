@@ -30,9 +30,9 @@ import com.android.launcher3.model.data.AppsListData.Companion.FLAG_WORK_PROFILE
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
-import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -63,7 +63,7 @@ class UserAvailabilityChangedTaskTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_PRIVATE_SPACE, Flags.FLAG_MODEL_REPOSITORY)
-    @MockUser(userType = UserIconInfo.TYPE_MAIN)
+    @MockUser(userType = UserType.MAIN)
     fun update_triggers_no_callbacks_if_current_user_not_work_or_private() {
         UserAvailabilityChangedTask(myUserHandle()).executeSync()
         modelState.appsList.getAndResetChangeFlag()
@@ -73,7 +73,7 @@ class UserAvailabilityChangedTaskTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_PRIVATE_SPACE, Flags.FLAG_MODEL_REPOSITORY)
-    @MockUser(userType = UserIconInfo.TYPE_PRIVATE, isQuietModeEnabled = true)
+    @MockUser(userType = UserType.PRIVATE, isQuietModeEnabled = true)
     fun update_flag_when_private_user_is_quiet() {
         UserAvailabilityChangedTask(myUserHandle()).executeSync()
         modelState.appsList.getAndResetChangeFlag()
@@ -84,7 +84,7 @@ class UserAvailabilityChangedTaskTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_PRIVATE_SPACE, Flags.FLAG_MODEL_REPOSITORY)
-    @MockUser(userType = UserIconInfo.TYPE_WORK, isQuietModeEnabled = true)
+    @MockUser(userType = UserType.WORK, isQuietModeEnabled = true)
     fun update_flag_when_work_user_is_quiet() {
         UserAvailabilityChangedTask(myUserHandle()).executeSync()
         modelState.appsList.getAndResetChangeFlag()

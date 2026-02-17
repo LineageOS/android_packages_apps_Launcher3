@@ -37,6 +37,7 @@ import com.android.launcher3.util.UserIconInfo;
 import com.android.launcher3.util.rule.MockUsersRule;
 import com.android.launcher3.util.rule.MockUsersRule.MockUser;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.users.UserType;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -59,8 +60,8 @@ public class AppEventProducerTest {
         mAppEventProducer = new AppEventProducer(mContext, null);
     }
 
-    @MockUser(userType = UserIconInfo.TYPE_MAIN)
-    @MockUser(userType = UserIconInfo.TYPE_PRIVATE)
+    @MockUser(userType = UserType.MAIN)
+    @MockUser(userType = UserType.PRIVATE)
     @Test
     public void buildAppTarget_containsCorrectUser() {
         ComponentName gmailComponentName = new ComponentName(mContext,

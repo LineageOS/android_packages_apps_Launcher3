@@ -23,7 +23,6 @@ import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_WITH_SHADOW;
 import static com.android.launcher3.icons.FastBitmapDrawable.WHITE_SCRIM_ALPHA;
-import static com.android.launcher3.taskbar.bubbles.utils.UserTypeExt.toUserIconInfoType;
 import static com.android.wm.shell.shared.bubbles.FlyoutDrawableLoader.loadFlyoutDrawable;
 
 import android.annotation.Nullable;
@@ -149,7 +148,7 @@ public class BubbleCreator {
         }
 
         UserIconInfo userIconInfo = new UserIconInfo(
-                UserHandle.of(info.getUserId()), toUserIconInfoType(info.getUserType()));
+                UserHandle.of(info.getUserId()), info.getUserType());
 
         // Badged bubble image
         BubbleIcon bubbleIcon =

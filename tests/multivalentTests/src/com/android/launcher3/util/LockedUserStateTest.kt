@@ -21,9 +21,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
-import com.android.launcher3.util.UserIconInfo.Companion.TYPE_MAIN
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Rule
@@ -48,7 +48,7 @@ class LockedUserStateTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = true)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = true)
     fun runOnUserUnlocked_runs_action_immediately_if_already_unlocked() {
         val action: Runnable = mock()
         LockedUserState.get(context).runOnUserUnlocked(action = action)
@@ -57,7 +57,7 @@ class LockedUserStateTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun runOnUserUnlocked_waits_to_run_action_until_user_is_unlocked() {
         val action: Runnable = mock()
         LockedUserState.get(context).runOnUserUnlocked(action = action)
@@ -72,19 +72,19 @@ class LockedUserStateTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = true)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = true)
     fun isUserUnlocked_returns_true_when_user_is_unlocked() {
         assertThat(LockedUserState.get(context).isUserUnlocked).isTrue()
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun isUserUnlocked_returns_false_when_user_is_locked() {
         assertThat(LockedUserState.get(context).isUserUnlocked).isFalse()
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = true)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = true)
     fun taskExecutorOnProvidedExecutor_when_user_already_unlocked() {
         val action: Runnable = mock()
         val taskQueue = mutableListOf<Runnable>()
@@ -94,7 +94,7 @@ class LockedUserStateTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun taskExecutorOnProvidedExecutor_after_user_is_unlocked() {
         val action: Runnable = mock()
         val taskQueue = mutableListOf<Runnable>()
@@ -109,7 +109,7 @@ class LockedUserStateTest {
     }
 
     @Test
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun removed_task_does_not_execute() {
         val action1: Runnable = mock()
         val action2: Runnable = mock()

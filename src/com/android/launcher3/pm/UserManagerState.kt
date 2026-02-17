@@ -20,6 +20,7 @@ import android.os.UserHandle
 import android.os.UserManager
 import com.android.launcher3.pm.UserCache.CachedUserInfo
 import com.android.launcher3.util.UserIconInfo
+import com.android.users.UserType
 
 /** Current snapshot of UserManager information */
 class UserManagerState(private val userMap: Map<UserHandle, CachedUserInfo>) {
@@ -64,7 +65,7 @@ class UserManagerState(private val userMap: Map<UserHandle, CachedUserInfo>) {
     fun getCachedInfo(user: UserHandle): CachedUserInfo =
         userMap[user]
             ?: CachedUserInfo(
-                iconInfo = UserIconInfo(user, UserIconInfo.TYPE_MAIN),
+                iconInfo = UserIconInfo(user, UserType.MAIN),
                 isUnlocked = true,
                 isQuietModeEnabled = false,
             )
