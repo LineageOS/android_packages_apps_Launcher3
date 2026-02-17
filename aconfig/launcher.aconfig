@@ -707,3 +707,13 @@ flag {
   description: "Enables support for renaming home screen files."
   bug: "450710219"
 }
+
+flag {
+  name: "gesture_nav_touch_input_optimizations"
+  namespace: "launcher"
+  description: "Replaces existing Gesture Nav touch input with new SpyWindow optimizations"
+  bug: "466226558"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
