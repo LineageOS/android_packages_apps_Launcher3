@@ -27,7 +27,6 @@ import androidx.annotation.BinderThread
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.ApplicationContext
-import com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAltTabKqsOnConnectedDisplays
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.testing.TestLogging
 import com.android.launcher3.testing.shared.TestProtocol
@@ -357,7 +356,6 @@ internal constructor(
             sysUIProxy.focusState.focusedDisplayId
 
         fun focusedDisplayIdForAltTabKqsOnConnectedDisplays() =
-            if (enableAltTabKqsOnConnectedDisplays.isTrue) sysUIProxy.focusState.focusedDisplayId
-            else Display.DEFAULT_DISPLAY
+            sysUIProxy.focusState.focusedDisplayId
     }
 }

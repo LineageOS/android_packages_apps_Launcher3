@@ -27,7 +27,6 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.window.RemoteTransition
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.Flags.FLAG_ENABLE_ALT_TAB_KQS_FLATENNING
-import com.android.launcher3.Flags.FLAG_ENABLE_ALT_TAB_KQS_ON_CONNECTED_DISPLAYS
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
@@ -209,26 +208,8 @@ class KeyboardQuickSwitchControllerTest {
     }
 
     @Test
-    @DisableFlags(FLAG_ENABLE_ALT_TAB_KQS_FLATENNING, FLAG_ENABLE_ALT_TAB_KQS_ON_CONNECTED_DISPLAYS)
-    fun multipleDesktopTasksPresent_onDesktopWithCdFlagOff_onlyShowCurrentDesktopTasks() {
-        updateRecentsModel(
-            listOf(
-                createDesktopTask(listOf(RUNNING_TASK_ID)),
-                createDesktopTask(listOf(PREVIOUS_TASK_ID)),
-            )
-        )
-        enableDesktopMode()
-
-        triggerAltTab()
-
-        assertThat(isKqsShown).isTrue()
-        assertThat(shownTaskIds).containsExactly(RUNNING_TASK_ID)
-    }
-
-    @Test
     @DisableFlags(FLAG_ENABLE_ALT_TAB_KQS_FLATENNING)
-    @EnableFlags(FLAG_ENABLE_ALT_TAB_KQS_ON_CONNECTED_DISPLAYS)
-    fun multipleDesktopTasksPresent_onDesktopWithCdFlagON_showAllDesktopTasks() {
+    fun multipleDesktopTasksPresent_onDesktop_showAllDesktopTasks() {
         updateRecentsModel(
             listOf(
                 createDesktopTask(listOf(RUNNING_TASK_ID)),

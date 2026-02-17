@@ -303,13 +303,6 @@ flag {
 }
 
 flag {
-  name: "enable_alt_tab_kqs_on_connected_displays"
-  namespace: "lse_desktop_experience"
-  description: "Enable Alt + Tab KQS support on connected displays"
-  bug: "394007677"
-}
-
-flag {
   name: "enable_strict_mode"
   namespace: "launcher"
   description: "Enable Strict Mode for the Launcher app"
