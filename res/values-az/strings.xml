@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"Tətbiq təklif olunmasın"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"Proqnozlaşdırılan tətbiqi bərkidin"</string>
     <string name="bubble" msgid="3072951361014076670">"Qabarcıq"</string>
-    <!-- no translation found for enable_app_lock (5606772593969266718) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (2252606435270354961) -->
-    <skip />
+    <string name="enable_app_lock" msgid="5606772593969266718">"Tətbiq kilidi"</string>
+    <string name="disable_app_lock" msgid="2252606435270354961">"Tətbiq kilidini silin"</string>
     <string name="widget_settings" msgid="5280157748464495511">"Ayarlar"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"İşləmə panelinə əlavə edin"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"İşləmə panelindən silin"</string>
@@ -123,7 +121,6 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Geri qaytarmaq olmur. Bərpa etmək üçün Fayllar tətbiqinə keçin."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Əməliyyatlar"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Qısayollar"</string>
-    <string name="loading_shortcut" msgid="2638272014233830958">"Qısayol yüklənir"</string>
     <string name="pause_app_label" msgid="6796255881727695791">"Tətbiqi durdurun"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"qısayolları quraşdır"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Tətbiqə istifadəçi müdaxiləsi olmadan qısayolları əlavə etməyə icazə verir."</string>

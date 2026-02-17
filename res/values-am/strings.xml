@@ -50,7 +50,7 @@
     <string name="widget_preview_context_description" msgid="9045841361655787574">"የ<xliff:g id="WIDGET_NAME">%1$s</xliff:g> ምግብር"</string>
     <string name="widget_preview_name_and_dims_content_description" msgid="8489038126122831595">"የ<xliff:g id="WIDGET_NAME">%1$s</xliff:g> ምግብር፣ %2$d ስፋት በ%3$d ቁመት"</string>
     <string name="add_item_request_drag_hint" msgid="8730547755622776606">"በመነሻ ማያ ገፅ አካባቢ ላይ ለማንቀሳቀስ ነክተው ይያዙት"</string>
-    <string name="add_to_home_screen" msgid="9168649446635919791">"ወደ መነሻ ማያ ገፅ አክል"</string>
+    <string name="add_to_home_screen" msgid="9168649446635919791">"ወደ መነሻ ማያ ገጽ አክል"</string>
     <string name="added_to_home_screen_accessibility_text" msgid="4451545765448884415">"<xliff:g id="WIDGET_NAME">%1$s</xliff:g> ምግብር ወደ መነሻ ማያ ገፅ ታክሏል"</string>
     <string name="suggested_widgets_header_title" msgid="1844314680798145222">"የአስተያየት ጥቆማዎች"</string>
     <string name="productivity_widget_recommendation_category_label" msgid="3811812719618323750">"ጠቃሚ ነገሮች"</string>
@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"መተግበሪያውን አይጠቁሙ"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"የፒን ግምት"</string>
     <string name="bubble" msgid="3072951361014076670">"አረፋ"</string>
-    <!-- no translation found for enable_app_lock (5606772593969266718) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (2252606435270354961) -->
-    <skip />
+    <string name="enable_app_lock" msgid="5606772593969266718">"የመተግበሪያ መቆለፊያ"</string>
+    <string name="disable_app_lock" msgid="2252606435270354961">"የመተግበሪያ መቆለፊያን ያስወግዱ"</string>
     <string name="widget_settings" msgid="5280157748464495511">"ቅንብሮች"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"ወደ የተግባር አሞሌ አክል"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"ከተግባር አሞሌ ላይ አስወግድ"</string>
@@ -123,7 +121,6 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"መቀልበስ አልተቻለም። ወደነበረበት ለመመለስ ወደ ፋይሎች መተግበሪያ ይሂዱ።"</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"እርምጃዎች"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"አቋራጮች"</string>
-    <string name="loading_shortcut" msgid="2638272014233830958">"አቋራጭን በመጫን ላይ"</string>
     <string name="pause_app_label" msgid="6796255881727695791">"መተግበሪያን ባለበት አቁም"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"አቋራጮችን ይጭናል"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"መተግበሪያው ያለተጠቃሚ ጣልቃ ገብነት አቋራጭ እንዲያክል ያስችለዋል።"</string>
@@ -193,7 +190,7 @@
     <string name="dialog_remove" msgid="6510806469849709407">"አስወግድ"</string>
     <string name="widgets_list" msgid="796804551140113767">"የመግብሮች ዝርዝር"</string>
     <string name="widgets_list_closed" msgid="6141506579418771922">"የመግብሮች ዝርዝር ተዘግቷል"</string>
-    <string name="action_add_to_workspace" msgid="215894119683164916">"ወደ መነሻ ማያ ገፅ አክል"</string>
+    <string name="action_add_to_workspace" msgid="215894119683164916">"ወደ መነሻ ማያ ገጽ አክል"</string>
     <string name="action_move_here" msgid="2170188780612570250">"ንጥልን ወደዚህ ውሰድ"</string>
     <string name="item_removed" msgid="851119963877842327">"ንጥል ነገር ተንቀሳቅሷል"</string>
     <string name="undo" msgid="4151576204245173321">"ቀልብስ"</string>

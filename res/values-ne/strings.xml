@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"एप सिफारिस नगर्नुहोस्"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"सिफारिस गरिएको एप पिन गर्नुहोस्"</string>
     <string name="bubble" msgid="3072951361014076670">"बबल"</string>
-    <!-- no translation found for enable_app_lock (5606772593969266718) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (2252606435270354961) -->
-    <skip />
+    <string name="enable_app_lock" msgid="5606772593969266718">"एप लक"</string>
+    <string name="disable_app_lock" msgid="2252606435270354961">"एप लक हटाउनुहोस्"</string>
     <string name="widget_settings" msgid="5280157748464495511">"सेटिङ"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"टास्कबारमा हाल्नुहोस्"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"टास्कबारबाट हटाउनुहोस्"</string>
@@ -123,7 +121,6 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"अन्डू गर्न सकिएन। रिस्टोर गर्न Files एपमा जानुहोस्।"</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"कारबाहीहरू"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"सर्टकटहरू"</string>
-    <string name="loading_shortcut" msgid="2638272014233830958">"सर्टकट लोड गरिँदै छ"</string>
     <string name="pause_app_label" msgid="6796255881727695791">"एप पज गर्नुहोस्"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"सर्टकट स्थापना गर्नेहोस्"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा थप्नको लागि अनुमति दिनुहोस्।"</string>
