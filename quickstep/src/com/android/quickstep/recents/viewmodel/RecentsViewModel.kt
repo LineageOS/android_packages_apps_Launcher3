@@ -16,7 +16,9 @@
 
 package com.android.quickstep.recents.viewmodel
 
+import com.android.launcher3.Flags.enableLowResThumbnailPreloading
 import com.android.launcher3.dagger.DisplayId
+import com.android.quickstep.recents.data.AppTimersRepository
 import com.android.quickstep.recents.data.RecentTasksRepository
 import com.android.systemui.shared.recents.model.ThumbnailData
 import javax.inject.Inject
@@ -29,6 +31,7 @@ class RecentsViewModel
 constructor(
     private val recentsTasksRepository: RecentTasksRepository,
     private val recentsViewData: RecentsViewData,
+    private val appTimersRepository: AppTimersRepository,
     @DisplayId private val displayId: Int,
 ) {
     var visibleTaskIds = emptySet<Int>()
@@ -78,6 +81,9 @@ constructor(
 
     fun onReset() {
         updateVisibleTasks(emptyList())
+        if (enableLowResThumbnailPreloading()) {
+            appTimersRepository.invalidateCache()
+        }
     }
 
     fun updateRunningTask(taskIds: Set<Int>) {
