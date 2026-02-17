@@ -30,7 +30,7 @@ import android.service.personalcontext.hint.BundleHint
 import android.service.personalcontext.hint.ContentCaptureConversationEvent.ConversationUpdateEvent
 import android.service.personalcontext.hint.ContentCaptureConversationHint
 import android.service.personalcontext.hint.ContextHint
-import android.service.personalcontext.hint.ContextHintWithSignature
+import android.service.personalcontext.hint.PublishedContextHint
 import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
@@ -453,8 +453,7 @@ constructor(
         val hint = BundleHint.Builder().setDataBundle(bundle).build()
 
         val signedHint =
-            ContextHintWithSignature.Builder(hint, SecretKeySpec(ByteArray(16), "HmacSHA256"))
-                .build()
+            PublishedContextHint.Builder(hint, SecretKeySpec(ByteArray(16), "HmacSHA256")).build()
         val mockInsight = mockInsightBuilder.addOriginHint(signedHint).build()
         onInsightReceived(listOf(mockInsight))
     }
