@@ -292,8 +292,6 @@ constructor(
                 currentUnfilteredActions
             }
 
-        Log.d(TAG, "updateActionViewModelList: isImeVisible=$isImeVisible actions=$filteredActions")
-
         actions =
             filteredActions
                 .map { action ->
