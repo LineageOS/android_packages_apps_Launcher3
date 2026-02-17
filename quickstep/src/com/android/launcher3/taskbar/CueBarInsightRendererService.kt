@@ -17,8 +17,8 @@
 package com.android.launcher3.taskbar
 
 import android.service.personalcontext.RenderToken
-import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.InsightFilter
+import android.service.personalcontext.insight.PublishedContextInsight
 import android.service.personalcontext.renderer.InsightRendererService
 import android.util.Log
 import com.android.quickstep.cuebar.data.InsightListener
@@ -33,11 +33,11 @@ class CueBarInsightRendererService : InsightRendererService() {
         return InsightFilter.Builder().build()
     }
 
-    override fun onRender(insight: ContextInsight, renderToken: RenderToken) {
+    override fun onRender(publishedInsight: PublishedContextInsight, renderToken: RenderToken) {
         val listener = listenerRef?.get()
         if (listener != null) {
             // Forward the data to the custom listener (the Repository)
-            listener.onInsightReceived(listOf(insight))
+            listener.onInsightReceived(listOf(publishedInsight.getInsight()))
         } else {
             Log.w(TAG, "Insights received but no listener registered.")
         }
