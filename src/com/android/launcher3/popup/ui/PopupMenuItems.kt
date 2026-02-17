@@ -18,7 +18,6 @@ package com.android.launcher3.popup.ui
 
 import android.graphics.Rect
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -35,6 +34,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +47,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -62,25 +61,23 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.android.launcher3.R
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.deepShortcutAddButtonSize
-import com.android.launcher3.popup.ui.PopupMenuItemDimens.deepShortcutAddIconSize
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.deepShortcutIconSize
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.iconOnlyButtonSize
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHeight
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHorizontalPadding
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemIconSpacerWidth
-import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemTextSize
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemVerticalPadding
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemWidth
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.systemShortcutIconPadding
-import com.android.launcher3.popup.ui.PopupMenuItemDimens.systemShortcutIconSize
+import com.android.launcher3.util.compose.textStyleFromResource
 
 /**
  * A Composable for displaying a shortcut item with an icon, title, and optional trailing content.
@@ -154,8 +151,13 @@ fun PopupMenuItem(
                     modifier =
                         Modifier.fillMaxSize()
                             .padding(
-                                horizontal = popupMenuItemHorizontalPadding,
-                                vertical = popupMenuItemVerticalPadding,
+                                start = popupMenuItemHorizontalPadding,
+                                end =
+                                    popupMenuItemHorizontalPadding.takeIf {
+                                        trailingContent == null
+                                    } ?: 0.dp,
+                                top = popupMenuItemVerticalPadding,
+                                bottom = popupMenuItemVerticalPadding,
                             ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -163,8 +165,8 @@ fun PopupMenuItem(
                     Spacer(modifier = Modifier.width(popupMenuItemIconSpacerWidth))
                     Text(
                         text = title,
-                        color = colorResource(R.color.materialColorOnSurfaceVariant),
-                        fontSize = popupMenuItemTextSize,
+                        color = colorResource(R.color.materialColorOnSurface),
+                        style = PopupMenuStyles.popupMenuItemTextStyle,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -233,23 +235,20 @@ fun SystemShortcutMenuItem(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.padding(systemShortcutIconPadding),
             ) {
-                Image(
+                Icon(
                     painter = painter,
                     contentDescription = null,
-                    modifier = Modifier.size(systemShortcutIconSize),
-                    colorFilter =
-                        ColorFilter.tint(colorResource(R.color.materialColorOnSurfaceVariant)),
+                    tint = colorResource(R.color.materialColorOnSurface),
                 )
             }
         }
     } else {
         val iconComposable: @Composable () -> Unit = {
             Spacer(modifier = Modifier.width(systemShortcutIconPadding))
-            Image(
+            Icon(
                 painter = painter,
                 contentDescription = null,
-                modifier = Modifier.size(systemShortcutIconSize),
-                colorFilter = ColorFilter.tint(colorResource(R.color.materialColorOnSurfaceVariant)),
+                tint = colorResource(R.color.materialColorOnSurface),
             )
         }
 
@@ -300,7 +299,7 @@ fun DeepShortcutMenuItem(
         itemTitle = shortcut.title.toString()
         itemContentDescription = itemTitle
         iconComposable = {
-            Image(
+            Icon(
                 bitmap = shortcut.bitmap.icon.asImageBitmap(),
                 contentDescription = null,
                 modifier =
@@ -316,6 +315,7 @@ fun DeepShortcutMenuItem(
                                 (position.y + size.height).toInt(),
                             )
                     },
+                tint = Color.Unspecified,
             )
         }
         itemOnClick = { onClick(DeepShortcutClickEvent(shortcut, iconWindowBounds)) }
@@ -341,11 +341,9 @@ fun DeepShortcutMenuItem(
                         interactionSource = addInteractionSource,
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Image(
-                                modifier = Modifier.size(deepShortcutAddIconSize),
+                            Icon(
                                 painter = painterResource(id = R.drawable.ic_add_circle_filled),
-                                colorFilter =
-                                    ColorFilter.tint(colorResource(R.color.materialColorSecondary)),
+                                tint = colorResource(R.color.materialColorSecondary),
                                 contentDescription =
                                     stringResource(R.string.action_add_to_workspace),
                             )
@@ -378,14 +376,16 @@ fun DeepShortcutMenuItem(
 object PopupMenuItemDimens {
     val popupMenuItemHeight = 52.dp
     val popupMenuItemWidth = 216.dp
-    val popupMenuItemTextSize = 14.sp
-    val popupMenuItemHorizontalPadding = 8.dp
+    val popupMenuItemHorizontalPadding = 12.dp
     val popupMenuItemVerticalPadding = 10.dp
     val popupMenuItemIconSpacerWidth = 8.dp
     val systemShortcutIconPadding = 4.dp
-    val systemShortcutIconSize = 24.dp
     val deepShortcutIconSize = 32.dp
-    val deepShortcutAddIconSize = 20.dp
     val deepShortcutAddButtonSize = 48.dp
     val iconOnlyButtonSize = 48.dp
+}
+
+object PopupMenuStyles {
+    val popupMenuItemTextStyle: TextStyle
+        @Composable get() = textStyleFromResource(R.style.PopupMenuItemText)
 }
