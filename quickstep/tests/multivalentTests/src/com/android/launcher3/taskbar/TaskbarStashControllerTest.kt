@@ -48,6 +48,7 @@ import com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_SYSUI
 import com.android.launcher3.taskbar.TaskbarStashController.FLAG_TASKBAR_HIDDEN
 import com.android.launcher3.taskbar.TaskbarStashController.TASKBAR_STASH_DURATION
 import com.android.launcher3.taskbar.TaskbarStashController.TASKBAR_STASH_DURATION_FOR_IME
+import com.android.launcher3.taskbar.TaskbarStashController.TASKBAR_STASH_DURATION_WITHOUT_ICON_ALIGNMENT
 import com.android.launcher3.taskbar.TaskbarStashController.TRANSIENT_TASKBAR_STASH_ALPHA_DURATION
 import com.android.launcher3.taskbar.TaskbarStashController.TRANSIENT_TASKBAR_STASH_DURATION
 import com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_STASH
@@ -179,7 +180,12 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(TRANSIENT)
     fun testGetStashDuration_transientMode() {
-        assertThat(stashController.stashDuration).isEqualTo(TRANSIENT_TASKBAR_STASH_DURATION)
+        if (!activityContext.controllers.taskbarRecentAppsController.canShowRecentApps) {
+            assertThat(stashController.stashDuration).isEqualTo(TRANSIENT_TASKBAR_STASH_DURATION)
+        } else {
+            assertThat(stashController.stashDuration)
+                .isEqualTo(TASKBAR_STASH_DURATION_WITHOUT_ICON_ALIGNMENT)
+        }
     }
 
     @Test
