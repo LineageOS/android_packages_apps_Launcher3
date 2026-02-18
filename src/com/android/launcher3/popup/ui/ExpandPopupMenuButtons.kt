@@ -48,7 +48,6 @@ import com.android.launcher3.R
 import com.android.launcher3.popup.ui.ComposePopupDimens.popupCornerRadius
 import com.android.launcher3.popup.ui.ExpandPopupMenuButtonDimens.expandPopupMenuItemHorizontalPadding
 import com.android.launcher3.popup.ui.ExpandPopupMenuButtonDimens.expandPopupMenuItemImageSize
-import com.android.launcher3.popup.ui.ExpandPopupMenuButtonDimens.expandPopupMenuItemVerticalPadding
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHeight
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemWidth
 import com.android.launcher3.util.compose.textStyleFromResource
@@ -85,7 +84,7 @@ fun ExpandPopupMenuButton(text: String, onClick: () -> Unit) {
         Row(
             modifier =
                 Modifier.padding(
-                    vertical = expandPopupMenuItemVerticalPadding,
+                    vertical = 0.dp,
                     horizontal = expandPopupMenuItemHorizontalPadding,
                 ),
             verticalAlignment = Alignment.CenterVertically,
@@ -143,7 +142,6 @@ fun ExpandDeepShortcutsMenuButton(onShowDeepShortcuts: () -> Unit) {
 }
 
 private object ExpandPopupMenuButtonDimens {
-    val expandPopupMenuItemVerticalPadding = 10.dp
     val expandPopupMenuItemHorizontalPadding = 16.dp
     val expandPopupMenuItemImageSize = 24.dp
 }
