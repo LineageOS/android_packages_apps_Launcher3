@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"កុំណែនាំកម្មវិធី"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"ខ្ទាស់ការ​ព្យាករ"</string>
     <string name="bubble" msgid="3072951361014076670">"ផ្ទាំងអណ្ដែត"</string>
-    <!-- no translation found for enable_app_lock (5606772593969266718) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (2252606435270354961) -->
-    <skip />
+    <string name="enable_app_lock" msgid="5606772593969266718">"ការចាក់សោកម្មវិធី"</string>
+    <string name="disable_app_lock" msgid="2252606435270354961">"ដកការចាក់សោកម្មវិធីចេញ"</string>
     <string name="widget_settings" msgid="5280157748464495511">"ការកំណត់"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"បញ្ចូលទៅរបារកិច្ចការ"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"ដកចេញពីរបារកិច្ចការ"</string>
@@ -123,7 +121,6 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"មិន​អាច​ត្រឡប់​វិញ​បាន​ទេ។ ចូលទៅកាន់កម្មវិធី Files ដើម្បីស្ដារ។"</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"សកម្មភាព"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"ផ្លូវកាត់"</string>
-    <string name="loading_shortcut" msgid="2638272014233830958">"កំពុងផ្ទុកផ្លូវកាត់"</string>
     <string name="pause_app_label" msgid="6796255881727695791">"ផ្អាក​កម្មវិធី"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"ដំឡើង​ផ្លូវកាត់"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​បន្ថែម​ផ្លូវកាត់​ ដោយ​មិន​ចាំបាច់​​អំពើ​ពី​អ្នក​ប្រើ។"</string>
