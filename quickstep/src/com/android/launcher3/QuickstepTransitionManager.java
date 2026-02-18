@@ -425,20 +425,6 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 createAppLaunchRemoteTransition(
                         appLaunchRunner, onEndCallback::executeAllAndDestroy);
 
-        RemoteTransition remoteTransition = new RemoteTransition(appLaunchRemoteTransition,
-                mLauncher.getIApplicationThread(), "QuickstepLaunch");
-
-        if (com.android.window.flags.Flags.crossDisplayTransition()) {
-            TransitionFilter filter = new TransitionFilter();
-            filter.mRequirements = new TransitionFilter.Requirement[]{
-                    new TransitionFilter.Requirement()};
-
-            // This animation should not run on cross-display transitions.
-            filter.mRequirements[0].mNot = true;
-            filter.mRequirements[0].mIsCrossDisplayMove = true;
-            remoteTransition.setFilter(filter);
-        }
-
         // Note that this duration is a guess as we do not know if the animation will be a
         // recents launch or not for sure until we know the opening app targets.
         long duration = fromRecents
@@ -449,7 +435,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 - STATUS_BAR_TRANSITION_PRE_DELAY;
       ActivityOptions options = ActivityOptions.makeRemoteAnimation(
               new RemoteAnimationAdapter(appLaunchRunner, duration, statusBarTransitionDelay),
-              remoteTransition);
+              new RemoteTransition(appLaunchRemoteTransition, mLauncher.getIApplicationThread(),
+                    "QuickstepLaunch"));
         IRemoteCallback endCallback = completeRunnableListCallback(
                 onEndCallback, mLauncher, MAIN_EXECUTOR);
         options.setOnAnimationAbortListener(endCallback);
@@ -514,8 +501,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             Runnable onEndCallback
     ) {
         IRemoteTransition defaultAppLaunchTransition = defaultAppLaunchRunner.toRemoteTransition();
-        if (!com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()
-                || com.android.window.flags.Flags.crossDisplayTransition()) {
+        if (!com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()) {
             return defaultAppLaunchTransition;
         }
 
@@ -1470,8 +1456,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
          * launch happens via a different means (e.g. desktop mode), we also need to handle the
          * cross-display move via a remote transition.
          */
-        if (com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()
-                && !com.android.window.flags.Flags.crossDisplayTransition()) {
+        if (com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()) {
             mMoveDisplayTransition = new RemoteTransition(new MoveDisplayChangeRunner(this),
                     mLauncher.getIApplicationThread(), "QuickstepDisplayMove");
             TransitionFilter changeCheck = new TransitionFilter();
