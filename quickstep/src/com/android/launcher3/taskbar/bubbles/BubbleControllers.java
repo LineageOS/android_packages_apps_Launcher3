@@ -28,6 +28,7 @@ import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController;
 import com.android.launcher3.util.MultiPropertyFactory;
 import com.android.launcher3.util.RunnableList;
 import com.android.wm.shell.shared.bubbles.DragZoneFactory;
+import com.android.wm.shell.shared.bubbles.logging.BubbleLog;
 
 import java.io.PrintWriter;
 import java.util.Optional;
@@ -159,5 +160,6 @@ public class BubbleControllers {
     /** Dumps bubble controllers state. */
     public void dump(PrintWriter pw) {
         bubbleBarViewController.dump(pw);
+        BubbleLog.dump(pw);
     }
 }

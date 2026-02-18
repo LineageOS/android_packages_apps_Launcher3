@@ -46,6 +46,7 @@ import com.android.wm.shell.shared.bubbles.DragZoneFactory.SplitScreenModeChecke
 import com.android.wm.shell.shared.bubbles.DraggedObject;
 import com.android.wm.shell.shared.bubbles.DropTargetManager;
 import com.android.wm.shell.shared.bubbles.DropTargetManager.DragZoneChangedListener;
+import com.android.wm.shell.shared.bubbles.logging.BubbleLog;
 
 /**
  * Controls bubble bar drag interactions.
@@ -434,6 +435,8 @@ public class BubbleDragController {
          * @param event the motion event
          */
         protected void onTouchDown(@NonNull View view, @NonNull MotionEvent event) {
+            BubbleLog.d("BubbleDragController.onTouchDown() x=%f,y=%f,state=%s",
+                    event.getRawX(), event.getRawY(), mState.toString());
             mState = State.TOUCHED;
             mTouchSlop = ViewConfiguration.get(view.getContext()).getScaledTouchSlop();
             mTouchDownLocation.set(event.getRawX(), event.getRawY());
@@ -476,6 +479,8 @@ public class BubbleDragController {
          * @param event the motion event
          */
         protected void onTouchUp(@NonNull View view, @NonNull MotionEvent event) {
+            BubbleLog.d("BubbleDragController.onTouchUp() x=%f,y=%f,state=%s",
+                    event.getRawX(), event.getRawY(), mState.toString());
             switch (mState) {
                 case TOUCHED:
                     view.performClick();
@@ -497,6 +502,8 @@ public class BubbleDragController {
          * @param event the motion event
          */
         protected void onTouchCancel(@NonNull View view, @NonNull MotionEvent event) {
+            BubbleLog.d("BubbleDragController.onTouchCancel() x=%f,y=%f,state=%s",
+                    event.getRawX(), event.getRawY(), mState.toString());
             if (mState == State.DRAGGING) {
                 stopDragging(view, event);
             } else {
