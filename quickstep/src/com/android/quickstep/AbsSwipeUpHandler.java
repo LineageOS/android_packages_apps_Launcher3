@@ -355,7 +355,7 @@ public abstract class AbsSwipeUpHandler<
     private AnimatorControllerWithResistance mLauncherTransitionController;
     private boolean mHasEndedLauncherTransition;
 
-    private AnimationFactory mAnimationFactory = (t) -> { };
+    private AnimationFactory mAnimationFactory = (t, b) -> { };
 
     private boolean mWasLauncherAlreadyVisible;
 
@@ -961,7 +961,10 @@ public abstract class AbsSwipeUpHandler<
             return;
         }
         initTransitionEndpoints(mContainer.getDeviceProfile());
-        mAnimationFactory.createContainerInterface(mTransitionDragLength);
+        mAnimationFactory.createContainerInterface(
+                mTransitionDragLength,
+                mGestureState.getRunningTask() != null
+                        && mGestureState.getRunningTask().isHomeTask());
     }
 
     /**

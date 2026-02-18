@@ -129,7 +129,7 @@ public abstract class BaseActivityInterface<STATE_TYPE extends BaseState<STATE_T
         }
 
         @Override
-        public void createContainerInterface(long transitionLength) {
+        public void createContainerInterface(long transitionLength, boolean runningOverHome) {
             PendingAnimation pa = new PendingAnimation(transitionLength * 2);
             createBackgroundToOverviewAnim(mActivity, pa);
             AnimatorPlaybackController controller = pa.createPlaybackController();

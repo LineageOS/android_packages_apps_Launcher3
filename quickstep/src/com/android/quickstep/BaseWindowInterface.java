@@ -161,7 +161,7 @@ public abstract class BaseWindowInterface extends
         }
 
         @Override
-        public void createContainerInterface(long transitionLength) {
+        public void createContainerInterface(long transitionLength, boolean runningOverHome) {
             PendingAnimation pa = new PendingAnimation(transitionLength * 2);
             createBackgroundToOverviewAnim(mRecentsWindowManager, pa);
             AnimatorPlaybackController controller = pa.createPlaybackController();
@@ -177,10 +177,16 @@ public abstract class BaseWindowInterface extends
 
             RecentsView recentsView = mRecentsWindowManager.getOverviewPanel();
             AnimatorControllerWithResistance controllerWithResistance =
-                    AnimatorControllerWithResistance.createForRecents(controller,
-                            mRecentsWindowManager, recentsView.getPagedViewOrientedState(),
-                            mRecentsWindowManager.getDeviceProfile(), recentsView,
-                            RECENTS_SCALE_PROPERTY, recentsView, TASK_SECONDARY_TRANSLATION);
+                    AnimatorControllerWithResistance.createForRecents(
+                            controller,
+                            mRecentsWindowManager,
+                            recentsView.getPagedViewOrientedState(),
+                            mRecentsWindowManager.getDeviceProfile(),
+                            recentsView,
+                            RECENTS_SCALE_PROPERTY,
+                            recentsView,
+                            TASK_SECONDARY_TRANSLATION,
+                            runningOverHome);
             mCallback.accept(controllerWithResistance);
 
             // Creating the activity controller animation sometimes reapplies the launcher state
