@@ -773,6 +773,7 @@ public class TaskbarDragController extends DragController implements
         Trace.endAsyncSection("TaskbarDragController.dragStartToDragEnd",
                 mIsDragExternal ? EXTERNAL_DRAG_COOKIE : INTERNAL_DRAG_COOKIE);
         mIsDragExternal = false;
+        mIsDropHandledByDropTarget = false;
     }
 
     @Override

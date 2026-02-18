@@ -183,7 +183,7 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
             };
 
     private boolean mIsRtlLayout;
-    private final List<TaskbarOverflowItem> mItems = new ArrayList<TaskbarOverflowItem>();
+    private final List<TaskbarOverflowItem> mItems = new ArrayList<>();
     private int mIconSize;
     private Paint mItemBackgroundPaint;
     private final MultiTranslateDelegate mTranslateDelegate = new MultiTranslateDelegate(this);
@@ -209,6 +209,10 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     private float mLeaveBehindSizeDefault;
     private float mLeaveBehindSize;  // [mLeaveBehindSizeScaledDown..mLeaveBehindSizeDefault]
     private boolean mIsFirstItemHiddenForAnimation;
+
+    // Information about an item that is currently being dragged from the overflow.
+    // While being dragged, this item is hidden from the overflow's visual representation.
+    private int mHiddenDraggedItemId = NO_ID;
 
     public TaskbarOverflowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -285,10 +289,11 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
         int adjustedItemIconSize = Math.round(mItemIconSize);
         float itemIconRadius = adjustedItemIconSize / 2f;
 
-        int itemsToShow = Math.min(mItems.size(), MAX_ITEMS_IN_PREVIEW);
+        List<TaskbarOverflowItem> visibleItems = getVisibleItems();
+        int itemsToShow = Math.min(visibleItems.size(), MAX_ITEMS_IN_PREVIEW);
         for (int i = itemsToShow - 1; i >= 0; --i) {
             int indexDrawn = mOverflowType == OverflowType.PINNED ? i : itemsToShow - i - 1;
-            Drawable icon = mItems.get(indexDrawn).getDrawableIcon();
+            Drawable icon = visibleItems.get(indexDrawn).getDrawableIcon();
             if (icon == null) {
                 continue;
             }
@@ -342,10 +347,31 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     }
 
     /**
+     * Returns a list of items to be displayed in the overflow icon, excluding the item
+     * currently being dragged.
+     *
+     * @return A list of {@link TaskbarOverflowItem} currently visible in the overflow.
+     */
+    private List<TaskbarOverflowItem> getVisibleItems() {
+        if (mHiddenDraggedItemId == NO_ID) {
+            return mItems;
+        }
+        return mItems.stream()
+                .filter(item -> item.getItemId() != mHiddenDraggedItemId)
+                .toList();
+    }
+
+    private int getVisibleItemsCount() {
+        return (mHiddenDraggedItemId == NO_ID) ? mItems.size() : Math.max(0, mItems.size() - 1);
+    }
+
+    /**
      * Clears the list of tasks tracked by the view.
      */
     public void clearItems() {
         mItems.clear();
+        mHiddenDraggedItemId = NO_ID;
+
         invalidate();
         if (mOnChangeListener != null) {
             mOnChangeListener.onItemsChanged();
@@ -359,6 +385,48 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     public void setItems(List<? extends TaskbarOverflowItem> items) {
         mItems.clear();
         mItems.addAll(items);
+        mHiddenDraggedItemId = NO_ID;
+
+        invalidate();
+        if (mOnChangeListener != null) {
+            mOnChangeListener.onItemsChanged();
+        }
+    }
+
+    /**
+     * Handles the event when an item from the overflow is being dragged.
+     * <p>
+     * This method removes the item from the pinned list and caches its information so that it can
+     * be restored if the drag is cancelled.
+     *
+     * @param info  The {@link ItemInfo} of the item being dragged.
+     */
+    public void onOverflowItemDragged(ItemInfo info) {
+        mHiddenDraggedItemId = info.id;
+
+        invalidate();
+        if (mOnChangeListener != null) {
+            mOnChangeListener.onItemsChanged();
+        }
+    }
+
+    /**
+     * Handles the event when a drag operation that originated from the overflow has ended.
+     *
+     * @param itemDropped {@code true} if the item was successfully dropped, {@code false}
+     *                    otherwise.
+     */
+    public void onItemDragEnded(boolean itemDropped) {
+        if (mHiddenDraggedItemId == NO_ID) {
+            return;
+        }
+        if (itemDropped) {
+            // If the item is dropped successfully, the view is redrawn with the model update.
+            mHiddenDraggedItemId = NO_ID;
+            return;
+        }
+
+        mHiddenDraggedItemId = NO_ID;
         invalidate();
         if (mOnChangeListener != null) {
             mOnChangeListener.onItemsChanged();
@@ -371,7 +439,8 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
     }
 
     public List<ItemInfo> getOverflowInfoList() {
-        return mItems.stream().map(item -> ((ItemInfoWrapper) item).getItemInfo()).toList();
+        return getVisibleItems().stream().map(
+                item -> ((ItemInfoWrapper) item).getItemInfo()).toList();
     }
 
     /**
@@ -401,11 +470,12 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
      * @param singleTask The updated SingeTask.
      */
     public void updateTaskIsShown(SingleTask singleTask) {
-        for (int i = 0; i < mItems.size(); ++i) {
-            if (mItems.get(i) instanceof TaskWrapper taskItem
+        List<TaskbarOverflowItem> visibleItems = getVisibleItems();
+        for (int i = 0; i < visibleItems.size(); ++i) {
+            if (visibleItems.get(i) instanceof TaskWrapper taskItem
                     && taskItem.getItemId() == singleTask.getTask().key.id) {
-                mItems.set(i, new TaskWrapper(getContext(), singleTask));
-                if (i >= mItems.size() - MAX_ITEMS_IN_PREVIEW) {
+                visibleItems.set(i, new TaskWrapper(getContext(), singleTask));
+                if (i >= visibleItems.size() - MAX_ITEMS_IN_PREVIEW) {
                     invalidate();
                 }
                 break;
@@ -596,7 +666,7 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
      * Calculate the x and y offsets of the first item.
      */
     public PointF getOverlayOffsetsForFirstItem(boolean isMovingAway, int indexOfItem) {
-        int itemsToShow = Math.min(mItems.size(), MAX_ITEMS_IN_PREVIEW);
+        int itemsToShow = Math.min(getVisibleItemsCount(), MAX_ITEMS_IN_PREVIEW);
         int totalItems = isMovingAway && itemsToShow < MAX_ITEMS_IN_PREVIEW
                 ? itemsToShow + 1 : itemsToShow;
 

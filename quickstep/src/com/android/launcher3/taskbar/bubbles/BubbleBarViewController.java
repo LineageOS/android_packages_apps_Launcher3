@@ -412,6 +412,11 @@ public class BubbleBarViewController {
             public float getDistanceToRevealTriangle() {
                 return getDistanceToCollapsedPosition().y - mBarView.getPointerSize();
             }
+
+            @Override
+            public int getHorizontalMargin() {
+                return BubbleBarViewController.this.getHorizontalMargin();
+            }
         };
     }
 
@@ -577,6 +582,11 @@ public class BubbleBarViewController {
      */
     public boolean isBubbleBarVisible() {
         return mBarView.getVisibility() == VISIBLE;
+    }
+
+    /** Returns whether the bubble bar container is visible. */
+    public boolean isBubbleBarContainerVisible() {
+        return mBubbleBarContainer.getVisibility() == VISIBLE;
     }
 
     /** Whether the bubble bar has bubbles. */
@@ -854,6 +864,14 @@ public class BubbleBarViewController {
             mBarView.setVisibility(INVISIBLE);
         } else {
             mBarView.setVisibility(VISIBLE);
+        }
+
+        if (Flags.fixBubbleNotificationShowingInLockScreen()) {
+            if (mHiddenForSysui || mHiddenForNoBubbles) {
+                mBubbleBarContainer.setVisibility(INVISIBLE);
+            } else {
+                mBubbleBarContainer.setVisibility(VISIBLE);
+            }
         }
     }
 

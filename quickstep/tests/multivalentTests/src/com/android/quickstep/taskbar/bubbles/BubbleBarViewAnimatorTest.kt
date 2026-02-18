@@ -1657,6 +1657,7 @@ class BubbleBarViewAnimatorTest {
                 override val collapsedColor = Color.BLUE
                 override val collapsedElevation = 1f
                 override val distanceToRevealTriangle = 10f
+                override val horizontalMargin = 20
             }
         val flyoutCallbacks =
             object : FlyoutCallbacks {
