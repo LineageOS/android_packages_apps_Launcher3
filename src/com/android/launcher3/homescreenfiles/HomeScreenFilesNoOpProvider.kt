@@ -48,4 +48,7 @@ class HomeScreenFilesNoOpProvider : HomeScreenFilesProvider {
 
     override fun query(): CompletableFuture<Map<Uri, HomeScreenFile>> =
         CompletableFuture.completedFuture(emptyMap())
+
+    override fun rename(uri: Uri, name: String): CompletableFuture<Boolean> =
+        CompletableFuture.completedFuture(false)
 }

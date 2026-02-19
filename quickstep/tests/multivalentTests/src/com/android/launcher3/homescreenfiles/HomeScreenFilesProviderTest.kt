@@ -16,6 +16,7 @@
 
 package com.android.launcher3.homescreenfiles
 
+import android.content.ClipDescription.MIMETYPE_UNKNOWN
 import android.content.ContentProviderClient
 import android.content.ContentResolver
 import android.content.ContentResolver.NOTIFY_INSERT
@@ -26,6 +27,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Process
 import android.provider.DocumentsContract
+import android.provider.DocumentsContract.Document.MIME_TYPE_DIR
 import android.provider.DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY
 import android.provider.DocumentsContract.EXTRA_URI
 import android.provider.MediaStore
@@ -35,6 +37,7 @@ import android.provider.MediaStore.Files.FileColumns.IS_TRASHED
 import android.provider.MediaStore.Files.FileColumns.MIME_TYPE
 import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
 import android.provider.MediaStore.Files.FileColumns._ID
+import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.R
@@ -555,6 +558,301 @@ class HomeScreenFilesProviderTest {
                 isNull(),
                 isNull(),
             )
+    }
+
+    @Test
+    fun testRenameWhenUriIsNotSupported() {
+        createTestUri("id").also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original.png",
+                        mimeType = "image/png",
+                        isDirectory = false,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed.png",
+                usingUpdateResult = true,
+                usingUri = uri,
+                expectSuccess = false,
+            )
+        }
+    }
+
+    @Test
+    fun testRenameWhenQueryingBackingFileFails() {
+        testRename(
+            usingBackingFile = null,
+            usingName = "Renamed.png",
+            usingUpdateResult = true,
+            usingUri = createExternalPrimaryMediaStoreUri(1L),
+            expectSuccess = false,
+        )
+    }
+
+    @Test
+    fun testRenameWhenUpdateFails() {
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original.png",
+                        mimeType = "image/png",
+                        isDirectory = false,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed.png",
+                usingUpdateResult = false,
+                usingUri = uri,
+                expectSuccess = false,
+            )
+        }
+    }
+
+    @Test
+    fun testRenameWhenUpdateSucceeds() {
+        // Case: Rename file.
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original.png",
+                        mimeType = "image/png",
+                        isDirectory = false,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed.png",
+                usingUpdateResult = true,
+                usingUri = uri,
+                expectSuccess = true,
+            )
+        }
+
+        // Case: Rename file, adding extension.
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original",
+                        mimeType = MIMETYPE_UNKNOWN,
+                        isDirectory = false,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed.txt",
+                usingUpdateResult = true,
+                usingUri = uri,
+                expectSuccess = true,
+            )
+        }
+
+        // Case: Rename file, changing extension.
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original.png",
+                        mimeType = "image/png",
+                        isDirectory = false,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed.txt",
+                usingUpdateResult = true,
+                usingUri = uri,
+                expectSuccess = true,
+            )
+        }
+
+        // Case: Rename file, removing extension.
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original.png",
+                        mimeType = "image/png",
+                        isDirectory = false,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed",
+                usingUpdateResult = true,
+                usingUri = uri,
+                expectSuccess = true,
+            )
+        }
+
+        // Case: Rename folder.
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original",
+                        mimeType = MIME_TYPE_DIR,
+                        isDirectory = true,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed",
+                usingUpdateResult = true,
+                usingUri = uri,
+                expectSuccess = true,
+            )
+        }
+
+        // Case: Rename folder, adding extension.
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original",
+                        mimeType = MIME_TYPE_DIR,
+                        isDirectory = true,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed.dir",
+                usingUpdateResult = true,
+                usingUri = uri,
+                expectSuccess = true,
+            )
+        }
+
+        // Case: Rename folder, changing extension.
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original.dir",
+                        mimeType = MIME_TYPE_DIR,
+                        isDirectory = true,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed.folder",
+                usingUpdateResult = true,
+                usingUri = uri,
+                expectSuccess = true,
+            )
+        }
+
+        // Case: Rename folder, keeping extension.
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original.dir",
+                        mimeType = MIME_TYPE_DIR,
+                        isDirectory = true,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed.dir",
+                usingUpdateResult = true,
+                usingUri = uri,
+                expectSuccess = true,
+            )
+        }
+
+        // Case: Rename folder, removing extension.
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original.dir",
+                        mimeType = MIME_TYPE_DIR,
+                        isDirectory = true,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed",
+                usingUpdateResult = true,
+                usingUri = uri,
+                expectSuccess = true,
+            )
+        }
+    }
+
+    @Test
+    fun testRenameWhenUpdateThrows() {
+        createExternalPrimaryMediaStoreUri(1L).also { uri ->
+            testRename(
+                usingBackingFile =
+                    HomeScreenFile(
+                        uri = uri,
+                        displayName = "Original.png",
+                        mimeType = "image/png",
+                        isDirectory = false,
+                        user = Process.myUserHandle(),
+                    ),
+                usingName = "Renamed.png",
+                usingUpdateResult = null,
+                usingUri = uri,
+                expectSuccess = false,
+            )
+        }
+    }
+
+    private fun testRename(
+        usingBackingFile: HomeScreenFile?,
+        usingName: String,
+        usingUpdateResult: Boolean?,
+        usingUri: Uri,
+        expectSuccess: Boolean,
+    ) {
+        // Mock query result.
+        whenever(
+                context.contentResolver.query(
+                    eq(usingUri),
+                    /*projection=*/ eq(arrayOf(DISPLAY_NAME, MIME_TYPE, DATA)),
+                    /*selection=*/ isNull(),
+                    /*selectionArgs=*/ isNull(),
+                    /*sortOrder=*/ isNull(),
+                    /*cancellationSignal=*/ isNull(),
+                )
+            )
+            .thenAnswer {
+                MatrixCursor(arrayOf(DISPLAY_NAME, MIME_TYPE, DATA)).apply {
+                    if (usingBackingFile != null) {
+                        val displayName = usingBackingFile.displayName
+                        val mimeType = usingBackingFile.mimeType
+                        val data = "$HOME_SCREEN_FOLDER_RELATIVE_PATH/$displayName"
+                        addRow(arrayOf(displayName, mimeType, data))
+                    }
+                }
+            }
+
+        // Mock update result.
+        whenever(
+                context.contentResolver.update(
+                    usingUri,
+                    ContentValues().apply {
+                        put(DISPLAY_NAME, usingName)
+                        if (usingBackingFile?.isDirectory == true) {
+                            put(MIME_TYPE, MIME_TYPE_DIR)
+                        } else {
+                            MimeTypeMap.getSingleton()
+                                .getMimeTypeFromExtension(File(usingName).extension)
+                                .run { put(MIME_TYPE, this ?: MIMETYPE_UNKNOWN) }
+                        }
+                    },
+                    /*where=*/ "$RELATIVE_PATH == ?",
+                    /*selectionArgs=*/ arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
+                )
+            )
+            .apply {
+                when (usingUpdateResult) {
+                    true -> thenReturn(1)
+                    false -> thenReturn(0)
+                    else -> thenThrow(RuntimeException())
+                }
+            }
+
+        // Perform rename.
+        assertEquals(expectSuccess, provider.rename(usingUri, usingName).get())
     }
 
     @Test

@@ -31,6 +31,7 @@ import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.anim.AnimatedFloat
 import com.android.launcher3.apppairs.AppPairIcon
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.folder.FolderIcon
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
@@ -44,6 +45,7 @@ import com.android.launcher3.popup.PopupData
 import com.android.launcher3.popup.PopupDataSource
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.widget.LauncherAppWidgetHostView
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.doReturn
@@ -60,7 +62,7 @@ class PopupControllerTest {
 
     private val popupDataRepository = FakePopupDataRepository()
 
-    private val popupDataSource = PopupDataSource()
+    private lateinit var popupDataSource: PopupDataSource
 
     private val launcherDragController = launcherActivity.getFromLauncher { it.dragController }!!
 
@@ -105,6 +107,13 @@ class PopupControllerTest {
             user = userHandle
             screenId = 0
         }
+
+    @Before
+    fun setUp() {
+        launcherActivity.executeOnLauncher { launcher ->
+            popupDataSource = PopupDataSource(launcher.appComponent.homeScreenFilesProvider)
+        }
+    }
 
     @Test
     @EnableFlags(Flags.FLAG_HOME_SCREEN_EDIT_IMPROVEMENTS, Flags.FLAG_MODEL_REPOSITORY)
