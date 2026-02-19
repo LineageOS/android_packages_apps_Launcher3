@@ -22,7 +22,6 @@ import android.app.ActivityTaskManager
 import android.app.BroadcastOptions
 import android.app.PendingIntent
 import android.app.assist.ActivityId
-import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.provider.Settings
@@ -322,11 +321,10 @@ constructor(
             is ActionableInsight -> {
                 actionType = MA_ACTION_TYPE_NAME
                 val action = insight.actionDetails
-                val actionIntent = action.getIntent()
-                extras = actionIntent?.extras
-                if (activityId == null) {
-                    activityId = extras?.getParcelable(EXTRA_ACTIVITY_ID)
-                }
+                val actionPendingIntent = action.pendingIntent
+                // TODO(b/485706132): Update due to switchover to PendingIntent
+                extras = null
+
                 onPerformAction = {
                     when {
                         // 1. Remote Action Send
@@ -334,15 +332,20 @@ constructor(
                             action.remoteAction?.actionIntent?.let { launchPendingIntent(it) }
                         }
                         // 2. Start Activity Intent
-                        action.hasActionType(InsightActionDetails.ACTION_TYPE_INTENT) -> {
-                            actionIntent?.let { intent ->
-                                if (extras?.getBoolean(NEEDS_DATA_EGRESS) == true) {
-                                    insightHandler.egress(insight)
-                                } else {
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    appContext.startActivity(intent)
-                                }
-                            }
+                        action.hasActionType(InsightActionDetails.ACTION_TYPE_PENDING_INTENT) -> {
+                            // TODO(b/485706132): Handle egress case.
+                            //                            actionPendingIntent?.let { pendingIntent
+                            // ->
+                            //                                if
+                            // (extras?.getBoolean(NEEDS_DATA_EGRESS) == true) {
+                            //                                    insightHandler.egress(insight)
+                            //                                } else {
+                            //
+                            // intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            //                                    appContext.startActivity(intent)
+                            //                                }
+                            //                            }
+                            actionPendingIntent?.let { launchPendingIntent(it) }
                         }
                     }
                     ambientCueLogger.setFulfilledWithMaStatus()
