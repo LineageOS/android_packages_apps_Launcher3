@@ -16,7 +16,7 @@
 
 package com.android.launcher3.taskbar
 
-import android.content.Intent
+import android.app.PendingIntent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.service.personalcontext.hint.BundleHint
@@ -150,9 +150,8 @@ class AmbientCueRepositoryTest {
         val actionDetails = mock(InsightActionDetails::class.java)
         `when`(actionDetails.hasActionType(InsightActionDetails.ACTION_TYPE_REMOTE_ACTION))
             .thenReturn(true)
-        val actionIntent = mock(Intent::class.java)
-        `when`(actionIntent.extras).thenReturn(Bundle())
-        `when`(actionDetails.intent).thenReturn(actionIntent)
+        val pendingIntent = mock(PendingIntent::class.java)
+        `when`(actionDetails.pendingIntent).thenReturn(pendingIntent)
         val remoteAction = mock(android.app.RemoteAction::class.java)
         val remoteActionIntent = mock(android.app.PendingIntent::class.java)
         `when`(actionDetails.remoteAction).thenReturn(remoteAction)
