@@ -36,7 +36,7 @@ import javax.inject.Inject
 @LauncherAppSingleton
 class HomeScreenRepository @Inject constructor() {
 
-    private val _workspaceState: MutableDiffAwareRef<WorkspaceData, WorkspaceChangeEvent?> =
+    private val _workspaceState: MutableDiffAwareRef<WorkspaceData, WorkspaceChangeEvent> =
         MutableDiffAwareRef(ImmutableWorkspaceData(0, 0, SparseArray()))
 
     /** Represents the current home screen data model */
@@ -48,7 +48,7 @@ class HomeScreenRepository @Inject constructor() {
     val allWidgets = _allWidgets.asListenable()
 
     /** sets a new value to [workspaceState] */
-    fun dispatchWorkspaceDataChange(workspaceData: WorkspaceData, change: WorkspaceChangeEvent?) {
+    fun dispatchWorkspaceDataChange(workspaceData: WorkspaceData, change: WorkspaceChangeEvent) {
         _workspaceState.dispatchValue(workspaceData, change)
     }
 

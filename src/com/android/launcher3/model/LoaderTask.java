@@ -535,7 +535,7 @@ public class LoaderTask implements Runnable {
                         .createBrowserIconMigrator(loadedItems).performMigration();
             }
 
-            mBgDataModel.dataLoadComplete(loadedItems);
+            mBgDataModel.dataLoadComplete(loadedItems, name /* reason */);
         }
     }
 

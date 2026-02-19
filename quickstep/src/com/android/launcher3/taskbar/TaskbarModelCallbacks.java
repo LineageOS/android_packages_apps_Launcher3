@@ -38,6 +38,7 @@ import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.PredictedContainerInfo;
 import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent;
+import com.android.launcher3.model.data.WorkspaceChangeEvent.FullRefresh;
 import com.android.launcher3.model.data.WorkspaceChangeEvent.RemoveEvent;
 import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent;
 import com.android.launcher3.model.data.WorkspaceData;
@@ -96,15 +97,12 @@ public class TaskbarModelCallbacks implements
         var state = repo.getWorkspaceState();
 
         mContext.closeOnDestroy(state.getChanges().forEach(getTaskbarUiThread(), ev -> {
-            if (ev == null) {
-                bindCompleteModel(state.getValue());
-                return null;
-            }
             if (ev.isSource(mContext)) return null;
             switch (ev) {
                 case AddEvent ae -> bindWorkspaceItemsAdded(ae.getItems());
                 case UpdateEvent ue -> bindWorkspaceItemsUpdated(ue.getItems());
                 case RemoveEvent re -> bindWorkspaceItemsRemoved(re.getItems());
+                case FullRefresh fr -> bindCompleteModel(state.getValue());
                 default -> { }
             }
             return null;

@@ -29,6 +29,7 @@ import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.PredictedContainerInfo
 import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent
+import com.android.launcher3.model.data.WorkspaceChangeEvent.FullRefresh
 import com.android.launcher3.model.data.WorkspaceChangeEvent.RemoveEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
 import com.android.launcher3.model.data.WorkspaceData
@@ -78,13 +79,6 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
 
         launcher.closeOnDestroy(
             workspaceState.changes.forEach(MAIN_EXECUTOR) { ev ->
-                if (ev == null) {
-                    bindModelWithAsyncInflation(
-                        itemIdMap = workspaceState.value,
-                        isBindingSync = false,
-                    )
-                    return@forEach
-                }
                 // Ignore events which originated from our own UI
                 if (ev.isSource(launcher)) return@forEach
 
@@ -92,6 +86,12 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
                     is AddEvent -> bindWorkspaceItemsAdded(ev.items)
                     is RemoveEvent -> bindWorkspaceItemsRemoved(ev.items)
                     is UpdateEvent -> bindWorkspaceItemsUpdated(ev.items)
+                    is FullRefresh ->
+                        bindModelWithAsyncInflation(
+                            itemIdMap = workspaceState.value,
+                            isBindingSync = false,
+                            reason = ev.reason,
+                        )
                 }
             }
         )
@@ -99,7 +99,23 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         if (workspaceState.value.version > 0) {
             // If the data is already loaded, bind synchronously so that the first screen is shown
             // immediately
-            bindModelWithAsyncInflation(itemIdMap = workspaceState.value, isBindingSync = true)
+            bindModelWithAsyncInflation(
+                itemIdMap = workspaceState.value,
+                isBindingSync = true,
+                reason = "initial-bind-on-create",
+            )
+        }
+    }
+
+    /** Rebinds the launcher immediately, due to configuration change */
+    fun rebindOnConfigChange() {
+        val workspaceState = launcher.appComponent.homeScreenRepository.workspaceState
+        if (workspaceState.value.version > 0) {
+            bindModelWithAsyncInflation(
+                itemIdMap = workspaceState.value,
+                isBindingSync = true,
+                reason = "rebinding-on-config-change",
+            )
         }
     }
 
@@ -449,7 +465,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         if (useModelRepositoryBinding()) return
 
         if (Flags.simplifiedLauncherModelBinding()) {
-            bindModelWithAsyncInflation(itemIdMap, isBindingSync)
+            bindModelWithAsyncInflation(itemIdMap, isBindingSync, "bindCompleteModelAsync")
             return
         }
         val taskTracker = CancellationSignal()
@@ -565,10 +581,16 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         )
 
     /** Binds the model while inflating items asynchronously */
-    private fun bindModelWithAsyncInflation(itemIdMap: WorkspaceData, isBindingSync: Boolean) {
+    private fun bindModelWithAsyncInflation(
+        itemIdMap: WorkspaceData,
+        isBindingSync: Boolean,
+        reason: String,
+    ) {
         val taskTracker = CancellationSignal()
         // Cancel any previously running task and set the current as active task
         activeBindTask.getAndSet(taskTracker).cancel()
+
+        val tracer = TraceHelper.INSTANCE.beginAsyncSection("launcher-bind-$reason")
 
         val orderedScreenIds = itemIdMap.collectWorkspaceScreens()
         val currentScreenIds = getPagesToBindSynchronously(orderedScreenIds)
@@ -620,6 +642,7 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
                 launcher.bindInflatedItems(inflatedItems, null)
 
                 finishBindingItems(currentScreenIds)
+                tracer.close()
                 emptyList<Void>()
             }
     }

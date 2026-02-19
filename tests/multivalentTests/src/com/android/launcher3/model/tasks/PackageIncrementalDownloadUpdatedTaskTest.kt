@@ -88,7 +88,7 @@ class PackageIncrementalDownloadUpdatedTaskTest {
                 incrementalUpdates.add(it)
             }
 
-            val workspaceUpdates = mutableListOf<WorkspaceChangeEvent?>()
+            val workspaceUpdates = mutableListOf<WorkspaceChangeEvent>()
             modelState.homeRepo.workspaceState.changes.forEach(MODEL_EXECUTOR) {
                 workspaceUpdates.add(it)
             }
