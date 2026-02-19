@@ -16,10 +16,7 @@
 
 package com.android.quickstep.recents;
 
-import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
-import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
-import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -36,7 +33,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.tapl.Overview;
 import com.android.launcher3.tapl.OverviewTask;
-import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.launcher3.util.ui.BaseLauncherTaplTest.AllowInRecentsWindowTests;
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
 import com.android.quickstep.AbstractQuickStepTest;
@@ -70,12 +66,6 @@ public class TaplOverviewDismissTest extends AbstractQuickStepTest {
     public void tearDown() {
         executeOnOverview(/* forTearDown= */ true, recentsView ->
                 recentsView.getPagedViewOrientedState().forceAllowRotationForTesting(false));
-    }
-
-    private static void startTestApps() throws Exception {
-        startAppFast(getAppPackageName());
-        startAppFast(CALCULATOR_APP_PACKAGE);
-        startTestActivity(2);
     }
 
     @Test

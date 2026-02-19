@@ -28,7 +28,6 @@ import com.android.launcher3.tapl.OverviewTask
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName
 import com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp
-import com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape
 import com.android.quickstep.AbstractQuickStepTest
 import com.google.common.truth.Truth.assertThat

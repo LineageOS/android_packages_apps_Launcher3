@@ -23,6 +23,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
+import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,6 +33,7 @@ import static org.junit.Assume.assumeTrue;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
@@ -550,5 +553,22 @@ public abstract class BaseLauncherTaplTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected void startAppFast(String pkg) {
+        ActivityStartUtils.startAppFast(pkg, mDisplayId);
+    }
+
+    protected void startTestActivity(int activityNumber) {
+        ActivityStartUtils.startTestActivity(activityNumber, mDisplayId);
+    }
+
+    private static final String CALCULATOR_APP_PACKAGE =
+            resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR);
+
+    protected void startTestApps() {
+        startAppFast(getAppPackageName());
+        startAppFast(CALCULATOR_APP_PACKAGE);
+        startTestActivity(2);
     }
 }
