@@ -38,6 +38,10 @@ class HomeVisibilityState {
     var isHomeVisible = true
         private set
 
+    @Volatile
+    var isHomeBehindDesktop = false
+        private set
+
     @Volatile var navbarInsetPosition = 0
 
     private var listeners = CopyOnWriteArrayList<VisibilityChangeListener>()
@@ -54,11 +58,22 @@ class HomeVisibilityState {
                     override fun onHomeVisibilityChanged(
                         isVisible: Boolean,
                         keyguardGoingAwayOrWaking: Boolean,
+                        behindDesktop: Boolean,
                     ) {
                         Utilities.postAsyncCallback(Executors.MAIN_EXECUTOR.handler) {
+                            val homeVisibilityChanged = isHomeVisible != isVisible
                             isHomeVisible = isVisible
+                            isHomeBehindDesktop = behindDesktop
                             listeners.forEach {
-                                it.onHomeVisibilityChanged(isVisible, keyguardGoingAwayOrWaking)
+                                if (
+                                    homeVisibilityChanged || it.handleDesktopVisibilityOnlyChanges()
+                                ) {
+                                    it.onHomeVisibilityChanged(
+                                        isVisible,
+                                        keyguardGoingAwayOrWaking,
+                                        behindDesktop,
+                                    )
+                                }
                             }
                         }
                     }
@@ -85,7 +100,13 @@ class HomeVisibilityState {
     }
 
     interface VisibilityChangeListener {
-        fun onHomeVisibilityChanged(isVisible: Boolean, keyguardGoingAwayOrWaking: Boolean)
+        fun handleDesktopVisibilityOnlyChanges(): Boolean
+
+        fun onHomeVisibilityChanged(
+            isVisible: Boolean,
+            keyguardGoingAwayOrWaking: Boolean,
+            behindDesktop: Boolean,
+        )
     }
 
     override fun toString() = "{HomeVisibilityState isHomeVisible=$isHomeVisible}"
