@@ -346,6 +346,19 @@ class PopupDataSource @Inject constructor() {
             eventId = LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_DELETE_VIA_CONTEXT_MENU,
         )
 
+    private val handleRenameFileSystemItem = { _: ActivityContext, _: ItemInfo, _: View ->
+        TODO("b/450710219: Implement.")
+    }
+
+    val renameFileSystemItem =
+        PopupData(
+            iconResId = R.drawable.ic_home_screen_files_context_menu_rename,
+            labelResId = R.string.home_screen_files_context_menu_rename_label,
+            popupAction = handleRenameFileSystemItem,
+            category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+            eventId = LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_RENAME_VIA_CONTEXT_MENU,
+        )
+
     companion object {
         private const val TAG = "PopupDataSource"
     }

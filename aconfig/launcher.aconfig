@@ -707,3 +707,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "enable_home_screen_files_renaming"
+  namespace: "launcher"
+  description: "Enables support for renaming home screen files."
+  bug: "450710219"
+}
