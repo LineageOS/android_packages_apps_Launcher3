@@ -16,65 +16,44 @@
 
 package com.android.launcher3.taskbar
 
-import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.WindowManager.BadTokenException
 import android.view.WindowManager.LayoutParams
-import androidx.annotation.VisibleForTesting
-import androidx.core.os.postDelayed
+import com.android.launcher3.util.RetryingExecutor
 
 /** A wrapper around [WindowManager] which retries addView using exponential backoff */
 class SafeViewManager(
     private val windowManager: WindowManager,
     private val rootLayout: View,
-    private val handler: Handler = Handler(),
+    private val retryingExecutor: RetryingExecutor = RetryingExecutor(),
 ) {
-
-    private var layoutParams: LayoutParams? = null
-    private val token = Any()
     private var viewAdded = false
 
     fun addView(params: LayoutParams) {
         if (viewAdded) return
-        layoutParams = params
-        handler.removeCallbacksAndMessages(token)
-        tryAddWithBackoff(tryCount = 0)
+        retryingExecutor.execute { tryCount ->
+            try {
+                windowManager.addView(rootLayout, params)
+                viewAdded = true
+                true
+            } catch (e: BadTokenException) {
+                Log.d(TAG, "Failed to add window, tryCount=$tryCount", e)
+                false
+            }
+        }
     }
 
     fun removeView() {
-        layoutParams = null
-        handler.removeCallbacksAndMessages(token)
+        retryingExecutor.cancel()
         if (viewAdded) {
             windowManager.removeViewImmediate(rootLayout)
             viewAdded = false
         }
     }
 
-    private fun tryAddWithBackoff(tryCount: Int) {
-        val params = layoutParams ?: return
-        try {
-            windowManager.addView(rootLayout, params)
-            viewAdded = true
-            return
-        } catch (e: BadTokenException) {
-            Log.d(TAG, "Failed to add window, tryCount=$tryCount", e)
-        }
-
-        val nextTryCount = tryCount + 1
-        handler.postDelayed(
-            delayInMillis = BACKOFF_DELAYS_MS.getOrElse(tryCount) { FINAL_BACKOFF_MS },
-            token = token,
-        ) {
-            tryAddWithBackoff(nextTryCount)
-        }
-    }
-
     companion object {
         private const val TAG = "SafeViewManager"
-
-        @VisibleForTesting val BACKOFF_DELAYS_MS = arrayOf(10, 100L, 200L, 500L, 1000L, 2000L)
-        private const val FINAL_BACKOFF_MS = 5000L
     }
 }
