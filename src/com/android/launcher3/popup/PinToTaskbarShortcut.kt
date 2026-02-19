@@ -103,7 +103,7 @@ constructor(
                 is com.android.launcher3.model.data.AppInfo ->
                     mItemInfo.makeWorkspaceItem(mOriginalView.context)
 
-                is WorkspaceItemInfo -> mItemInfo.clone()
+                is WorkspaceItemInfo -> mItemInfo.clone().apply { id = ItemInfo.NO_ID }
                 else -> return
             }
 
@@ -130,7 +130,7 @@ constructor(
 
         val (cellX, cellY) = getCellCoordinates(targetIdx)
 
-        pinItem(writer, newInfo, mItemInfo.screenId, cellX, cellY)
+        pinItem(writer, newInfo, targetIdx, cellX, cellY)
         onClickCleanUp(v)
     }
 
