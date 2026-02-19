@@ -200,6 +200,7 @@ public final class LauncherInstrumentation {
     private static final String OPEN_FOLDER_RES_ID = "folder_content";
     static final String TASKBAR_RES_ID = "taskbar_view";
     static final String TASKBAR_PINNING_SWITCH_RES_ID = "taskbar_pinning_switch";
+    static final String TASKBAR_SWITCH_OPTION_RES_ID = "taskbar_switch_option";
     static final String TASKBAR_DIVIDER_CONTAINER_RES_ID = "taskbar_divider_container";
     private static final String SPLIT_PLACEHOLDER_RES_ID = "split_placeholder";
     static final String KEYBOARD_QUICK_SWITCH_RES_ID = "keyboard_quick_switch_view";

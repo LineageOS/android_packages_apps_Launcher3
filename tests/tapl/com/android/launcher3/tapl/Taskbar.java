@@ -20,6 +20,7 @@ import static android.view.KeyEvent.KEYCODE_META_RIGHT;
 import static com.android.launcher3.tapl.LauncherInstrumentation.KEYBOARD_QUICK_SWITCH_RES_ID;
 import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_DIVIDER_CONTAINER_RES_ID;
 import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_PINNING_SWITCH_RES_ID;
+import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_SWITCH_OPTION_RES_ID;
 import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_RES_ID;
 import static com.android.launcher3.tapl.TaskbarAppIcon.LONG_CLICK_EVENT;
 
@@ -153,9 +154,22 @@ public final class Taskbar {
              LauncherInstrumentation.Closable e = mLauncher.eventsCheck()) {
             mLauncher.showTaskbarIfHidden();
             mLauncher.waitForSystemLauncherObject(TASKBAR_RES_ID);
-            mLauncher.clickAndGet(mLauncher.waitForLauncherObject(TASKBAR_DIVIDER_CONTAINER_RES_ID),
-                    "taskbar_divider_container_popup_menu", LONG_CLICK_EVENT);
-            mLauncher.waitForLauncherObject(TASKBAR_PINNING_SWITCH_RES_ID).click();
+
+            // Retrieve the focusable layout and click on the switch.
+            UiObject2 taskbar_layout = mLauncher.clickAndGet(mLauncher.waitForLauncherObject(
+                    TASKBAR_DIVIDER_CONTAINER_RES_ID),
+                    TASKBAR_SWITCH_OPTION_RES_ID, LONG_CLICK_EVENT);
+            for (UiObject2 child : taskbar_layout.getChildren()) {
+                if (child.getResourceName() != null && child.getResourceName().contains(
+                        TASKBAR_PINNING_SWITCH_RES_ID)) {
+                    child.click();
+
+                    // Wait for the popup menu to disappear after the click
+                    mLauncher.waitUntilLauncherObjectGone(TASKBAR_PINNING_SWITCH_RES_ID);
+                    mLauncher.waitForIdle();
+                    return;
+                }
+            }
         }
     }
 
