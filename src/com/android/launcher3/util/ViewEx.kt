@@ -27,8 +27,10 @@ import android.hardware.HardwareBuffer
 import android.os.Build
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.graphics.drawable.toDrawable
 import com.android.launcher3.BuildConfig
+import com.android.launcher3.R
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -110,6 +112,24 @@ object ViewEx {
         }
 
         return captureAsPicture()
+    }
+
+    /**
+     * Recursively check view tag [R.id.perform_a11y_action_on_launcher_state_normal_tag] and call
+     * [View.performAccessibilityAction] on view tree. The tag is cleared after this call.
+     */
+    @JvmStatic
+    fun View.performAccessibilityActionOnViewTree() {
+        val a11yTag = R.id.perform_a11y_action_on_launcher_state_normal_tag
+        (getTag(a11yTag) as? Int)?.run {
+            performAccessibilityAction(this, null)
+            setTag(a11yTag, null)
+        }
+        (this as? ViewGroup)?.run {
+            (0 until childCount).map(::getChildAt).forEach {
+                it.performAccessibilityActionOnViewTree()
+            }
+        }
     }
 
     /**

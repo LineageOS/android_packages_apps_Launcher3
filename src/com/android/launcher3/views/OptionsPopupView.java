@@ -266,11 +266,14 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
         return true;
     }
 
-    // TODO(b/449912243): Force page change animation.
     private static boolean createNewFolder(View view) {
         final Launcher launcher = Launcher.getLauncher(view.getContext());
         final Workspace<?> workspace = launcher.getWorkspace();
         final int currentScreenId = workspace.getScreenIdForPageIndex(workspace.getCurrentPage());
+
+        // NOTE: This causes the launcher to auto-scroll to the new file system folder once created
+        // provided that no further touch interaction occurs during the async operation.
+        launcher.resetLastTouchUpTime();
 
         HomeScreenFilesProvider.INSTANCE.get(launcher)
                 .createNewFolder(
