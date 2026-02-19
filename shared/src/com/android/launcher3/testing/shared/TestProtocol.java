@@ -227,6 +227,9 @@ public final class TestProtocol {
     public static final String REQUEST_MARK_OVERVIEW_SELECT_TIP_SEEN =
             "mark_overview_select_tip_seen";
 
+    public static final String SYSTEM_SHORTCUTS_CONTAINER = "system_shortcuts_container";
+    public static final String DEEP_SHORTCUTS_CONTAINER = "deep_shortcuts_container";
+
     /** Logs {@link Log#d(String, String)} if {@link #sDebugTracing} is true. */
     public static void testLogD(String tag, String message) {
         if (!sDebugTracing) {
