@@ -286,6 +286,11 @@
     <!-- Label for expanding app shortcuts in popup menu-->
     <string name="shortcuts_popup_menu_button">Shortcuts</string>
 
+    <!-- Description for expanding system shortcuts in popup menu-->
+    <string name="actions_popup_menu_button_description">Show actions menu</string>
+    <!-- Description for expanding app shortcuts in popup menu-->
+    <string name="shortcuts_popup_menu_button_description">Show app shortcuts menu</string>
+
     <!-- Label for pausing an app [CHAR_LIMIT=20] -->
     <string name="pause_app_label">Pause app</string>
 
