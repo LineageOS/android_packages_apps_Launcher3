@@ -165,12 +165,12 @@ constructor(
         if (isActive()) forceReload(callerName) else CompletableFuture.completedFuture(Unit)
 
     /** Rebinds all existing callbacks with already loaded model */
-    fun rebindCallbacks() {
+    fun rebindCallbacks(reason: String) {
         if (useModelRepositoryBinding() && isActive()) {
-            MODEL_EXECUTOR.execute { mBgDataModel.dispatchRebind() }
+            MODEL_EXECUTOR.execute { mBgDataModel.dispatchRebind(reason) }
         } else {
             if (synchronized(mCallbacksList) { mCallbacksList.isNotEmpty() }) {
-                startLoader("rebindCallbacks")
+                startLoader(reason)
             }
         }
     }

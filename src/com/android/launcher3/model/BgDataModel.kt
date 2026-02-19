@@ -38,6 +38,7 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.PredictedContainerInfo
 import com.android.launcher3.model.data.WorkspaceChangeEvent.AddEvent
+import com.android.launcher3.model.data.WorkspaceChangeEvent.FullRefresh
 import com.android.launcher3.model.data.WorkspaceChangeEvent.RemoveEvent
 import com.android.launcher3.model.data.WorkspaceChangeEvent.UpdateEvent
 import com.android.launcher3.model.data.WorkspaceData
@@ -209,15 +210,15 @@ constructor(
     }
 
     @Synchronized
-    fun dataLoadComplete(allItems: SparseArray<ItemInfo>) {
+    fun dataLoadComplete(allItems: SparseArray<ItemInfo>, reason: String) {
         mutableWorkspaceData.replaceDataMap(allItems)
-        dispatchRebind()
+        dispatchRebind(reason)
     }
 
     @Synchronized
-    fun dispatchRebind() {
+    fun dispatchRebind(reason: String) {
         if (Flags.modelRepository()) {
-            repo.get().dispatchWorkspaceDataChange(mutableWorkspaceData.copy(), null)
+            repo.get().dispatchWorkspaceDataChange(mutableWorkspaceData.copy(), FullRefresh(reason))
         }
     }
 

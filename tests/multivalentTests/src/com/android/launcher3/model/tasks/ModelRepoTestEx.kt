@@ -30,7 +30,7 @@ import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.ExecutorService
 
-typealias TrackedWorkspaceUpdates = TrackedUpdates<WorkspaceData, WorkspaceChangeEvent?>
+typealias TrackedWorkspaceUpdates = TrackedUpdates<WorkspaceData, WorkspaceChangeEvent>
 
 object ModelRepoTestEx {
 

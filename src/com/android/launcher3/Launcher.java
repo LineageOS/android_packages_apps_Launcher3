@@ -637,7 +637,11 @@ public class Launcher extends StatefulActivity<LauncherState>
             // Calling onSaveInstanceState ensures that static cache used by listWidgets is
             // initialized properly.
             onSaveInstanceState(new Bundle());
-            mModel.rebindCallbacks();
+            if (useModelRepositoryBinding()) {
+                modelCallbacks.rebindOnConfigChange();
+            } else {
+                mModel.rebindCallbacks("rebinding-due-to-config-change");
+            }
             updateDisallowBack();
         } finally {
             Trace.endSection();

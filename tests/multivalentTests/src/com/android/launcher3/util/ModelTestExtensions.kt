@@ -155,7 +155,10 @@ object ModelTestExtensions {
 
     /** Initializes [BgDataModel.itemsIdMap] with provided [items] */
     fun BgDataModel.initItems(vararg items: ItemInfo) {
-        dataLoadComplete(SparseArray<ItemInfo>().apply { items.forEach { this[it.id] = it } })
+        dataLoadComplete(
+            allItems = SparseArray<ItemInfo>().apply { items.forEach { this[it.id] = it } },
+            reason = "test-initItems",
+        )
     }
 
     /** Sets the workspace as an empty layout and loads it */
@@ -196,7 +199,8 @@ object ModelTestExtensions {
     fun Context.preloadModelData(vararg items: ItemInfo) {
         val state = appComponent.testableModelState
         state.dataModel.dataLoadComplete(
-            SparseArray<ItemInfo>().apply { items.forEach { this[it.id] = it } }
+            allItems = SparseArray<ItemInfo>().apply { items.forEach { this[it.id] = it } },
+            reason = "test-preloadModelData",
         )
         state.dbController.updateMaxIdForTest(items.maxOf { it.id })
         preloadAppList(

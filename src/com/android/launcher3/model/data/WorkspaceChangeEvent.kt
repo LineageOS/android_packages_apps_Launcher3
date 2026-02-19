@@ -17,6 +17,7 @@
 package com.android.launcher3.model.data
 
 import com.android.launcher3.model.BgDataModel.ModificationSource
+import com.android.launcher3.model.BgDataModel.ModificationSource.ModelTask
 import com.android.launcher3.model.BgDataModel.ModificationSource.UISurface
 import com.android.launcher3.views.ActivityContext
 import java.lang.ref.WeakReference
@@ -48,4 +49,10 @@ sealed class WorkspaceChangeEvent(actualOwner: ModificationSource) {
      */
     class RemoveEvent(val items: Predicate<ItemInfo?>, owner: ModificationSource) :
         WorkspaceChangeEvent(owner)
+
+    /**
+     * Indicates a full refresh of data causing the UI surface to rebind their UI. Since a full
+     * refresh is not meant to be skipped, source is always treated as [ModelTask].
+     */
+    class FullRefresh(val reason: String) : WorkspaceChangeEvent(ModelTask)
 }

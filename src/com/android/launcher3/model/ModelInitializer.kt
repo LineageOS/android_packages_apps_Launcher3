@@ -143,7 +143,7 @@ constructor(
             settingsCache.getListenableRef(PRIVATE_SPACE_HIDE_WHEN_LOCKED_URI).forEach(
                 MAIN_EXECUTOR
             ) {
-                model.rebindCallbacks()
+                model.rebindCallbacks("private-space-state-changed")
             }
         )
 
@@ -192,7 +192,9 @@ constructor(
 
         // Shape changes
         lifeCycle.addCloseable(
-            themeManager.iconShapeData.forEach(MAIN_EXECUTOR) { model.rebindCallbacks() }
+            themeManager.iconShapeData.forEach(MAIN_EXECUTOR) {
+                model.rebindCallbacks("icon-shape-changed")
+            }
         )
 
         if (Flags.enableAppAutomationIndicator()) {

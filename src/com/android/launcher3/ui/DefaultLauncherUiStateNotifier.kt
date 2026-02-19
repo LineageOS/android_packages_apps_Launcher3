@@ -59,7 +59,9 @@ class DefaultLauncherUiStateNotifier(
         uiExecutor.execute {
             val allCallbacks = callbacks + model.callbacks
             if (changeLog.itemsAdded.isNotEmpty()) {
-                allCallbacks.filter { it != owner }.forEach { it.bindItemsAdded(changeLog.itemsAdded) }
+                allCallbacks
+                    .filter { it != owner }
+                    .forEach { it.bindItemsAdded(changeLog.itemsAdded) }
             }
             if (changeLog.itemsModified.isNotEmpty()) {
                 allCallbacks
@@ -91,6 +93,6 @@ class DefaultLauncherUiStateNotifier(
             return
         }
         // Bound model was changed between submitting the job and executing the job
-        model.rebindCallbacks()
+        model.rebindCallbacks("model-ui-consistency-failed")
     }
 }
