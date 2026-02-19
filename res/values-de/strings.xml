@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"App nicht vorschlagen"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"Vorgeschlagene App fixieren"</string>
     <string name="bubble" msgid="3072951361014076670">"Bubble"</string>
-    <!-- no translation found for enable_app_lock (5606772593969266718) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (2252606435270354961) -->
-    <skip />
+    <string name="enable_app_lock" msgid="5606772593969266718">"App‑Sperre"</string>
+    <string name="disable_app_lock" msgid="2252606435270354961">"App-Sperre entfernen"</string>
     <string name="widget_settings" msgid="5280157748464495511">"Einstellungen"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"Zu Taskleiste hinzuf."</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"Aus Taskleiste entf."</string>
@@ -123,7 +121,6 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Kann nicht rückgängig gemacht werden. Rufe zum Wiederherstellen die Files App auf."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Aktionen"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Verknüpfungen"</string>
-    <string name="loading_shortcut" msgid="2638272014233830958">"Verknüpfung wird geladen"</string>
     <string name="pause_app_label" msgid="6796255881727695791">"App pausieren"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"Verknüpfungen installieren"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Ermöglicht einer App das Hinzufügen von Verknüpfungen ohne Eingreifen des Nutzers"</string>

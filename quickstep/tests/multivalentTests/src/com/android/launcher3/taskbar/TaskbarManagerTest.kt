@@ -24,13 +24,13 @@ import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
-import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
 import com.android.quickstep.SystemUiProxy
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAVIGATION_BAR_DISABLED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -72,21 +72,21 @@ class TaskbarManagerTest {
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun userLocked_primaryDisplay_hasTaskbarInDirectBootSandbox() {
         assertThat(activityContext.applicationContext)
             .isInstanceOf(TaskbarBootAppContext::class.java)
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun userLocked_externalDisplay_missingTaskbarInDirectBootStage() {
         val displayId = context.virtualDisplayRule.add()
         assertThat(taskbarManager.getTaskbarForDisplay(displayId)).isNull()
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun onUserUnlocked_directBootStage_taskbarRecreatedOutsideBootAppContext() {
         mockerUserRule.unlockMainUser()
         TestUtil.runOnExecutorSync(getTaskbarUiThread()) {}
@@ -95,7 +95,7 @@ class TaskbarManagerTest {
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     fun onUserUnlocked_directBootStage_connectedDisplay_taskbarRecreatedOutsideBootAppContext() {
         val displayId = context.virtualDisplayRule.add()
         mockerUserRule.unlockMainUser()

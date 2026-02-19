@@ -25,7 +25,6 @@ import com.android.launcher3.model.data.TaskViewItemInfo.Companion.createTaskVie
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
-import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
 import com.android.quickstep.TaskOverlayFactory
@@ -39,6 +38,7 @@ import com.android.quickstep.views.TaskView
 import com.android.quickstep.views.TaskViewType
 import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -133,7 +133,7 @@ class TaskViewItemInfoTest {
         assertThat(taskViewItemInfo.runtimeStatusFlags and FLAG_NOT_PINNABLE).isEqualTo(0)
     }
 
-    @MockUser(userType = UserIconInfo.TYPE_PRIVATE)
+    @MockUser(userType = UserType.PRIVATE)
     @Test
     fun privateTask() {
         val taskContainers = listOf(createTaskContainer(createTask(1)))

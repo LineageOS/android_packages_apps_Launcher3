@@ -51,12 +51,11 @@ import com.android.launcher3.util.Executors
 import com.android.launcher3.util.LauncherLayoutBuilder
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
-import com.android.launcher3.util.UserIconInfo.Companion.TYPE_MAIN
-import com.android.launcher3.util.UserIconInfo.Companion.TYPE_WORK
 import com.android.launcher3.util.XmlElement.Companion.getRootElement
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
 import com.android.launcher3.widget.LauncherWidgetHolder
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import java.io.StringReader
 import org.junit.Rule
@@ -177,8 +176,8 @@ class AutoInstallsLayoutTest {
         assertThat(callback.items[3][CONTAINER]).isEqualTo(folderId)
     }
 
-    @MockUser(userType = TYPE_MAIN)
-    @MockUser(userType = TYPE_WORK)
+    @MockUser(userType = UserType.MAIN)
+    @MockUser(userType = UserType.WORK)
     @Test
     fun work_item_added_to_home() {
         val cache = UserCache.getInstance(targetContext)

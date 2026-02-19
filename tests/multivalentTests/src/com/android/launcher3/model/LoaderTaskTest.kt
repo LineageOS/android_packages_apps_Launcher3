@@ -62,10 +62,10 @@ import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.SettingsCache
 import com.android.launcher3.util.TestUtil
-import com.android.launcher3.util.UserIconInfo
 import com.android.launcher3.util.WidgetUtils
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
@@ -333,7 +333,7 @@ class LoaderTaskTest {
     }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_WORK, isQuietModeEnabled = true)
+    @MockUser(userType = UserType.WORK, isQuietModeEnabled = true)
     fun setsQuietModeFlagCorrectlyForWorkProfile() =
         with(bgDataModel) {
             setFlagsRule.enableFlags(Flags.FLAG_ENABLE_PRIVATE_SPACE)
@@ -349,7 +349,7 @@ class LoaderTaskTest {
         }
 
     @Test
-    @MockUser(userType = UserIconInfo.TYPE_PRIVATE, isQuietModeEnabled = true)
+    @MockUser(userType = UserType.PRIVATE, isQuietModeEnabled = true)
     fun setsQuietModeFlagCorrectlyForPrivateProfile() =
         with(bgDataModel) {
             setFlagsRule.enableFlags(Flags.FLAG_ENABLE_PRIVATE_SPACE)

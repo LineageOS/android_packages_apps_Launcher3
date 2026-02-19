@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.em
 import com.android.launcher3.R
 
 /**
@@ -47,6 +48,7 @@ fun textStyleFromResource(@StyleRes styleResId: Int): TextStyle {
     var fontFamily: FontFamily? = null
     var fontWeight: FontWeight? = null
     var lineHeight: TextUnit = TextUnit.Unspecified
+    var letterSpacing: TextUnit = TextUnit.Unspecified
 
     // -- Separate groups of similar typed attributes. --
 
@@ -66,7 +68,11 @@ fun textStyleFromResource(@StyleRes styleResId: Int): TextStyle {
     theme
         .obtainStyledAttributes(
             styleResId,
-            intArrayOf(android.R.attr.textSize, android.R.attr.lineHeight),
+            intArrayOf(
+                android.R.attr.textSize,
+                android.R.attr.lineHeight,
+                android.R.attr.letterSpacing,
+            ),
         )
         .use { typedArray ->
             if (typedArray.hasValue(0)) {
@@ -80,6 +86,9 @@ fun textStyleFromResource(@StyleRes styleResId: Int): TextStyle {
                 if (lineHeightPx != 0) {
                     lineHeight = with(density) { lineHeightPx.toSp() }
                 }
+            }
+            if (typedArray.hasValue(2)) {
+                letterSpacing = typedArray.getFloat(2, 0f).em
             }
         }
 
@@ -98,5 +107,6 @@ fun textStyleFromResource(@StyleRes styleResId: Int): TextStyle {
         lineHeight = lineHeight,
         fontFamily = fontFamily,
         fontWeight = fontWeight,
+        letterSpacing = letterSpacing,
     )
 }

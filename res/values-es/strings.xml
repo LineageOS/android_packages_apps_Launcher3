@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"No sugerir aplicación"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"Fijar predicción"</string>
     <string name="bubble" msgid="3072951361014076670">"Burbuja"</string>
-    <!-- no translation found for enable_app_lock (5606772593969266718) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (2252606435270354961) -->
-    <skip />
+    <string name="enable_app_lock" msgid="5606772593969266718">"Bloqueo de app"</string>
+    <string name="disable_app_lock" msgid="2252606435270354961">"Quitar bloqueo de app"</string>
     <string name="widget_settings" msgid="5280157748464495511">"Ajustes"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"Añadir a la barra"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"Quitar de la barra"</string>
@@ -123,7 +121,6 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"No se puede deshacer. Ve a la aplicación Files para restaurarlo."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Acciones"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Accesos directos"</string>
-    <string name="loading_shortcut" msgid="2638272014233830958">"Cargando acceso directo"</string>
     <string name="pause_app_label" msgid="6796255881727695791">"Pausar aplicación"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"instalar accesos directos"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Permite que una aplicación añada accesos directos sin intervención del usuario."</string>

@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"ಆ್ಯಪ್ ಅನ್ನು ಸೂಚಿಸಬೇಡಿ"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"ಮುನ್ನೋಟ ಪಿನ್ ಮಾಡಿ"</string>
     <string name="bubble" msgid="3072951361014076670">"ಬಬಲ್"</string>
-    <!-- no translation found for enable_app_lock (5606772593969266718) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (2252606435270354961) -->
-    <skip />
+    <string name="enable_app_lock" msgid="5606772593969266718">"ಆ್ಯಪ್ ಲಾಕ್"</string>
+    <string name="disable_app_lock" msgid="2252606435270354961">"ಆ್ಯಪ್ ಲಾಕ್ ತೆಗೆಯಿರಿ"</string>
     <string name="widget_settings" msgid="5280157748464495511">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"ಟಾಸ್ಕ್‌ಬಾರ್‌ಗೆ ಸೇರಿಸಿ"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"ಟಾಸ್ಕ್‌ಬಾರ್‌ನಿಂದ ತೆಗೆದುಹಾಕಿ"</string>
@@ -123,7 +121,6 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"ರದ್ದುಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ ಮರುಸ್ಥಾಪಿಸಲು Files ಆ್ಯಪ್‌ಗೆ ಹೋಗಿ."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"ಕ್ರಿಯೆಗಳು"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
-    <string name="loading_shortcut" msgid="2638272014233830958">"ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="pause_app_label" msgid="6796255881727695791">"ಆ್ಯಪ್ ವಿರಾಮಗೊಳಿಸಿ"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"ಬಳಕೆದಾರರ ಹಸ್ತಕ್ಷೇಪವಿಲ್ಲದೆ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>

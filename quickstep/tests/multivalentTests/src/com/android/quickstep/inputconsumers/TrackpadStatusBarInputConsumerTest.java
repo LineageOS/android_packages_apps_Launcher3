@@ -88,6 +88,7 @@ public class TrackpadStatusBarInputConsumerTest {
         when(mBaseContainerInterface.getCreatedContainer()).thenReturn(mRecentsViewContainer);
         when(mRecentsViewContainer.getOverviewPanel()).thenReturn(mRecentsView);
         when(mRecentsView.getCurrentPageTaskView()).thenReturn(mTaskView);
+        when(mRecentsView.shouldSwipeDownLaunchTaskView(mTaskView)).thenReturn(true);
 
         mContext.initDaggerComponent(
                 DaggerTrackpadStatusBarInputConsumerTest_TestComponent.builder()
@@ -117,6 +118,23 @@ public class TrackpadStatusBarInputConsumerTest {
 
         verify(mTaskView).launchWithAnimation();
         verify(mSystemUiProxy, never()).onStatusBarTrackpadEvent(any());
+    }
+
+    @Test
+    public void testOnMotionEvent_threeFingerSwipeDown_inOverview_cannotLaunchTask() {
+        when(mRecentsViewContainer.isRecentsViewVisible()).thenReturn(true);
+        when(mRecentsView.shouldSwipeDownLaunchTaskView(mTaskView)).thenReturn(false);
+        when(mSystemUiProxy.isActive()).thenReturn(true);
+        mIsThreeFingerTrackpadSwipe = true;
+
+        // ACTION_DOWN
+        mUnderTest.onMotionEvent(createMotionEvent(ACTION_DOWN, 0, 0));
+
+        // ACTION_MOVE passing touch slop downwards
+        MotionEvent moveEvent = createMotionEvent(ACTION_MOVE, 0, TOUCH_SLOP + 1);
+        mUnderTest.onMotionEvent(moveEvent);
+
+        verify(mTaskView, never()).launchWithAnimation();
     }
 
     @Test

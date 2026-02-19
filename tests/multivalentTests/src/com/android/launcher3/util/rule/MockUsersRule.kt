@@ -28,10 +28,7 @@ import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.UserIconInfo
-import com.android.launcher3.util.UserIconInfo.Companion.TYPE_CLONED
-import com.android.launcher3.util.UserIconInfo.Companion.TYPE_PRIVATE
-import com.android.launcher3.util.UserIconInfo.Companion.TYPE_WORK
-import com.android.launcher3.util.UserIconInfo.UserType
+import com.android.users.UserType
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
 import kotlin.annotation.AnnotationTarget.FUNCTION
@@ -102,9 +99,9 @@ class MockUsersRule(private val app: SandboxApplication) : TestRule {
             doReturn(serial).whenever(launcherUserInfo).userSerialNumber
             doReturn(
                     when (mockUser.userType) {
-                        TYPE_PRIVATE -> USER_TYPE_PROFILE_PRIVATE
-                        TYPE_CLONED -> USER_TYPE_PROFILE_CLONE
-                        TYPE_WORK -> USER_TYPE_PROFILE_MANAGED
+                        UserType.PRIVATE -> USER_TYPE_PROFILE_PRIVATE
+                        UserType.CLONED -> USER_TYPE_PROFILE_CLONE
+                        UserType.WORK -> USER_TYPE_PROFILE_MANAGED
                         else -> ""
                     }
                 )
@@ -146,7 +143,7 @@ class MockUsersRule(private val app: SandboxApplication) : TestRule {
     @JvmRepeatable(MockUsers::class)
     @Target(FUNCTION, CLASS)
     annotation class MockUser(
-        @UserType val userType: Int,
+        val userType: UserType = UserType.MAIN,
         val userSerial: Int = -1, // If not specified, userHandle's hashCode is used
         val preinstalledApps: Array<String> = [],
         val isUserUnlocked: Boolean = true,

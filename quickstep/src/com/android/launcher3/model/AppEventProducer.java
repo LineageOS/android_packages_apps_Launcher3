@@ -65,9 +65,9 @@ import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logging.StatsLogManager.EventEnum;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.shortcuts.ShortcutRequest;
-import com.android.launcher3.util.UserIconInfo;
 import com.android.quickstep.logging.StatsLogCompatManager.StatsLogConsumer;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.users.UserType;
 
 import java.util.Optional;
 import java.util.function.ObjIntConsumer;
@@ -177,7 +177,7 @@ public class AppEventProducer implements StatsLogConsumer {
 
     @Nullable
     AppTarget toAppTarget(LauncherAtom.ItemInfo info) {
-        int iconInfoType = getIconInfoTypeFromItemInfo(info);
+        UserType iconInfoType = getIconInfoTypeFromItemInfo(info);
         UserCache userCache = UserCache.INSTANCE.get(mContext);
         UserHandle userHandle = userCache.getUserProfiles().stream()
                 .filter(user -> userCache.getUserInfo(user).type == iconInfoType)
@@ -230,6 +230,8 @@ public class AppEventProducer implements StatsLogConsumer {
             }
             case FOLDER_ICON:
                 return createTempFolderTarget();
+            default:
+                break;
         }
         if (id != null && cn != null) {
             if (shortcutInfo != null) {
@@ -254,15 +256,15 @@ public class AppEventProducer implements StatsLogConsumer {
                 ? null : ComponentName.unflattenFromString(componentNameString);
     }
 
-    private int getIconInfoTypeFromItemInfo(LauncherAtom.ItemInfo info) {
+    private UserType getIconInfoTypeFromItemInfo(LauncherAtom.ItemInfo info) {
         int userType = info.getUserType();
         return switch (userType) {
-            case SysUiStatsLog.LAUNCHER_UICHANGED__USER_TYPE__TYPE_WORK -> UserIconInfo.TYPE_WORK;
+            case SysUiStatsLog.LAUNCHER_UICHANGED__USER_TYPE__TYPE_WORK -> UserType.WORK;
             case SysUiStatsLog.LAUNCHER_UICHANGED__USER_TYPE__TYPE_CLONED ->
-                    UserIconInfo.TYPE_CLONED;
+                    UserType.CLONED;
             case SysUiStatsLog.LAUNCHER_UICHANGED__USER_TYPE__TYPE_PRIVATE ->
-                    UserIconInfo.TYPE_PRIVATE;
-            default -> UserIconInfo.TYPE_MAIN;
+                    UserType.PRIVATE;
+            default -> UserType.MAIN;
         };
     }
 }

@@ -54,6 +54,7 @@ import com.android.launcher3.util.UserIconInfo;
 import com.android.launcher3.util.rule.MockUsersRule;
 import com.android.launcher3.util.rule.MockUsersRule.MockUser;
 import com.android.launcher3.util.rule.TestStabilityRule;
+import com.android.users.UserType;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -66,8 +67,8 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 @RunWith(AndroidJUnit4.class)
-@MockUser(userType = UserIconInfo.TYPE_MAIN)
-@MockUser(userType = UserIconInfo.TYPE_PRIVATE)
+@MockUser(userType = UserType.MAIN)
+@MockUser(userType = UserType.PRIVATE)
 public class PrivateProfileManagerTest {
 
     @Rule public TestRule testStabilityRule = new TestStabilityRule();

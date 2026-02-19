@@ -41,7 +41,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.R
@@ -50,8 +50,8 @@ import com.android.launcher3.popup.ui.ExpandPopupMenuButtonDimens.expandPopupMen
 import com.android.launcher3.popup.ui.ExpandPopupMenuButtonDimens.expandPopupMenuItemImageSize
 import com.android.launcher3.popup.ui.ExpandPopupMenuButtonDimens.expandPopupMenuItemVerticalPadding
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHeight
-import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemTextSize
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemWidth
+import com.android.launcher3.util.compose.textStyleFromResource
 
 /**
  * A generic composable for a menu item that expands a section in the popup.
@@ -92,8 +92,8 @@ fun ExpandPopupMenuButton(text: String, onClick: () -> Unit) {
         ) {
             Text(
                 text = text,
-                color = colorResource(R.color.materialColorOnSurfaceVariant),
-                fontSize = popupMenuItemTextSize,
+                color = colorResource(R.color.materialColorOnSurface),
+                style = ExpandButtonStyles.expandButtonTextStyle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -144,6 +144,11 @@ fun ExpandDeepShortcutsMenuButton(onShowDeepShortcuts: () -> Unit) {
 
 private object ExpandPopupMenuButtonDimens {
     val expandPopupMenuItemVerticalPadding = 10.dp
-    val expandPopupMenuItemHorizontalPadding = 12.dp
+    val expandPopupMenuItemHorizontalPadding = 16.dp
     val expandPopupMenuItemImageSize = 24.dp
+}
+
+object ExpandButtonStyles {
+    val expandButtonTextStyle: TextStyle
+        @Composable get() = textStyleFromResource(R.style.ExpandButtonText)
 }

@@ -104,10 +104,8 @@
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"Ekki fá tillögu að forriti"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"Festa tillögu"</string>
     <string name="bubble" msgid="3072951361014076670">"Blaðra"</string>
-    <!-- no translation found for enable_app_lock (5606772593969266718) -->
-    <skip />
-    <!-- no translation found for disable_app_lock (2252606435270354961) -->
-    <skip />
+    <string name="enable_app_lock" msgid="5606772593969266718">"Forritslás"</string>
+    <string name="disable_app_lock" msgid="2252606435270354961">"Fjarlægja forritslás"</string>
     <string name="widget_settings" msgid="5280157748464495511">"Stillingar"</string>
     <string name="add_to_taskbar" msgid="1442306985857150792">"Bæta á forritastiku"</string>
     <string name="remove_from_taskbar" msgid="5817026706030273018">"Fjarlægja af forritastiku"</string>
@@ -123,7 +121,6 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Ekki hægt að afturkalla. Farðu í forritið Skrár til að endurheimta."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Aðgerðir"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Flýtileiðir"</string>
-    <string name="loading_shortcut" msgid="2638272014233830958">"Hleður flýtileið"</string>
     <string name="pause_app_label" msgid="6796255881727695791">"Gera hlé á forriti"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"setja upp flýtileiðir"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Leyfir forriti að bæta við flýtileiðum án íhlutunar notanda."</string>

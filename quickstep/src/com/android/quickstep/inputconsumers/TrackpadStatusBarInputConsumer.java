@@ -45,7 +45,7 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
     private final float mTouchSlop;
     private final PointF mDown = new PointF();
     private boolean mHasPassedTouchSlop;
-    private boolean mIsLaunchingTask;
+    private boolean mConsumeGesture;
 
     public TrackpadStatusBarInputConsumer(
             Context context,
@@ -72,7 +72,7 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
                 case ACTION_DOWN -> {
                     mDown.set(ev.getX(), ev.getY());
                     mHasPassedTouchSlop = false;
-                    mIsLaunchingTask = false;
+                    mConsumeGesture = false;
                 }
                 case ACTION_MOVE -> {
                     if (!mHasPassedTouchSlop) {
@@ -84,7 +84,7 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
                                         && isThreeFingerTrackpadSwipe(ev)) {
                                     tryLaunchCurrentTaskIfInOverview();
                                 }
-                                if (!mIsLaunchingTask) {
+                                if (!mConsumeGesture) {
                                     setActive(ev);
                                     ev.setAction(ACTION_DOWN);
                                     dispatchTouchEvent(ev);
@@ -131,12 +131,10 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
             return;
         }
         TaskView taskView = recentsView.getCurrentPageTaskView();
-        if (taskView == null) {
-            return;
+        if (recentsView.shouldSwipeDownLaunchTaskView(taskView)) {
+            taskView.launchWithAnimation();
         }
-
-        taskView.launchWithAnimation();
-        mIsLaunchingTask = true;
+        mConsumeGesture = true;
 
     }
 

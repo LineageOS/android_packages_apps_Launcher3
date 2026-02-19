@@ -23,9 +23,9 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 import com.android.launcher3.LauncherFiles.SHARED_PREFERENCES_KEY
 import com.android.launcher3.LauncherPrefs.Companion.BOOT_AWARE_PREFS_KEY
-import com.android.launcher3.util.UserIconInfo.Companion.TYPE_MAIN
 import com.android.launcher3.util.rule.MockUsersRule
 import com.android.launcher3.util.rule.MockUsersRule.MockUser
+import com.android.users.UserType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Rule
@@ -74,7 +74,7 @@ class SandboxApplicationTest {
         }
     }
 
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     @Test
     fun testGetSharedPreferences_userLocked_throwsException() {
         assertThrows(IllegalStateException::class.java) {
@@ -83,7 +83,7 @@ class SandboxApplicationTest {
         }
     }
 
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     @Test
     fun testGetSharedPreferences_windowContextAndUserLocked_throwsException() {
         val windowContext =
@@ -96,7 +96,7 @@ class SandboxApplicationTest {
         }
     }
 
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = false)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = false)
     @Test
     fun testGetSharedPreferences_deviceProtectedStorageContextAndUserLocked_returnsPreferences() {
         val deviceProtectedStorageContext = app.createDeviceProtectedStorageContext()
@@ -108,7 +108,7 @@ class SandboxApplicationTest {
         assertThat(sharedPreferences).isNotNull()
     }
 
-    @MockUser(userType = TYPE_MAIN, isUserUnlocked = true)
+    @MockUser(userType = UserType.MAIN, isUserUnlocked = true)
     @Test
     fun testGetSharedPreferences_userUnlocked_returnsPreferences() {
         val sharedPreferences =
