@@ -734,6 +734,23 @@ public class BubbleBarView extends FrameLayout {
     }
 
     /**
+     * Returns the expanded start and end bounds with translation that may have been applied.
+     */
+    public int[] computeBubbleBarExpandedLeftRight() {
+        Rect expandedBounds = getBubbleBarBounds();
+        int[] leftRight = new int[2];
+        int restingExpandedWidth = (int) restingExpandedWidth();
+        if (mBubbleBarLocation.isOnLeft(isLayoutRtl())) {
+            leftRight[0] = expandedBounds.left;
+            leftRight[1] = expandedBounds.left + restingExpandedWidth;
+        } else {
+            leftRight[0] = expandedBounds.right - restingExpandedWidth;
+            leftRight[1] = expandedBounds.right;
+        }
+        return leftRight;
+    }
+
+    /**
      * Set bubble bar relative pivot value for X and Y, applied as a fraction of view width/height
      * respectively. If the value is not in range of 0 to 1 it will be normalized.
      *
@@ -900,6 +917,15 @@ public class BubbleBarView extends FrameLayout {
 
     /** Removes the given bubble from the bubble bar. */
     public void removeBubble(View bubble) {
+        removeBubble(bubble, /* onAnimationEndRunnable = */ null);
+    }
+
+    /**
+     * Removes the given bubble from the bubble bar.
+     *
+     * @param onAnimationEndRunnable action to run after the animation is ended.
+     */
+    public void removeBubble(View bubble, @Nullable Runnable onAnimationEndRunnable) {
         if (isExpanded()) {
             final boolean dismissedByDrag = mDraggedBubbleView == bubble;
             if (dismissedByDrag) {
@@ -915,6 +941,9 @@ public class BubbleBarView extends FrameLayout {
                 public void onAnimationEnd() {
                     removeView(bubble);
                     mBubbleAnimator = null;
+                    if (onAnimationEndRunnable != null) {
+                        onAnimationEndRunnable.run();
+                    }
                 }
 
                 @Override
@@ -1566,15 +1595,20 @@ public class BubbleBarView extends FrameLayout {
      * @return width of the bubble bar in its expanded state, regardless of current width
      */
     public float expandedWidth() {
-        final int childCount = getChildCount();
         final float horizontalPadding = 2 * mBubbleBarPadding;
         if (mBubbleAnimator != null && mBubbleAnimator.isRunning()) {
             return mBubbleAnimator.getExpandedWidth() + horizontalPadding;
         }
+        return restingExpandedWidth();
+    }
+
+    /** Resting expanded bubbles bar with, without expansion animation adjustments */
+    private float restingExpandedWidth() {
+        int childCount = getChildCount();
         // spaces amount is less than child count by 1, or 0 if no child views
         final float totalSpace = Math.max(childCount - 1, 0) * mExpandedBarIconsSpacing;
         final float totalIconSize = childCount * getScaledIconSize();
-        return totalIconSize + totalSpace + horizontalPadding;
+        return totalIconSize + totalSpace + 2 * mBubbleBarPadding;
     }
 
     /**
