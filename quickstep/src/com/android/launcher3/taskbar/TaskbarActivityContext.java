@@ -349,9 +349,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mIsSafeModeEnabled = TraceHelper.allowIpcs("isSafeMode",
                 () -> getPackageManager().isSafeMode());
 
-        // Get display and corners first, as views might use them in constructor.
-        Context c = getApplicationContext();
-        mWindowManager = c.getSystemService(WindowManager.class);
+        mWindowManager = windowContext.getSystemService(WindowManager.class);
 
         // Inflate views.
         boolean isTransientTaskbar = isTransientTaskbar();
@@ -408,10 +406,10 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
         // Construct controllers.
         RotationButtonController rotationButtonController = new RotationButtonController(
-                new RotationPolicyWrapperImpl(c),
+                new RotationPolicyWrapperImpl(windowContext),
                 this,
-                c.getColor(R.color.floating_rotation_button_light_color),
-                c.getColor(R.color.floating_rotation_button_dark_color),
+                windowContext.getColor(R.color.floating_rotation_button_light_color),
+                windowContext.getColor(R.color.floating_rotation_button_dark_color),
                 R.drawable.ic_sysbar_rotate_button_ccw_start_0,
                 R.drawable.ic_sysbar_rotate_button_ccw_start_90,
                 R.drawable.ic_sysbar_rotate_button_cw_start_0,
@@ -430,7 +428,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 new TaskbarScrimViewController(this, taskbarScrimView),
                 new TaskbarUnfoldAnimationController(this, unfoldTransitionProgressProvider,
                         mWindowManager,
-                        new RotationChangeProvider(c.getSystemService(DisplayManager.class), this,
+                        new RotationChangeProvider(
+                                windowContext.getSystemService(DisplayManager.class), this,
                                 UI_HELPER_EXECUTOR.getHandler(), getMainThreadHandler())),
                 new TaskbarKeyguardController(this),
                 new StashedHandleViewController(this, stashedHandleView),

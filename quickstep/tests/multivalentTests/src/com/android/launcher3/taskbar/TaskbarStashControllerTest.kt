@@ -68,6 +68,7 @@ import com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR
 import com.android.wm.shell.shared.desktopmode.DesktopState
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -105,6 +106,18 @@ class TaskbarStashControllerTest {
         get() = DesktopVisibilityController.INSTANCE[context]
 
     private val activityContext by taskbarUnitTestRule::activityContext
+    private lateinit var windowManagerSpy: WindowManager
+
+    @Before
+    fun setUp() {
+        windowManagerSpy =
+            checkNotNull(
+                taskbarUnitTestRule.taskbarManager
+                    .getPerDisplayResourceForTest(context.displayId)
+                    ?.windowContext
+                    ?.getSystemService(WindowManager::class.java)
+            )
+    }
 
     @After fun cancelTimeoutIfExists() = stashController.cancelTimeoutIfExists()
 
@@ -860,7 +873,7 @@ class TaskbarStashControllerTest {
         assertThat(stashedHandleViewController.isStashedHandleVisible).isFalse()
         assertThat(stashController.isStashedInApp).isFalse()
 
-        verify(context.windowManagerSpy, atLeastOnce())
+        verify(windowManagerSpy, atLeastOnce())
             .updateViewLayout(any(), wmLayoutParamsCaptor.capture())
         assertThat(isNavBarForciblyShown(wmLayoutParamsCaptor.lastValue.forciblyShownTypes))
             .isTrue()
@@ -889,7 +902,7 @@ class TaskbarStashControllerTest {
         assertThat(stashController.isStashedInApp).isTrue()
 
         // verify the nav bar window should be forcibly shown
-        verify(context.windowManagerSpy, atLeastOnce())
+        verify(windowManagerSpy, atLeastOnce())
             .updateViewLayout(any(), wmLayoutParamsCaptor.capture())
         assertThat(isNavBarForciblyShown(wmLayoutParamsCaptor.lastValue.forciblyShownTypes))
             .isTrue()
@@ -898,7 +911,7 @@ class TaskbarStashControllerTest {
         runOnTaskbarUiThreadSync {
             autohideSuspendController.updateFlag(FLAG_AUTOHIDE_SUSPEND_BUBBLES, false)
         }
-        verify(context.windowManagerSpy, atLeastOnce())
+        verify(windowManagerSpy, atLeastOnce())
             .updateViewLayout(any(), wmLayoutParamsCaptor.capture())
         assertThat(isNavBarForciblyShown(wmLayoutParamsCaptor.lastValue.forciblyShownTypes))
             .isFalse()
@@ -919,7 +932,7 @@ class TaskbarStashControllerTest {
         assertThat(stashController.isStashedInApp).isTrue()
 
         // verify the nav bar window is not forcibly shown
-        verify(context.windowManagerSpy, atLeastOnce())
+        verify(windowManagerSpy, atLeastOnce())
             .updateViewLayout(any(), wmLayoutParamsCaptor.capture())
         assertThat(isNavBarForciblyShown(wmLayoutParamsCaptor.lastValue.forciblyShownTypes))
             .isFalse()
@@ -928,7 +941,7 @@ class TaskbarStashControllerTest {
         runOnTaskbarUiThreadSync {
             autohideSuspendController.updateFlag(FLAG_AUTOHIDE_SUSPEND_BUBBLES, true)
         }
-        verify(context.windowManagerSpy, atLeastOnce())
+        verify(windowManagerSpy, atLeastOnce())
             .updateViewLayout(any(), wmLayoutParamsCaptor.capture())
         assertThat(isNavBarForciblyShown(wmLayoutParamsCaptor.lastValue.forciblyShownTypes))
             .isTrue()
@@ -949,7 +962,7 @@ class TaskbarStashControllerTest {
         assertThat(stashController.isStashedInApp).isTrue()
 
         // verify the nav bar window is not forcibly shown
-        verify(context.windowManagerSpy, atLeastOnce())
+        verify(windowManagerSpy, atLeastOnce())
             .updateViewLayout(any(), wmLayoutParamsCaptor.capture())
         assertThat(isNavBarForciblyShown(wmLayoutParamsCaptor.lastValue.forciblyShownTypes))
             .isFalse()
@@ -959,7 +972,7 @@ class TaskbarStashControllerTest {
         runOnTaskbarUiThreadSync {
             autohideSuspendController.updateFlag(FLAG_AUTOHIDE_SUSPEND_GROWTH_NUDGE_OPEN, true)
         }
-        verify(context.windowManagerSpy, atLeastOnce())
+        verify(windowManagerSpy, atLeastOnce())
             .updateViewLayout(any(), wmLayoutParamsCaptor.capture())
         assertThat(isNavBarForciblyShown(wmLayoutParamsCaptor.lastValue.forciblyShownTypes))
             .isFalse()
