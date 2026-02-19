@@ -47,6 +47,7 @@ import com.android.launcher3.util.TestUtil
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.BaseDragLayer
 import com.android.providers.media.flags.Flags.FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -199,23 +200,48 @@ class PopupDataRepositoryImplUnitTest {
 
     @Test
     @DisableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING,
         Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
         FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
     )
-    fun getPopupDataForFileSystemItemsWhenTrashingDisabled() {
-        testPopupDataForFileSystemItems(supportsTrashing = false)
+    fun getPopupDataForFileSystemItemsWhenRenamingAndTrashingDisabled() {
+        testPopupDataForFileSystemItems(supportsRenaming = false, supportsTrashing = false)
     }
 
     @Test
     @EnableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING,
         Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
         FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
     )
-    fun getPopupDataForFileSystemItemsWhenTrashingEnabled() {
-        testPopupDataForFileSystemItems(supportsTrashing = true)
+    fun getPopupDataForFileSystemItemsWhenRenamingAndTrashingEnabled() {
+        testPopupDataForFileSystemItems(supportsRenaming = true, supportsTrashing = true)
     }
 
-    private fun testPopupDataForFileSystemItems(supportsTrashing: Boolean) {
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING)
+    @DisableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
+    fun getPopupDataForFileSystemItemsWhenRenamingEnabledAndTrashingDisabled() {
+        testPopupDataForFileSystemItems(supportsRenaming = true, supportsTrashing = false)
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
+    fun getPopupDataForFileSystemItemsWhenRenamingDisabledAndTrashingEnabled() {
+        testPopupDataForFileSystemItems(supportsRenaming = false, supportsTrashing = true)
+    }
+
+    private fun testPopupDataForFileSystemItems(
+        supportsRenaming: Boolean,
+        supportsTrashing: Boolean,
+    ) {
         testPopupDataForFileSystemItem(
             HomeScreenFile(
                 uri = Uri.parse("content://media/external_primary/file/1"),
@@ -224,6 +250,7 @@ class PopupDataRepositoryImplUnitTest {
                 isDirectory = false,
                 user = Process.myUserHandle(),
             ),
+            supportsRenaming,
             supportsTrashing,
         )
         testPopupDataForFileSystemItem(
@@ -234,11 +261,16 @@ class PopupDataRepositoryImplUnitTest {
                 isDirectory = true,
                 user = Process.myUserHandle(),
             ),
+            supportsRenaming,
             supportsTrashing,
         )
     }
 
-    private fun testPopupDataForFileSystemItem(file: HomeScreenFile, supportsTrashing: Boolean) {
+    private fun testPopupDataForFileSystemItem(
+        file: HomeScreenFile,
+        supportsRenaming: Boolean,
+        supportsTrashing: Boolean,
+    ) {
         val activityContext = mock<ActivityContext>()
         val view = mock<View>()
         val item =
@@ -248,17 +280,32 @@ class PopupDataRepositoryImplUnitTest {
                 intent = HomeScreenFilesUtils.buildLaunchIntent(file.uri, file)
             }
         val popupData = popupDataRepository.getPopupDataByItemInfo(item)
+        var popupDataIndex = 0
 
-        assert(popupData!!.size == 2)
-        with(popupData[0]) {
+        assert(popupData!!.size == if (supportsRenaming) 3 else 2)
+        with(popupData[popupDataIndex++]) {
             assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
             assert(iconResId == R.drawable.ic_home_screen_files_context_menu_open_in_app)
             assert(labelResId == R.string.home_screen_files_context_menu_open_in_app_label)
             assert(eventId == LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_OPEN_VIA_CONTEXT_MENU)
+
             popupAction.invoke(activityContext, item, view)
             verify(activityContext, times(1)).startActivitySafely(view, item.intent, item)
         }
-        with(popupData[1]) {
+        if (supportsRenaming) {
+            with(popupData[popupDataIndex++]) {
+                assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
+                assert(iconResId == R.drawable.ic_home_screen_files_context_menu_rename)
+                assert(labelResId == R.string.home_screen_files_context_menu_rename_label)
+                assert(eventId == LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_RENAME_VIA_CONTEXT_MENU)
+
+                // TODO(b/450710219): Replace assertion once implemented.
+                assertThrows(NotImplementedError::class.java) {
+                    popupAction.invoke(activityContext, item, view)
+                }
+            }
+        }
+        with(popupData[popupDataIndex++]) {
             assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
             assert(iconResId == R.drawable.ic_home_screen_files_context_menu_move_to_trash)
             if (supportsTrashing) {
