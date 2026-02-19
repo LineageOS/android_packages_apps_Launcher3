@@ -159,7 +159,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
     public interface AnimationFactory<STATE_TYPE extends BaseState<STATE_TYPE>,
             CONTAINER_TYPE extends RecentsViewContainer & StatefulContainer<STATE_TYPE>> {
 
-        void createContainerInterface(long transitionLength);
+        void createContainerInterface(long transitionLength, boolean runningOverHome);
 
         /**
          * @param attached Whether to show RecentsView alongside the app window. If false, recents
