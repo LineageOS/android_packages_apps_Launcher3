@@ -114,6 +114,8 @@
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Aplikacija je uklonjena s trake zadataka"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Ukloni"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Otvori"</string>
+    <!-- no translation found for home_screen_files_context_menu_rename_label (699579827537411711) -->
+    <skip />
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Izbriši trajno"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Premjesti u otpad"</string>
     <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"Stavka <xliff:g id="ITEM_NAME">%1$s</xliff:g> je premještena u otpad"</string>

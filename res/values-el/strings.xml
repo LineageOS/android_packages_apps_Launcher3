@@ -114,6 +114,8 @@
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Η εφαρμογή καταργήθηκε από τη Γραμμή εργαλείων"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Κατάργηση"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Άνοιγμα"</string>
+    <!-- no translation found for home_screen_files_context_menu_rename_label (699579827537411711) -->
+    <skip />
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Οριστική διαγραφή"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Μετακίνηση στον κάδο"</string>
     <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"<xliff:g id="ITEM_NAME">%1$s</xliff:g>: μεταφέρθηκαν στον κάδο"</string>

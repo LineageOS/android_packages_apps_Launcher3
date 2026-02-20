@@ -114,6 +114,8 @@
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Se quitó la app de la Barra de tareas"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Quitar"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Abrir"</string>
+    <!-- no translation found for home_screen_files_context_menu_rename_label (699579827537411711) -->
+    <skip />
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Borrar definitivamente"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Mover a la papelera"</string>
     <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"<xliff:g id="ITEM_NAME">%1$s</xliff:g> se envió a la papelera"</string>
@@ -192,7 +194,7 @@
     <string name="widgets_list_closed" msgid="6141506579418771922">"Se cerró la lista de widgets"</string>
     <string name="action_add_to_workspace" msgid="215894119683164916">"Agregar a pantalla principal"</string>
     <string name="action_move_here" msgid="2170188780612570250">"Mover elemento aquí"</string>
-    <string name="item_removed" msgid="851119963877842327">"Se eliminó el elemento."</string>
+    <string name="item_removed" msgid="851119963877842327">"Se quitó el elemento"</string>
     <string name="undo" msgid="4151576204245173321">"Deshacer"</string>
     <string name="action_move" msgid="4339390619886385032">"Mover elemento"</string>
     <string name="move_to_empty_cell_description" msgid="5254852678218206889">"Mover a la fila <xliff:g id="NUMBER_0">%1$s</xliff:g>, columna <xliff:g id="NUMBER_1">%2$s</xliff:g> en <xliff:g id="STRING">%3$s</xliff:g>"</string>
