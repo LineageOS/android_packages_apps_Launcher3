@@ -16,6 +16,29 @@
       "message": "We could add different switch for icon shapes. So there will be two switches.",
       "revId": "fe5374f6c1ae718020c359a7deb110a82e044bc8",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dd2a0255_e885ca53",
+        "filename": "src/com/android/launcher3/LauncherPrefs.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2026-02-20T18:50:34Z",
+      "side": 1,
+      "message": "line length",
+      "range": {
+        "startLine": 252,
+        "startChar": 0,
+        "endLine": 252,
+        "endChar": 104
+      },
+      "revId": "fe5374f6c1ae718020c359a7deb110a82e044bc8",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
