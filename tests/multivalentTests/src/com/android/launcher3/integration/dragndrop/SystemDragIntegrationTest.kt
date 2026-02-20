@@ -64,6 +64,8 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.BaseLauncherActivityTest
 import com.android.launcher3.util.ModelTestExtensions.setEmptyModelLayout
+import com.android.launcher3.util.RoboApiWrapper
+import com.android.launcher3.util.rule.ScreenRecordRule
 import java.util.LinkedList
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -72,6 +74,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -79,6 +82,8 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
+
+    @get:Rule val screenRecord = RoboApiWrapper.screenRecordRule() // b/462494467
 
     private val context: Context = targetContext()
     private lateinit var draggableView: View
@@ -114,6 +119,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     }
 
     @Test
+    @ScreenRecordRule.ScreenRecord // b/462494467
     fun testDragAndDropWhenPayloadContainsImmovableUri() {
         testDragAndDrop(
             ClipDescription(/* label= */ "", /* mimeTypes= */ arrayOf(MIMETYPE_TEXT_PLAIN)).apply {
@@ -124,6 +130,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     }
 
     @Test
+    @ScreenRecordRule.ScreenRecord // b/462494467
     fun testDragAndDropWhenPayloadContainsMovableUris() {
         val uniqueDisplayName = "${System.currentTimeMillis()}"
 
@@ -156,6 +163,7 @@ class SystemDragIntegrationTest : BaseLauncherActivityTest<Launcher>() {
     }
 
     @Test
+    @ScreenRecordRule.ScreenRecord // b/462494467
     fun testDragAndDropWhenPayloadContainsText() {
         testDragAndDrop(
             ClipDescription(/* label= */ "", /* mimeTypes= */ arrayOf(MIMETYPE_TEXT_PLAIN)).apply {
