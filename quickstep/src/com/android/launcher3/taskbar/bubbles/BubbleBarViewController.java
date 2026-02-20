@@ -63,6 +63,7 @@ import com.android.launcher3.util.MultiValueAlpha;
 import com.android.quickstep.SystemUiProxy;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.logging.BubbleLog;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -859,7 +860,14 @@ public class BubbleBarViewController {
     private void updateVisibilityForStateChange() {
         boolean hiddenForStashedAndNotAnimating =
                 mHiddenForStashed && !mBubbleBarViewAnimator.isAnimating();
-        if (mHiddenForSysui || mHiddenForNoBubbles || hiddenForStashedAndNotAnimating) {
+        boolean viewHidden =
+                mHiddenForSysui || mHiddenForNoBubbles || hiddenForStashedAndNotAnimating;
+        BubbleLog.d(
+                "BubbleBarViewController.updateVisibilityForStateChange() viewHidden=%b"
+                    + " mHiddenForSysui=%b mHiddenForNoBubbles=%b"
+                    + " hiddenForStashedAndNotAnimating=%b",
+                viewHidden, mHiddenForSysui, mHiddenForNoBubbles, hiddenForStashedAndNotAnimating);
+        if (viewHidden) {
             //TODO(b/404870188) this visibility change cause search view drag misbehavior
             mBarView.setVisibility(INVISIBLE);
         } else {
@@ -867,7 +875,12 @@ public class BubbleBarViewController {
         }
 
         if (Flags.fixBubbleNotificationShowingInLockScreen()) {
-            if (mHiddenForSysui || mHiddenForNoBubbles) {
+            boolean containerHidden = mHiddenForSysui || mHiddenForNoBubbles;
+            BubbleLog.d(
+                    "BubbleBarViewController.updateVisibilityForStateChange() containerHidden=%b"
+                        + " mHiddenForSysui=%b mHiddenForNoBubbles=%b",
+                    containerHidden, mHiddenForSysui, mHiddenForNoBubbles);
+            if (containerHidden) {
                 mBubbleBarContainer.setVisibility(INVISIBLE);
             } else {
                 mBubbleBarContainer.setVisibility(VISIBLE);
