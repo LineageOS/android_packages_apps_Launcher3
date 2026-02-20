@@ -168,7 +168,7 @@ public class TaskbarControllers {
      * in constructors for now, as some controllers may still be waiting for init().
      */
     public void init(@NonNull TaskbarSharedState sharedState, AnimatorSet startAnimation,
-            TaskbarUiState taskbarUiState) {
+            TaskbarUiState taskbarUiState, boolean userUnlocked) {
         mAreAllControllersInitialized = false;
         mSharedState = sharedState;
 
@@ -194,7 +194,7 @@ public class TaskbarControllers {
         voiceInteractionWindowController.init(this);
         taskbarRecentAppsController.init(this, sharedState.recentTasksBeforeTaskbarRecreate);
         taskbarTranslationController.init(this);
-        taskbarEduTooltipController.init(this, taskbarUiState);
+        taskbarEduTooltipController.init(this, taskbarUiState, userUnlocked);
         keyboardQuickSwitchController.init(this);
         taskbarPinningController.init(this, mSharedState);
         taskbarDesktopModeController.init(this, mSharedState, taskbarUiState);
