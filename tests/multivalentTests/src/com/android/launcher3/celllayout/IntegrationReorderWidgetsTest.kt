@@ -30,6 +30,7 @@ import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherAppState
+import com.android.launcher3.LauncherState
 import com.android.launcher3.celllayout.CellLayoutTestCaseReader.Board
 import com.android.launcher3.celllayout.CellLayoutTestCaseReader.TestSection
 import com.android.launcher3.celllayout.board.CellLayoutBoard
@@ -155,9 +156,11 @@ class IntegrationReorderWidgetsTest {
 
     private fun simulateDrag(fromCell: CellAndSpan, toCell: CellAndSpan) {
         val resizeFrameWaiter = launcherActivity.createResizeFrameShownWaiter()
+
         launcherActivity.executeOnLauncher {
             val widget: LauncherAppWidgetHostView =
                 getWidgetAtCell(it.workspace, fromCell.cellX, fromCell.cellY)
+
             val options = DragOptions()
             options.simulatedDndStartPoint = Point(widget.x.roundToInt(), widget.y.roundToInt())
             val info = widget.tag as ItemInfo
@@ -166,6 +169,7 @@ class IntegrationReorderWidgetsTest {
                 options,
             )
         }
+
         getInstrumentation().waitForIdleSync()
         launcherActivity.executeOnLauncher {
             it.workspace.onDragEnter(it.dragController.mDragObject)
@@ -176,7 +180,13 @@ class IntegrationReorderWidgetsTest {
         }
         getInstrumentation().waitForIdleSync()
         resizeFrameWaiter.waitForSignal()
+        // In case we go to spring mode
+        launcherActivity.goToState(LauncherState.NORMAL)
+        launcherActivity.waitUntil("Wait for normal state") {
+            it.launcherUiState.launcherState == LauncherState.NORMAL
+        }
         moveDragObjectToLocation(toCell)
+
         launcherActivity.executeOnLauncher {
             it.workspace.onDragOver(it.dragController.mDragObject)
         }
@@ -185,9 +195,11 @@ class IntegrationReorderWidgetsTest {
             it.workspace.onDragExit(it.dragController.mDragObject)
         }
         getInstrumentation().waitForIdleSync()
+
         launcherActivity.executeOnLauncher {
             it.workspace.onDrop(it.dragController.mDragObject, it.dragController.mOptions)
         }
+
         getInstrumentation().waitForIdleSync()
     }
 
