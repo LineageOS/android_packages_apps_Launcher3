@@ -44,6 +44,5 @@
         android:textStyle="bold"
         android:textSize="@dimen/snackbar_max_text_size"
         android:textColor="?android:attr/colorAccent"
-        style="@style/TextTitle"
-        android:capitalize="sentences"/>
+        style="@style/TextTitle"/>
 </merge>

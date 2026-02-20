@@ -27,6 +27,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -125,7 +126,7 @@ public class Snackbar extends AbstractFloatingView {
         TextView labelView = snackbar.findViewById(R.id.label);
         labelView.setText(labelString);
 
-        TextView actionView = snackbar.findViewById(R.id.action);
+        Button actionView = snackbar.findViewById(R.id.action);
         float actionWidth;
         if (actionStringResId != NO_ID) {
             String actionText = res.getString(actionStringResId);
