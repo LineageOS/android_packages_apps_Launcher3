@@ -126,7 +126,7 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
     // The rect string of the view that the arrow is attached to, in screen reference frame.
     protected int mArrowColor;
 
-    protected final float mElevation;
+    protected float mElevation;
 
     // Tag for Views that have children that will need to be iterated to add styling.
     private final String mIterateChildrenTag;
