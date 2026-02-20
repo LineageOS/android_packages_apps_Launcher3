@@ -98,7 +98,7 @@ interface TaskbarManager {
 
     @VisibleForTesting fun removeAllBubbles()
 
-    @VisibleForTesting fun unstashTaskbarIfStashed()
+    @VisibleForTesting fun unstashTaskbarIfStashed(): Boolean
 
     @VisibleForTesting fun enableBlockingTimeoutDuringTests(enableBlockingTimeout: Boolean)
 

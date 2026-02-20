@@ -79,8 +79,7 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
     @Override
     protected void performInitialization() {
         reinitializeLauncherData();
-        // Replace mDevice.pressHome() with TAPL's more robust version
-        mLauncher.goHome();
+        mDevice.pressHome();
 
         // Wait for all apps view to be gone.
         mDevice.wait(Until.gone(By.res(mTargetPackage, "apps_view")), DEFAULT_UI_TIMEOUT);

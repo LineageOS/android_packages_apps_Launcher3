@@ -2330,11 +2330,16 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     /**
      * Unstashes the Taskbar if it is stashed.
+     *
+     * @return true if transient taskbar and caller can expect taskbar to be unstashed.
      */
     @VisibleForTesting
-    public void unstashTaskbarIfStashed() {
+    public boolean unstashTaskbarIfStashed() {
         if (isTransientTaskbar()) {
             mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(false);
+            return true;
+        } else {
+            return false;
         }
     }
 
