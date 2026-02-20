@@ -34,6 +34,7 @@ class TaplTestOverviewExternalDisplay : AbstractQuickStepTest() {
     @Before
     override fun setUp() {
         super.setUp()
+        clearAllRecentTasks()
         startTestActivity(2)
         startTestActivity(3)
     }
@@ -45,6 +46,13 @@ class TaplTestOverviewExternalDisplay : AbstractQuickStepTest() {
         assertThat(task).isNotNull()
         assertThat(task.open()).isNotNull()
         assertTestActivityIsRunning(3, "Test Activity didn't open from Overview")
+    }
+
+    @Test
+    @MultiDisplayTest
+    fun testStartAppsAndGoToOverview() {
+        mLauncher.launchedAppState.switchToOverview()
+        assertThat(mLauncher.recentTasks.size).isEqualTo(2)
     }
 
     @Test
