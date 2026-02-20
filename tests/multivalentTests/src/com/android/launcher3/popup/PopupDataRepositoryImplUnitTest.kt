@@ -37,6 +37,7 @@ import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.WorkspaceChangeEvent.FullRefresh
 import com.android.launcher3.model.data.WorkspaceData.ImmutableWorkspaceData
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.repository.HomeScreenRepository
@@ -283,7 +284,7 @@ class PopupDataRepositoryImplUnitTest {
         items.forEachIndexed { i: Int, item: ItemInfo -> data[i] = item }
         homeScreenRepository.dispatchWorkspaceDataChange(
             ImmutableWorkspaceData(version = 0, modificationId = 0, items = data),
-            null,
+            FullRefresh(reason = "seedData"),
         )
         TestUtil.runOnExecutorSync(Executors.DATA_HELPER_EXECUTOR) {}
     }

@@ -637,7 +637,11 @@ public class Launcher extends StatefulActivity<LauncherState>
             // Calling onSaveInstanceState ensures that static cache used by listWidgets is
             // initialized properly.
             onSaveInstanceState(new Bundle());
-            mModel.rebindCallbacks();
+            if (useModelRepositoryBinding()) {
+                modelCallbacks.rebindOnConfigChange();
+            } else {
+                mModel.rebindCallbacks("rebinding-due-to-config-change");
+            }
             updateDisallowBack();
         } finally {
             Trace.endSection();
@@ -2032,6 +2036,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         Workspace<?> workspace = mWorkspace;
         int newItemsScreenId = -1;
         int index = 0;
+        View lastAddedView = null;
         for (Pair<ItemInfo, View> e : shortcuts) {
             final ItemInfo item = e.first;
 
@@ -2062,6 +2067,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                 view = getAppWidgetHolder().attachViewToHostAndGetAttachedView(lv);
             }
             workspace.addInScreenFromBind(view, item);
+            lastAddedView = view;
             if (boundAnim != null) {
                 // Animate all the applications up now
                 view.setAlpha(0f);
@@ -2072,11 +2078,23 @@ public class Launcher extends StatefulActivity<LauncherState>
             }
         }
 
-        // Animate to the correct page
+        // Animate to the correct page.
         if (boundAnim != null && newItemsScreenId > -1) {
             int currentScreenId = mWorkspace.getScreenIdForPageIndex(mWorkspace.getNextPage());
             final int newScreenIndex = mWorkspace.getPageIndexForScreenId(newItemsScreenId);
             final Runnable startBounceAnimRunnable = boundAnim::start;
+
+            // Schedule accessibility action.
+            final View a11yTarget = lastAddedView;
+            boundAnim.addListener(forEndCallback((success) -> {
+                if (success
+                        && isInState(NORMAL)
+                        && mLauncherUiState.isTopResumedActivityRef().getValue()
+                        && a11yTarget.isAttachedToWindow()
+                        && a11yTarget.getVisibility() == View.VISIBLE) {
+                    ViewEx.performAccessibilityActionOnViewTree(a11yTarget);
+                }
+            }));
 
             if (canAnimatePageChange() && newItemsScreenId != currentScreenId) {
                 // We post the animation slightly delayed to prevent slowdowns
@@ -2836,6 +2854,20 @@ public class Launcher extends StatefulActivity<LauncherState>
         if (shouldShowHomeBehindDesktop() && !isTopResumed && isInState(ALL_APPS)) {
             getStateManager().goToState(NORMAL);
         }
+    }
+
+    /**
+     * Resets the cached timestamp for the last [MotionEvent.ACTION_UP] event.
+     * <p>
+     * Note that as an intentional side-effect, this method causes the inactivity requirement for
+     * auto-scrolling to newly bound/inflated items to be satisfied until the next
+     * [MotionEvent.ACTION_UP] event.
+     *
+     * @see #bindInflatedItems(List, AnimatorSet)
+     * @see #canAnimatePageChange()
+     */
+    public void resetLastTouchUpTime() {
+        mLastTouchUpTime = -1;
     }
 
     /**

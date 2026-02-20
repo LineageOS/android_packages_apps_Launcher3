@@ -77,7 +77,7 @@ class ShortcutsChangedTaskTest {
 
     @Mock lateinit var mockShortcut: ShortcutInfo
 
-    private val workspaceUpdates = mutableListOf<WorkspaceChangeEvent?>()
+    private val workspaceUpdates = mutableListOf<WorkspaceChangeEvent>()
 
     @Before
     fun setup() {

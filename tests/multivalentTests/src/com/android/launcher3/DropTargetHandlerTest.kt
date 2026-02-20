@@ -16,30 +16,29 @@
 
 package com.android.launcher3
 
+import android.content.Context
 import android.net.Uri
 import android.os.Process
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.widget.TextView
+import androidx.annotation.StringRes
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.LauncherSettings.Favorites
-import com.android.launcher3.celllayout.CellLayoutLayoutParams
-import com.android.launcher3.folder.FolderIcon
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
-import com.android.launcher3.model.TransactionContext
-import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.views.Snackbar
 import com.android.providers.media.flags.Flags.FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API
+import com.google.common.truth.StringSubject
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
-import java.util.function.Consumer
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,11 +46,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
@@ -93,11 +88,16 @@ class DropTargetHandlerTest {
     fun onDeletePermanentlyCompleteForHomeScreenFile() {
         launcherActivity.executeOnLauncher { launcher ->
             val dropTargetHandler =
-                DropTargetHandler(launcher, undoDeleteController, homeScreenFilesProvider, immediateExecutor)
+                DropTargetHandler(
+                    launcher,
+                    undoDeleteController,
+                    homeScreenFilesProvider,
+                    immediateExecutor,
+                )
             dropTargetHandler.onDeleteComplete(item, null)
 
             val snackbar = launcher.snackbar
-            assertThat(snackbar.labelView.text.toString()).isEqualTo("Item removed")
+            assertThat(snackbar.labelView.text.toString()).isEqualToString(R.string.item_removed)
             verifyNoInteractions(homeScreenFilesProvider)
 
             // The provider call happens only when the snackbar gets dismissed.
@@ -119,18 +119,24 @@ class DropTargetHandlerTest {
 
         launcherActivity.executeOnLauncher { launcher ->
             val dropTargetHandler =
-                DropTargetHandler(launcher, undoDeleteController, homeScreenFilesProvider, immediateExecutor)
+                DropTargetHandler(
+                    launcher,
+                    undoDeleteController,
+                    homeScreenFilesProvider,
+                    immediateExecutor,
+                )
             dropTargetHandler.onDeleteComplete(item, null)
 
             val snackbar = launcher.snackbar
 
             // Move to trash.
-            assertThat(snackbar.labelView.text.toString()).isEqualTo("abc.png moved to trash")
+            assertThat(snackbar.labelView.text.toString())
+                .isEqualToString(R.string.home_screen_files_moved_to_trash_message, "abc.png")
             verify(homeScreenFilesProvider, times(1)).moveToTrash(eq("abc.png"))
             verifyNoMoreInteractions(homeScreenFilesProvider)
 
             // Undo.
-            assertThat(snackbar.actionView.text.toString()).isEqualTo("Undo")
+            assertThat(snackbar.actionView.text.toString()).isEqualToString(R.string.undo)
             snackbar.actionView.performClick()
             verify(homeScreenFilesProvider, times(1)).restoreFromTrash(eq("/new/path/in/trash"))
             verifyNoMoreInteractions(homeScreenFilesProvider)
@@ -148,12 +154,17 @@ class DropTargetHandlerTest {
 
         launcherActivity.executeOnLauncher { launcher ->
             val dropTargetHandler =
-                DropTargetHandler(launcher, undoDeleteController, homeScreenFilesProvider, immediateExecutor)
+                DropTargetHandler(
+                    launcher,
+                    undoDeleteController,
+                    homeScreenFilesProvider,
+                    immediateExecutor,
+                )
             dropTargetHandler.onDeleteComplete(item, null)
 
             // Error toast for failed move to trash.
             assertThat(launcher.snackbar.labelView.text.toString())
-                .isEqualTo("Can't move to trash. Something went wrong.")
+                .isEqualToString(R.string.home_screen_files_move_to_trash_error_message)
         }
     }
 
@@ -170,7 +181,12 @@ class DropTargetHandlerTest {
 
         launcherActivity.executeOnLauncher { launcher ->
             val dropTargetHandler =
-                DropTargetHandler(launcher, undoDeleteController, homeScreenFilesProvider, immediateExecutor)
+                DropTargetHandler(
+                    launcher,
+                    undoDeleteController,
+                    homeScreenFilesProvider,
+                    immediateExecutor,
+                )
             dropTargetHandler.onDeleteComplete(item, null)
 
             // Click "Undo".
@@ -178,7 +194,7 @@ class DropTargetHandlerTest {
 
             // Error toast for failed undo.
             assertThat(launcher.snackbar.labelView.text.toString())
-                .isEqualTo("Can't undo. Go to Files app to restore.")
+                .isEqualToString(R.string.home_screen_files_restore_from_trash_error_message)
         }
     }
 
@@ -194,7 +210,12 @@ class DropTargetHandlerTest {
                 }
 
             val dropTargetHandler =
-                DropTargetHandler(launcher, undoDeleteController, homeScreenFilesProvider, immediateExecutor)
+                DropTargetHandler(
+                    launcher,
+                    undoDeleteController,
+                    homeScreenFilesProvider,
+                    immediateExecutor,
+                )
             dropTargetHandler.onDeleteComplete(item, null)
 
             launcher.snackbar.close(false)
@@ -237,4 +258,7 @@ class DropTargetHandlerTest {
 
     private val Snackbar.actionView
         get() = findViewById<TextView>(R.id.action)
+
+    private fun StringSubject.isEqualToString(@StringRes id: Int, vararg args: String) =
+        isEqualTo(ApplicationProvider.getApplicationContext<Context>().getString(id, *args))
 }

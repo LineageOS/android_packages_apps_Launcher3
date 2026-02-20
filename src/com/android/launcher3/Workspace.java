@@ -341,7 +341,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 @Override
                 public void onStateTransitionComplete(LauncherState finalState) {
                     if (finalState == NORMAL) {
-                        performAccessibilityActionOnViewTree(Workspace.this);
+                        ViewEx.performAccessibilityActionOnViewTree(Workspace.this);
                     }
                 }
             };
@@ -3887,24 +3887,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         @Override
         public void onAnimationEnd(Animator animation) {
             onEndStateTransition();
-        }
-    }
-
-    /**
-     * Recursively check view tag {@link R.id.perform_a11y_action_on_launcher_state_normal_tag} and
-     * call {@link View#performAccessibilityAction(int, Bundle)} on view tree. The tag is cleared
-     * after this call.
-     */
-    private static void performAccessibilityActionOnViewTree(View view) {
-        Object tag = view.getTag(R.id.perform_a11y_action_on_launcher_state_normal_tag);
-        if (tag instanceof Integer) {
-            view.performAccessibilityAction((int) tag, null);
-            view.setTag(R.id.perform_a11y_action_on_launcher_state_normal_tag, null);
-        }
-        if (view instanceof ViewGroup viewgroup) {
-            for (int i = 0; i < viewgroup.getChildCount(); i++) {
-                performAccessibilityActionOnViewTree(viewgroup.getChildAt(i));
-            }
         }
     }
 

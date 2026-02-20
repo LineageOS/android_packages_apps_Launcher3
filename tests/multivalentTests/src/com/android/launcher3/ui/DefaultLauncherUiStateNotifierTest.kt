@@ -117,7 +117,7 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         notifier.notifyModelChanged(changeLog, null)
         bgDataModel.lastBindId = 4
         RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
-        verify(spiedModel).rebindCallbacks()
+        verify(spiedModel).rebindCallbacks(any())
     }
 
     @Test
@@ -127,7 +127,7 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         bgDataModel.lastBindId = 5
         notifier.notifyModelChanged(changeLog, null)
         RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
-        verify(spiedModel, never()).rebindCallbacks()
+        verify(spiedModel, never()).rebindCallbacks(any())
     }
 
     @Test
@@ -138,6 +138,6 @@ class DefaultLauncherUiStateNotifierTest : AbstractWorkspaceModelTest() {
         notifier.notifyModelChanged(changeLog, null)
         bgDataModel.lastBindId = 6
         RoboApiWrapper.waitForLooperSync(Executors.MAIN_EXECUTOR.looper)
-        verify(spiedModel, never()).rebindCallbacks()
+        verify(spiedModel, never()).rebindCallbacks(any())
     }
 }

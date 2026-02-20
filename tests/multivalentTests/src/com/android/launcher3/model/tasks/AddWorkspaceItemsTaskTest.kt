@@ -203,7 +203,7 @@ class AddWorkspaceItemsTaskTest {
         val task = newTask(*itemsToAdd)
 
         runOnExecutorSync(MODEL_EXECUTOR) {
-            val workspaceUpdates = mutableListOf<WorkspaceChangeEvent?>()
+            val workspaceUpdates = mutableListOf<WorkspaceChangeEvent>()
             modelState.homeRepo.workspaceState.changes.forEach(MODEL_EXECUTOR) {
                 workspaceUpdates.add(it)
             }

@@ -522,6 +522,11 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         return mTaskbarView.getTransientTaskbarIconLayoutBoundsInParent();
     }
 
+    /** Returns taskbar visual icon bounds on the screen. **/
+    public Rect getTaskbarIconsBoundsOnScreen() {
+        return mTaskbarView.getTaskbarIconsActualBounds();
+    }
+
     public View[] getIconViews() {
         return mTaskbarView.getIconViews();
     }

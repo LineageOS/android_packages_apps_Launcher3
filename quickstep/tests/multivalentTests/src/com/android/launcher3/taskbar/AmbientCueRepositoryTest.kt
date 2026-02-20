@@ -152,7 +152,7 @@ class AmbientCueRepositoryTest {
             .thenReturn(true)
         val actionIntent = mock(Intent::class.java)
         `when`(actionIntent.extras).thenReturn(Bundle())
-        `when`(actionDetails.createActionIntent()).thenReturn(actionIntent)
+        `when`(actionDetails.intent).thenReturn(actionIntent)
         val remoteAction = mock(android.app.RemoteAction::class.java)
         val remoteActionIntent = mock(android.app.PendingIntent::class.java)
         `when`(actionDetails.remoteAction).thenReturn(remoteAction)
