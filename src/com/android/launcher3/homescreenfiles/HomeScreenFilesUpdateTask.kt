@@ -36,6 +36,7 @@ import com.android.launcher3.model.ModelTaskController
 import com.android.launcher3.model.WorkspaceItemSpaceFinder
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_DISABLED_FILE_SYSTEM_NOT_READY
+import com.android.launcher3.model.data.WorkspaceItemCoordinates
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.util.IntSet
 import dagger.assisted.Assisted
@@ -63,25 +64,29 @@ data class HomeScreenFilesUpdate(
     /**
      * Used to apply special behaviors/properties when updating the launcher model.
      *
-     * @param findSpaceStartingFromScreenId Passed to [WorkspaceItemSpaceFinder] when adding items.
+     * @param findSpaceStartingFrom Coords passed to [WorkspaceItemSpaceFinder] when adding items.
      * @param isDelayedInit Whether this update is a delayed initialization of all file items.
      */
     data class Extras
-    private constructor(val findSpaceStartingFromScreenId: Int, val isDelayedInit: Boolean) {
+    private constructor(
+        val findSpaceStartingFrom: WorkspaceItemCoordinates,
+        val isDelayedInit: Boolean,
+    ) {
         companion object {
             @JvmStatic fun builder() = Builder()
         }
 
         private constructor(
             builder: Builder
-        ) : this(builder.findSpaceStartingFromScreenId, builder.isDelayedInit)
+        ) : this(builder.findSpaceStartingFrom, builder.isDelayedInit)
 
         // NOTE: We use the builder pattern because [Extras] are predominantly created from Java
         // which does not benefit from kotlin's support for default arguments. Using @JvmOverloads
         // would be onerous as the number of possible extras continues to grow.
         // TODO(b/449912243): Create extra for forcing page change animation when adding new items.
         class Builder {
-            var findSpaceStartingFromScreenId: Int = Workspace.FIRST_SCREEN_ID
+            var findSpaceStartingFrom: WorkspaceItemCoordinates =
+                WorkspaceItemCoordinates(screenId = Workspace.FIRST_SCREEN_ID, cellX = 0, cellY = 0)
                 private set
 
             var isDelayedInit: Boolean = false
@@ -91,7 +96,9 @@ data class HomeScreenFilesUpdate(
 
             fun isDelayedInit(v: Boolean) = apply { isDelayedInit = v }
 
-            fun findSpaceStartingFromScreenId(v: Int) = apply { findSpaceStartingFromScreenId = v }
+            fun findSpaceStartingFrom(v: WorkspaceItemCoordinates) = apply {
+                findSpaceStartingFrom = v
+            }
         }
     }
 }
@@ -224,7 +231,7 @@ constructor(
                                 itemInfo.spanX,
                                 itemInfo.spanY,
                                 /* excludedScreens= */ IntSet(),
-                                extras.findSpaceStartingFromScreenId,
+                                extras.findSpaceStartingFrom,
                             )
                             .also { coords ->
                                 itemInfo.screenId = coords.screenId
