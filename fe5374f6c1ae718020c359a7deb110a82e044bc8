@@ -37,6 +37,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "160bb692_f7b9a941",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 18796
+      },
+      "writtenOn": "2026-02-21T03:54:02Z",
+      "side": 1,
+      "message": "For now, I have removed the reset of the themed icons value, so the existing value will be used for this switch. I will check if it’s possible to separate it.",
+      "parentUuid": "f0c563e0_526ce0d5",
+      "revId": "fe5374f6c1ae718020c359a7deb110a82e044bc8",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "dd2a0255_e885ca53",
         "filename": "src/com/android/launcher3/LauncherPrefs.kt",
         "patchSetId": 1
@@ -48,6 +66,30 @@
       "writtenOn": "2026-02-20T18:50:34Z",
       "side": 1,
       "message": "line length",
+      "range": {
+        "startLine": 252,
+        "startChar": 0,
+        "endLine": 252,
+        "endChar": 104
+      },
+      "revId": "fe5374f6c1ae718020c359a7deb110a82e044bc8",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3c3db875_68862b2d",
+        "filename": "src/com/android/launcher3/LauncherPrefs.kt",
+        "patchSetId": 1
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 18796
+      },
+      "writtenOn": "2026-02-21T03:54:02Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "dd2a0255_e885ca53",
       "range": {
         "startLine": 252,
         "startChar": 0,
