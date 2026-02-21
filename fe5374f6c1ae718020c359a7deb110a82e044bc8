@@ -18,6 +18,23 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f0c563e0_526ce0d5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2026-02-21T02:14:33Z",
+      "side": 1,
+      "message": "Doing it this way:\n1. resets all the current user setting for themed icons\n2. flips the default to true for both themed icons and shapes\n\nI would just unconditionally enable icon shapes for drawer since that\u0027s how it was in our previous versions, and keep the themed icon toggle as-is",
+      "revId": "fe5374f6c1ae718020c359a7deb110a82e044bc8",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "dd2a0255_e885ca53",
