@@ -141,5 +141,18 @@ private constructor(
                 hasRecents = hasRecents,
             )
         }
+
+        @JvmStatic
+        fun from(targets: RemoteAnimationTargets): AnimatedSurfaces {
+            return AnimatedSurfaces(
+                unfilteredApps = AnimatedSurface.mapFromTargets(targets.unfilteredApps),
+                apps = AnimatedSurface.mapFromTargets(targets.apps),
+                wallpapers = AnimatedSurface.mapFromTargets(targets.wallpapers),
+                nonApps = AnimatedSurface.mapFromTargets(targets.nonApps),
+                extras = targets.extras,
+                mode = AnimatedSurface.mappedModeFromTarget(targets.targetMode),
+                hasRecents = targets.hasRecents,
+            )
+        }
     }
 }
