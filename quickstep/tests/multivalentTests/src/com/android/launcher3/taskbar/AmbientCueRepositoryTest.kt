@@ -16,14 +16,14 @@
 
 package com.android.launcher3.taskbar
 
-import android.content.Intent
+import android.app.PendingIntent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.service.personalcontext.hint.BundleHint
 import android.service.personalcontext.hint.ContentCaptureConversationEvent
 import android.service.personalcontext.hint.ContentCaptureConversationHint
 import android.service.personalcontext.hint.ContextHint
-import android.service.personalcontext.hint.ContextHintWithSignature
+import android.service.personalcontext.hint.PublishedContextHint
 import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
@@ -118,7 +118,7 @@ class AmbientCueRepositoryTest {
         val insight = mock(ActionableInsight::class.java)
         val originHintList =
             hints.map { contextHint ->
-                mock(ContextHintWithSignature::class.java).apply {
+                mock(PublishedContextHint::class.java).apply {
                     `when`(this.contextHint).thenReturn(contextHint)
                 }
             }
@@ -150,9 +150,8 @@ class AmbientCueRepositoryTest {
         val actionDetails = mock(InsightActionDetails::class.java)
         `when`(actionDetails.hasActionType(InsightActionDetails.ACTION_TYPE_REMOTE_ACTION))
             .thenReturn(true)
-        val actionIntent = mock(Intent::class.java)
-        `when`(actionIntent.extras).thenReturn(Bundle())
-        `when`(actionDetails.intent).thenReturn(actionIntent)
+        val pendingIntent = mock(PendingIntent::class.java)
+        `when`(actionDetails.pendingIntent).thenReturn(pendingIntent)
         val remoteAction = mock(android.app.RemoteAction::class.java)
         val remoteActionIntent = mock(android.app.PendingIntent::class.java)
         `when`(actionDetails.remoteAction).thenReturn(remoteAction)
@@ -303,13 +302,11 @@ class AmbientCueRepositoryTest {
         val imeHint = createImeVisibilityHint(true)
         val insightWithIme = mockActionableInsight()
         val renderHintWithSignature =
-            mock(ContextHintWithSignature::class.java).apply {
+            mock(PublishedContextHint::class.java).apply {
                 `when`(contextHint).thenReturn(renderHint)
             }
         val imeHintWithSignature =
-            mock(ContextHintWithSignature::class.java).apply {
-                `when`(contextHint).thenReturn(imeHint)
-            }
+            mock(PublishedContextHint::class.java).apply { `when`(contextHint).thenReturn(imeHint) }
         `when`(insightWithIme.originHints)
             .thenReturn(setOf(renderHintWithSignature, imeHintWithSignature))
 
@@ -325,13 +322,11 @@ class AmbientCueRepositoryTest {
         val imeHint = createImeVisibilityHint(false)
         val insightWithoutIme = mockActionableInsight()
         val renderHintWithSignature =
-            mock(ContextHintWithSignature::class.java).apply {
+            mock(PublishedContextHint::class.java).apply {
                 `when`(contextHint).thenReturn(renderHint)
             }
         val imeHintWithSignature =
-            mock(ContextHintWithSignature::class.java).apply {
-                `when`(contextHint).thenReturn(imeHint)
-            }
+            mock(PublishedContextHint::class.java).apply { `when`(contextHint).thenReturn(imeHint) }
         `when`(insightWithoutIme.originHints)
             .thenReturn(setOf(renderHintWithSignature, imeHintWithSignature))
 
@@ -347,7 +342,7 @@ class AmbientCueRepositoryTest {
         // No IME visibility hint provided
         val insightDefaultIme = mockActionableInsight()
         val renderHintWithSignature =
-            mock(ContextHintWithSignature::class.java).apply {
+            mock(PublishedContextHint::class.java).apply {
                 `when`(contextHint).thenReturn(renderHint)
             }
         `when`(insightDefaultIme.originHints).thenReturn(setOf(renderHintWithSignature))

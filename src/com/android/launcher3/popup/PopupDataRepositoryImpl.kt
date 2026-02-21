@@ -17,6 +17,7 @@
 package com.android.launcher3.popup
 
 import android.content.Context
+import com.android.launcher3.Flags.enableHomeScreenFilesRenaming
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
@@ -47,8 +48,13 @@ constructor(
     private val widgetSystemShortcuts = listOf(popupDataSource.removePopupData)
     private val widgetWithSettingsSystemShortcuts =
         listOf(popupDataSource.removePopupData, popupDataSource.widgetSettingsPopupData)
-    private val homeScreenFileShortcuts =
-        listOf(popupDataSource.openHomeScreenFile, popupDataSource.deleteFileSystemItem)
+    private val homeScreenFileShortcuts = buildList {
+        add(popupDataSource.openHomeScreenFile)
+        if (enableHomeScreenFilesRenaming()) {
+            add(popupDataSource.renameFileSystemItem)
+        }
+        add(popupDataSource.deleteFileSystemItem)
+    }
     private var popupData: Map<Int, List<PopupData>> = mapOf()
 
     init {

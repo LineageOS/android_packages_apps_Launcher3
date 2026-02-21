@@ -48,7 +48,7 @@
     <string name="back_gesture_feedback_swipe_too_far_from_edge" msgid="4175100312909721217">"तुम्ही स्क्रीनच्या अगदी उजव्या किंवा अगदी डाव्या कडेपासून स्‍वाइप करत आहात खात्री करा"</string>
     <string name="back_gesture_feedback_cancelled" msgid="762621530959111290">"तुम्ही स्क्रीनच्या उजव्या किंवा डाव्या कडेपासून मध्यभागी स्‍वाइप करून सोडून देत आहात याची खात्री करा"</string>
     <string name="back_gesture_feedback_complete_with_overview_follow_up" msgid="9176400654037014471">"मागे जाण्यासाठी उजवीकडून कसे स्‍वाइप करावे ते शिकलात. आता पुढे, ॲप्स कशी स्विच करायची ते जाणून घ्या."</string>
-    <string name="back_gesture_feedback_complete_with_follow_up" msgid="8653374779579748392">"तुम्ही गो बॅक जेश्चर पूर्ण केले. आता, ॲप्स कशी स्विच करायची ते जाणून घ्या."</string>
+    <string name="back_gesture_feedback_complete_with_follow_up" msgid="8653374779579748392">"तुम्ही मागे जा जेश्चर पूर्ण केले. आता, ॲप्स कशी स्विच करायची ते जाणून घ्या."</string>
     <string name="back_gesture_feedback_complete_without_follow_up" msgid="197189945858268342">"तुम्ही गो बॅक जेश्चर पूर्ण केले आहे"</string>
     <string name="back_gesture_feedback_swipe_in_nav_bar" msgid="9157480023651452969">"तुम्ही स्क्रीनच्या तळाच्या अगदी जवळून स्‍वाइप करत नाही याची खात्री करा"</string>
     <string name="back_gesture_tutorial_confirm_subtitle" msgid="5181305411668713250">"बॅक जेश्चरची संवेदनशीलता बदलण्यासाठी, सेटिंग्ज वर जा"</string>
@@ -59,7 +59,7 @@
     <string name="home_gesture_feedback_swipe_too_far_from_edge" msgid="4816365433160895458">"तुम्ही स्क्रीनच्या तळाच्या कडेपासून वर स्वाइप करत आहात याची खात्री करा"</string>
     <string name="home_gesture_feedback_overview_detected" msgid="5177627157303895077">"तुम्ही स्क्रीनवरून बोट उचलण्यापूर्वी थांबत नाही याची खात्री करा"</string>
     <string name="home_gesture_feedback_wrong_swipe_direction" msgid="8328465201424027148">"तुम्ही सरळ वर स्वाइप करत आहात याची खात्री करा"</string>
-    <string name="home_gesture_feedback_complete_with_follow_up" msgid="8766981412895888417">"तुम्ही गो होम जेश्चर पूर्ण केले आहे. आता, मागे कसे जायचे ते जाणून घ्या."</string>
+    <string name="home_gesture_feedback_complete_with_follow_up" msgid="8766981412895888417">"तुम्ही होमवर जाणे जेश्चर पूर्ण केले आहे. आता, मागे कसे जायचे ते जाणून घ्या."</string>
     <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"तुम्ही गो होम जेश्चर पूर्ण केले आहे"</string>
     <string name="home_gesture_intro_title" msgid="836590312858441830">"होमवर जाण्यासाठी स्‍वाइप करा"</string>
     <string name="home_gesture_intro_subtitle" msgid="2632238748497975326">"तुमच्या स्क्रीनच्या तळाकडून वर स्वाइप करा. हे जेश्चर तुम्हाला नेहमी होम स्क्रीनवर घेऊन जाते."</string>
@@ -69,7 +69,7 @@
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"तुम्ही स्क्रीनच्या तळाच्या कडेपासून वर स्वाइप करत आहात याची खात्री करा"</string>
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"विंडोवरून बोट उचलण्यापूर्वी थोडा वेळ ते तेथेच धरून ठेवा"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"तुम्ही सरळ वर स्वाइप करून थांबत आहात याची खात्री करा"</string>
-    <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"तुम्ही जेश्चर कसे वापरायचे हे शिकलात. जेश्चर बंद करण्यासाठी, सेटिंग्ज वर जा."</string>
+    <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"तुम्ही जेश्चर कशी वापरायची हे शिकलात. जेश्चर बंद करण्यासाठी, सेटिंग्ज वर जा."</string>
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"तुम्ही स्विच ॲप्स जेश्चर पूर्ण केले आहे"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"अ‍ॅप्स स्विच करण्यासाठी स्वाइप करा"</string>
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"ॲप्सदरम्यान स्विच करण्यासाठी, स्क्रीनच्या तळापासून वर स्वाइप करा, धरून ठेवा, त्यानंतर सोडून द्या."</string>
@@ -140,8 +140,7 @@
     <string name="taskbar_button_recents" msgid="7273376136216613134">"अलीकडील"</string>
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"सूचना"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"क्विक सेटिंग्ज"</string>
-    <!-- no translation found for taskbar_button_more_options (8685586215650683202) -->
-    <skip />
+    <string name="taskbar_button_more_options" msgid="8685586215650683202">"आणखी पर्याय"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"टास्कबार"</string>
     <string name="bubble_bar_a11y_title" msgid="7743340801055597168">"बबल बार"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"नेव्हिगेशन बार"</string>
@@ -159,8 +158,7 @@
     <string name="quick_switch_overflow" msgid="3679780650881041632">"{count,plural, =1{आणखी अ‍ॅप}other{आणखी अ‍ॅप्स}}"</string>
     <string name="quick_switch_desktop" msgid="8393802056024499749">"डेस्कटॉप"</string>
     <string name="quick_switch_split_task" msgid="5598194724255333896">"<xliff:g id="APP_NAME_1">%1$s</xliff:g> आणि <xliff:g id="APP_NAME_2">%2$s</xliff:g>"</string>
-    <!-- no translation found for quick_switch_task_with_position_in_parent (9082434281522648105) -->
-    <skip />
+    <string name="quick_switch_task_with_position_in_parent" msgid="9082434281522648105">"<xliff:g id="TASK_DESCRIPTION">%1$s</xliff:g>, <xliff:g id="TOTAL_TASKS">%3$d</xliff:g> पैकी <xliff:g id="INDEX_IN_PARENT">%2$d</xliff:g> आयटम, निवडण्यासाठी की बाइंडिंग रिलीझ करा"</string>
     <string name="quick_switch_scroll_arrow_left" msgid="6527033155534184309">"डावीकडे स्क्रोल करा"</string>
     <string name="quick_switch_scroll_arrow_right" msgid="7319779291086916348">"उजवीकडे स्क्रोल करा"</string>
     <string name="bubble_bar_bubble_fallback_description" msgid="7811684548953452009">"बबल"</string>

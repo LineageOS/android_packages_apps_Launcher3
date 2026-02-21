@@ -59,7 +59,6 @@ import com.android.launcher3.R
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHeight
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHorizontalPadding
-import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemVerticalPadding
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemWidth
 import com.android.launcher3.util.compose.testTag
 import com.android.launcher3.util.compose.testTagContainer
@@ -445,10 +444,7 @@ private fun SystemShortcutsSection(
             Row(
                 modifier =
                     Modifier.size(popupMenuItemWidth, popupMenuItemHeight)
-                        .padding(
-                            vertical = popupMenuItemVerticalPadding,
-                            horizontal = popupMenuItemHorizontalPadding,
-                        ),
+                        .padding(vertical = 0.dp, horizontal = popupMenuItemHorizontalPadding),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {

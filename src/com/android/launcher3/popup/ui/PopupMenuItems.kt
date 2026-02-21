@@ -74,7 +74,6 @@ import com.android.launcher3.popup.ui.PopupMenuItemDimens.iconOnlyButtonSize
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHeight
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHorizontalPadding
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemIconSpacerWidth
-import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemVerticalPadding
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemWidth
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.systemShortcutIconPadding
 import com.android.launcher3.util.compose.textStyleFromResource
@@ -156,8 +155,8 @@ fun PopupMenuItem(
                                     popupMenuItemHorizontalPadding.takeIf {
                                         trailingContent == null
                                     } ?: 0.dp,
-                                top = popupMenuItemVerticalPadding,
-                                bottom = popupMenuItemVerticalPadding,
+                                top = 0.dp,
+                                bottom = 0.dp,
                             ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -377,7 +376,6 @@ object PopupMenuItemDimens {
     val popupMenuItemHeight = 52.dp
     val popupMenuItemWidth = 216.dp
     val popupMenuItemHorizontalPadding = 12.dp
-    val popupMenuItemVerticalPadding = 10.dp
     val popupMenuItemIconSpacerWidth = 8.dp
     val systemShortcutIconPadding = 4.dp
     val deepShortcutIconSize = 32.dp

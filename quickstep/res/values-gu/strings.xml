@@ -140,8 +140,7 @@
     <string name="taskbar_button_recents" msgid="7273376136216613134">"તાજેતરના"</string>
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"નોટિફિકેશન"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"ઝડપી સેટિંગ"</string>
-    <!-- no translation found for taskbar_button_more_options (8685586215650683202) -->
-    <skip />
+    <string name="taskbar_button_more_options" msgid="8685586215650683202">"વધુ વિકલ્પો"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"ટાસ્કબાર"</string>
     <string name="bubble_bar_a11y_title" msgid="7743340801055597168">"બબલ બાર"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"નૅવિગેશન બાર"</string>
@@ -159,8 +158,7 @@
     <string name="quick_switch_overflow" msgid="3679780650881041632">"{count,plural, =1{વધુ ઍપ}one{વધુ ઍપ}other{વધુ ઍપ}}"</string>
     <string name="quick_switch_desktop" msgid="8393802056024499749">"ડેસ્કટૉપ"</string>
     <string name="quick_switch_split_task" msgid="5598194724255333896">"<xliff:g id="APP_NAME_1">%1$s</xliff:g> અને <xliff:g id="APP_NAME_2">%2$s</xliff:g>"</string>
-    <!-- no translation found for quick_switch_task_with_position_in_parent (9082434281522648105) -->
-    <skip />
+    <string name="quick_switch_task_with_position_in_parent" msgid="9082434281522648105">"<xliff:g id="TASK_DESCRIPTION">%1$s</xliff:g>, <xliff:g id="TOTAL_TASKS">%3$d</xliff:g>માંથી આઇટમ <xliff:g id="INDEX_IN_PARENT">%2$d</xliff:g>, પસંદ કરવા માટે કી બાઇન્ડિંગ રિલીઝ કરો"</string>
     <string name="quick_switch_scroll_arrow_left" msgid="6527033155534184309">"ડાબે સ્ક્રોલ કરો"</string>
     <string name="quick_switch_scroll_arrow_right" msgid="7319779291086916348">"જમણે સ્ક્રોલ કરો"</string>
     <string name="bubble_bar_bubble_fallback_description" msgid="7811684548953452009">"બબલ"</string>
