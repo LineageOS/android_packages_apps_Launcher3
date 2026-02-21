@@ -45,16 +45,6 @@ public class WidgetHostViewLoader implements DragController.DragListener {
     }
 
     @Override
-    public void onDragEnterWindow(DropTarget.DragObject dragObject, DragOptions options) {
-        // No-op
-    }
-
-    @Override
-    public void onDragExitWindow(DropTarget.DragObject dragObject, DragOptions options) {
-        // No-op
-    }
-
-    @Override
     public void onDragEnd() {
         if (LOGD) {
             Log.d(TAG, "Cleaning up in onDragEnd()...");

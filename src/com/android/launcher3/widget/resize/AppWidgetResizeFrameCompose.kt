@@ -120,14 +120,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         close(/* animate= */ true) // close frame if user starts dragging widget.
     }
 
-    override fun onDragEnterWindow(dragObject: DropTarget.DragObject, options: DragOptions) {
-        // No-op
-    }
-
-    override fun onDragExitWindow(dragObject: DropTarget.DragObject, options: DragOptions) {
-        // No-op
-    }
-
     override fun onDragEnd() {
         // No-op
     }

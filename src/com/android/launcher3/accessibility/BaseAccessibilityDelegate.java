@@ -165,16 +165,6 @@ public abstract class BaseAccessibilityDelegate<T extends Context & ActivityCont
         // No-op
     }
 
-    @Override
-    public void onDragEnterWindow(DropTarget.DragObject dragObject, DragOptions options) {
-        // No-op
-    }
-
-    @Override
-    public void onDragExitWindow(DropTarget.DragObject dragObject, DragOptions options) {
-        // No-op
-    }
-
     public class LauncherAction {
         public final int keyCode;
         public final AccessibilityNodeInfo.AccessibilityAction accessibilityAction;
