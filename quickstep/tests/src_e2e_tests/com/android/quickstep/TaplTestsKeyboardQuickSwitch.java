@@ -16,6 +16,10 @@
 package com.android.quickstep;
 
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
+import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
+import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
+import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 
 import android.content.Intent;
 import android.platform.test.annotations.DisableFlags;
@@ -28,6 +32,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.launcher3.Flags;
 import com.android.launcher3.tapl.KeyboardQuickSwitch;
 import com.android.launcher3.taskbar.KeyboardQuickSwitchController;
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 import com.android.launcher3.util.ui.ActivityStartUtils;
 import com.android.launcher3.util.ui.BaseLauncherTaplTest.AllowInRecentsWindowTests;
 
@@ -82,6 +87,7 @@ public class TaplTestsKeyboardQuickSwitch extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testDismiss_fromHome() {
         runTest(TestSurface.HOME, TestCase.DISMISS);
     }
@@ -92,6 +98,7 @@ public class TaplTestsKeyboardQuickSwitch extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testDismiss_fromHomeAllApps() {
         runTest(TestSurface.HOME_ALL_APPS, TestCase.DISMISS);
     }
@@ -103,16 +110,19 @@ public class TaplTestsKeyboardQuickSwitch extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchLastTask_fromHome() {
         runTest(TestSurface.HOME, TestCase.LAUNCH_LAST_APP);
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchLastTask_fromApp() {
         runTest(TestSurface.LAUNCHED_APP, TestCase.LAUNCH_LAST_APP);
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchLastTask_fromHomeAllApps() {
         runTest(TestSurface.HOME_ALL_APPS, TestCase.LAUNCH_LAST_APP);
     }
@@ -124,16 +134,19 @@ public class TaplTestsKeyboardQuickSwitch extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchSelectedTask_fromHome() {
         runTest(TestSurface.HOME, TestCase.LAUNCH_SELECTED_APP);
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchSelectedTask_fromApp() {
         runTest(TestSurface.LAUNCHED_APP, TestCase.LAUNCH_SELECTED_APP);
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchSelectedTask_fromHomeAllApps() {
         runTest(TestSurface.HOME_ALL_APPS, TestCase.LAUNCH_SELECTED_APP);
     }
@@ -146,18 +159,21 @@ public class TaplTestsKeyboardQuickSwitch extends AbstractQuickStepTest {
 
     @Test
     @DisableFlags(value = Flags.FLAG_ENABLE_ALT_TAB_KQS_FLATENNING)
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchOverviewTask_fromHome() {
         runTest(TestSurface.HOME, TestCase.LAUNCH_OVERVIEW);
     }
 
     @Test
     @DisableFlags(value = Flags.FLAG_ENABLE_ALT_TAB_KQS_FLATENNING)
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchOverviewTask_fromApp() {
         runTest(TestSurface.LAUNCHED_APP, TestCase.LAUNCH_OVERVIEW);
     }
 
     @Test
     @DisableFlags(value = Flags.FLAG_ENABLE_ALT_TAB_KQS_FLATENNING)
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchOverviewTask_fromHomeAllApps() {
         runTest(TestSurface.HOME_ALL_APPS, TestCase.LAUNCH_OVERVIEW);
     }
@@ -170,6 +186,7 @@ public class TaplTestsKeyboardQuickSwitch extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchSingleRecentTask() {
         clearAllRecentTasks();
         startAppFast(CALCULATOR_APP_PACKAGE);
@@ -177,12 +194,14 @@ public class TaplTestsKeyboardQuickSwitch extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testDismissedWhenGoingHome() {
         runTest(TestSurface.LAUNCHED_APP, TestCase.DISMISS_WHEN_GOING_HOME);
     }
 
     @Test
     @EnableFlags(value = Flags.FLAG_ENABLE_ALT_TAB_KQS_FLATENNING)
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280168)
     public void testLaunchLastTaskAfterMaxNotOverview_fromHome() {
         runTest(TestSurface.HOME, TestCase.LAUNCH_LAST_MAX_TASK_NOT_OVERVIEW);
     }
