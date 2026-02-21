@@ -76,6 +76,7 @@ import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemHorizonta
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemIconSpacerWidth
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.popupMenuItemWidth
 import com.android.launcher3.popup.ui.PopupMenuItemDimens.systemShortcutIconPadding
+import com.android.launcher3.util.compose.testTag
 import com.android.launcher3.util.compose.textStyleFromResource
 
 /**
@@ -252,6 +253,7 @@ fun SystemShortcutMenuItem(
         }
 
         PopupMenuItem(
+            modifier = Modifier.testTag(title),
             icon = iconComposable,
             title = title,
             itemContentDescription = title,

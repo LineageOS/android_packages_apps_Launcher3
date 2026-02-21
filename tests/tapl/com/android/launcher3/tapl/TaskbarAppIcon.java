@@ -20,6 +20,7 @@ import androidx.test.uiautomator.UiObject2;
 
 import com.android.launcher3.Flags;
 import com.android.launcher3.tapl.Taskbar.TaskbarLocation;
+import com.android.launcher3.testing.shared.TestProtocol;
 
 import java.util.regex.Pattern;
 
@@ -69,10 +70,10 @@ public final class TaskbarAppIcon extends AppIcon implements SplitscreenDragSour
                 final UiObject2 popupContainer = mLauncher.rightClickAndGet(
                         mObject, "popup_container", getRightClickEvent());
                 return createMenu(popupContainer
-                        .findObject(By.desc("deep_shortcuts_container")));
+                        .findObject(By.desc(TestProtocol.DEEP_SHORTCUTS_CONTAINER)));
             }
-            return createMenu(mLauncher.rightClickAndGet(
-                    mObject, /* resName= */ "deep_shortcuts_container", getRightClickEvent()));
+            return createMenu(mLauncher.rightClickAndGet(mObject,
+                    /* resName= */ TestProtocol.DEEP_SHORTCUTS_CONTAINER, getRightClickEvent()));
         }
     }
 
