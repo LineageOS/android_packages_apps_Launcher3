@@ -271,7 +271,7 @@ class HomeScreenFilesProviderTest {
         val updatesStream = provider.updates.forEach(Runnable::run, updates::add)
 
         // Invoke [#createNewFolder()].
-        val extras = HomeScreenFilesUpdate.Extras.builder().findSpaceStartingFromScreenId(1).build()
+        val extras = HomeScreenFilesUpdate.Extras.builder().findSpaceStartingFrom(mock()).build()
         assertEquals(expectSuccess, provider.createNewFolder(extras).get())
 
         // Verify [extras] propagation.

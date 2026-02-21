@@ -125,7 +125,9 @@ class TaskbarLayoutTransitionFactory(private vararg val transitionListeners: Tra
 
                 override fun set(view: View, values: FloatArray) {
                     if (view is TaskbarPinnedAppIconContainer) {
-                        for ((i, v) in values.withIndex()) view[i].pinningTranslationX.value = v
+                        for (i in values.indices) {
+                            view.getChildAt(i)?.pinningTranslationX?.value = values[i]
+                        }
                     }
                 }
             },

@@ -112,6 +112,7 @@ open class PopupContainer<T>(
     }
 
     open fun showComposePopup(systemShortcuts: List<PopupItem>, deepShortcutCount: Int = 0) {
+        mElevation = 0f
         mIsOpen = true
         popupContainer.addView(this)
         visibility = GONE
