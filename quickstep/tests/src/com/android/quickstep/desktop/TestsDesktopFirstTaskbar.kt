@@ -31,7 +31,6 @@ import com.android.quickstep.integration.BaseTaskbarIntegrationTest
 import com.android.quickstep.taskbar.util.IntegrationNavigationModeSwitchRule
 import com.android.quickstep.taskbar.util.IntegrationNavigationModeSwitchRule.NavigationModeSwitch
 import com.android.quickstep.taskbar.util.IntegrationTaskbarModeSwitchRule.Mode
-import com.android.window.flags.Flags
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import org.junit.After
 import org.junit.Assume
@@ -62,7 +61,6 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
         mOriginalWindowingMode =
             setDisplayWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM)
         super.setup()
-        Assume.assumeTrue(Flags.enterDesktopByDefaultOnFreeformDisplays())
         Assume.assumeTrue(
             "Ignoring test because device does not support desktop mode",
             DesktopModeStatus.canEnterDesktopMode(

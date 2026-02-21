@@ -31,7 +31,6 @@ import com.android.launcher3.util.rule.SetPropRule;
 import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch;
 import com.android.quickstep.TaskbarModeSwitchRule.TaskbarModeSwitch;
 import com.android.quickstep.util.OOPDisplayWindowingModeRule;
-import com.android.window.flags.Flags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 import org.junit.Assume;
@@ -58,7 +57,6 @@ public class TaplTestsDesktopTaskbarAllAppsDragTest extends AbstractTaplTestsTas
 
     @Override
     public void setUp() throws Exception {
-        Assume.assumeTrue(Flags.enterDesktopByDefaultOnFreeformDisplays());
         Assume.assumeTrue(
                 "Ignoring test because device does not support desktop mode",
                 DesktopModeStatus.canEnterDesktopMode(getTargetContext()));
