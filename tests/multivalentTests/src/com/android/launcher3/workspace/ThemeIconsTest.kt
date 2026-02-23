@@ -42,6 +42,9 @@ import com.android.launcher3.util.BaseLauncherActivityTest
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.ModelTestExtensions.setEmptyModelLayout
 import com.android.launcher3.util.TestUtil
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
+import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
+import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -158,6 +161,7 @@ class ThemeIconsTest : BaseLauncherActivityTest<Launcher>() {
     @SkipOnDeviceless
     @Throws(Exception::class)
     @EnableFlags(Flags.FLAG_EXPANDABLE_LONG_PRESS_MENU)
+    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280969)
     fun testShortcutIconWithTheme() {
         setThemeEnabled(true)
         targetContext().setEmptyModelLayout()
