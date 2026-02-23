@@ -45,7 +45,6 @@ import com.android.launcher3.LauncherState;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.rule.TestStabilityRule;
 import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 
 import org.junit.After;
@@ -81,9 +80,6 @@ public class PromiseIconUiTest extends BaseLauncherActivityTest<Launcher> {
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
-    @Rule
-    public TestStabilityRule mTestStabilityRule = new TestStabilityRule();
-
     public static final String PACKAGE_NAME = "test.promise.app";
     public static final String DUMMY_PACKAGE = "com.example.android.aardwolf";
     public static final String DUMMY_LABEL = "Aardwolf";
@@ -117,6 +113,7 @@ public class PromiseIconUiTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486279161)
     public void testPromiseIcon_addedFromEligibleSession() throws Throwable {
         final String appLabel = "Test Promise App " + UUID.randomUUID().toString();
         final ItemOperator findPromiseApp = (info, view) ->
