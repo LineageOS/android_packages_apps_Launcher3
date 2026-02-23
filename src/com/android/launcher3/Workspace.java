@@ -120,6 +120,7 @@ import com.android.launcher3.folder.PreviewBackground;
 import com.android.launcher3.graphics.DragPreviewProvider;
 import com.android.launcher3.homescreenfiles.HomeScreenFile;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider;
+import com.android.launcher3.homescreenfiles.HomeScreenFilesUpdate;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtilsKt;
 import com.android.launcher3.icons.FastBitmapDrawable;
@@ -132,6 +133,7 @@ import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
+import com.android.launcher3.model.data.WorkspaceItemCoordinates;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pageindicators.PageIndicator;
 import com.android.launcher3.pageindicators.PageIndicatorDotsWithArrows;
@@ -2231,7 +2233,13 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
                 final List<CompletableFuture<Boolean>> results =
                         HomeScreenFilesProvider.INSTANCE.get(mLauncher)
-                                .moveToHomeScreen(uriList, relativeFolderPath);
+                                .moveToHomeScreen(uriList,
+                                        HomeScreenFilesUpdate.Extras.builder()
+                                                .findSpaceStartingFrom(new WorkspaceItemCoordinates(
+                                                        dropOverInfo.screenId, dropOverInfo.cellX,
+                                                        dropOverInfo.cellY, dropOverInfo.container))
+                                                .build(),
+                                        relativeFolderPath);
 
                 runOnFirstFailure(
                         results,
@@ -3252,7 +3260,14 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 // (2) the creation of new workspace items for any additionally dropped URIs.
                 List<Uri> uriList = requireNonNull(payload.getUriList());
                 HomeScreenFilesProvider provider = HomeScreenFilesProvider.INSTANCE.get(mLauncher);
-                List<CompletableFuture<Boolean>> results = provider.moveToHomeScreen(uriList);
+                List<CompletableFuture<Boolean>> results =
+                        provider.moveToHomeScreen(uriList,
+                                HomeScreenFilesUpdate.Extras.builder()
+                                        .findSpaceStartingFrom(new WorkspaceItemCoordinates(
+                                                firstItemInfo.screenId, firstItemInfo.cellX,
+                                                firstItemInfo.cellY, firstItemInfo.container))
+                                        .build(),
+                                /*relativeFolderPath=*/ null);
 
                 runOnFirstFailure(
                         results,

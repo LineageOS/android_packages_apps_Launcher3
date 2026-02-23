@@ -35,6 +35,7 @@ class HomeScreenFilesNoOpProvider : HomeScreenFilesProvider {
 
     override fun moveToHomeScreen(
         uriList: List<Uri>,
+        extras: HomeScreenFilesUpdate.Extras,
         relativeFolderPath: String?,
     ): List<CompletableFuture<Boolean>> = uriList.map { CompletableFuture.completedFuture(false) }
 
