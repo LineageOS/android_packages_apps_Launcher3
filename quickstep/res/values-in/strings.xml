@@ -140,8 +140,7 @@
     <string name="taskbar_button_recents" msgid="7273376136216613134">"Terbaru"</string>
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Notifikasi"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Setelan Cepat"</string>
-    <!-- no translation found for taskbar_button_more_options (8685586215650683202) -->
-    <skip />
+    <string name="taskbar_button_more_options" msgid="8685586215650683202">"Opsi lainnya"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Taskbar"</string>
     <string name="bubble_bar_a11y_title" msgid="7743340801055597168">"Bilah balon"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Menu navigasi"</string>
@@ -159,8 +158,7 @@
     <string name="quick_switch_overflow" msgid="3679780650881041632">"{count,plural, =1{aplikasi lainnya}other{aplikasi lainnya}}"</string>
     <string name="quick_switch_desktop" msgid="8393802056024499749">"Desktop"</string>
     <string name="quick_switch_split_task" msgid="5598194724255333896">"<xliff:g id="APP_NAME_1">%1$s</xliff:g> dan <xliff:g id="APP_NAME_2">%2$s</xliff:g>"</string>
-    <!-- no translation found for quick_switch_task_with_position_in_parent (9082434281522648105) -->
-    <skip />
+    <string name="quick_switch_task_with_position_in_parent" msgid="9082434281522648105">"<xliff:g id="TASK_DESCRIPTION">%1$s</xliff:g>, item <xliff:g id="INDEX_IN_PARENT">%2$d</xliff:g> dari <xliff:g id="TOTAL_TASKS">%3$d</xliff:g>, lepas penekanan tombol untuk memilih"</string>
     <string name="quick_switch_scroll_arrow_left" msgid="6527033155534184309">"Scroll ke kiri"</string>
     <string name="quick_switch_scroll_arrow_right" msgid="7319779291086916348">"Scroll ke kanan"</string>
     <string name="bubble_bar_bubble_fallback_description" msgid="7811684548953452009">"Balon"</string>

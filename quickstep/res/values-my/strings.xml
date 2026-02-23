@@ -48,7 +48,7 @@
     <string name="back_gesture_feedback_swipe_too_far_from_edge" msgid="4175100312909721217">"ညာ (သို့) ဘယ်ဘက်အစွန်ဆုံးမှ ပွတ်ဆွဲကြောင်း သေချာပါစေ"</string>
     <string name="back_gesture_feedback_cancelled" msgid="762621530959111290">"ဖန်သားပြင်၏ ညာ (သို့) ဘယ်အစွန်းမှ အလယ်သို့ ပွတ်ဆွဲပြီး လွှတ်လိုက်ကြောင်း သေချာပါစေ"</string>
     <string name="back_gesture_feedback_complete_with_overview_follow_up" msgid="9176400654037014471">"နောက်ပြန်သွားရန် ညာဘက်မှပွတ်ဆွဲနည်းကို သိသွားပါပြီ။ နောက်အဆင့်တွင် အက်ပ်များပြောင်းနည်းကို လေ့လာပါ။"</string>
-    <string name="back_gesture_feedback_complete_with_follow_up" msgid="8653374779579748392">"နောက်ဆုတ်လက်ဟန် ရှင်းလင်းပို့ချချက် ပြီးပါပြီ။ နောက်အဆင့်တွင် အက်ပ်များပြောင်းနည်းကို လေ့လာပါ။"</string>
+    <string name="back_gesture_feedback_complete_with_follow_up" msgid="8653374779579748392">"နောက်သို့ လက်ဟန်ကို လေ့လာပြီးပါပြီ။ နောက်အဆင့်တွင် အက်ပ်များပြောင်းနည်းကို လေ့လာပါ။"</string>
     <string name="back_gesture_feedback_complete_without_follow_up" msgid="197189945858268342">"နောက်သို့ လက်ဟန် အပြီးသတ်လိုက်ပါပြီ"</string>
     <string name="back_gesture_feedback_swipe_in_nav_bar" msgid="9157480023651452969">"ဖန်သားပြင် အောက်ခြေနှင့် အလွန်နီးကပ်စွာ ပွတ်ဆွဲခြင်းမရှိကြောင်း သေချာပါစေ"</string>
     <string name="back_gesture_tutorial_confirm_subtitle" msgid="5181305411668713250">"နောက်ဆုတ်လက်ဟန်၏ အာရုံခံစွမ်းကိုပြောင်းရန် ‘ဆက်တင်များ’ သို့ သွားပါ"</string>
@@ -140,8 +140,7 @@
     <string name="taskbar_button_recents" msgid="7273376136216613134">"လတ်တလောများ"</string>
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"အကြောင်းကြားချက်"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"အမြန်ဆက်တင်များ"</string>
-    <!-- no translation found for taskbar_button_more_options (8685586215650683202) -->
-    <skip />
+    <string name="taskbar_button_more_options" msgid="8685586215650683202">"နောက်ထပ်ရွေးစရာ"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"လုပ်ဆောင်စရာဘား"</string>
     <string name="bubble_bar_a11y_title" msgid="7743340801055597168">"ပူဖောင်းဘား"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"လမ်းညွှန်ဘား"</string>
@@ -159,8 +158,7 @@
     <string name="quick_switch_overflow" msgid="3679780650881041632">"{count,plural, =1{နောက်ထပ်အက်ပ်}other{နောက်ထပ်အက်ပ်များ}}"</string>
     <string name="quick_switch_desktop" msgid="8393802056024499749">"ဒက်စ်တော့"</string>
     <string name="quick_switch_split_task" msgid="5598194724255333896">"<xliff:g id="APP_NAME_1">%1$s</xliff:g> နှင့် <xliff:g id="APP_NAME_2">%2$s</xliff:g>"</string>
-    <!-- no translation found for quick_switch_task_with_position_in_parent (9082434281522648105) -->
-    <skip />
+    <string name="quick_switch_task_with_position_in_parent" msgid="9082434281522648105">"<xliff:g id="TASK_DESCRIPTION">%1$s</xliff:g>၊ <xliff:g id="TOTAL_TASKS">%3$d</xliff:g> ခုအနက် <xliff:g id="INDEX_IN_PARENT">%2$d</xliff:g>၊ ရွေးရန်အတွက် ကီးအတွဲကို လွှတ်လိုက်ပါ"</string>
     <string name="quick_switch_scroll_arrow_left" msgid="6527033155534184309">"ဘယ်သို့လှိမ့်ရန်"</string>
     <string name="quick_switch_scroll_arrow_right" msgid="7319779291086916348">"ညာသို့လှိမ့်ရန်"</string>
     <string name="bubble_bar_bubble_fallback_description" msgid="7811684548953452009">"ပူဖောင်းကွက်"</string>
