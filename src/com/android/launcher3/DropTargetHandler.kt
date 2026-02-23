@@ -155,10 +155,6 @@ class DropTargetHandler(
             .thenAcceptAsync(moveToTrashResultHandler, mainExecutor)
     }
 
-    fun onAccessibilityDelete(view: View?, item: ItemInfo) {
-        onDeleteComplete(item, view)
-    }
-
     fun getDragLayer(): DragLayer {
         return launcher.dragLayer
     }
