@@ -19,7 +19,6 @@ package com.android.launcher3.dragndrop;
 import static android.view.View.VISIBLE;
 
 import static com.android.launcher3.AbstractFloatingView.TYPE_DISCOVERY_BOUNCE;
-import static com.android.launcher3.Flags.enableDragEnterExitSupport;
 import static com.android.launcher3.Flags.enableSystemDrag;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_NOT_PINNABLE;
 
@@ -132,22 +131,6 @@ public class DragController implements DragDriver.EventListener, TouchController
          * @param options Options used to start the drag
          */
         void onDragStart(DropTarget.DragObject dragObject, DragOptions options);
-
-        /**
-         * The drag has entered the launcher window
-         *
-         * @param dragObject The object being dragged
-         * @param options Options used to start the drag
-         */
-        void onDragEnterWindow(DropTarget.DragObject dragObject, DragOptions options);
-
-        /**
-         * The drag has exited the launcher window
-         *
-         * @param dragObject The object being dragged
-         * @param options Options used to start the drag
-         */
-        void onDragExitWindow(DropTarget.DragObject dragObject, DragOptions options);
 
         /**
          * The drag has ended
@@ -419,13 +402,6 @@ public class DragController implements DragDriver.EventListener, TouchController
         for (DragListener listener : new ArrayList<>(mListeners)) {
             listener.onDragStart(mDragObject, mOptions);
         }
-        if (shouldPropagateDragEnterExitEvents()
-                && mDragDriver != null
-                && mDragDriver.isDragWithinLauncherWindow()) {
-            for (DragListener listener : new ArrayList<>(mListeners)) {
-                listener.onDragEnterWindow(mDragObject, mOptions);
-            }
-        }
     }
 
     protected boolean isItemPinnable() {
@@ -575,24 +551,10 @@ public class DragController implements DragDriver.EventListener, TouchController
     }
 
     @Override
-    public void onDriverDragEnterWindow() {
-        if (shouldPropagateDragEnterExitEvents()) {
-            for (DragListener listener : new ArrayList<>(mListeners)) {
-                listener.onDragEnterWindow(mDragObject, mOptions);
-            }
-        }
-    }
-
-    @Override
     public void onDriverDragExitWindow() {
         if (mLastDropTarget != null) {
             mLastDropTarget.onDragExit(mDragObject);
             mLastDropTarget = null;
-        }
-        if (shouldPropagateDragEnterExitEvents()) {
-            for (DragListener listener : new ArrayList<>(mListeners)) {
-                listener.onDragExitWindow(mDragObject, mOptions);
-            }
         }
     }
 
@@ -808,12 +770,6 @@ public class DragController implements DragDriver.EventListener, TouchController
     }
 
     private DropTarget findDropTarget(final int x, final int y) {
-        if (enableDragEnterExitSupport()
-                && mDragDriver != null
-                && !mDragDriver.isDragWithinLauncherWindow()) {
-            return null;
-        }
-
         mCoordinatesTemp[0] = x;
         mCoordinatesTemp[1] = y;
         final Rect r = mRectTemp;
@@ -908,9 +864,5 @@ public class DragController implements DragDriver.EventListener, TouchController
                 cancelDrag();
             }
         }
-    }
-
-    private boolean shouldPropagateDragEnterExitEvents() {
-        return enableDragEnterExitSupport() && !mIsInPreDrag;
     }
 }

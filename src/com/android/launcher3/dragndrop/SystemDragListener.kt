@@ -141,21 +141,13 @@ class SystemDragListener(
         return super.onDrag(event)
     }
 
-    override fun onDragStart(dragObject: DragObject, options: DragOptions) {
-        // No-op
-    }
-
-    override fun onDragEnterWindow(dragObject: DragObject, options: DragOptions) {
-        // No-op
-    }
-
-    override fun onDragExitWindow(dragObject: DragObject, options: DragOptions) {
-        // No-op
-    }
-
     override fun onDragEnd() {
         mContext.dragController.removeDragListener(this)
         postCleanup()
+    }
+
+    override fun onDragStart(dragObject: DragObject, options: DragOptions) {
+        // No-op
     }
 
     override fun startDrag(

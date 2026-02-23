@@ -42,14 +42,6 @@ open class AccessibleDragListenerAdapter
         enableAccessibleDrag(true, dragObject)
     }
 
-    override fun onDragEnterWindow(dragObject: DragObject, options: DragOptions) {
-        // No-op
-    }
-
-    override fun onDragExitWindow(dragObject: DragObject, options: DragOptions) {
-        // No-op
-    }
-
     override fun onDragEnd() {
         mViewGroup.setOnHierarchyChangeListener(null)
         enableAccessibleDrag(false, null)

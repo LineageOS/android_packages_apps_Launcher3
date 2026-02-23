@@ -221,16 +221,6 @@ public abstract class ButtonDropTarget extends TextView
     }
 
     @Override
-    public void onDragEnterWindow(DropTarget.DragObject dragObject, DragOptions options) {
-        // No-op
-    }
-
-    @Override
-    public void onDragExitWindow(DropTarget.DragObject dragObject, DragOptions options) {
-        // No-op
-    }
-
-    @Override
     public final boolean acceptDrop(DragObject dragObject) {
         return supportsDrop(dragObject.dragInfo);
     }
