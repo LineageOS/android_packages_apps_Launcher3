@@ -79,12 +79,12 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
+import com.android.cuebar.ui.viewmodel.ActionType
+import com.android.cuebar.ui.viewmodel.ActionViewModel
 import com.android.launcher3.R
 import com.android.quickstep.cuebar.ui.compose.modifier.animatedActionBorder
 import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
 import com.android.quickstep.cuebar.ui.utils.FilterUtils
-import com.android.quickstep.cuebar.ui.viewmodel.ActionType
-import com.android.quickstep.cuebar.ui.viewmodel.ActionViewModel
 import kotlinx.coroutines.delay
 
 @Composable

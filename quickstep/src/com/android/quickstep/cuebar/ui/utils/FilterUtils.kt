@@ -16,8 +16,8 @@
 
 package com.android.quickstep.cuebar.ui.utils
 
-import com.android.quickstep.cuebar.ui.viewmodel.ActionType
-import com.android.quickstep.cuebar.ui.viewmodel.ActionViewModel
+import com.android.cuebar.ui.viewmodel.ActionType
+import com.android.cuebar.ui.viewmodel.ActionViewModel
 
 object FilterUtils {
     /**

@@ -47,11 +47,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.window.core.layout.WindowSizeClass
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
+import com.android.cuebar.ui.viewmodel.ActionViewModel
 import com.android.launcher3.widgetpicker.ui.rememberViewModel
 import com.android.quickstep.cuebar.ui.compose.NavBarPill
 import com.android.quickstep.cuebar.ui.compose.ShortPill
 import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
-import com.android.quickstep.cuebar.ui.viewmodel.ActionViewModel
 import com.android.quickstep.cuebar.ui.viewmodel.AmbientCueViewModel
 import com.android.quickstep.cuebar.ui.viewmodel.PillStyleViewModel
 import kotlinx.coroutines.delay
