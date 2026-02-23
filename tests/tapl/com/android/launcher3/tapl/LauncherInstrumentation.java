@@ -1878,6 +1878,10 @@ public final class LauncherInstrumentation {
         return waitForObjectBySelector(getLauncherObjectSelector(resName));
     }
 
+    public void waitForTaskbarToShow() {
+        waitForSystemLauncherObject(TASKBAR_RES_ID);
+    }
+
     @NonNull
     UiObject2 waitForSystemLauncherObject(String resName) {
         return is3PLauncher() ? waitForOverviewObject(resName)
@@ -2702,8 +2706,9 @@ public final class LauncherInstrumentation {
     }
 
     /** Shows the taskbar if it is hidden, otherwise does nothing. */
-    public void showTaskbarIfHidden() {
-        getTestInfo(TestProtocol.REQUEST_UNSTASH_TASKBAR_IF_STASHED);
+    public boolean showTaskbarIfHidden() {
+        return getTestInfo(TestProtocol.REQUEST_UNSTASH_TASKBAR_IF_STASHED)
+                .getBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD);
     }
 
     /** Shows the bubble bar if it is stashed, otherwise this does nothing. */

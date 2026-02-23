@@ -24,6 +24,7 @@ import static com.android.systemui.shared.Flags.enableRecentsInTaskbar;
 import static junit.framework.TestCase.assertEquals;
 
 import android.content.Intent;
+import android.os.SystemClock;
 
 import com.android.launcher3.tapl.Taskbar;
 import com.android.launcher3.tapl.TestHelpers;
@@ -62,9 +63,13 @@ public class AbstractTaplTestsTaskbar extends AbstractQuickStepTest {
         performInitialization();
         if (startCalculatorAppDuringSetup()) {
             startAppFast(CALCULATOR_APP_PACKAGE);
+            // Let app open animation to settle
+            SystemClock.sleep(3000);
         }
         mLauncher.enableBlockTimeout(true);
-        mLauncher.showTaskbarIfHidden();
+        if (mLauncher.showTaskbarIfHidden()) {
+            mLauncher.waitForTaskbarToShow();
+        }
     }
 
     @After

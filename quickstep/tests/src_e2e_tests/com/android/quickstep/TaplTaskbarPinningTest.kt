@@ -34,11 +34,8 @@ class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 
     private lateinit var taskbarFeatureEvaluator: TaskbarFeatureEvaluator
 
-    override fun startCalculatorAppDuringSetup(): Boolean = false
-
     override fun setUp() {
         super.setUp()
-        startAppFast(CALCULATOR_APP_PACKAGE)
         taskbarFeatureEvaluator =
             TaskbarFeatureEvaluator.INSTANCE[mTargetContext][mTargetContext.displayId]!!
     }
