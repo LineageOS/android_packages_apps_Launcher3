@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.graphics.ColorUtils;
 
@@ -376,6 +377,47 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
         if (mOnChangeListener != null) {
             mOnChangeListener.onItemsChanged();
         }
+    }
+
+    /**
+     * Adds an item to the list of items at front position.
+     * @param item The item to add.
+     */
+    public void prependItem(TaskbarOverflowItem item) {
+        mItems.addFirst(item);
+
+        invalidate();
+        if (mOnChangeListener != null) {
+            mOnChangeListener.onItemsChanged();
+        }
+    }
+
+    /**
+     * Removes the first visible item from the item list.
+     * @return The removed item, or null if no visible items exist.
+     */
+    @Nullable
+    public TaskbarOverflowItem removeFirstVisibleItem() {
+        if (mItems.isEmpty()) {
+            return null;
+        }
+
+        int indexToRemove = 0;
+        if (mItems.getFirst().getItemId() == mHiddenDraggedItemId) {
+            if (mItems.size() == 1) {
+                return null;
+            }
+            indexToRemove = 1;
+        }
+
+        TaskbarOverflowItem item = mItems.remove(indexToRemove);
+
+        invalidate();
+        if (mOnChangeListener != null) {
+            mOnChangeListener.onItemsChanged();
+        }
+
+        return item;
     }
 
     /**

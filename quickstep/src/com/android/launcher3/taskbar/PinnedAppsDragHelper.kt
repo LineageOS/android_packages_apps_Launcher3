@@ -16,9 +16,16 @@
 
 package com.android.launcher3.taskbar
 
+import android.animation.LayoutTransition.APPEARING
+import android.animation.LayoutTransition.DISAPPEARING
 import android.content.Context
 import android.view.View
+import android.view.View.OnLayoutChangeListener
+import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.LinearLayout.INVISIBLE
+import com.android.launcher3.BubbleTextView
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.taskbar.TaskbarViewDragDropController.PinnedAppsContainerDelegate
 
 /** A helper class to handle drag and drop logic for pinned apps container. */
@@ -61,11 +68,72 @@ abstract class PinnedAppsDragHelper(
     open fun createGhostViewLayoutParams(iconSize: Int): ViewGroup.LayoutParams =
         TaskbarView.TaskbarLayoutParams(0, 0)
 
+    abstract fun createViewForItem(item: ItemInfo): BubbleTextView?
+
     open fun onDragStateChanged() {}
 
     open fun hasHiddenChild(): Boolean = indexOfChildHiddenForDrag >= 0
 
     override fun getPinIndex(startingIndex: Int): Int = startingIndex + dropSpotIndex
+
+    override fun updateForDroppedItem(item: ItemInfo): Boolean {
+        if (dropSpotIndex == -1) {
+            return false
+        }
+        dropTargetGhostView?.let {
+            container.removeView(it)
+            dropTargetGhostView = null
+        }
+
+        val draggedView =
+            if (indexOfChildHiddenForDrag >= 0) container.getChildAt(indexOfChildHiddenForDrag)
+            else null
+        draggedView?.let {
+            container.removeView(it)
+            // Cancel any pending drag view disappearing animation - the dragged view is not visible
+            // at this time and will be readded to the container immediately.
+            container.layoutTransition?.cancel(DISAPPEARING)
+            // Keep drag view invisible, but make it take up space during layout - it will be
+            // changed to visible when resetting the drag state.
+            it.visibility = INVISIBLE
+        }
+
+        val itemView = draggedView ?: createViewForItem(item)
+        if (itemView != null) {
+            container.addView(itemView, calculateDropIndexInContainer(dropSpotIndex, -1))
+            container.layoutTransition?.cancel(APPEARING)
+        }
+        indexOfChildHiddenForDrag = -1
+        dropSpotIndex = -1
+
+        // Adding item view may trigger layout animations. Given that the item view is replacing
+        // drop ghost item, the position of non-dragged views should not change, but the added
+        // dragged view may end up animating from its current location if it's reused (either as
+        // an original drag view, or as a recycled item view) - cancel changing animation, and
+        // appearing animation when they get started on next layout to avoid unwanted motion.
+        container.addOnLayoutChangeListener(
+            object : OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    view: View?,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int,
+                ) {
+                    view?.removeOnLayoutChangeListener(this)
+                    container.layoutTransition?.endChangingAnimations()
+                    container.layoutTransition?.cancel(APPEARING)
+                }
+            }
+        )
+
+        onDragStateChanged()
+        return itemView != draggedView
+    }
 
     override fun releaseDropSlot() {
         dropSpotIndex = -1
@@ -81,8 +149,8 @@ abstract class PinnedAppsDragHelper(
             return
         }
         container.removeViewAt(indexOfChildHiddenForDrag)
+        container.layoutTransition?.cancel(DISAPPEARING)
         indexOfChildHiddenForDrag = -1
-        container.clearDisappearingChildren()
     }
 
     override fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean): Boolean {
