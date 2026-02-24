@@ -367,16 +367,22 @@
     <string name="folder_closed">Folder closed</string>
     <!-- Folder renamed format -->
     <string name="folder_renamed">Folder renamed to <xliff:g id="name" example="Games">%1$s</xliff:g></string>
+    <!-- Folder type name when home screen files folder is not supported -->
+    <string name="folder_type_name">Folder</string>
+    <!-- Folder type name when the home screen files folder is supported -->
+    <string name="app_folder_type_name">App folder</string>
     <!-- Folder name format when folder has less than 4 items -->
-    <string name="folder_name_format_exact">Folder: <xliff:g id="name" example="Games">%1$s</xliff:g>, <xliff:g id="size" example="2">%2$d</xliff:g> items</string>
+    <string name="folder_name_format_exact"><xliff:g id="type" example="App folder">%1$s</xliff:g>: <xliff:g id="name" example="Games">%2$s</xliff:g>, <xliff:g id="size" example="2">%3$d</xliff:g> items</string>
     <!-- Folder name format when folder has less than 4 items and a notification dot -->
-    <string name="folder_name_format_exact_with_dot">Folder: <xliff:g id="name" example="Games">%1$s</xliff:g>, <xliff:g id="size" example="2">%2$d</xliff:g> items, has notifications</string>
+    <string name="folder_name_format_exact_with_dot"><xliff:g id="type" example="App folder">%1$s</xliff:g>: <xliff:g id="name" example="Games">%2$s</xliff:g>, <xliff:g id="size" example="2">%3$d</xliff:g> items, has notifications</string>
     <!-- Folder name format when folder has 4 or more items shown in preview-->
-    <string name="folder_name_format_overflow">Folder: <xliff:g id="name" example="Games">%1$s</xliff:g>, <xliff:g id="size" example="2">%2$d</xliff:g> or more items</string>
+    <string name="folder_name_format_overflow"><xliff:g id="type" example="App folder">%1$s</xliff:g> <xliff:g id="name" example="Games">%2$s</xliff:g>, <xliff:g id="size" example="2">%3$d</xliff:g> or more items</string>
     <!-- Folder name format when folder has 4 or more items shown in preview and a notification dot -->
-    <string name="folder_name_format_overflow_with_dot">Folder: <xliff:g id="name" example="Games">%1$s</xliff:g>, <xliff:g id="size" example="2">%2$d</xliff:g> or more items, has notifications</string>
+    <string name="folder_name_format_overflow_with_dot"><xliff:g id="type" example="App folder">%1$s</xliff:g>: <xliff:g id="name" example="Games">%2$s</xliff:g>, <xliff:g id="size" example="2">%3$d</xliff:g> or more items, has notifications</string>
     <!-- Accessibility announement for unnamed folders -->
     <string name="unnamed_folder">Unnamed folder</string>
+    <!-- Home screen files folder name -->
+    <string name="files_folder_name">File folder: <xliff:g id="name" example="Documents">%1$s</xliff:g></string>
 
     <!-- App pair accessibility -->
     <!-- App pair name -->

@@ -50,6 +50,7 @@ import androidx.core.util.Pair;
 
 import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
+import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.dagger.LauncherAppSingleton;
@@ -630,7 +631,9 @@ public class IconCache extends BaseIconCache {
     protected void applyCacheEntry(@NonNull final CacheEntry entry,
             @NonNull final ItemInfoWithIcon info) {
         info.title = Utilities.trim(entry.title);
-        info.contentDescription = entry.contentDescription;
+        info.contentDescription = HomeScreenFilesUtilsKt.isFileSystemFolderItem(info)
+                ? context.getString(R.string.files_folder_name, entry.contentDescription)
+                : entry.contentDescription;
         info.bitmap = entry.bitmap;
         // Clear any previously set appTitle, if the packageOverride is no longer valid
         info.appTitle = null;

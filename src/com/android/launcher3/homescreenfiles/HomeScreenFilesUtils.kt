@@ -36,6 +36,7 @@ class HomeScreenFilesUtils {
                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
         /** Returns `true` if the feature to show files on the home screen is enabled. */
+        @JvmStatic
         val isFeatureEnabled: Boolean by lazy {
             showFilesOnHomeScreen() && Environment.isExternalStorageManager()
         }
@@ -85,3 +86,6 @@ val ItemInfo.homeScreenFile: HomeScreenFile?
 /** Returns whether an [ItemInfo] represents a file system item. */
 fun ItemInfo.isFileSystemItem(): Boolean =
     itemType == ITEM_TYPE_FILE_SYSTEM_FILE || itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER
+
+/** Returns whether an [ItemInfo] represents a file system folder. */
+fun ItemInfo.isFileSystemFolderItem(): Boolean = itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER
