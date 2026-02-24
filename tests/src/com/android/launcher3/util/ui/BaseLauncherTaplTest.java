@@ -86,11 +86,15 @@ import java.util.concurrent.TimeUnit;
 import shark.AndroidMetadataExtractor;
 import shark.AndroidObjectInspectors;
 import shark.AndroidReferenceMatchers;
+import shark.ApplicationLeak;
 import shark.FilteringLeakingObjectFinder;
 import shark.HeapAnalysis;
+import shark.HeapAnalysisSuccess;
 import shark.HeapAnalyzer;
 import shark.HeapField;
 import shark.HeapObject.HeapInstance;
+import shark.LeakTrace;
+import shark.LeakTraceReference;
 import shark.OnAnalysisProgressListener;
 
 /**
@@ -174,19 +178,28 @@ public abstract class BaseLauncherTaplTest {
                     device.executeShellCommand(
                             "am dumpheap " + device.getLauncherPackageName() + " " + fileName);
                 }
+                Log.d(TAG, "Saved leak dump, the leak is still present: "
+                        + !launcher.noLeakedUiSurfaces());
+                sDumpWasGenerated = true;
 
                 File hprofFile = new File(fileName);
                 // Make the hprof file readable for the heap analyzer.
                 device.executeShellCommand("chmod 644 " + fileName);
 
+                String referenceChain = null;
                 try {
-                    createLeakReportFromHeap(hprofFile);
+                    referenceChain = createLeakReportFromHeap(hprofFile);
                 } catch (Throwable e) {
                     Log.e(TAG, "Heap analysis failed", e);
                 }
-                Log.d(TAG, "Saved leak dump, the leak is still present: "
-                        + !launcher.noLeakedUiSurfaces());
-                sDumpWasGenerated = true;
+
+                if (referenceChain != null) {
+                    // Omit the full list of UI surfaces when a specific leak path is found to keep
+                    // the assertion message focused and concise.
+                    return "Saved memory dump and leak analysis as artifacts. "
+                            + "Path from GC root to the leaking object: " + referenceChain;
+                }
+
                 result = "saved memory dump as an artifact";
             } catch (Throwable e) {
                 Log.e(TAG, "dumpHprofData failed", e);
@@ -196,7 +209,7 @@ public abstract class BaseLauncherTaplTest {
         return result + ". Full list of UI surfaces: " + launcher.getRootedUiSurfacesList();
     }
 
-    private static void createLeakReportFromHeap(File hprofFile) {
+    private static String createLeakReportFromHeap(File hprofFile) {
         HeapAnalyzer heapAnalyzer = new HeapAnalyzer(
                 OnAnalysisProgressListener.Companion.getNO_OP());
         List<FilteringLeakingObjectFinder.LeakingObjectFilter> filters = new ArrayList<>(
@@ -248,6 +261,42 @@ public abstract class BaseLauncherTaplTest {
         } catch (IOException e) {
             Log.e(TAG, "Failed to write analysis to file", e);
         }
+
+        return getConciseLeakPath(analysis);
+    }
+
+    private static String getConciseLeakPath(HeapAnalysis analysis) {
+
+        if (!(analysis instanceof HeapAnalysisSuccess)) {
+            return null;
+        }
+
+        HeapAnalysisSuccess success = (HeapAnalysisSuccess) analysis;
+        if (success.getApplicationLeaks().isEmpty()) {
+            return null;
+        }
+
+        // We only extract the first leak to keep the assertion error message readable
+        ApplicationLeak firstLeak = success.getApplicationLeaks().get(0);
+        if (firstLeak.getLeakTraces().isEmpty()) {
+            return null;
+        }
+
+        LeakTrace trace = firstLeak.getLeakTraces().get(0);
+        List<String> pathElements = new ArrayList<>();
+
+        for (LeakTraceReference ref : trace.getReferencePath()) {
+            String className = ref.getOriginObject().getClassName();
+            if (className.startsWith("java.lang.") || className.startsWith("java.util.")) {
+                continue;
+            }
+            pathElements.add(ref.getOwningClassSimpleName()
+                    + "." + ref.getReferenceDisplayName());
+        }
+
+        pathElements.add(trace.getLeakingObject().getClassSimpleName());
+
+        return String.join(" -> ", pathElements);
     }
 
     private static HeapInstance getRef(HeapInstance instance, String className, String fieldName) {
