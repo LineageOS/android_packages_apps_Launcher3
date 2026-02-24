@@ -73,8 +73,8 @@ import com.android.quickstep.util.SystemUiFlagUtils;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
-import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.BubbleFlagHelper;
 
 import kotlin.Unit;
 
@@ -312,13 +312,20 @@ public class TaskbarLauncherStateController {
 
         resetIconAlignment();
 
+        mLauncherState = mLauncherUiState.getLauncherState();
         if (shouldReactToLauncherStateChange()) {
             mStateListenerClosable =
                     mLauncher.addStateListener(mStateListener, getTaskbarUiThread());
-            runForRecentsWindowManager(recentsWindowManager ->
-                    recentsWindowManager.getStateManager().addStateListener(mRecentsStateListener));
+            RecentsState recentsState = getFromRecentsWindowManager(recentsWindowManager -> {
+                StateManager<RecentsState, RecentsWindowManager> stateManager =
+                        recentsWindowManager.getStateManager();
+                stateManager.addStateListener(mRecentsStateListener);
+                return stateManager.getState();
+            });
+            if (recentsState != null) {
+                mLauncherState = toLauncherState(recentsState);
+            }
         }
-        mLauncherState = mLauncherUiState.getLauncherState();
         updateStateForSysuiFlags(sysuiStateFlags, /*applyState*/ false);
 
         applyState(0);
