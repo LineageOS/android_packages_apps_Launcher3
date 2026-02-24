@@ -17,6 +17,7 @@
 package com.android.quickstep;
 
 import static com.android.launcher3.Flags.FLAG_ENABLE_MOUSE_INTERACTION_CHANGES;
+import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
 import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.quickstep.InputConsumerUtils.newBaseConsumer;
@@ -42,6 +43,7 @@ import android.view.Display;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 
+import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -182,12 +184,17 @@ public class InputConsumerUtilsTest {
     @Before
     public void setUpTaskbarActivityContext() {
         NavHandle navHandle = mock(NavHandle.class);
+        LifecycleRegistry lifecycleRegistry =
+                LifecycleRegistry.createUnsafe(mTaskbarActivityContext);
+        lifecycleRegistry.setCurrentState(androidx.lifecycle.Lifecycle.State.INITIALIZED);
 
         when(navHandle.canNavHandleBeLongPressed()).thenReturn(true);
 
+        when(mTaskbarActivityContext.getLifecycle()).thenReturn(lifecycleRegistry);
         when(mTaskbarActivityContext.getDeviceProfile()).thenReturn(new DeviceProfile());
         when(mTaskbarActivityContext.getNavHandle()).thenReturn(navHandle);
         when(mTaskbarActivityContext.getResources()).thenReturn(mContext.getResources());
+        when(mTaskbarActivityContext.getUiExecutor()).thenReturn(getTaskbarUiThread());
     }
 
     @Before
