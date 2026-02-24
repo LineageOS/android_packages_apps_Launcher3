@@ -617,7 +617,9 @@ public abstract class BaseLauncherTaplTest {
 
     /** Clears all recent tasks */
     public void clearAllRecentTasks() {
-        mLauncher.goHome();
+        if (mDisplayId == DEFAULT_DISPLAY) {
+            mLauncher.goHome();
+        }
         try {
             getUiDevice().executeShellCommand(
                     "dumpsys activity service SystemUIService WMShell desktopmode removeAllDesks");
