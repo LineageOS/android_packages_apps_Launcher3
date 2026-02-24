@@ -32,6 +32,10 @@ import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.FakePrefsModule
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
+import com.android.launcher3.util.rule.TestStabilityRule
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
+import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
+import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import com.android.tools.dagger.mutation.annotations.BindValue
 import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
@@ -56,6 +60,7 @@ class SettingsChangeLoggerTest {
 
     @get:Rule val mockito = MockitoJUnit.rule()
     @get:Rule val context = SandboxApplication()
+    @get:Rule val testStabilityRule = TestStabilityRule()
 
     private val mInstanceId = InstanceId.fakeInstanceId(1)
 
@@ -87,6 +92,7 @@ class SettingsChangeLoggerTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280752)
     fun logSnapshot_defaultValue() {
         SettingsChangeLogger.INSTANCE.get(context).apply {
             // Wait for all the states in SettingsChangeLogger to get initialized
