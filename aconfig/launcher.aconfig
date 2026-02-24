@@ -276,16 +276,6 @@ flag {
 }
 
 flag {
-  name: "restore_archived_shortcuts"
-  namespace: "launcher"
-  description: "Makes sure pre-archived pinned shortcuts also get restored"
-  bug: "375414891"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "restore_archived_app_icons_from_db"
   namespace: "launcher"
   description: "Restores pre-archived icons from db when available, mimicing promise icons"
