@@ -1435,7 +1435,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * Updates and applies {@link TaskbarStashController#FLAG_IN_SECONDARY_LAUNCHER_ON_CD} to
      * {@link TaskbarStashController} state flags.
      */
-    public void updateStashControllerLauncherStateFlag(boolean enabled) {
+    void updateStashControllerLauncherStateFlag(boolean enabled) {
         if (isPrimaryDisplay() || !enableAutoStashConnectedDisplayTaskbar.isTrue()) {
             return;
         }

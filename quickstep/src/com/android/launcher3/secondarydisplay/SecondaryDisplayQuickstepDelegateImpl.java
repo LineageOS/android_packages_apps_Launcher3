@@ -163,11 +163,7 @@ public final class SecondaryDisplayQuickstepDelegateImpl extends SecondaryDispla
 
         var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
         if (conn == null) return;
-        TaskbarActivityContext tac = conn.getTaskbarManager().getTaskbarForDisplay(displayId);
-        if (tac == null) {
-            return;
-        }
-        tac.updateStashControllerLauncherStateFlag(isVisible);
+        conn.getTaskbarManager().updateStashControllerLauncherStateFlag(displayId, isVisible);
     }
 
     @Override
