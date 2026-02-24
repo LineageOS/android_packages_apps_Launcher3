@@ -16,6 +16,8 @@
 
 package com.android.quickstep;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 import static com.android.quickstep.fallback.RecentsStateUtilsKt.hasEquivalentRecentsState;
 import static com.android.quickstep.fallback.RecentsStateUtilsKt.toLauncherState;
@@ -28,15 +30,18 @@ import androidx.test.uiautomator.Until;
 
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.tapl.LaunchedAppState;
+import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.TestHelpers;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.TestUtil;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
+import com.android.quickstep.util.MultiDisplayTestRule;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.window.RecentsWindowFlags;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.quickstep.window.RecentsWindowTracker;
 
+import org.junit.Rule;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
@@ -50,6 +55,9 @@ import java.util.function.Supplier;
 public abstract class AbstractQuickStepTest
         extends AbstractLauncherUiTest<QuickstepLauncher, RecentsView<?, ?>> {
 
+    @Rule
+    public MultiDisplayTestRule mMultiDisplayTestRule =
+            new MultiDisplayTestRule(getInstrumentation(), this::onTestDisplayChanged);
     @Override
     protected TestRule getRulesInsideActivityMonitor() {
         return RuleChain.
@@ -171,5 +179,10 @@ public abstract class AbstractQuickStepTest
                         + "one",
                 isInLaunchedApp(launcher)));
         return launchedAppState;
+    }
+
+    private void onTestDisplayChanged(int displayId) {
+        mDisplayId = displayId;
+        mLauncher = new LauncherInstrumentation(mDisplayId, /* isLauncherTest= */ true);
     }
 }

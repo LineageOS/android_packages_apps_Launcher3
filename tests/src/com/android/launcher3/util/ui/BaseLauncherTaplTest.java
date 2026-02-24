@@ -52,6 +52,7 @@ import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.Until;
 
+import com.android.launcher3.tapl.Background;
 import com.android.launcher3.tapl.HomeAllApps;
 import com.android.launcher3.tapl.HomeAppIcon;
 import com.android.launcher3.tapl.LauncherInstrumentation;
@@ -122,7 +123,16 @@ public abstract class BaseLauncherTaplTest {
     private static final String ENUM_CLASS = Enum.class.getName();
 
     protected final UiDevice mDevice = getUiDevice();
-    protected final LauncherInstrumentation mLauncher = createLauncherInstrumentation();
+    protected final LauncherInstrumentation mDefaultDisplayLauncher =
+            createLauncherInstrumentation();
+
+    /**
+     * this is used by default for TAPL actions in tests and may be overridden if test display
+     * changes. see {@link com.android.quickstep.AbstractQuickStepTest#onTestDisplayChanged(int)}.
+     * To guarantee a TAPL action is always performed on default display launcher use
+     * {@link #mDefaultDisplayLauncher} instead.
+     */
+    protected LauncherInstrumentation mLauncher = mDefaultDisplayLauncher;
 
     @NonNull
     public static LauncherInstrumentation createLauncherInstrumentation() {
@@ -429,6 +439,20 @@ public abstract class BaseLauncherTaplTest {
     @NonNull
     private static UiDevice getUiDevice() {
         return UiDevice.getInstance(getInstrumentation());
+    }
+
+    /**
+     * Get the base container for the display associated with this test after going to Home if
+     * possible. Prefer this method over mLauncher.goHome to support tests on external displays
+     *
+     * @return a Workspace object for default display or a LaunchedAppState for non-default
+     */
+    protected Background getBaseContainer() {
+        if (mDisplayId == DEFAULT_DISPLAY) {
+            return mLauncher.goHome();
+        } else {
+            return mLauncher.getLaunchedAppState();
+        }
     }
 
     private static void aggressivelyUnlockSysUi() {
