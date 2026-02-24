@@ -46,4 +46,11 @@ class TaplTestOverviewExternalDisplay : AbstractQuickStepTest() {
         assertThat(task.open()).isNotNull()
         assertTestActivityIsRunning(3, "Test Activity didn't open from Overview")
     }
+
+    @Test
+    @MultiDisplayTest
+    fun testDismissAllTasksFromOverview() {
+        baseContainer.switchToOverview().dismissAllTasks()
+        assertThat(mLauncher.recentTasks).isEmpty()
+    }
 }
