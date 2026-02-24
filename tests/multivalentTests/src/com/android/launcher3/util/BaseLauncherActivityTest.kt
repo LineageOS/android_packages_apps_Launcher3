@@ -24,6 +24,7 @@ import com.android.launcher3.integration.util.LauncherActivityScenarioRule
 import com.android.launcher3.testutil.LauncherTestInteractions
 import com.android.launcher3.testutil.Wait.atMost
 import com.android.launcher3.util.ModelTestExtensions.loadModelSync
+import com.android.launcher3.util.rule.TestStabilityRule
 import org.junit.Rule
 
 @Deprecated("Use LauncherActivityScenarioRule instead")
@@ -33,6 +34,8 @@ import org.junit.Rule
  * This should instead be a rule, but is kept as a base class for easier migration from TAPL
  */
 open class BaseLauncherActivityTest<LAUNCHER_TYPE : Launcher> {
+
+    @get:Rule val testStabilityRule = TestStabilityRule()
 
     @get:Rule val launcherActivity = LauncherActivityScenarioRule<LAUNCHER_TYPE>()
 
