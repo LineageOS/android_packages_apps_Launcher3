@@ -682,6 +682,13 @@ flag {
 }
 
 flag {
+  name: "double_tap_to_sleep"
+  namespace: "launcher"
+  description: "Enables double tap to sleep gesture on launcher"
+  bug: "394952494"
+}
+
+flag {
   name: "reduce_workspace_blur_usage"
   namespace: "launcher"
   description: "Disables the full workspace blur and zoom effects behind surfaces like the \"All apps\" panel or the widget picker"
