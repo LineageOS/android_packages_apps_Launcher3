@@ -215,6 +215,7 @@ import com.android.quickstep.util.LauncherUnfoldAnimationController;
 import com.android.quickstep.util.QuickstepOnboardingPrefs;
 import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.util.SurfaceTransactionApplier;
+import com.android.quickstep.util.TraceStateLoggerHelper;
 import com.android.quickstep.util.unfold.LauncherUnfoldTransitionController;
 import com.android.quickstep.util.unfold.ProxyUnfoldTransitionProvider;
 import com.android.quickstep.views.FloatingTaskView;
@@ -794,6 +795,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         View.setTracedRequestLayoutClassClass(TRACE_RELAYOUT_CLASS);
         OverviewComponentObserver.INSTANCE.get(this)
                 .addOverviewChangeListener(mOverviewChangeListener);
+        new TraceStateLoggerHelper(getDisplayId()).startTraceStateLogger(this);
     }
 
     @Override
