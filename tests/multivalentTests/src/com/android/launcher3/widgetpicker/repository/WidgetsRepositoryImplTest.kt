@@ -238,7 +238,9 @@ class WidgetsRepositoryImplTest {
         whenever(launcherApps.getShortcutConfigActivityList(eq(APP_2_PACKAGE_NAME), eq(user)))
             .thenReturn(listOf())
 
-        doReturn(iconLoadRequest).whenever(iconCacheMock).getIconLoadRequest(any<Any>(), any())
+        doReturn(iconLoadRequest)
+            .whenever(iconCacheMock)
+            .getIconLoadRequest(any<Any>(), any(), any())
         doReturn(ShortcutPreviewDrawable).whenever(iconLoadRequest).getIcon(any<ComponentInfo>())
         doReturn(ShortcutPreviewDrawable).whenever(iconLoadRequest).getIcon(any<ApplicationInfo>())
     }
