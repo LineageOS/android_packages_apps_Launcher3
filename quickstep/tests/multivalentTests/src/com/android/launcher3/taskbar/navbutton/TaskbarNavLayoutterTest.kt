@@ -16,6 +16,8 @@
 
 package com.android.launcher3.taskbar.navbutton
 
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import android.view.Display
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +32,7 @@ import com.android.launcher3.deviceprofile.DeviceConfiguration
 import com.android.launcher3.deviceprofile.DeviceProperties
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.google.common.truth.Truth.assertThat
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -39,8 +42,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@SkipOnDeviceless // Causing module errors: b/486737856 raised to fix this
 @RunWith(AndroidJUnit4::class)
 class TaskbarNavLayoutterTest : NavButtonLayoutterTest() {
+
+    @get:Rule val limitDevicesRule = LimitDevicesRule()
 
     private val mockTaskbarActivityContext: TaskbarActivityContext = mock {
         val realContext = ApplicationProvider.getApplicationContext<android.content.Context>()
