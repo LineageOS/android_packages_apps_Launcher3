@@ -15,10 +15,7 @@
  */
 package com.android.quickstep.recents;
 
-import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
-import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
-import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -62,12 +59,6 @@ public class TaplOverviewIconTest extends AbstractQuickStepTest {
                 "Launcher activity is the top activity; expecting another activity to be the top "
                         + "one",
                 isInLaunchedApp(launcher)));
-    }
-
-    private void startTestApps() {
-        startAppFast(getAppPackageName());
-        startAppFast(CALCULATOR_APP_PACKAGE);
-        startTestActivity(2);
     }
 
     @Test

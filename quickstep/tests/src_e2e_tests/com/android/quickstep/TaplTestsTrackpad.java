@@ -16,7 +16,6 @@
 
 package com.android.quickstep;
 
-import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
 import static com.android.quickstep.NavigationModeSwitchRule.Mode.ZERO_BUTTON;
 
 import static org.junit.Assert.assertNotNull;
