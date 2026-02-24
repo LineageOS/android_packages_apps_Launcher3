@@ -175,8 +175,8 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
             }
 
             case TestProtocol.REQUEST_UNSTASH_TASKBAR_IF_STASHED:
-                runOnTaskbar(TaskbarManager::unstashTaskbarIfStashed);
-                return response;
+                return getTaskbarProperty(
+                        Bundle::putBoolean, TaskbarManager::unstashTaskbarIfStashed);
 
             case TestProtocol.REQUEST_COLLAPSE_BUBBLE_BAR:
                 runOnTaskbar(TaskbarManager::removeAllBubbles);

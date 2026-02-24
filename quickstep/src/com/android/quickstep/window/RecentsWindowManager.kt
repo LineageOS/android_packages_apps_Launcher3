@@ -49,6 +49,7 @@ import android.window.OnBackInvokedDispatcher
 import android.window.RemoteTransition
 import android.window.SplashScreen
 import android.window.TransitionInfo
+import androidx.annotation.AnyThread
 import androidx.annotation.UiThread
 import androidx.core.animation.addListener
 import androidx.core.view.isVisible
@@ -204,7 +205,7 @@ constructor(
 
     private var callbacks: RecentsAnimationCallbacks? = null
 
-    private var taskbarInteractor: TaskbarInteractor? = null
+    @Volatile private var taskbarInteractor: TaskbarInteractor? = null
 
     private var oldConfiguration: Configuration? = null
     private var oldRotation: Int = -1
@@ -810,6 +811,7 @@ constructor(
             displayId != DEFAULT_DISPLAY
     }
 
+    @AnyThread
     override fun setTaskbarInteractor(taskbarInteractor: TaskbarInteractor?) {
         this.taskbarInteractor = taskbarInteractor
     }

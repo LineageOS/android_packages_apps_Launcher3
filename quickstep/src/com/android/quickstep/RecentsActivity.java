@@ -57,6 +57,7 @@ import android.view.ViewStub;
 import android.window.RemoteTransition;
 import android.window.SplashScreen;
 
+import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -133,7 +134,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
     private FallbackActivityRecentsView mFallbackRecentsView;
     private OverviewActionsView<?> mActionsView;
     private SysUIConnectionTracker mSysUIConnectionTracker;
-    private @Nullable TaskbarInteractor mTaskbarInteractor;
+    private @Nullable volatile TaskbarInteractor mTaskbarInteractor;
 
     private StateManager<RecentsState, RecentsActivity> mStateManager;
 
@@ -193,6 +194,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         mSysUIConnectionTracker.onConnected(this, c -> c.getTaskbarManager().setActivity(this));
     }
 
+    @AnyThread
     @Override
     public void setTaskbarInteractor(@Nullable TaskbarInteractor taskbarInteractor) {
         mTaskbarInteractor = taskbarInteractor;

@@ -51,7 +51,7 @@ import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.quickstep.util.SingleTask
 import com.android.window.flags.Flags.FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU
 import com.android.wm.shell.Flags.FLAG_ENABLE_CREATE_ANY_BUBBLE
-import com.android.wm.shell.shared.bubbles.BubbleFeatureConfigImpl
+import com.android.wm.shell.shared.bubbles.FakeBubbleFeatureConfig
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert
 import org.junit.Before
@@ -59,7 +59,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
@@ -436,8 +435,8 @@ class TaskbarPopupControllerTest {
     @Test
     @EnableFlags(FLAG_ENABLE_CREATE_ANY_BUBBLE)
     fun getShortcuts_bubblesNotSupported() {
-        val bubbleFeatureConfig = mock<BubbleFeatureConfigImpl>()
-        whenever(bubbleFeatureConfig.areAppBubblesSupported()).thenReturn(false)
+        val bubbleFeatureConfig = FakeBubbleFeatureConfig()
+        bubbleFeatureConfig.areAppBubblesSupported = false
         taskbarContext.overrideBubbleFeatureConfigForTests(bubbleFeatureConfig)
         val itemInfo = hotseatIcon.getTag() as ItemInfo
         val systemShortcuts =

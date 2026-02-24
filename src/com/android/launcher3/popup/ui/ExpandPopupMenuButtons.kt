@@ -41,6 +41,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,17 +60,27 @@ import com.android.launcher3.util.compose.textStyleFromResource
  * A generic composable for a menu item that expands a section in the popup.
  *
  * @param text The text to display for the menu item.
+ * @param contentDescription The content description for the button.
  * @param onClick The callback function to invoke when the menu item is clicked.
  */
 @Composable
-fun ExpandPopupMenuButton(text: String, onClick: () -> Unit) {
+fun ExpandPopupMenuButton(text: String, contentDescription: String, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     Surface(
         onClick = onClick,
-        modifier = Modifier.size(popupMenuItemWidth, popupMenuItemHeight),
+        modifier =
+            Modifier.size(popupMenuItemWidth, popupMenuItemHeight).semantics(
+                mergeDescendants = true
+            ) {
+                this.role = Role.Button
+                this.onClick(label = contentDescription) {
+                    onClick()
+                    true
+                }
+            },
         shape = RoundedCornerShape(popupCornerRadius),
         color =
             colorResource(
@@ -124,6 +138,7 @@ fun ExpandPopupMenuButton(text: String, onClick: () -> Unit) {
 fun ExpandSystemShortcutsMenuButton(onShowSystemShortcuts: () -> Unit) {
     ExpandPopupMenuButton(
         text = stringResource(R.string.actions_popup_menu_button),
+        contentDescription = stringResource(R.string.actions_popup_menu_button_description),
         onClick = onShowSystemShortcuts,
     )
 }
@@ -137,6 +152,7 @@ fun ExpandSystemShortcutsMenuButton(onShowSystemShortcuts: () -> Unit) {
 fun ExpandDeepShortcutsMenuButton(onShowDeepShortcuts: () -> Unit) {
     ExpandPopupMenuButton(
         text = stringResource(R.string.shortcuts_popup_menu_button),
+        contentDescription = stringResource(R.string.shortcuts_popup_menu_button_description),
         onClick = onShowDeepShortcuts,
     )
 }

@@ -340,7 +340,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         SettingsCache settingsCache = SettingsCache.INSTANCE.get(this);
         mIsUserSetupComplete = settingsCache.getValue(URI_USER_SETUP_COMPLETE);
         mIsNavBarKidsMode = settingsCache.getValue(URI_NAV_BAR_KIDS_MODE);
-        mBubbleFeatureConfig = new BubbleFeatureConfigImpl(mWindowContext);
+        mBubbleFeatureConfig = new BubbleFeatureConfigImpl(mWindowContext,
+                DesktopState.getInstance(mWindowContext));
 
         applyDeviceProfile(launcherDp);
         mTaskbarSpecsEvaluator = new TaskbarSpecsEvaluator(
@@ -2330,11 +2331,16 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     /**
      * Unstashes the Taskbar if it is stashed.
+     *
+     * @return true if transient taskbar and caller can expect taskbar to be unstashed.
      */
     @VisibleForTesting
-    public void unstashTaskbarIfStashed() {
+    public boolean unstashTaskbarIfStashed() {
         if (isTransientTaskbar()) {
             mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(false);
+            return true;
+        } else {
+            return false;
         }
     }
 

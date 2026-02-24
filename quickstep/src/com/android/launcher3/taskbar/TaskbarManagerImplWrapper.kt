@@ -209,9 +209,10 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
     }
 
     @VisibleForTesting
-    override fun unstashTaskbarIfStashed() {
-        getTaskbarUiThread().execute { impl.currentActivityContext!!.unstashTaskbarIfStashed() }
-    }
+    override fun unstashTaskbarIfStashed(): Boolean =
+        getTaskbarUiThread()
+            .submit<Boolean> { impl.currentActivityContext!!.unstashTaskbarIfStashed() }
+            .get()
 
     @VisibleForTesting
     override fun enableBlockingTimeoutDuringTests(enableBlockingTimeout: Boolean) {

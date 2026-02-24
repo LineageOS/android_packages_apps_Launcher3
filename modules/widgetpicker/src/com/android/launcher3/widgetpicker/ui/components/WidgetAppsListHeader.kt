@@ -291,12 +291,12 @@ private fun WidgetAppHeader(
 ) {
     val focusBorderModifier =
         if (isFocused) {
-            modifier.border(
+            Modifier.border(
                 width = ListHeaderDimensions.focusOutlineStrokeWidth,
                 color = WidgetPickerTheme.colors.focusOutline,
                 shape = RoundedCornerShape(ListHeaderDimensions.focusOutlineRadius),
             )
-        } else modifier
+        } else Modifier
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
