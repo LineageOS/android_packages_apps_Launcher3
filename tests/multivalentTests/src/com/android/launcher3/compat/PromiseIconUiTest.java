@@ -21,6 +21,8 @@ import static android.os.Process.myUserHandle;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.launcher3.Flags.FLAG_ENABLE_SUPPORT_FOR_ARCHIVING;
+import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
+import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -43,6 +45,8 @@ import com.android.launcher3.LauncherState;
 import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.LauncherBindableItemsContainer.ItemOperator;
 import com.android.launcher3.util.TestUtil;
+import com.android.launcher3.util.rule.TestStabilityRule;
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 
 import org.junit.After;
 import org.junit.Before;
@@ -76,6 +80,9 @@ public class PromiseIconUiTest extends BaseLauncherActivityTest<Launcher> {
     @Rule
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
+
+    @Rule
+    public TestStabilityRule mTestStabilityRule = new TestStabilityRule();
 
     public static final String PACKAGE_NAME = "test.promise.app";
     public static final String DUMMY_PACKAGE = "com.example.android.aardwolf";
@@ -151,6 +158,7 @@ public class PromiseIconUiTest extends BaseLauncherActivityTest<Launcher> {
 
     @Test
     @RequiresFlagsEnabled(FLAG_ENABLE_SUPPORT_FOR_ARCHIVING)
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 485320643)
     public void testPromiseIcon_addedArchivedApp() throws Throwable {
         installDummyAppAndWaitForUIUpdate();
         assertThat(UiDevice.getInstance(getInstrumentation()).executeShellCommand(
