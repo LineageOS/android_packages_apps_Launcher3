@@ -49,6 +49,10 @@ import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.testutil.rule.ApplicationOverrideRule
 import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.launcher3.util.SandboxApplication
+import com.android.launcher3.util.rule.TestStabilityRule
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
+import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
+import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -74,6 +78,7 @@ class WorkspaceTest {
     @get:Rule val app = SandboxApplication().withModelDependency()
     @get:Rule val appOverride = ApplicationOverrideRule(app, mockito)
     @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
+    @get:Rule val testStabilityRule = TestStabilityRule()
 
     private val nextUniqueId = AtomicInteger(1)
 
@@ -145,6 +150,7 @@ class WorkspaceTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_FILE_SYSTEM_FOLDERS_AS_DROP_TARGETS)
+    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486279940)
     fun testAddToExistingFileSystemFolderWithFeatureEnabled() {
         testAddToExistingFileSystemFolder()
     }
