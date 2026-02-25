@@ -24,6 +24,8 @@ import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 import static com.android.launcher3.util.TestUtil.getOnMainThread;
 import static com.android.launcher3.util.WidgetUtils.createWidgetInfo;
 import static com.android.launcher3.util.WidgetUtils.findWidgetProvider;
+import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
+import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -57,6 +59,7 @@ import com.android.launcher3.util.BaseLauncherActivityTest;
 import com.android.launcher3.util.ModelTestExtensions;
 import com.android.launcher3.util.RoboApiWrapper;
 import com.android.launcher3.util.TestUtil;
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 
 import org.junit.After;
 import org.junit.Before;
@@ -115,6 +118,7 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
      * Unable to bind widgetId
      */
     @SkipOnDeviceless
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280632)
     public void testBindNormalWidget_withConfig() {
         addWidgetToScreen(true, true, i -> { });
         verifyWidgetPresent(findWidgetProvider(true));
@@ -125,6 +129,7 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
      * Unable to bind widgetId
      */
     @SkipOnDeviceless
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280632)
     public void testBindNormalWidget_withoutConfig() {
         addWidgetToScreen(false, true, i -> { });
         verifyWidgetPresent(findWidgetProvider(false));
@@ -135,6 +140,7 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
      * Failing because of Wait.atMost
      */
     @SkipOnDeviceless
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280632)
     public void testUnboundWidget_removed() {
         int itemId = addWidgetToScreen(false, false, item -> item.appWidgetId = -33);
 
@@ -147,6 +153,7 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280632)
     public void testPendingWidget_autoRestored() {
         // A non-restored widget with no config screen gets restored automatically.
         // Do not bind the widget
@@ -159,6 +166,7 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
      * Failing because of Wait.atMost
      */
     @SkipOnDeviceless
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280632)
     public void testPendingWidget_withConfigScreen() {
         // A non-restored widget with config screen get bound and shows a 'Click to setup' UI.
         // Do not bind the widget
@@ -197,6 +205,7 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280632)
     public void testPendingWidget_notRestored_removed() {
         int itemId = addPendingItemToScreen(
                 getInvalidWidgetInfo(), FLAG_ID_NOT_VALID | FLAG_PROVIDER_NOT_READY);
@@ -208,6 +217,7 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280632)
     public void testPendingWidget_notRestored_brokenInstall() {
         // A widget which is was being installed once, even if its not being
         // installed at the moment is not removed.
@@ -231,6 +241,7 @@ public class BindWidgetTest extends BaseLauncherActivityTest<Launcher> {
      * Failing because of Wait.atMost
      */
     @SkipOnDeviceless
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280632)
     public void testPendingWidget_notRestored_activeInstall() throws Exception {
         // A widget which is being installed is not removed
         LauncherAppWidgetInfo item = getInvalidWidgetInfo();
