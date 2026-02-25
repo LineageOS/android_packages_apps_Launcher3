@@ -64,12 +64,18 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import com.android.launcher3.R
 import com.android.launcher3.organizer.creation.screen.ui.spacecreator.SpaceCreatorActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WorkspaceOrganizer(viewModel: WorkspaceOrganizerViewModel, onArrowBack: () -> Unit) {
+fun WorkspaceOrganizer(onArrowBack: () -> Unit) {
+    val context = LocalContext.current
+    val viewModel =
+        ViewModelProvider(context as ViewModelStoreOwner, WorkspaceOrganizerViewModel.Factory)[
+            WorkspaceOrganizerViewModel::class.java]
     Scaffold(
         containerColor = Color.Transparent,
         floatingActionButton = { FloatingMenu(viewModel) },
@@ -120,14 +126,18 @@ fun WorkspaceOrganizerContent(viewModel: WorkspaceOrganizerViewModel, padding: P
         modifier = Modifier.fillMaxSize().consumeWindowInsets(padding),
     ) {
         itemsIndexed(pages) { index, item ->
-            WorkspaceOrganizerPage(item, index == viewModel.mWorkspaceOrganizerState.selectedPage)
+            WorkspaceOrganizerPage(
+                item,
+                index == viewModel.workspaceOrganizerState.selectedPage,
+                onClick = { viewModel.setSelectedWorkspacePage(index) },
+            )
         }
         item { WorkspaceOrganizerAddPage() }
     }
 }
 
 @Composable
-fun WorkspaceOrganizerPage(page: WorkspacePage, isSelected: Boolean) {
+fun WorkspaceOrganizerPage(page: WorkspacePage, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier =
             Modifier.width(WorkspaceOrganizerDimens.workspacePageWidth)
@@ -148,6 +158,7 @@ fun WorkspaceOrganizerPage(page: WorkspacePage, isSelected: Boolean) {
                         )
                     else it
                 }
+                .clickable { onClick() }
                 .padding(WorkspaceOrganizerDimens.workspacePagePadding)
     ) {
         Image(
@@ -205,10 +216,10 @@ fun FloatingMenu(viewModel: WorkspaceOrganizerViewModel) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NavigationArrows(
-            { viewModel.increaseSelectedWorkspacePage(-1) },
-            { viewModel.increaseSelectedWorkspacePage(1) },
+            { viewModel.moveSelectedWorkspacePage(-1) },
+            { viewModel.moveSelectedWorkspacePage(1) },
         )
-        DeleteWorkspace({})
+        DeleteWorkspace({ viewModel.removeSelectedWorkspacePage() })
     }
 }
 

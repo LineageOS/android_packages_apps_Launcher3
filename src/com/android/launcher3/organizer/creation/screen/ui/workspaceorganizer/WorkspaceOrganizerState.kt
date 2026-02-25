@@ -22,4 +22,4 @@ import android.graphics.Bitmap
 data class WorkspaceOrganizerState(var selectedPage: Int = 0) {}
 
 /** Holds the information needed to render the preview of the Workspace pages. */
-data class WorkspacePage(var bitmap: Bitmap)
+data class WorkspacePage(var bitmap: Bitmap, val screenId: Int)
