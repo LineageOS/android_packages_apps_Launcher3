@@ -541,6 +541,8 @@ class PersistentBubbleStashControllerTest {
                     override fun setIsDragging(dragging: Boolean) {}
 
                     override fun onBubbleBarExpandedStateChanged(expanded: Boolean) {}
+
+                    override fun onMarginUpdated() {}
                 }
             )
         }

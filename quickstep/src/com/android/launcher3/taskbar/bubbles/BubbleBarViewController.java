@@ -300,6 +300,11 @@ public class BubbleBarViewController {
                             false /* shouldBubblesFollow */);
                 }
             }
+
+            @Override
+            public void onMarginUpdated() {
+                mBubbleStashController.updateHandleBounds();
+            }
         });
 
         mBubbleViewController = new BubbleView.Controller() {

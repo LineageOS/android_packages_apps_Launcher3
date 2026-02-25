@@ -427,6 +427,10 @@ constructor(
         bubbleStashedHandleViewController?.getBounds(bounds)
     }
 
+    override fun updateHandleBounds() {
+        bubbleStashedHandleViewController?.updateBounds()
+    }
+
     override fun onDestroy() {
         showBubbleBarReceiver.close()
     }

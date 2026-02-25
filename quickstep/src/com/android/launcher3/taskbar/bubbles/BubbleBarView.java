@@ -481,6 +481,9 @@ public class BubbleBarView extends FrameLayout {
         }
         setLayoutParams(lp); // triggers a relayout
         updateBubbleAccessibilityStates();
+        if (mController != null) {
+            mController.onMarginUpdated();
+        }
     }
 
     /**
@@ -1079,6 +1082,9 @@ public class BubbleBarView extends FrameLayout {
         }
 
         setLayoutParams(lp);
+        if (mController != null) {
+            mController.onMarginUpdated();
+        }
     }
 
     /**
@@ -1132,7 +1138,11 @@ public class BubbleBarView extends FrameLayout {
         boolean shouldFlipCoordinates = switch (mBubbleBarLocation) {
             case LEFT -> !isLeftSide;
             case RIGHT -> isLeftSide;
-            case DEFAULT -> (isLayoutRtl && isLeftSide) || (!isLayoutRtl && !isLeftSide);
+            case DEFAULT ->
+                // in the default case, if the layout is set to LTR, the bubble bar would be on the
+                // right, so we should flip the coordinates if we're computing for the left side in
+                // LTR, or similarly if we're computing for the right side in RTL.
+                (isLayoutRtl && !isLeftSide) || (!isLayoutRtl && isLeftSide);
         };
 
         if (shouldFlipCoordinates) {
@@ -1933,5 +1943,8 @@ public class BubbleBarView extends FrameLayout {
 
         /** Notifies the controller that bubble bar expanded state changed */
         void onBubbleBarExpandedStateChanged(boolean expanded);
+
+        /** Notifies the controller that the bubble bar margin was updated */
+        void onMarginUpdated();
     }
 }
