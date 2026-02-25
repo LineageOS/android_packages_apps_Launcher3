@@ -377,14 +377,17 @@ public class TouchInteractionHandler extends ContextWrapper {
 
     private void onOverviewTargetChanged(boolean isHomeAndOverviewSame) {
         mAllAppsActionManager.setHomeAndOverviewSame(isHomeAndOverviewSame);
+        BaseContainerInterface<?, ?> containerInterface =
+                mOverviewComponentObserver.get().getContainerInterface(DEFAULT_DISPLAY);
         RecentsViewContainer newOverviewContainer =
-                mOverviewComponentObserver.get().getContainerInterface(
-                        DEFAULT_DISPLAY).getCreatedContainer();
+                containerInterface == null ? null : containerInterface.getCreatedContainer();
         if (newOverviewContainer != null) {
-            if (newOverviewContainer instanceof StatefulActivity activity) {
+            if (newOverviewContainer instanceof StatefulActivity<?> activity) {
                 // This will also call setRecentsViewContainer() internally.
                 mTaskbarManager.setActivity(activity);
-            } else {
+            } else if (!isHomeAndOverviewSame) {
+                // When isHomeAndOverviewSame is true, QuickstepLauncher.onOverviewTargetChanged
+                // will call TaskbarManager.setActivity
                 mTaskbarManager.setRecentsViewContainer(newOverviewContainer);
             }
         }
