@@ -16,8 +16,6 @@
 package com.android.quickstep;
 
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
-import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
-import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
 
 import android.content.Intent;
 import android.platform.test.annotations.DisableFlags;

@@ -1,3 +1,12 @@
+// launcher3-quickstep-e2e-test-shared-utils
+
+filegroup {
+    name: "launcher3-quickstep-e2e-test-shared-utils",
+    srcs: [
+        "com/android/quickstep/util/MultiDisplayTestRule.kt",
+    ],
+}
+
 // launcher3-quickstep-e2e-inproc-tests
 
 filegroup {
@@ -22,6 +31,7 @@ filegroup {
         "com/android/quickstep/TaskbarModeSwitchRule.java",
         "com/android/quickstep/NavigationModeSwitchRule.java",
         "com/android/launcher3/testcomponent/ExcludeFromRecentsTestActivity.java",
+        ":launcher3-quickstep-e2e-test-shared-utils",
     ],
 }
 
@@ -49,6 +59,7 @@ filegroup {
         "com/android/quickstep/recents/TaplOverviewIconTest.java",
         "com/android/quickstep/recents/TaplOverviewKeyboardTest.java",
         "com/android/quickstep/recents/TaplOverviewTest.java",
+        "com/android/quickstep/recents/TaplTestOverviewExternalDisplay.kt",
     ],
 }
 
@@ -57,6 +68,7 @@ filegroup {
     srcs: [
         "com/android/quickstep/util/SplitScreenTestUtils.kt",
         "com/android/quickstep/util/OOPDisplayWindowingModeRule.kt",
+        ":launcher3-quickstep-e2e-test-shared-utils",
     ],
 }
 

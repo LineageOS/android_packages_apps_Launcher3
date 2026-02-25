@@ -125,22 +125,24 @@ object ActivityStartUtils {
             .isTrue()
 
         // Wait for the Launcher to stop.
-        val launcherInstrumentation = LauncherInstrumentation(displayId, true)
-        if (!launcherInstrumentation.shouldShowHomeBehindDesktop()) {
-            launcherInstrumentation.waitForCondition(
-                "Launcher activity didn't stop",
-                DEFAULT_ACTIVITY_TIMEOUT,
-            ) {
-                !launcherInstrumentation.isLauncherActivityStarted
-            }
-        } else {
-            // On desktop, the launcher activity might still be considered "started"
-            // even if another app is on top. We skip this check for desktop devices.
-            val idp = InvariantDeviceProfile.INSTANCE.get(getInstrumentation().targetContext)
-            if (idp.deviceType != InvariantDeviceProfile.TYPE_DESKTOP) {
-                assertWithMessage("Launcher activity not started when it should be")
-                    .that(launcherInstrumentation.isLauncherActivityStarted)
-                    .isTrue()
+        if (displayId == DEFAULT_DISPLAY) {
+            val launcherInstrumentation = LauncherInstrumentation(displayId, true)
+            if (!launcherInstrumentation.shouldShowHomeBehindDesktop()) {
+                launcherInstrumentation.waitForCondition(
+                    "Launcher activity didn't stop",
+                    DEFAULT_ACTIVITY_TIMEOUT,
+                ) {
+                    !launcherInstrumentation.isLauncherActivityStarted
+                }
+            } else {
+                // On desktop, the launcher activity might still be considered "started"
+                // even if another app is on top. We skip this check for desktop devices.
+                val idp = InvariantDeviceProfile.INSTANCE.get(getInstrumentation().targetContext)
+                if (idp.deviceType != InvariantDeviceProfile.TYPE_DESKTOP) {
+                    assertWithMessage("Launcher activity not started when it should be")
+                        .that(launcherInstrumentation.isLauncherActivityStarted)
+                        .isTrue()
+                }
             }
         }
     }

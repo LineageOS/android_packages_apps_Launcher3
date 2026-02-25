@@ -16,11 +16,8 @@
 
 package com.android.quickstep;
 
-import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
-import static com.android.launcher3.util.ui.ActivityStartUtils.startAppFast;
 import static com.android.launcher3.util.ui.ActivityStartUtils.startImeTestActivity;
-import static com.android.launcher3.util.ui.ActivityStartUtils.startTestActivity;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -72,12 +69,6 @@ public class TaplTestsQuickstep extends AbstractQuickStepTest {
     public void tearDown() {
         executeOnOverview(/* forTearDown= */ true, recentsView ->
                 recentsView.getPagedViewOrientedState().forceAllowRotationForTesting(false));
-    }
-
-    public static void startTestApps() throws Exception {
-        startAppFast(getAppPackageName());
-        startAppFast(CALCULATOR_APP_PACKAGE);
-        startTestActivity(2);
     }
 
     @Test

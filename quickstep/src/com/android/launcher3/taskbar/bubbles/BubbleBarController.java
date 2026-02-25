@@ -273,7 +273,8 @@ public class BubbleBarController {
     }
 
     private boolean isImeDocked() {
-        if (mContext instanceof TaskbarActivityContext) {
+        if (Flags.fixBubbleBarStashingWithHardwareKeyboard()
+                && mContext instanceof TaskbarActivityContext) {
             return ((TaskbarActivityContext) mContext).isImeDocked();
         }
         return true;

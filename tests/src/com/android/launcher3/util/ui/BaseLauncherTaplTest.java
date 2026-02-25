@@ -23,6 +23,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
+import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
+import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,6 +33,7 @@ import static org.junit.Assume.assumeTrue;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
@@ -49,6 +52,7 @@ import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.Until;
 
+import com.android.launcher3.tapl.Background;
 import com.android.launcher3.tapl.HomeAllApps;
 import com.android.launcher3.tapl.HomeAppIcon;
 import com.android.launcher3.tapl.LauncherInstrumentation;
@@ -119,7 +123,16 @@ public abstract class BaseLauncherTaplTest {
     private static final String ENUM_CLASS = Enum.class.getName();
 
     protected final UiDevice mDevice = getUiDevice();
-    protected final LauncherInstrumentation mLauncher = createLauncherInstrumentation();
+    protected final LauncherInstrumentation mDefaultDisplayLauncher =
+            createLauncherInstrumentation();
+
+    /**
+     * this is used by default for TAPL actions in tests and may be overridden if test display
+     * changes. see {@link com.android.quickstep.AbstractQuickStepTest#onTestDisplayChanged(int)}.
+     * To guarantee a TAPL action is always performed on default display launcher use
+     * {@link #mDefaultDisplayLauncher} instead.
+     */
+    protected LauncherInstrumentation mLauncher = mDefaultDisplayLauncher;
 
     @NonNull
     public static LauncherInstrumentation createLauncherInstrumentation() {
@@ -428,6 +441,20 @@ public abstract class BaseLauncherTaplTest {
         return UiDevice.getInstance(getInstrumentation());
     }
 
+    /**
+     * Get the base container for the display associated with this test after going to Home if
+     * possible. Prefer this method over mLauncher.goHome to support tests on external displays
+     *
+     * @return a Workspace object for default display or a LaunchedAppState for non-default
+     */
+    protected Background getBaseContainer() {
+        if (mDisplayId == DEFAULT_DISPLAY) {
+            return mLauncher.goHome();
+        } else {
+            return mLauncher.getLaunchedAppState();
+        }
+    }
+
     private static void aggressivelyUnlockSysUi() {
         final UiDevice device = getUiDevice();
         for (int i = 0; i < 10 && hasSystemUiObject("keyguard_status_view"); ++i) {
@@ -550,5 +577,22 @@ public abstract class BaseLauncherTaplTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected void startAppFast(String pkg) {
+        ActivityStartUtils.startAppFast(pkg, mDisplayId);
+    }
+
+    protected void startTestActivity(int activityNumber) {
+        ActivityStartUtils.startTestActivity(activityNumber, mDisplayId);
+    }
+
+    private static final String CALCULATOR_APP_PACKAGE =
+            resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR);
+
+    protected void startTestApps() {
+        startAppFast(getAppPackageName());
+        startAppFast(CALCULATOR_APP_PACKAGE);
+        startTestActivity(2);
     }
 }

@@ -164,6 +164,12 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
         return impl.getTaskbarForDisplay(displayId)
     }
 
+    override fun updateStashControllerLauncherStateFlag(displayId: Int, isVisible: Boolean) {
+        getTaskbarUiThread().execute {
+            getTaskbarForDisplay(displayId)?.updateStashControllerLauncherStateFlag(isVisible)
+        }
+    }
+
     override fun dumpLogs(prefix: String, pw: PrintWriter) {
         // Stay on caller thread because PrinterWriter is not thread safe.
         impl.dumpLogs(prefix, pw)

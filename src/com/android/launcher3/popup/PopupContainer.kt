@@ -266,16 +266,6 @@ open class PopupContainer<T>(
         handleClose(/* animate */ true)
     }
 
-    @CallSuper
-    override fun onDragEnterWindow(dragObject: DragObject, options: DragOptions) {
-        // No-op
-    }
-
-    @CallSuper
-    override fun onDragExitWindow(dragObject: DragObject, options: DragOptions) {
-        // No-op
-    }
-
     override fun onDropCompleted(target: View, d: DragObject, success: Boolean) {}
 
     @CallSuper

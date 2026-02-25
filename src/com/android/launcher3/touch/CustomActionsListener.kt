@@ -122,20 +122,6 @@ object AllAppsItemCustomActionsListener : CustomActionsListener {
                             view.visibility = View.INVISIBLE
                         }
 
-                        override fun onDragEnterWindow(
-                            dragObject: DragObject,
-                            options: DragOptions,
-                        ) {
-                            // No-op
-                        }
-
-                        override fun onDragExitWindow(
-                            dragObject: DragObject,
-                            options: DragOptions,
-                        ) {
-                            // No-op
-                        }
-
                         override fun onDragEnd() {
                             view.visibility = View.VISIBLE
                             dragController.removeDragListener(this)

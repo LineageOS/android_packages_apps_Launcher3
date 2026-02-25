@@ -692,18 +692,18 @@ flag {
 }
 
 flag {
-  name: "enable_drag_enter_exit_support"
-  namespace: "launcher"
-  description: "Enables support for drag enter/exit."
-  bug: "456191832"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "enable_home_screen_files_renaming"
   namespace: "launcher"
   description: "Enables support for renaming home screen files."
   bug: "450710219"
+}
+
+flag {
+  name: "gesture_nav_touch_input_optimizations"
+  namespace: "launcher"
+  description: "Replaces existing Gesture Nav touch input with new SpyWindow optimizations"
+  bug: "466226558"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

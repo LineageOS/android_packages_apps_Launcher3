@@ -16,16 +16,23 @@
 
 package com.android.launcher3.taskbar.navbutton
 
+import android.platform.test.rule.LimitDevicesRule
+import android.platform.test.rule.SkipOnDeviceless
 import androidx.test.filters.SmallTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
 @SmallTest
+@SkipOnDeviceless // Causing module errors: b/486737856 raised to fix this
 @RunWith(ParameterizedAndroidJunit4::class)
 class PhoneSeascapeNavLayoutterTest(private val order: SeascapeButtonOrder) :
     NavButtonLayoutterTest() {
+
+    @get:Rule val limitDevicesRule = LimitDevicesRule()
+
     @Test
     fun addThreeButtons_expectedOrder() {
         val layoutter = createLayoutter()

@@ -50,7 +50,6 @@ import static com.android.quickstep.util.ExternalDisplaysKt.isExternalDisplay;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DUAL_SHADE_ENABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING;
-import static com.android.window.flags.Flags.enableDesktopFirstSplitscreenRefocusBugfix;
 import static com.android.wm.shell.Flags.enableBubbleBar;
 import static com.android.wm.shell.Flags.enableBubbleBarOnPhones;
 import static com.android.wm.shell.Flags.enableTinyTaskbar;
@@ -1436,7 +1435,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * Updates and applies {@link TaskbarStashController#FLAG_IN_SECONDARY_LAUNCHER_ON_CD} to
      * {@link TaskbarStashController} state flags.
      */
-    public void updateStashControllerLauncherStateFlag(boolean enabled) {
+    void updateStashControllerLauncherStateFlag(boolean enabled) {
         if (isPrimaryDisplay() || !enableAutoStashConnectedDisplayTaskbar.isTrue()) {
             return;
         }
@@ -2135,9 +2134,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     private boolean shouldLaunchInDesktop(int displayId, ItemInfo info) {
         final SingleTask singleTask = mControllers.taskbarRecentAppsController.getSingleTask(info);
-        final Task nonDesktopTask = enableDesktopFirstSplitscreenRefocusBugfix()
-                ? mControllers.taskbarRecentAppsController.getNonDesktopTask(info)
-                : (singleTask == null ? null : singleTask.getTask());
+        final Task nonDesktopTask =
+                mControllers.taskbarRecentAppsController.getNonDesktopTask(info);
         if (DisplayController.getInfo(this).isInDesktopFirstMode && nonDesktopTask != null) {
             if (!DesktopExperienceFlags.ENABLE_DESKTOP_FIRST_POLICY_IN_LPM.isTrue()) {
                 // Keep the fullscreen mode in desktop-first mode.

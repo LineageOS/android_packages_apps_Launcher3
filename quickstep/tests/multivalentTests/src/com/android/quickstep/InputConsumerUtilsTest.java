@@ -17,6 +17,8 @@
 package com.android.quickstep;
 
 import static com.android.launcher3.Flags.FLAG_ENABLE_MOUSE_INTERACTION_CHANGES;
+import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
+import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.quickstep.InputConsumerUtils.newBaseConsumer;
 import static com.android.quickstep.InputConsumerUtils.newConsumer;
 
@@ -70,6 +72,8 @@ import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController;
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator;
 import com.android.launcher3.util.LockedUserState;
 import com.android.launcher3.util.SandboxApplication;
+import com.android.launcher3.util.rule.TestStabilityRule;
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.quickstep.inputconsumers.AccessibilityInputConsumer;
 import com.android.quickstep.inputconsumers.BubbleBarInputConsumer;
@@ -145,6 +149,8 @@ public class InputConsumerUtilsTest {
 
     @Rule
     public final MockitoRule mMockitoRule = MockitoJUnit.rule();
+
+    @Rule public TestStabilityRule mTestStabilityRule = new TestStabilityRule();
 
     @Before
     public void setupTaskAnimationManager() {
@@ -371,6 +377,7 @@ public class InputConsumerUtilsTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_MOUSE_INTERACTION_CHANGES)
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280960)
     public void testNewBaseConsumer_nonTrackpadMouseEvent_nonDesktop_returnsDefaultInputConsumer() {
         when(mCurrentGestureState.isTrackpadGesture()).thenReturn(false);
         MotionEvent mouseEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);

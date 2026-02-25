@@ -102,6 +102,7 @@ import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
 import com.android.quickstep.util.RecentsAtomicAnimationFactory;
 import com.android.quickstep.util.SurfaceTransactionApplier;
+import com.android.quickstep.util.TraceStateLoggerHelper;
 import com.android.quickstep.views.OverviewActionsView;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
@@ -428,6 +429,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         setTitle(R.string.accessibility_recent_apps);
 
         restoreState(savedInstanceState);
+        new TraceStateLoggerHelper(getDisplayId()).startTraceStateLogger(this);
     }
 
     @Override

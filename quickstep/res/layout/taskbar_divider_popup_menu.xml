@@ -21,6 +21,7 @@
     android:layout_height="wrap_content"
     android:minWidth="@dimen/taskbar_pinning_popup_menu_width"
     android:focusable="true"
+    android:importantForAccessibility="no"
     android:background="@drawable/popup_background"
     android:orientation="vertical">
 
@@ -32,6 +33,7 @@
         android:elevation="2dp"
         android:focusable="true"
         android:clickable="true"
+        android:importantForAccessibility="yes"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:background="@drawable/rounded_popup_ripple"
@@ -44,6 +46,7 @@
             android:layout_margin="6dp"
             android:layout_width="20dp"
             android:layout_height="20dp"
+            android:importantForAccessibility="no"
             android:background="@drawable/ic_visibility"
             android:backgroundTint="@color/materialColorOnSurface" />
 
@@ -53,6 +56,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/taskbar_pinning_switch"
             android:background="@null"
+            android:importantForAccessibility="no"
             android:gravity="start|center_vertical"
             android:textAlignment="viewStart"
             android:paddingStart="12dp"
