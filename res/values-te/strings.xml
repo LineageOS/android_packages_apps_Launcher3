@@ -122,6 +122,10 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"చర్య రద్దు చేయలేరు. రీస్టోర్ చేయడానికి Files యాప్‌నకు వెళ్లండి."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"చర్యలు"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"షార్ట్‌కట్‌లు"</string>
+    <!-- no translation found for actions_popup_menu_button_description (4224192559473869722) -->
+    <skip />
+    <!-- no translation found for shortcuts_popup_menu_button_description (7566698511556454634) -->
+    <skip />
     <string name="pause_app_label" msgid="6796255881727695791">"యాప్‌ను పాజ్ చేయండి"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"షార్ట్‌కట్‌లను ఇన్‌స్టాల్ చేయడం"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"వినియోగదారు ప్రమేయం లేకుండా షార్ట్‌కట్‌లను జోడించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -149,11 +153,21 @@
     <string name="folder_tap_to_rename" msgid="4017685068016979677">"పేరు మార్పును సేవ్ చేయడానికి నొక్కండి"</string>
     <string name="folder_closed" msgid="4100806530910930934">"ఫోల్డర్ మూసివేయబడింది"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"ఫోల్డర్ పేరు <xliff:g id="NAME">%1$s</xliff:g>గా మార్చబడింది"</string>
-    <string name="folder_name_format_exact" msgid="8626242716117004803">"ఫోల్డర్: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> ఐటెమ్‌లు"</string>
-    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"ఫోల్డర్: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> ఐటెమ్‌లు, నోటిఫికేషన్‌లు ఉన్నాయి"</string>
-    <string name="folder_name_format_overflow" msgid="4270108890534995199">"ఫోల్డర్: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> లేదా అంతకంటే ఎక్కువ ఐటెమ్‌లు"</string>
-    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"ఫోల్డర్: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> లేదా మరిన్ని ఐటెమ్‌లు, నోటిఫికేషన్‌లు ఉన్నాయి"</string>
+    <!-- no translation found for folder_type_name (506043307348675355) -->
+    <skip />
+    <!-- no translation found for app_folder_type_name (149643408248060284) -->
+    <skip />
+    <!-- no translation found for folder_name_format_exact (3699127874865971331) -->
+    <skip />
+    <!-- no translation found for folder_name_format_exact_with_dot (5844176801938785593) -->
+    <skip />
+    <!-- no translation found for folder_name_format_overflow (4492486727595816291) -->
+    <skip />
+    <!-- no translation found for folder_name_format_overflow_with_dot (6701701338010067565) -->
+    <skip />
     <string name="unnamed_folder" msgid="2420192029474044442">"పేరు లేని ఫోల్డర్"</string>
+    <!-- no translation found for files_folder_name (7712191128817533622) -->
+    <skip />
     <string name="app_pair_name_format" msgid="8134106404716224054">"యాప్ పెయిర్: <xliff:g id="APP1">%1$s</xliff:g>, <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"వాల్‌పేపర్ &amp; స్టయిల్"</string>
     <string name="edit_home_screen" msgid="8947858375782098427">"మొదటి స్క్రీన్‌ను ఎడిట్ చేయండి"</string>
@@ -193,7 +207,7 @@
     <string name="widgets_list_closed" msgid="6141506579418771922">"విడ్జెట్‌ల లిస్ట్‌ మూసివేయబడింది"</string>
     <string name="action_add_to_workspace" msgid="215894119683164916">"మొదటి స్క్రీన్‌కు జోడించండి"</string>
     <string name="action_move_here" msgid="2170188780612570250">"అంశాన్ని ఇక్కడికి తరలించు"</string>
-    <string name="item_removed" msgid="851119963877842327">"ఐటెమ్ తీసివేయబడింది"</string>
+    <string name="item_removed" msgid="851119963877842327">"ఐటెమ్‌ను తీసివేశారు"</string>
     <string name="undo" msgid="4151576204245173321">"చర్య రద్దు"</string>
     <string name="action_move" msgid="4339390619886385032">"అంశాన్ని తరలించు"</string>
     <string name="move_to_empty_cell_description" msgid="5254852678218206889">"<xliff:g id="STRING">%3$s</xliff:g> లో <xliff:g id="NUMBER_0">%1$s</xliff:g> అడ్డు వరుస <xliff:g id="NUMBER_1">%2$s</xliff:g>నిలువు వరుసకు తరలించండి"</string>
