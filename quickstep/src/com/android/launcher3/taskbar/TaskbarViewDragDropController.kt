@@ -22,10 +22,10 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.util.size
 import com.android.launcher3.Alarm
 import com.android.launcher3.DropTarget
+import com.android.launcher3.LauncherModel.Companion.useModelRepositoryBinding
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.OnAlarmListener
 import com.android.launcher3.R
-import com.android.launcher3.UndoDeleteController
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.model.data.ItemInfo
@@ -159,7 +159,6 @@ class TaskbarViewDragDropController(
 
     private fun endDrag(delegate: PinnedAppsContainerDelegate) {
         startCloseOverflowAlarm()
-        delegate.releaseDropSlot()
         targetPinIndex = -1
     }
 
@@ -254,8 +253,8 @@ class TaskbarViewDragDropController(
         return itemsToShift
     }
 
-    private fun addOrMoveItemInDatabase(draggedItem: ItemInfo) {
-        val hotseatItems = modelCallbacks?.hotseatItems ?: return
+    private fun addOrMoveItemInDatabase(draggedItem: ItemInfo): Set<ItemInfo>? {
+        val hotseatItems = modelCallbacks?.hotseatItems ?: return null
 
         var hotseatItemsContainDraggedInfo = false
         var itemToUpdate = draggedItem
@@ -274,7 +273,7 @@ class TaskbarViewDragDropController(
         }
 
         val (targetScreenId, shouldShiftLeft) = getDropTargetState(hotseatItems, itemToUpdate)
-        if (hotseatItemsContainDraggedInfo && itemToUpdate.screenId == targetScreenId) return
+        if (hotseatItemsContainDraggedInfo && itemToUpdate.screenId == targetScreenId) return null
 
         val itemsToShift =
             if (shouldShiftLeft) getItemsToShiftLeft(hotseatItems, itemToUpdate, targetScreenId)
@@ -285,7 +284,6 @@ class TaskbarViewDragDropController(
             val newPosition = item.screenId + if (shouldShiftLeft) -1 else 1
             writer.addOrMoveItemInDatabase(item, CONTAINER_HOTSEAT, newPosition, newPosition, 0)
         }
-        modelCallbacks?.bindItemsUpdated(itemsToShift.toSet())
 
         writer.addOrMoveItemInDatabase(
             itemToUpdate,
@@ -294,7 +292,8 @@ class TaskbarViewDragDropController(
             targetScreenId,
             0,
         )
-        modelCallbacks?.bindItemsUpdated(hashSetOf(itemToUpdate))
+
+        return itemsToShift.toSet() + hashSetOf(itemToUpdate)
     }
 
     /** Returns the [ItemInfo] from the dragged object. */
@@ -330,14 +329,12 @@ class TaskbarViewDragDropController(
 
             isItemDropped = true
             val itemToUnpin = extractItemInfoFromDragObject(dragObject) ?: return
-            val undoDeleteController = activityContext.undoDeleteController
-            undoDeleteController.prepareToUndoDelete()
-            undoDeleteController.deleteItem(itemToUnpin, "Unpin by taskbar drag and drop")
+            // Remove dragged views immediately - model update will end up removing the dragged item
+            // views too, but may do so with a delay, and cause an item removal animation to run.
+            taskbarPinDelegate.removeDraggedView()
+            overflowPinDelegate?.removeDraggedView()
 
-            modelCallbacks?.bindWorkspaceComponentsRemoved(
-                ItemInfoMatcher.ofItems(Collections.singleton(itemToUnpin))
-            )
-            showDeleteItemSnackbar(undoDeleteController)
+            deleteItemFromModel(itemToUnpin)
         }
 
         override fun onDragEnter(dragObject: DropTarget.DragObject?) {
@@ -387,8 +384,42 @@ class TaskbarViewDragDropController(
         }
 
         /** Shows the snackbar after removing a pinned item from hotseat with undo action. */
-        private fun showDeleteItemSnackbar(undoDeleteController: UndoDeleteController) {
-            val onUndoClicked = Runnable { undoDeleteController.abort() }
+        private fun deleteItemFromModel(item: ItemInfo) {
+            val undoDeleteController = activityContext.undoDeleteController
+            undoDeleteController.prepareToUndoDelete()
+
+            if (
+                activityContext.controllers.taskbarRecentAppsController.setItemMarkedForDeletion(
+                    item,
+                    true,
+                )
+            ) {
+                modelCallbacks?.commitRunningAppsToUI()
+            }
+            undoDeleteController.deleteItem(item, "Unpin by taskbar drag and drop")
+
+            // If model repository bindings are disabled, source of updates will not receive model
+            // change events. Update the model state directly, so the changes get picked up by
+            // taskbar.
+            // When model repository bindings are enabled, model callbacks decide whether to handle
+            // updates coming from their own context, and taskbar model callbacks let removal
+            // updates through.
+            if (!useModelRepositoryBinding()) {
+                modelCallbacks?.bindWorkspaceComponentsRemoved(
+                    ItemInfoMatcher.ofItems(Collections.singleton(item))
+                )
+            }
+
+            val onUndoClicked = Runnable {
+                undoDeleteController.abort()
+
+                if (
+                    activityContext.controllers.taskbarRecentAppsController
+                        .setItemMarkedForDeletion(item, false)
+                ) {
+                    modelCallbacks?.commitRunningAppsToUI()
+                }
+            }
 
             val onDismissed = Runnable { undoDeleteController.commit() }
 
@@ -444,8 +475,13 @@ class TaskbarViewDragDropController(
         override fun onDrop(dragObject: DropTarget.DragObject?, options: DragOptions?) {
             val newInfo = extractItemInfoFromDragObject(dragObject) ?: return
 
-            isItemDropped = true
-            addOrMoveItemInDatabase(newInfo)
+            val updates = addOrMoveItemInDatabase(newInfo)
+            isItemDropped = updates != null
+            if (updates != null) {
+                modelCallbacks?.updateItemsForDragAndDrop(updates)
+            } else {
+                delegate.releaseDropSlot()
+            }
             endDrag(delegate)
         }
 
@@ -482,6 +518,7 @@ class TaskbarViewDragDropController(
 
         override fun onDragExit(dragObject: DropTarget.DragObject?) {
             if (dragObject?.dragComplete != true || dragObject.cancelled) {
+                delegate.releaseDropSlot()
                 endDrag(delegate)
             }
         }
@@ -525,6 +562,14 @@ class TaskbarViewDragDropController(
 
         /** Clears the reserved drop slot. */
         fun releaseDropSlot()
+
+        /**
+         * Removes the view that's being dragged (i.e. view that's been set as being dragged using
+         * [updateItemViewVisibilityForDragState]) from the container. Called when the dragged item
+         * gets unpinned during drop operation, and is expected to be followed by a model update
+         * removing the dragged item.
+         */
+        fun removeDraggedView()
 
         /**
          * Returns the index in the taskbar where the dragged item would be pinned if dropped at the

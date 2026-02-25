@@ -1896,6 +1896,16 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     }
 
     @Override
+    public void removeDraggedView() {
+        if (mHotseatIconsContainer != null) {
+            mHotseatIconsContainer.removeDraggedView();
+            return;
+        }
+
+        mDragDelegate.removeDraggedView();
+    }
+
+    @Override
     public int getPinIndex(int startingIndex) {
         // RTL in HotseatIconsContainer has different logic so the index starts from right to left.
         if (mIsRtl && mHotseatIconsContainer != null

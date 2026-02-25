@@ -16,24 +16,38 @@
 
 package com.android.launcher3.taskbar
 
+import android.app.WindowConfiguration
+import android.content.ComponentName
+import android.content.Intent
 import android.graphics.Rect
+import android.os.Process
 import android.view.View
+import android.view.View.GONE
 import android.view.View.MeasureSpec
+import android.view.View.VISIBLE
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
+import com.android.launcher3.BubbleTextView
 import com.android.launcher3.DropTarget
 import com.android.launcher3.LauncherModel
+import com.android.launcher3.LauncherSettings
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.R
 import com.android.launcher3.dragndrop.DragView
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.TaskItemInfo
+import com.android.launcher3.model.data.TaskItemInfo.Companion.isSameItem
+import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.testing.FakeModelWriter
 import com.android.launcher3.model.testing.WriterAction
 import com.android.launcher3.popup.ArrowPopup.CLOSE_DURATION_U
+import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
+import com.android.launcher3.taskbar.TaskbarViewTestUtil.createTestWorkspaceItem
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext
+import com.android.launcher3.taskbar.rules.MockedRecentsModelHelper
 import com.android.launcher3.taskbar.rules.SandboxParams
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
@@ -42,13 +56,19 @@ import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext_ModifiedC
 import com.android.launcher3.util.IntSparseArrayMap
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.launcher3.views.Snackbar
+import com.android.quickstep.RecentsModel
+import com.android.quickstep.util.DesktopTask
+import com.android.quickstep.util.SingleTask
+import com.android.systemui.shared.recents.model.Task
 import com.android.tools.dagger.mutation.annotations.BindValue
 import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import org.junit.runners.model.Statement
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
@@ -60,6 +80,9 @@ class TaskbarViewDragDropControllerTest {
     private val TEST_APP = TaskbarViewTestUtil.createAppInfo(0)
     private val TEST_WORKSPACE_ITEM = TaskbarViewTestUtil.createHotseatWorkspaceItem(1)
     private val TEST_OPEN_ANIMATION_DURATION = 15L
+
+    private val mockRecentsModelHelper: MockedRecentsModelHelper = MockedRecentsModelHelper()
+    @BindValue val recentsModel: RecentsModel by mockRecentsModelHelper
 
     private val modelWriter = FakeModelWriter()
     @BindValue
@@ -76,10 +99,46 @@ class TaskbarViewDragDropControllerTest {
             params = SandboxParams(builderBase = mutatedComponentBuilder())
         )
     @get:Rule(order = 1) val animatorTestRule = TaskbarAnimatorTestRule(this)
-    @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
+    @get:Rule(order = 2)
+    val taskbarUnitTestRule = TaskbarUnitTestRule(context, this::onControllersInitialized)
+
+    @get:Rule(order = 3)
+    val desktopModeRule = TestRule { base, description ->
+        object : Statement() {
+            override fun evaluate() {
+                whenever(desktopVisibilityController.isInDesktopMode(context.displayId))
+                    .thenReturn(true)
+                base?.evaluate()
+            }
+        }
+    }
+
+    private var currentControllerInitCallback: () -> Unit = {}
+        set(value) {
+            runOnTaskbarUiThreadSync { value.invoke() }
+            field = value
+        }
+
+    private fun onControllersInitialized() {
+        runOnTaskbarUiThreadSync {
+            if (!recentAppsController.canShowRunningApps) {
+                recentAppsController.onDestroy()
+                recentAppsController.canShowRunningApps = true
+                recentAppsController.init(
+                    taskbarUnitTestRule.activityContext.controllers,
+                    emptyList(),
+                )
+            }
+
+            currentControllerInitCallback.invoke()
+        }
+    }
 
     private val activityContext
         get() = taskbarUnitTestRule.activityContext
+
+    private val desktopVisibilityController: DesktopVisibilityController
+        get() = DesktopVisibilityController.INSTANCE[context]
 
     private val overlayContext: TaskbarOverlayContext
         get() = activityContext.controllers.taskbarOverlayController.requestWindow()
@@ -92,6 +151,9 @@ class TaskbarViewDragDropControllerTest {
 
     private val taskbarViewController by taskbarUnitTestRule.delegate { it.taskbarViewController }
     private val taskbarDragController by taskbarUnitTestRule.delegate { it.taskbarDragController }
+    private val recentAppsController by
+        taskbarUnitTestRule.delegate { it.taskbarRecentAppsController }
+
     private val taskbarViewDragDropController by
         taskbarUnitTestRule.delegate { it.taskbarViewDragDropController }
 
@@ -100,6 +162,7 @@ class TaskbarViewDragDropControllerTest {
     @Before
     fun setup() {
         taskbarViewDragDropController.setUpCallbacks(modelCallbacks)
+        runOnTaskbarUiThreadSync { mockRecentsModelHelper.resolvePendingTaskRequests() }
     }
 
     @Test
@@ -453,45 +516,187 @@ class TaskbarViewDragDropControllerTest {
 
     @Test
     fun unpinned_onDrop_undoClicked_abortsDelete() {
-        val dragObject = createDragObject(TEST_WORKSPACE_ITEM)
+        val hotseatItems = createTestHotseatItemsWithDifferentPackages(2) as Array<ItemInfo>
+        updateTaskbarHotseatItems(hotseatItems)
+        whenever(modelCallbacks.commitRunningAppsToUI()).then {
+            updateTaskbarHotseatItems(hotseatItems)
+        }
+
+        val draggedItem = hotseatItems[1]
+        val dragView = getItemView(draggedItem)
+        val dragObject = createDragObject(draggedItem)
 
         runOnTaskbarUiThreadSync {
+            assertThat(dragView).isNotNull()
+            taskbarViewDragDropController.onTaskbarItemViewDragStart(dragView!!)
+            assertThat(dragView.visibility).isEqualTo(GONE)
+
             taskbarViewDragDropController.unpinDropTarget.onDrop(dragObject, null)
+            taskbarViewDragDropController.onTaskbarItemViewDragEnd(dragView)
         }
 
         assertThat(modelWriter.actions).hasSize(0)
 
+        assertThat(getItemView(draggedItem)).isNull()
+        assertThat(getRunningTaskIconForItem(draggedItem)).isNull()
+
+        // Undo deletion.
         val snackbar = getOnTaskbarUiThread { overlayContext.snackbar }
-
         assertThat(snackbar).isNotNull()
-
         runOnTaskbarUiThreadSync { snackbar!!.actionView.performClick() }
-
         assertThat(modelWriter.actions).hasSize(0)
+
+        assertThat(getItemView(draggedItem)?.visibility).isEqualTo(VISIBLE)
+        assertThat(getRunningTaskIconForItem(draggedItem)).isNull()
+
+        updateTaskbarHotseatItems(hotseatItems)
+        assertThat(getItemView(draggedItem)?.visibility).isEqualTo(VISIBLE)
     }
 
     @Test
     fun unpinned_onDrop_onDismiss_commitsDelete() {
-        val dragObject = createDragObject(TEST_WORKSPACE_ITEM)
+        val hotseatItems = createTestHotseatItemsWithDifferentPackages(2) as Array<ItemInfo>
+        updateTaskbarHotseatItems(hotseatItems)
+        whenever(modelCallbacks.commitRunningAppsToUI()).then {
+            updateTaskbarHotseatItems(hotseatItems)
+        }
+
+        val draggedItem = hotseatItems[1]
+        val dragView = getItemView(draggedItem)
+        val dragObject = createDragObject(draggedItem)
 
         runOnTaskbarUiThreadSync {
+            assertThat(dragView).isNotNull()
+            taskbarViewDragDropController.onTaskbarItemViewDragStart(dragView!!)
+            assertThat(dragView.visibility).isEqualTo(GONE)
+
             taskbarViewDragDropController.unpinDropTarget.onDrop(dragObject, null)
+            taskbarViewDragDropController.onTaskbarItemViewDragEnd(dragView)
         }
 
         assertThat(modelWriter.actions).hasSize(0)
 
-        val snackbar = getOnTaskbarUiThread { overlayContext.snackbar }
+        assertThat(getItemView(draggedItem)).isNull()
+        assertThat(getRunningTaskIconForItem(draggedItem)).isNull()
 
+        val snackbar = getOnTaskbarUiThread { overlayContext.snackbar }
         assertThat(snackbar).isNotNull()
 
         runOnTaskbarUiThreadSync { snackbar!!.close(false) }
 
         assertThat(modelWriter.actions).hasSize(1)
 
-        assertThat(modelWriter.actions).contains(WriterAction.DeleteItem(TEST_WORKSPACE_ITEM))
+        assertThat(modelWriter.actions).contains(WriterAction.DeleteItem(draggedItem))
 
         val closedSnackbar = getOnTaskbarUiThread { overlayContext.snackbar }
         assertThat(closedSnackbar).isNull()
+
+        updateTaskbarHotseatItems(hotseatItems.sliceArray(0..0))
+
+        assertThat(getItemView(draggedItem)).isNull()
+        assertThat(getRunningTaskIconForItem(draggedItem)).isNull()
+
+        updateTaskbarHotseatItems(hotseatItems)
+        assertThat(getItemView(draggedItem)?.visibility).isEqualTo(VISIBLE)
+    }
+
+    @Test
+    fun unpinned_onDrop_itemWithRunningTasks_undoClicked_abortsDelete() {
+        val hotseatItems: Array<ItemInfo> =
+            createTestHotseatItemsWithDifferentPackages(2)
+                .mapIndexed { index, it -> TaskItemInfo(index, it) }
+                .toTypedArray()
+        createDesktopTasksFromPackages(hotseatItems.mapNotNull { it.targetPackage })
+        updateTaskbarHotseatItems(hotseatItems)
+        whenever(modelCallbacks.commitRunningAppsToUI()).then {
+            updateTaskbarHotseatItems(hotseatItems)
+        }
+
+        val draggedItem = hotseatItems[1]
+        val dragView = getItemView(draggedItem)
+        val dragObject = createDragObject(draggedItem)
+
+        runOnTaskbarUiThreadSync {
+            assertThat(dragView).isNotNull()
+            taskbarViewDragDropController.onTaskbarItemViewDragStart(dragView!!)
+            assertThat(dragView.visibility).isEqualTo(GONE)
+
+            taskbarViewDragDropController.unpinDropTarget.onDrop(dragObject, null)
+            taskbarViewDragDropController.onTaskbarItemViewDragEnd(dragView)
+        }
+
+        assertThat(modelWriter.actions).hasSize(0)
+
+        // Verify that the taskbar is showing the recent task for drag view.
+        assertThat(getRunningTaskIconForItem(draggedItem)?.visibility).isEqualTo(VISIBLE)
+
+        // Verify that taskbar does not contain a pinned view for dragged item.
+        assertThat(getItemView(draggedItem)).isNull()
+
+        // Undo deletion.
+        val snackbar = getOnTaskbarUiThread { overlayContext.snackbar }
+        assertThat(snackbar).isNotNull()
+        runOnTaskbarUiThreadSync { snackbar!!.actionView.performClick() }
+        assertThat(modelWriter.actions).hasSize(0)
+
+        // Verify that pinned item view is back in taskbar.
+        assertThat(getItemView(draggedItem)?.visibility).isEqualTo(VISIBLE)
+
+        // Recent task view is gone.
+        assertThat(getRunningTaskIconForItem(draggedItem)).isNull()
+    }
+
+    @Test
+    fun unpinned_onDrop_itemWithRunningTasks_onDismiss_commitsDelete() {
+        val hotseatItems: Array<ItemInfo> =
+            createTestHotseatItemsWithDifferentPackages(2)
+                .mapIndexed { index, it -> TaskItemInfo(index, it) }
+                .toTypedArray()
+        createDesktopTasksFromPackages(hotseatItems.mapNotNull { it.targetPackage })
+        updateTaskbarHotseatItems(hotseatItems)
+        whenever(modelCallbacks.commitRunningAppsToUI()).then {
+            updateTaskbarHotseatItems(hotseatItems)
+        }
+
+        val draggedItem = hotseatItems[1]
+        val dragView = getItemView(draggedItem)
+        val dragObject = createDragObject(draggedItem)
+
+        runOnTaskbarUiThreadSync {
+            assertThat(dragView).isNotNull()
+            taskbarViewDragDropController.onTaskbarItemViewDragStart(dragView!!)
+            assertThat(dragView.visibility).isEqualTo(GONE)
+
+            taskbarViewDragDropController.unpinDropTarget.onDrop(dragObject, null)
+            taskbarViewDragDropController.onTaskbarItemViewDragEnd(dragView)
+        }
+
+        assertThat(modelWriter.actions).hasSize(0)
+
+        // Verify that the taskbar is showing the recent task for drag view.
+        assertThat(getRunningTaskIconForItem(draggedItem)?.visibility).isEqualTo(VISIBLE)
+
+        // Verify that taskbar does not contain a pinned view for dragged item.
+        assertThat(getItemView(draggedItem)).isNull()
+
+        val snackbar = getOnTaskbarUiThread { overlayContext.snackbar }
+        assertThat(snackbar).isNotNull()
+
+        runOnTaskbarUiThreadSync { snackbar!!.close(false) }
+
+        assertThat(modelWriter.actions).hasSize(1)
+        assertThat(modelWriter.actions).contains(WriterAction.DeleteItem(draggedItem))
+
+        val closedSnackbar = getOnTaskbarUiThread { overlayContext.snackbar }
+        assertThat(closedSnackbar).isNull()
+
+        updateTaskbarHotseatItems(hotseatItems.sliceArray(0..0))
+
+        assertThat(getRunningTaskIconForItem(draggedItem)).isNotNull()
+        assertThat(getItemView(draggedItem)).isNull()
+
+        updateTaskbarHotseatItems(hotseatItems)
+        assertThat(getItemView(draggedItem)?.visibility).isEqualTo(VISIBLE)
     }
 
     private fun createDragObject(info: ItemInfo): DropTarget.DragObject {
@@ -581,5 +786,72 @@ class TaskbarViewDragDropControllerTest {
         mockDragViewToOverViewBounds(dragObject, overflowContainer)
         requireNotNull(taskbarViewDragDropController.overflowPinningDropTarget)
             .onDragEnter(dragObject)
+    }
+
+    private fun createTestHotseatItemsWithDifferentPackages(count: Int): Array<WorkspaceItemInfo> {
+        return Array(count) {
+            createTestWorkspaceItem(
+                it,
+                "App $it",
+                Intent().setComponent(ComponentName("com.test.app$it", "Test")),
+                Process.myUserHandle(),
+                LauncherSettings.Favorites.CONTAINER_ALL_APPS,
+            )
+        }
+    }
+
+    private fun createDesktopTasksFromPackages(desktopPackages: List<String>) {
+        val defaultDisplayId = context.displayId
+        val desktopTasks =
+            desktopPackages.mapIndexed({ index, p ->
+                Task(
+                    Task.TaskKey(
+                        index,
+                        WindowConfiguration.WINDOWING_MODE_FREEFORM,
+                        Intent().apply { `package` = p },
+                        ComponentName(p, ""),
+                        Process.myUserHandle().identifier,
+                        2000,
+                    )
+                )
+            })
+
+        mockRecentsModelHelper.updateRecentTasks(
+            listOf(DesktopTask(deskId = context.displayId, defaultDisplayId, desktopTasks))
+        )
+
+        runOnTaskbarUiThreadSync { mockRecentsModelHelper.resolvePendingTaskRequests() }
+    }
+
+    private fun updateTaskbarHotseatItems(hotseatItems: Array<ItemInfo>) {
+        runOnTaskbarUiThreadSync {
+            val taskbarView: TaskbarView =
+                taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
+            taskbarView.updateItems(
+                recentAppsController.updateHotseatItemInfos(hotseatItems as Array<ItemInfo?>),
+                recentAppsController.shownTasks,
+                emptyList(),
+            )
+        }
+    }
+
+    private fun getItemView(item: ItemInfo): BubbleTextView? {
+        return getOnTaskbarUiThread {
+            val taskbarView: TaskbarView =
+                taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
+            taskbarView.iconViews.filterIsInstance<BubbleTextView>().firstOrNull() {
+                item.isSameItem(it.tag as? ItemInfo)
+            }
+        }
+    }
+
+    private fun getRunningTaskIconForItem(item: ItemInfo): BubbleTextView? {
+        return getOnTaskbarUiThread {
+            val taskbarView: TaskbarView =
+                taskbarUnitTestRule.activityContext.dragLayer.findViewById(R.id.taskbar_view)
+            taskbarView.iconViews.filterIsInstance<BubbleTextView>().firstOrNull() {
+                (it.tag as? SingleTask)?.containsPackage(item.targetPackage) == true
+            }
+        }
     }
 }
