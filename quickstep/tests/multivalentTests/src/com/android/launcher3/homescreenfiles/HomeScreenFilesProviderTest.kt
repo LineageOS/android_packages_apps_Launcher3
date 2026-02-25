@@ -20,6 +20,8 @@ import android.content.ClipDescription.MIMETYPE_UNKNOWN
 import android.content.ContentProviderClient
 import android.content.ContentResolver
 import android.content.ContentResolver.NOTIFY_INSERT
+import android.content.ContentResolver.NOTIFY_UPDATE
+import android.content.ContentUris
 import android.content.ContentValues
 import android.database.ContentObserver
 import android.database.MatrixCursor
@@ -342,36 +344,32 @@ class HomeScreenFilesProviderTest {
         whenever(contentResolver.acquireContentProviderClient(MediaStore.AUTHORITY))
             .thenReturn(contentProviderClient)
 
-        // Mock attempts to resolve a single media store URI in its original location.
+        // Mock attempts to resolve a media store URI.
+        val path = "/storage/emulated/0/Download"
         whenever(contentResolver.query(any(), any(), isNull(), isNull(), isNull(), isNull()))
             .thenAnswer { invocation ->
                 val answer = MatrixCursor(arrayOf(DISPLAY_NAME, MIME_TYPE, DATA))
-                if (invocation.getArgument<Uri>(0) == mediaStoreFolderUri) {
-                    answer.addRow(arrayOf("folder_a", null, "/storage/emulated/0/Desktop/folder_a"))
-                } else {
-                    answer.addRow(
-                        arrayOf("test.png", "image/png", "/storage/emulated/0/Desktop/test.png")
-                    )
+                val uri = invocation.getArgument<Uri>(0)
+                val id = ContentUris.parseId(uri)
+                when (uri) {
+                    mediaStoreFolderUri -> answer.addRow(arrayOf("Folder", null, "$path/Folder"))
+                    else -> answer.addRow(arrayOf("File\\ $id.png", "image/png", "$path/File/$id"))
                 }
                 return@thenAnswer answer
             }
         whenever(fileFactory.invoke(any())).thenAnswer { invocation ->
             val file = mock<File>()
+            val isDirectory = invocation.getArgument<String>(0) == "$path/Folder"
             whenever(file.exists()).thenReturn(true)
-            whenever(file.isDirectory)
-                .thenReturn(
-                    invocation.getArgument<String>(0) == "/storage/emulated/0/Desktop/folder_a"
-                )
+            whenever(file.isDirectory).thenReturn(isDirectory)
             file
         }
 
         // Mock attempts to update media store.
         whenever(
                 contentResolver.update(
-                    /*uri=*/ anyOrNull(),
-                    /*contentValues=*/ eq(
-                        ContentValues().apply { put(RELATIVE_PATH, relativePath) }
-                    ),
+                    /*uri=*/ any(),
+                    /*contentValues=*/ any(),
                     /*where=*/ eq("$RELATIVE_PATH != ?"),
                     /*selectionArgs=*/ eq(arrayOf(relativePath)),
                 )
@@ -379,42 +377,62 @@ class HomeScreenFilesProviderTest {
             .thenAnswer { invocation ->
                 when (invocation.getArgument<Uri>(0)) {
                     mediaStoreUri,
-                    mediaStoreUriResolvedFromEsp -> 1
+                    mediaStoreUriResolvedFromEsp -> {
+                        assertThat(invocation.getArgument<ContentValues>(1))
+                            .isEqualTo(ContentValues().apply { put(RELATIVE_PATH, relativePath) })
+                        1
+                    }
+                    mediaStoreFolderUri -> {
+                        assertThat(invocation.getArgument<ContentValues>(1))
+                            .isEqualTo(
+                                ContentValues().apply {
+                                    put(MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
+                                    put(RELATIVE_PATH, relativePath)
+                                }
+                            )
+                        1
+                    }
                     else -> throw RuntimeException()
                 }
             }
-        whenever(
-                contentResolver.update(
-                    /*uri=*/ eq(mediaStoreFolderUri),
-                    /*contentValues=*/ eq(
-                        ContentValues().apply {
-                            put(RELATIVE_PATH, relativePath)
-                            put(MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
-                        }
-                    ),
-                    /*where=*/ eq("$RELATIVE_PATH != ?"),
-                    /*selectionArgs=*/ eq(arrayOf(relativePath)),
-                )
+
+        // Cache updates.
+        val updates = mutableListOf<HomeScreenFilesUpdate>()
+        val updatesStream = provider.updates.forEach(Runnable::run, updates::add)
+
+        // NOTE: Overlapping move attempts for a given URI are disallowed.
+        val expectSuccessByUri =
+            listOf(
+                Pair(espUri, true),
+                Pair(mediaStoreUri, true),
+                Pair(mediaStoreUri, false),
+                Pair(mediaStoreFolderUri, true),
+                Pair(testUri, false),
             )
-            .thenReturn(1)
 
         // Attempt to move URIs to home screen.
-        // NOTE: Overlapping move attempts for a given URI are disallowed.
+        val extras = HomeScreenFilesUpdate.Extras.builder().findSpaceStartingFrom(mock()).build()
         assertEquals(
-            listOf(
-                /*expectedEspUriResult=*/ true,
-                /*expectedMediaStoreUriResult=*/ true,
-                /*expectedMediaStoreUriResult=*/ false,
-                /*expectedTestUriResult=*/ false,
-                /*expectedMediaStoreFolderUriResult=*/ true,
-            ),
+            expectSuccessByUri.map(Pair<Uri, Boolean>::second),
             provider
                 .moveToHomeScreen(
-                    listOf(espUri, mediaStoreUri, mediaStoreUri, testUri, mediaStoreFolderUri),
+                    expectSuccessByUri.map(Pair<Uri, Boolean>::first),
+                    extras,
                     relativeFolderPath,
                 )
                 .map(CompletableFuture<Boolean>::get),
         )
+
+        // Verify [extras] propagation.
+        val contentObserver = captureContentObserver()
+        expectSuccessByUri
+            .filter(Pair<Uri, Boolean>::second)
+            .map(Pair<Uri, Boolean>::first)
+            .map { MediaStore.getMediaUri(context, it) }
+            .forEachIndexed { index, uri ->
+                contentObserver.dispatchChange(false, uri, NOTIFY_UPDATE)
+                assertEquals(extras, updates[index].extras)
+            }
     }
 
     @Test
