@@ -43,6 +43,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
@@ -53,6 +54,7 @@ import com.android.launcher3.homescreenfiles.HomeScreenFilesUpdate;
 import com.android.launcher3.logging.StatsLogManager.EventEnum;
 import com.android.launcher3.model.data.WorkspaceItemCoordinates;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.organizer.creation.screen.ui.workspaceoverview.WorkspaceOverviewActivity;
 import com.android.launcher3.popup.ArrowPopup;
 import com.android.launcher3.shortcuts.DeepShortcutView;
 import com.android.launcher3.testing.TestLogging;
@@ -248,6 +250,14 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
                     LAUNCHER_CREATE_NEW_FOLDER_BUTTON_TAP_OR_LONGPRESS,
                     OptionsPopupView::createNewFolder));
         }
+
+        if (Flags.kondoPlanner()) {
+            options.add(new OptionItem(launcher,
+                    R.string.settings_home_organizer,
+                    R.drawable.ic_setting,
+                    LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
+                    OptionsPopupView::startScreenCreation));
+        }
         return options;
     }
 
@@ -305,6 +315,16 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
         launcher.startActivity(new Intent(Intent.ACTION_APPLICATION_PREFERENCES)
                 .setPackage(launcher.getPackageName())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        return true;
+    }
+
+    private static boolean startScreenCreation(View view) {
+        Launcher launcher = Launcher.getLauncher(view.getContext());
+
+        launcher.startActivity(
+                new Intent(view.getContext(), WorkspaceOverviewActivity.class)
+                        .setPackage(launcher.getPackageName())
+        );
         return true;
     }
 

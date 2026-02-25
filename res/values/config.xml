@@ -216,4 +216,7 @@
     <!-- Disables the full workspace blur and zoom effects behind surfaces like the "All apps" panel
          or the widget picker. -->
     <bool name="reduce_workspace_blur_usage">false</bool>
+
+    <!-- Home organizer -->
+    <dimen name="home_organizer_background_blur_radius">30dp</dimen>
 </resources>

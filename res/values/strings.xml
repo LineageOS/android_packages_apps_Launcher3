@@ -397,6 +397,8 @@
     <string name="settings_button_text">Home settings</string>
     <!-- Message shown when a feature is disabled by the administrator -->
     <string name="msg_disabled_by_admin">Disabled by your admin</string>
+    <!-- Text for settings button [CHAR LIMIT=20]-->
+    <string name="settings_home_organizer">Home organizer</string>
 
     <!-- Strings for settings -->
     <!-- Text explaining when the home screen will get rotated. [CHAR LIMIT=100] -->
