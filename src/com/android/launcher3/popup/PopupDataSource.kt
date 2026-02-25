@@ -20,6 +20,7 @@ import android.content.Intent
 import android.os.Process
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.DropTargetHandler
@@ -30,7 +31,9 @@ import com.android.launcher3.Utilities
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate
 import com.android.launcher3.allapps.PrivateProfileManager
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
+import com.android.launcher3.homescreenfiles.homeScreenFile
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -45,10 +48,13 @@ import com.android.launcher3.views.Snackbar
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 import com.android.launcher3.widget.WidgetsBottomSheet
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint
+import java.io.File
 import javax.inject.Inject
 
 @LauncherAppSingleton
-class PopupDataSource @Inject constructor() {
+class PopupDataSource
+@Inject
+constructor(@LauncherAppSingleton private val homeScreenFilesProvider: HomeScreenFilesProvider) {
     // Handles action from tapping remove shortcut.
     private val handleRemove = { activityContext: ActivityContext, itemInfo: ItemInfo, view: View ->
         AbstractFloatingView.closeAllOpenViews(activityContext)
@@ -346,9 +352,28 @@ class PopupDataSource @Inject constructor() {
             eventId = LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_DELETE_VIA_CONTEXT_MENU,
         )
 
-    private val handleRenameFileSystemItem = { _: ActivityContext, _: ItemInfo, _: View ->
-        TODO("b/450710219: Implement.")
-    }
+    private val handleRenameFileSystemItem =
+        fun(activityContext: ActivityContext, itemInfo: ItemInfo, _: View) {
+            val hsf = itemInfo.homeScreenFile ?: return
+
+            // TODO(b/450710219): Replace w/ dialog.
+            val extension = File(hsf.displayName).extension
+            val suffix = if (extension.isNotEmpty()) ".$extension" else ""
+            val name = "${System.currentTimeMillis()}$suffix"
+
+            homeScreenFilesProvider.rename(hsf.uri, name).whenComplete { result, throwable ->
+                if (throwable != null || !result) {
+                    activityContext.uiExecutor.post {
+                        Toast.makeText(
+                                activityContext.asContext(),
+                                R.string.something_went_wrong,
+                                Toast.LENGTH_SHORT,
+                            )
+                            .show()
+                    }
+                }
+            }
+        }
 
     val renameFileSystemItem =
         PopupData(

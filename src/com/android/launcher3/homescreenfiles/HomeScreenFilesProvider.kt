@@ -76,14 +76,14 @@ interface HomeScreenFilesProvider {
     ): List<CompletableFuture<Boolean>>
 
     /**
-     * Permanently deletes a single file or folder in the [HOME_SCREEN_FOLDER_RELATIVE_PATH] folder.
+     * Permanently deletes a single file/folder in the [HOME_SCREEN_FOLDER_RELATIVE_PATH] directory.
      *
      * @param uri The URI of the item to be deleted.
      */
     fun deletePermanently(uri: Uri)
 
     /**
-     * Moves a single file or folder in the [HOME_SCREEN_FOLDER_RELATIVE_PATH] folder to trash.
+     * Moves a single file/folder in the [HOME_SCREEN_FOLDER_RELATIVE_PATH] directory to trash.
      *
      * @param name The name of the item to be deleted.
      * @return The new path of the item after being moved to trash, or `null` if the operation
@@ -92,15 +92,24 @@ interface HomeScreenFilesProvider {
     fun moveToTrash(name: String): CompletableFuture<String?>
 
     /**
-     * Restores a single file or folder from trash to its original location.
+     * Restores a single file/folder from trash to its original location.
      *
      * @param trashPath The path of the item in trash.
-     * @return The flag indicating if the operation succeeded (true) or failed (false).
+     * @return The success/failure of the restore attempt.
      */
     fun restoreFromTrash(trashPath: String): CompletableFuture<Boolean>
 
     /** Returns all eligible file items to be shown on the home screen. */
     fun query(): CompletableFuture<Map<Uri, HomeScreenFile>>
+
+    /**
+     * Renames a single file/folder in the [HOME_SCREEN_FOLDER_RELATIVE_PATH] directory.
+     *
+     * @param uri The URI of the item to be renamed.
+     * @param name The new name of the item.
+     * @return The success/failure of the rename attempt.
+     */
+    fun rename(uri: Uri, name: String): CompletableFuture<Boolean>
 
     companion object {
         @JvmField
