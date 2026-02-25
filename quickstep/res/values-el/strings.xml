@@ -129,7 +129,7 @@
     <string name="taskbar_edu_pinning_standalone" msgid="2636919474366410467">"Για να εμφανίζεται πάντα η Γραμμή εργαλείων στο κάτω μέρος της οθόνης, αγγίξτε παρατεταμένα το διαχωριστικό"</string>
     <string name="taskbar_edu_bubbles_standalone" msgid="4182824636656528043">"Σύρετε μια εφαρμογή στη γωνία, για να εμφανίζεται ως κινούμενη"</string>
     <string name="taskbar_search_edu_title" msgid="5569194922234364530">"Αγγίξτε παρατεταμένα το πλήκτρο ενέργειας για να αναζητήσετε το περιεχόμενο της οθόνης"</string>
-    <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Αυτό το προϊόν χρησιμοποιεί το επιλεγμένο τμήμα της οθόνης σας για αναζήτηση. Ισχύουν η <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Πολιτική απορρήτου<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> και οι <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Όροι Παροχής Υπηρεσιών<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> της Google."</string>
+    <string name="taskbar_edu_search_disclosure" msgid="8734536088447779686">"Αυτό το προϊόν χρησιμοποιεί το επιλεγμένο τμήμα της οθόνης σας για αναζήτηση. Ισχύουν η <xliff:g id="BEGIN_PRIVACY_LINK">&lt;a href="%1$s"&gt;</xliff:g>Πολιτική απορρήτου<xliff:g id="END_PRIVACY_LINK">&lt;/a&gt;</xliff:g> και οι <xliff:g id="BEGIN_TOS_LINK">&lt;a href="%2$s"&gt;</xliff:g>Όροι παροχής υπηρεσιών<xliff:g id="END_TOS_LINK">&lt;/a&gt;</xliff:g> της Google."</string>
     <string name="taskbar_edu_close" msgid="887022990168191073">"Κλείσιμο"</string>
     <string name="taskbar_edu_done" msgid="6880178093977704569">"Τέλος"</string>
     <string name="taskbar_edu_next" msgid="4007618274426775841">"Επόμενο"</string>

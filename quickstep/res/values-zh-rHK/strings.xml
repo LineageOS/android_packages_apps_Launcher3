@@ -158,7 +158,7 @@
     <string name="quick_switch_overflow" msgid="3679780650881041632">"{count,plural, =1{個其他應用程式}other{個其他應用程式}}"</string>
     <string name="quick_switch_desktop" msgid="8393802056024499749">"桌面"</string>
     <string name="quick_switch_split_task" msgid="5598194724255333896">"「<xliff:g id="APP_NAME_1">%1$s</xliff:g>」和「<xliff:g id="APP_NAME_2">%2$s</xliff:g>」"</string>
-    <string name="quick_switch_task_with_position_in_parent" msgid="9082434281522648105">"<xliff:g id="TASK_DESCRIPTION">%1$s</xliff:g>，第 <xliff:g id="INDEX_IN_PARENT">%2$d</xliff:g> 個項目，共 <xliff:g id="TOTAL_TASKS">%3$d</xliff:g> 項，放開按鍵組合即可選取"</string>
+    <string name="quick_switch_task_with_position_in_parent" msgid="9082434281522648105">"<xliff:g id="TASK_DESCRIPTION">%1$s</xliff:g>，第 <xliff:g id="INDEX_IN_PARENT">%2$d</xliff:g> 個項目，總共有 <xliff:g id="TOTAL_TASKS">%3$d</xliff:g> 個項目，放開快速鍵組合就可以揀"</string>
     <string name="quick_switch_scroll_arrow_left" msgid="6527033155534184309">"向左捲動"</string>
     <string name="quick_switch_scroll_arrow_right" msgid="7319779291086916348">"向右捲動"</string>
     <string name="bubble_bar_bubble_fallback_description" msgid="7811684548953452009">"對話氣泡"</string>
