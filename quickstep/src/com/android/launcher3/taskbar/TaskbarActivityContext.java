@@ -525,13 +525,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     /**
-     * Used to confirm we are on AL device.
-     */
-    public boolean shouldShowHomeBehindDesktop() {
-        return DesktopState.getInstance(this).getShouldShowHomeBehindDesktop();
-    }
-
-    /**
      * Copy the original DeviceProfile, match the number of hotseat icons and qsb width and update
      * the icon size
      */
