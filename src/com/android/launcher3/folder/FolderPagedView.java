@@ -400,6 +400,9 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
 
         setEnableOverscroll(getPageCount() > 1);
 
+        // Update the focus chain for all icons to ensure proper keyboard navigation.
+        arrangeChildrenFocus(list);
+
         // Update footer
         mPageIndicator.setVisibility(getPageCount() > 1 ? View.VISIBLE : View.GONE);
         mFolder.onIndicatorVisibilityChanged();
@@ -407,6 +410,22 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
         int horizontalGravity = getPageCount() > 1
                 ? (mIsRtl ? Gravity.RIGHT : Gravity.LEFT) : Gravity.CENTER_HORIZONTAL;
         mFolder.getFolderName().setGravity(horizontalGravity | Gravity.CENTER_VERTICAL);
+    }
+
+    /**
+     * Updates the next focus forward ID for each child in the folder, skipping any null views.
+     */
+    private void arrangeChildrenFocus(List<View> list) {
+        View lastFocusView = null;
+        for (View view : list) {
+            if (view == null) {
+                continue;
+            }
+            if (lastFocusView != null) {
+                lastFocusView.setNextFocusForwardId(view.getId());
+            }
+            lastFocusView = view;
+        }
     }
 
     public int getDesiredWidth() {
