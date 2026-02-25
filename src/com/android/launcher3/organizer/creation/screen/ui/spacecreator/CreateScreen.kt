@@ -1,0 +1,200 @@
+/*
+ * Copyright (C) 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.launcher3.organizer.creation.screen.ui.spacecreator
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.android.launcher3.R
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateScreen(viewModel: SpaceCreatorViewModel) {
+    Scaffold(
+        containerColor = Color.Transparent,
+        topBar = {
+            CenterAlignedTopAppBar(
+                modifier = Modifier.padding(CreateScreenDimens.contentSidePadding),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                    ),
+                title = {
+                    Text(
+                        text = stringResource(R.string.organizer_create_screen),
+                        color = colorResource(R.color.materialColorOnSurface),
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {},
+                        modifier =
+                            Modifier.background(
+                                CreateScreenDimens.AndroidOnlySe1Se1,
+                                shape = RoundedCornerShape(size = 360.dp),
+                            ),
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = colorResource(R.color.materialColorOnSurface),
+                        )
+                    }
+                },
+            )
+        },
+        content = { padding ->
+            CreateScreenContent(
+                padding = padding,
+                topics = viewModel.createScreenState.topics,
+                onTopicClick = {},
+            )
+        },
+    )
+}
+
+@Composable
+fun CreateScreenContent(
+    padding: PaddingValues,
+    topics: List<String>,
+    onTopicClick: (topic: String) -> Unit,
+) {
+    val mainTopic = topics[0]
+    val otherTopics = topics.drop(1)
+    Column(
+        modifier =
+            Modifier.padding(padding)
+                .padding(
+                    start = CreateScreenDimens.contentEndStartPadding,
+                    end = CreateScreenDimens.contentEndStartPadding,
+                ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            modifier =
+                Modifier.padding(
+                    top = CreateScreenDimens.textDescriptionTopBottomPadding,
+                    bottom = CreateScreenDimens.textDescriptionTopBottomPadding,
+                    start = CreateScreenDimens.textDescriptionLeftRightPadding,
+                    end = CreateScreenDimens.textDescriptionLeftRightPadding,
+                ),
+            text = stringResource(R.string.organizer_create_screen_description),
+            textAlign = TextAlign.Center,
+            color = CreateScreenDimens.textColor,
+        )
+        TopicPreview(
+            modifier = Modifier.weight(1f),
+            previewTitle = mainTopic,
+            topic = mainTopic,
+            onTopicClick = onTopicClick,
+            numberOfIcons = 5,
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(CreateScreenDimens.topicSpacing),
+        ) {
+            items(otherTopics.size) { i ->
+                TopicPreview(
+                    modifier = Modifier.weight(1f),
+                    previewTitle = otherTopics[i],
+                    topic = otherTopics[i],
+                    onTopicClick = onTopicClick,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TopicPreview(
+    previewTitle: String,
+    topic: String,
+    onTopicClick: (topic: String) -> Unit,
+    modifier: Modifier = Modifier,
+    numberOfIcons: Int = 3,
+) {
+    // Placeholder code
+    Column(
+        modifier = modifier.height(CreateScreenDimens.topicHeight),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            modifier =
+                Modifier.clip(RoundedCornerShape(CreateScreenDimens.topicRadius))
+                    .clickable(onClick = { onTopicClick(topic) })
+                    .align(Alignment.CenterHorizontally)
+                    .background(
+                        color = CreateScreenDimens.topicPreviewBackgroundColor,
+                        RoundedCornerShape(CreateScreenDimens.topicRadius),
+                    )
+                    .padding(CreateScreenDimens.topicPadding)
+        ) {
+            repeat(numberOfIcons) {
+                Box(
+                    modifier =
+                        Modifier.size(CreateScreenDimens.iconSize)
+                            .background(Color.Blue, CircleShape)
+                )
+            }
+        }
+        Text(text = previewTitle, color = CreateScreenDimens.textColor)
+    }
+}
+
+object CreateScreenDimens {
+    val iconSize = 41.dp
+    val topicPadding = 20.dp
+    val topicRadius = 24.dp
+    val topicHeight = 116.dp
+    val textDescriptionTopBottomPadding = 32.dp
+    val textDescriptionLeftRightPadding = 16.dp
+    val contentEndStartPadding = 16.dp
+    val topicSpacing = 4.dp
+    val contentSidePadding = 24.dp
+    val topicPreviewBackgroundColor = Color(0x52FFFFFF)
+    val AndroidOnlySe1Se1: Color = Color(0x8A081034)
+    val textColor = Color.White
+}
