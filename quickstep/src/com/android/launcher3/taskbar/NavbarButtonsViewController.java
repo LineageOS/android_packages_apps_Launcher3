@@ -40,6 +40,7 @@ import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.launcher3.util.FlagDebugUtils.appendFlag;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BACK_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BACK_DISMISS_IME;
@@ -164,6 +165,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     private static final int FLAG_SLIDE_IN_VIEW_VISIBLE = 1 << 14;
     private static final int FLAG_KEYBOARD_SHORTCUT_HELPER_SHOWING = 1 << 15;
     private static final int FLAG_TASKBAR_STASHED_ON_CD = 1 << 16;
+    private static final int FLAG_SYSUI_DIALOG_SHOWING = 1 << 17;
 
     /**
      * Flags where a UI could be over Taskbar surfaces, so the color override should be disabled.
@@ -382,9 +384,11 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         // - IME is visible (e.g. when editing a Folder name)
         // - VoiceInteractionWindow (assistant) is showing
         // - Keyboard shortcuts helper is showing
+        // - A System UI Dialog is showing (e.g. Mirroring bottom sheet)
         if (!isPhoneMode) {
             int flagsToRemoveTranslation = FLAG_NOTIFICATION_SHADE_EXPANDED
-                    | FLAG_VOICE_INTERACTION_WINDOW_SHOWING | FLAG_KEYBOARD_SHORTCUT_HELPER_SHOWING;
+                    | FLAG_VOICE_INTERACTION_WINDOW_SHOWING | FLAG_KEYBOARD_SHORTCUT_HELPER_SHOWING
+                    | FLAG_SYSUI_DIALOG_SHOWING;
             mPropertyHolders.add(new StatePropertyHolder(mNavButtonInAppDisplayProgressForSysui,
                     flags -> (flags & flagsToRemoveTranslation) != 0, AnimatedFloat.VALUE,
                     1, 0));
@@ -635,6 +639,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
                 (sysUiStateFlags & SYSUI_STATE_SHORTCUT_HELPER_SHOWING) != 0;
         boolean splitAnimationRunning =
                 (sysUiStateFlags & SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION) != 0;
+        boolean isSysuiDialogShowing = (sysUiStateFlags & SYSUI_STATE_DIALOG_SHOWING) != 0;
         updateStateForFlag(FLAG_IME_SWITCHER_BUTTON_VISIBLE, isImeSwitcherButtonVisible);
         updateStateForFlag(FLAG_IME_VISIBLE, isImeVisible);
         updateStateForFlag(FLAG_BACK_DISMISS_IME, isBackDismissIme);
@@ -646,6 +651,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         updateStateForFlag(FLAG_SCREEN_PINNING_ACTIVE, isScreenPinningActive);
         updateStateForFlag(FLAG_VOICE_INTERACTION_WINDOW_SHOWING, isVoiceInteractionWindowShowing);
         updateStateForFlag(FLAG_KEYBOARD_SHORTCUT_HELPER_SHOWING, isKeyboardShortcutHelperShowing);
+        updateStateForFlag(FLAG_SYSUI_DIALOG_SHOWING, isSysuiDialogShowing);
 
         if (mA11yButton != null) {
             // Only used in 3 button
@@ -1360,6 +1366,8 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
                 "FLAG_VOICE_INTERACTION_WINDOW_SHOWING");
         appendFlag(str, flags, FLAG_KEYBOARD_SHORTCUT_HELPER_SHOWING,
                 "FLAG_KEYBOARD_SHORTCUT_HELPER_SHOWING");
+        appendFlag(str, flags, FLAG_SYSUI_DIALOG_SHOWING,
+                "FLAG_SYSUI_DIALOG_SHOWING");
         return str.toString();
     }
 
