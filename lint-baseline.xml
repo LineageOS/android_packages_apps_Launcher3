@@ -316,4 +316,180 @@
             column="37"/>
     </issue>
 
+    <issue
+        id="NewApi"
+        message="Call requires API level CUR_DEVELOPMENT/10000 (current min is 31): `android.content.pm.PackageManager#getEnableAppLockIntentForPackage`"
+        errorLine1="                            .getEnableAppLockIntentForPackage(packageName, newAppLockEnabled)"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/src/com/android/launcher3/popup/AppLockShortcut.kt"
+            line="65"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level CUR_DEVELOPMENT/10000 (current min is 31): `android.content.pm.ApplicationInfo#isAppLockSupported`"
+        errorLine1="        android.security.Flags.appLockApis() &amp;&amp; appInfo?.isAppLockSupported ?: false"
+        errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/src/com/android/launcher3/util/ApplicationInfoWrapper.kt"
+            line="118"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level CUR_DEVELOPMENT/10000 (current min is 31): `android.content.pm.ApplicationInfo#isAppLockEnabled`"
+        errorLine1="        android.security.Flags.appLockApis() &amp;&amp; appInfo?.isAppLockEnabled ?: false"
+        errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/src/com/android/launcher3/util/ApplicationInfoWrapper.kt"
+            line="122"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 31): `java.util.List#getFirst`"
+        errorLine1="            ShortcutInfo si = sis.getFirst();"
+        errorLine2="                                  ~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/src/com/android/launcher3/icons/IconCache.java"
+            line="380"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_inverse_on_surface_light` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_inverse_on_surface_light&quot;&gt;@android:color/system_inverse_on_surface_light&lt;/color&gt;"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="27"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_inverse_primary_light` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_inverse_primary_light&quot;&gt;@android:color/system_inverse_primary_light&lt;/color&gt;"
+        errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="28"
+            column="48"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_inverse_surface_light` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_inverse_surface_light&quot;&gt;@android:color/system_inverse_surface_light&lt;/color&gt;"
+        errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="29"
+            column="48"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_scrim_light` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_scrim_light&quot;&gt;@android:color/system_scrim_light&lt;/color&gt;"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="52"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_shadow_light` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_shadow_light&quot;&gt;@android:color/system_shadow_light&lt;/color&gt;"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="56"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_surface_tint_light` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_surface_tint_light&quot;&gt;@android:color/system_surface_tint_light&lt;/color&gt;"
+        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="65"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_inverse_on_surface_dark` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_inverse_on_surface_dark&quot;&gt;@android:color/system_inverse_on_surface_dark&lt;/color&gt;"
+        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="82"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_inverse_primary_dark` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_inverse_primary_dark&quot;&gt;@android:color/system_inverse_primary_dark&lt;/color&gt;"
+        errorLine2="                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="83"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_inverse_surface_dark` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_inverse_surface_dark&quot;&gt;@android:color/system_inverse_surface_dark&lt;/color&gt;"
+        errorLine2="                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="84"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_scrim_dark` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_scrim_dark&quot;&gt;@android:color/system_scrim_dark&lt;/color&gt;"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="107"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_shadow_dark` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_shadow_dark&quot;&gt;@android:color/system_shadow_dark&lt;/color&gt;"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="111"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`@android:color/system_surface_tint_dark` requires API level 10000 (current min is 31)"
+        errorLine1="    &lt;color name=&quot;system_surface_tint_dark&quot;&gt;@android:color/system_surface_tint_dark&lt;/color&gt;"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="packages/apps/Launcher3/res/values-v34/colors.xml"
+            line="120"
+            column="44"/>
+    </issue>
+
 </issues>
