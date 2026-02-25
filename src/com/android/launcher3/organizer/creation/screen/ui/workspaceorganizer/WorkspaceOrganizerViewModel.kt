@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui.workspaceoverview
+package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,8 +29,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-/** View model used by the WorkspaceOverview activity and its composables. */
-class WorkspaceOverviewViewModel
+/** View model used by the [WorkspaceOrganizerActivity] and its composables. */
+class WorkspaceOrganizerViewModel
 @Inject
 constructor(workspacePagesRepository: WorkspacePreviewRepository) : ViewModel() {
 
@@ -44,19 +44,20 @@ constructor(workspacePagesRepository: WorkspacePreviewRepository) : ViewModel() 
                 initialValue = listOf(),
             )
 
-    var workspaceOverviewState: WorkspaceOverviewState by mutableStateOf(WorkspaceOverviewState())
+    var mWorkspaceOrganizerState: WorkspaceOrganizerState by
+        mutableStateOf(WorkspaceOrganizerState())
         private set
 
     fun increaseSelectedWorkspacePage(delta: Int) {
-        workspaceOverviewState =
-            workspaceOverviewState.copy(
+        mWorkspaceOrganizerState =
+            mWorkspaceOrganizerState.copy(
                 selectedPage =
-                    (workspaceOverviewState.selectedPage + delta) % workspacePages.value.size
+                    (mWorkspaceOrganizerState.selectedPage + delta) % workspacePages.value.size
             )
     }
 
     fun setSelectedWorkspacePage(index: Int) {
-        workspaceOverviewState =
-            workspaceOverviewState.copy(selectedPage = (index) % workspacePages.value.size)
+        mWorkspaceOrganizerState =
+            mWorkspaceOrganizerState.copy(selectedPage = (index) % workspacePages.value.size)
     }
 }

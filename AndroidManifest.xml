@@ -89,7 +89,7 @@
         </activity>
 
 
-        <activity android:name="com.android.launcher3.organizer.creation.screen.ui.workspaceoverview.WorkspaceOverviewActivity"
+        <activity android:name="com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerActivity"
             android:excludeFromRecents="true"
             android:autoRemoveFromRecents="true"
             android:launchMode="singleTop"

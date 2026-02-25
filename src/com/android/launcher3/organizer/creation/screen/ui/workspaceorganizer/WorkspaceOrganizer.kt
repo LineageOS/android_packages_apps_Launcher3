@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui.workspaceoverview
+package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -66,8 +66,8 @@ import com.android.launcher3.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WorkspaceOverview(
-    viewModel: WorkspaceOverviewViewModel,
+fun WorkspaceOrganizer(
+    viewModel: WorkspaceOrganizerViewModel,
     onAddWorkspaceClick: () -> Unit,
     onArrowBack: () -> Unit,
 ) {
@@ -77,7 +77,7 @@ fun WorkspaceOverview(
         floatingActionButtonPosition = FabPosition.Center,
         topBar = {
             CenterAlignedTopAppBar(
-                modifier = Modifier.padding(WorkspaceOverviewDimens.contentSidePadding),
+                modifier = Modifier.padding(WorkspaceOrganizerDimens.contentSidePadding),
                 colors =
                     TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
@@ -88,10 +88,10 @@ fun WorkspaceOverview(
                     IconButton(
                         onClick = onArrowBack,
                         modifier =
-                            Modifier.width(WorkspaceOverviewDimens.SizeMediumMedium3)
-                                .height(WorkspaceOverviewDimens.SizeMediumMedium3)
+                            Modifier.width(WorkspaceOrganizerDimens.SizeMediumMedium3)
+                                .height(WorkspaceOrganizerDimens.SizeMediumMedium3)
                                 .background(
-                                    WorkspaceOverviewDimens.AndroidOnlySe1Se1,
+                                    WorkspaceOrganizerDimens.AndroidOnlySe1Se1,
                                     shape = RoundedCornerShape(size = 360.dp),
                                 ),
                     ) {
@@ -105,55 +105,55 @@ fun WorkspaceOverview(
             )
         },
     ) { padding ->
-        WorkspaceOverviewContent(viewModel, padding, onAddWorkspaceClick)
+        WorkspaceOrganizerContent(viewModel, padding, onAddWorkspaceClick)
     }
 }
 
 @Composable
-fun WorkspaceOverviewContent(
-    viewModel: WorkspaceOverviewViewModel,
+fun WorkspaceOrganizerContent(
+    viewModel: WorkspaceOrganizerViewModel,
     padding: PaddingValues,
     onAddWorkspaceClick: () -> Unit,
 ) {
     val pages: List<WorkspacePage> by viewModel.workspacePages.collectAsState()
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        horizontalArrangement = spacedBy(WorkspaceOverviewDimens.workspaceOverviewSpacing),
-        verticalArrangement = spacedBy(WorkspaceOverviewDimens.workspaceOverviewSpacing),
+        horizontalArrangement = spacedBy(WorkspaceOrganizerDimens.workspaceOrganizerSpacing),
+        verticalArrangement = spacedBy(WorkspaceOrganizerDimens.workspaceOrganizerSpacing),
         contentPadding =
-            padding.plus(PaddingValues(horizontal = WorkspaceOverviewDimens.contentSidePadding)),
+            padding.plus(PaddingValues(horizontal = WorkspaceOrganizerDimens.contentSidePadding)),
         modifier = Modifier.fillMaxSize().consumeWindowInsets(padding),
     ) {
         itemsIndexed(pages) { index, item ->
-            OverviewWorkspacePage(item, index == viewModel.workspaceOverviewState.selectedPage)
+            WorkspaceOrganizerPage(item, index == viewModel.mWorkspaceOrganizerState.selectedPage)
         }
-        item { OverviewWorkspaceAddPage(onAddWorkspaceClick) }
+        item { WorkspaceOrganizerAddPage(onAddWorkspaceClick) }
     }
 }
 
 @Composable
-fun OverviewWorkspacePage(page: WorkspacePage, isSelected: Boolean) {
+fun WorkspaceOrganizerPage(page: WorkspacePage, isSelected: Boolean) {
     Box(
         modifier =
-            Modifier.width(WorkspaceOverviewDimens.workspacePageWidth)
-                .height(WorkspaceOverviewDimens.workspacePageHeight)
+            Modifier.width(WorkspaceOrganizerDimens.workspacePageWidth)
+                .height(WorkspaceOrganizerDimens.workspacePageHeight)
                 .background(
-                    color = Color(WorkspaceOverviewDimens.workspacePageBackgroundColor),
-                    shape = RoundedCornerShape(size = WorkspaceOverviewDimens.workspaceCornerSize),
+                    color = Color(WorkspaceOrganizerDimens.workspacePageBackgroundColor),
+                    shape = RoundedCornerShape(size = WorkspaceOrganizerDimens.workspaceCornerSize),
                 )
                 .let {
                     if (isSelected)
                         it.border(
-                            width = WorkspaceOverviewDimens.overviewWorkspacePageBorder,
+                            width = WorkspaceOrganizerDimens.workspaceOrganizerPageBorder,
                             color = colorResource(R.color.materialColorTertiary),
                             shape =
                                 RoundedCornerShape(
-                                    size = WorkspaceOverviewDimens.workspaceCornerSize
+                                    size = WorkspaceOrganizerDimens.workspaceCornerSize
                                 ),
                         )
                     else it
                 }
-                .padding(WorkspaceOverviewDimens.workspacePagePadding)
+                .padding(WorkspaceOrganizerDimens.workspacePagePadding)
     ) {
         Image(
             page.bitmap.asImageBitmap(),
@@ -164,23 +164,23 @@ fun OverviewWorkspacePage(page: WorkspacePage, isSelected: Boolean) {
 }
 
 @Composable
-fun OverviewWorkspaceAddPage(onAddClick: () -> Unit) {
+fun WorkspaceOrganizerAddPage(onAddClick: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-            Modifier.width(WorkspaceOverviewDimens.workspacePageWidth)
-                .height(WorkspaceOverviewDimens.workspacePageHeight)
+            Modifier.width(WorkspaceOrganizerDimens.workspacePageWidth)
+                .height(WorkspaceOrganizerDimens.workspacePageHeight)
                 .background(
-                    color = Color(WorkspaceOverviewDimens.workspacePageBackgroundColor),
-                    shape = RoundedCornerShape(size = WorkspaceOverviewDimens.workspaceCornerSize),
+                    color = Color(WorkspaceOrganizerDimens.workspacePageBackgroundColor),
+                    shape = RoundedCornerShape(size = WorkspaceOrganizerDimens.workspaceCornerSize),
                 )
-                .padding(WorkspaceOverviewDimens.workspacePagePadding)
+                .padding(WorkspaceOrganizerDimens.workspacePagePadding)
                 .clickable { onAddClick() },
     ) {
         Icon(
             modifier =
-                Modifier.width(WorkspaceOverviewDimens.workspaceAddButtonSize)
-                    .height(WorkspaceOverviewDimens.workspaceAddButtonSize),
+                Modifier.width(WorkspaceOrganizerDimens.workspaceAddButtonSize)
+                    .height(WorkspaceOrganizerDimens.workspaceAddButtonSize),
             imageVector = Icons.Rounded.Add,
             contentDescription = "Previous workspace",
             tint = Color.White,
@@ -189,21 +189,21 @@ fun OverviewWorkspaceAddPage(onAddClick: () -> Unit) {
 }
 
 @Composable
-fun FloatingMenu(viewModel: WorkspaceOverviewViewModel) {
+fun FloatingMenu(viewModel: WorkspaceOrganizerViewModel) {
     colorResource(R.color.materialColorOnSurfaceVariant)
     Row(
         modifier =
             Modifier.wrapContentWidth()
-                .height(WorkspaceOverviewDimens.floatingMenuHeight)
+                .height(WorkspaceOrganizerDimens.floatingMenuHeight)
                 .background(
                     color = colorResource(R.color.materialColorTertiary),
                     shape =
                         RoundedCornerShape(
-                            size = WorkspaceOverviewDimens.IconButtonIconContainerRadius
+                            size = WorkspaceOrganizerDimens.IconButtonIconContainerRadius
                         ),
                 )
-                .padding(WorkspaceOverviewDimens.floatingMenuPadding),
-        horizontalArrangement = spacedBy(WorkspaceOverviewDimens.SpaceExtraSmallNone),
+                .padding(WorkspaceOrganizerDimens.floatingMenuPadding),
+        horizontalArrangement = spacedBy(WorkspaceOrganizerDimens.SpaceExtraSmallNone),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NavigationArrows(
@@ -238,7 +238,7 @@ fun NavigationArrows(onPrevClick: () -> Unit, onNextClick: () -> Unit) {
     Row(
         Modifier.wrapContentSize().padding(all = 0.dp),
         horizontalArrangement =
-            spacedBy(WorkspaceOverviewDimens.navigationArrowsSpacing, Alignment.Start),
+            spacedBy(WorkspaceOrganizerDimens.navigationArrowsSpacing, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
@@ -255,7 +255,7 @@ fun NavigationArrows(onPrevClick: () -> Unit, onNextClick: () -> Unit) {
                                 bottomEnd = 8.dp,
                             ),
                     )
-                    .padding(all = WorkspaceOverviewDimens.navigationArrowIconPadding),
+                    .padding(all = WorkspaceOrganizerDimens.navigationArrowIconPadding),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
@@ -277,7 +277,7 @@ fun NavigationArrows(onPrevClick: () -> Unit, onNextClick: () -> Unit) {
                                 bottomEnd = 24.dp,
                             ),
                     )
-                    .padding(all = WorkspaceOverviewDimens.navigationArrowIconPadding),
+                    .padding(all = WorkspaceOrganizerDimens.navigationArrowIconPadding),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -288,7 +288,7 @@ fun NavigationArrows(onPrevClick: () -> Unit, onNextClick: () -> Unit) {
     }
 }
 
-object WorkspaceOverviewDimens {
+object WorkspaceOrganizerDimens {
     val iconSize = 41.dp
     val workspaceCornerSize = 16.dp
     val IconButtonIconContainerRadius: Dp = 360.dp
@@ -296,13 +296,13 @@ object WorkspaceOverviewDimens {
     val SizeMediumMedium3: Dp = 40.dp
     val contentSidePadding = 24.dp
     val AndroidOnlySe1Se1: Color = Color(0x8A081034)
-    val overviewWorkspacePageBorder = 3.dp
+    val workspaceOrganizerPageBorder = 3.dp
     val workspacePageHeight = 278.31549.dp
     val workspacePageWidth = 174.dp
     val workspacePagePadding =
         PaddingValues(start = 0.dp, top = 8.4466.dp, end = 0.dp, bottom = 8.4466.dp)
     val workspacePageBackgroundColor = 0x52FFFFFF
-    val workspaceOverviewSpacing = 16.dp
+    val workspaceOrganizerSpacing = 16.dp
     val workspaceAddButtonSize = 40.dp
     val floatingMenuHeight = 64.dp
     val floatingMenuPadding = PaddingValues(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 8.dp)
