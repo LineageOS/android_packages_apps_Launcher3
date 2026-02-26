@@ -77,6 +77,9 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -2487,42 +2490,24 @@ public final class LauncherInstrumentation {
         long steps = duration / GESTURE_STEP_MS;
 
         long currentTime = startTime;
-
+        Interpolator interpolator;
         if (isDecelerating) {
-            // formula: V = V0 - D*T, assuming V = 0 when T = duration
-
-            // vx0: initial speed at the x-dimension, set as twice the avg speed
-            // dx: the constant deceleration at the x-dimension
-            double vx0 = 2.0 * (to.x - from.x) / duration;
-            double dx = vx0 / duration;
-            // vy0: initial speed at the y-dimension, set as twice the avg speed
-            // dy: the constant deceleration at the y-dimension
-            double vy0 = 2.0 * (to.y - from.y) / duration;
-            double dy = vy0 / duration;
-
-            for (long i = 0; i < steps; ++i) {
-                sleep(GESTURE_STEP_MS);
-                currentTime += GESTURE_STEP_MS;
-
-                // formula: P = P0 + V0*T - (D*T^2/2)
-                final double t = (i + 1) * GESTURE_STEP_MS;
-                point.x = from.x + (int) (vx0 * t - 0.5 * dx * t * t);
-                point.y = from.y + (int) (vy0 * t - 0.5 * dy * t * t);
-
-                sendPointer(downTime, currentTime, MotionEvent.ACTION_MOVE, point, gestureScope);
-            }
+            interpolator = new DecelerateInterpolator();
         } else {
-            for (long i = 0; i < steps; ++i) {
-                sleep(GESTURE_STEP_MS);
-                currentTime += GESTURE_STEP_MS;
+            interpolator = new LinearInterpolator();
+        }
+        int xDiff = to.x - from.x;
+        int yDiff = to.y - from.y;
+        for (long i = 0; i < steps; ++i) {
+            sleep(GESTURE_STEP_MS);
+            currentTime += GESTURE_STEP_MS;
 
-                final float progress = (currentTime - startTime) / (float) duration;
-                point.x = from.x + (int) (progress * (to.x - from.x));
-                point.y = from.y + (int) (progress * (to.y - from.y));
+            final float progress = (currentTime - startTime) / (float) duration;
+            float interpolatedProgress = interpolator.getInterpolation(progress);
+            point.x = from.x + (int) (interpolatedProgress * xDiff);
+            point.y = from.y + (int) (interpolatedProgress * yDiff);
 
-                sendPointer(downTime, currentTime, MotionEvent.ACTION_MOVE, point, gestureScope);
-
-            }
+            sendPointer(downTime, currentTime, MotionEvent.ACTION_MOVE, point, gestureScope);
         }
 
         return currentTime;
