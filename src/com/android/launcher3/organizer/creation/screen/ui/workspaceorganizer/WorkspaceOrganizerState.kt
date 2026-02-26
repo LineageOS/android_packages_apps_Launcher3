@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui.workspaceoverview
+package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
 
 import android.graphics.Bitmap
 
-data class WorkspaceOverviewState(var selectedPage: Int = 0) {}
+/** View model used by the [WorkspaceOrganizerActivity] and its composables. */
+data class WorkspaceOrganizerState(var selectedPage: Int = 0) {}
 
+/** Holds the information needed to render the preview of the Workspace pages. */
 data class WorkspacePage(var bitmap: Bitmap)

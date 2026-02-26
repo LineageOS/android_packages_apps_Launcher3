@@ -54,7 +54,7 @@ import com.android.launcher3.homescreenfiles.HomeScreenFilesUpdate;
 import com.android.launcher3.logging.StatsLogManager.EventEnum;
 import com.android.launcher3.model.data.WorkspaceItemCoordinates;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
-import com.android.launcher3.organizer.creation.screen.ui.workspaceoverview.WorkspaceOverviewActivity;
+import com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerActivity;
 import com.android.launcher3.popup.ArrowPopup;
 import com.android.launcher3.shortcuts.DeepShortcutView;
 import com.android.launcher3.testing.TestLogging;
@@ -322,7 +322,7 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
         Launcher launcher = Launcher.getLauncher(view.getContext());
 
         launcher.startActivity(
-                new Intent(view.getContext(), WorkspaceOverviewActivity.class)
+                new Intent(view.getContext(), WorkspaceOrganizerActivity.class)
                         .setPackage(launcher.getPackageName())
         );
         return true;

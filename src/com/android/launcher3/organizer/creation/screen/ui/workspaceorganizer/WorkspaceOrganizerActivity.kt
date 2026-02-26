@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui.workspaceoverview
+package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -22,15 +22,15 @@ import androidx.activity.compose.setContent
 import com.android.launcher3.dagger.LauncherComponentProvider.get
 import com.android.launcher3.organizer.creation.screen.ui.BlurController
 
-class WorkspaceOverviewActivity : ComponentActivity() {
+class WorkspaceOrganizerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val appComponent = get(application)
         val homeOrganizerRepository = appComponent.workspacePreviewRepository
         homeOrganizerRepository.refreshPages()
-        val viewModel = WorkspaceOverviewViewModel(homeOrganizerRepository)
-        setContent { WorkspaceOverview(viewModel, {}, {}) }
+        val viewModel = WorkspaceOrganizerViewModel(homeOrganizerRepository)
+        setContent { WorkspaceOrganizer(viewModel, {}, {}) }
     }
 
     override fun onResume() {
