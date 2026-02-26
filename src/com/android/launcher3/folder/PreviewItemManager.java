@@ -214,7 +214,7 @@ public class PreviewItemManager {
         int saveCount = canvas.getSaveCount();
         // The items are drawn in coordinates relative to the preview offset
         PreviewBackground bg = mIcon.getFolderBackground();
-        Path clipPath = bg.getClipPath();
+        Path clipPath = bg.getClipPath().getPath();
         float firstPageItemsTransX = 0;
         if (mShouldSlideInFirstPage) {
             PointF firstPageOffset = new PointF(bg.basePreviewOffsetX + mCurrentPageItemsTransX,
