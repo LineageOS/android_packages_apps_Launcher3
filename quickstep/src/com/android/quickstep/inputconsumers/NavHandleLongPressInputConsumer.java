@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.launcher3.Utilities;
@@ -73,7 +74,7 @@ public class NavHandleLongPressInputConsumer extends DelegateInputConsumer {
     private final int mLongPressTimeout;
     private final int mOuterLongPressTimeout;
     private final boolean mDeepPressEnabled;
-    private final NavHandle mNavHandle;
+    private @Nullable NavHandle mNavHandle;
     private StatsLogManager mStatsLogManager;
     private final TopTaskTracker mTopTaskTracker;
     private final GestureState mGestureState;
@@ -168,6 +169,7 @@ public class NavHandleLongPressInputConsumer extends DelegateInputConsumer {
         if (MAIN_EXECUTOR.getHandler().hasCallbacks(mTriggerLongPress)) {
             cancelLongPress(CANCEL_REASON_INPUT_CONSUMER_SWITCHED);
         }
+        mNavHandle = null;
     }
 
     private void handleMotionEvent(MotionEvent ev) {
@@ -181,7 +183,9 @@ public class NavHandleLongPressInputConsumer extends DelegateInputConsumer {
                 mGestureState.setIsInExtendedSlopRegion(false);
                 mDeepPressLogged = false;
                 if (isInNavBarHorizontalArea(ev.getRawX())) {
-                    mNavHandleLongPressHandler.onTouchStarted(mNavHandle);
+                    if (mNavHandle != null) {
+                        mNavHandleLongPressHandler.onTouchStarted(mNavHandle);
+                    }
                     MAIN_EXECUTOR.getHandler().postDelayed(mTriggerLongPress, mLongPressTimeout);
                 }
                 if (DEBUG_NAV_HANDLE) {
@@ -231,9 +235,11 @@ public class NavHandleLongPressInputConsumer extends DelegateInputConsumer {
             // Log deep press even if feature is disabled.
             String runningPackage = mTopTaskTracker.getCachedTopTask(
                     /* filterOnlyVisibleRecents */ true, getDisplayId()).getPackageName();
-            mStatsLogManager.logger().withPackageName(runningPackage).log(
-                    mNavHandle.isNavHandleStashedTaskbar() ? LAUNCHER_DEEP_PRESS_STASHED_TASKBAR
-                            : LAUNCHER_DEEP_PRESS_NAVBAR);
+            if (mNavHandle != null) {
+                mStatsLogManager.logger().withPackageName(runningPackage).log(
+                        mNavHandle.isNavHandleStashedTaskbar() ? LAUNCHER_DEEP_PRESS_STASHED_TASKBAR
+                                : LAUNCHER_DEEP_PRESS_NAVBAR);
+            }
             mDeepPressLogged = true;
 
             // But only trigger if the feature is enabled.
@@ -247,6 +253,9 @@ public class NavHandleLongPressInputConsumer extends DelegateInputConsumer {
     private void triggerLongPress() {
         if (DEBUG_NAV_HANDLE) {
             Log.d(TAG, "triggerLongPress");
+        }
+        if (mNavHandle == null) {
+            return;
         }
         String runningPackage = mTopTaskTracker.getCachedTopTask(
                 /* filterOnlyVisibleRecents */ true, getDisplayId()).getPackageName();
@@ -287,7 +296,9 @@ public class NavHandleLongPressInputConsumer extends DelegateInputConsumer {
         }
         mGestureState.setIsInExtendedSlopRegion(false);
         MAIN_EXECUTOR.getHandler().removeCallbacks(mTriggerLongPress);
-        mNavHandleLongPressHandler.onTouchFinished(mNavHandle, reason);
+        if (mNavHandle != null) {
+            mNavHandleLongPressHandler.onTouchFinished(mNavHandle, reason);
+        }
     }
 
     private boolean isInNavBarHorizontalArea(float x) {

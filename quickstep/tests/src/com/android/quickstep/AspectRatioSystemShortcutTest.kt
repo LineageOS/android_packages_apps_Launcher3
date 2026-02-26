@@ -46,6 +46,10 @@ import com.android.launcher3.util.SandboxContext
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
 import com.android.launcher3.util.WindowBounds
+import com.android.launcher3.util.rule.TestStabilityRule
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
+import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
+import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import com.android.quickstep.TaskViewTestDIHelpers.mockRecentsModel
 import com.android.quickstep.orientation.LandscapePagedViewHandler
 import com.android.quickstep.task.thumbnail.TaskContentView
@@ -77,6 +81,7 @@ import org.mockito.kotlin.whenever
 class AspectRatioSystemShortcutTest {
 
     @get:Rule val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
+    @get:Rule val testStabilityRule = TestStabilityRule()
 
     /** Spy on a concrete Context so we can reference real View, Layout, and Display properties. */
     private val context: Context = spy(InstrumentationRegistry.getInstrumentation().targetContext)
@@ -164,6 +169,7 @@ class AspectRatioSystemShortcutTest {
      */
     @EnableFlags(com.android.window.flags.Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT)
     @Test
+    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280489)
     fun createShortcut_sw599dp_notCreated() {
         val task = createTask()
         val taskContainer = createTaskContainer(task)

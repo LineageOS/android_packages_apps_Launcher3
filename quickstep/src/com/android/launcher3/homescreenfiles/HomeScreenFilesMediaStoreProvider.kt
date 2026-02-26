@@ -16,6 +16,7 @@
 
 package com.android.launcher3.homescreenfiles
 
+import android.content.ClipDescription.MIMETYPE_UNKNOWN
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.ContentValues
@@ -34,6 +35,7 @@ import android.provider.MediaStore.Files.FileColumns.RELATIVE_PATH
 import android.provider.MediaStore.Files.FileColumns._ID
 import android.provider.MediaStore.VOLUME_EXTERNAL_PRIMARY
 import android.util.Log
+import android.webkit.MimeTypeMap
 import androidx.annotation.WorkerThread
 import androidx.core.database.getStringOrNull
 import com.android.launcher3.R
@@ -421,6 +423,58 @@ class HomeScreenFilesMediaStoreProvider(
                 null
             }
     }
+
+    override fun rename(uri: Uri, name: String): CompletableFuture<Boolean> =
+        supplyAsync(
+            {
+                val mediaStoreUri = getExternalPrimaryMediaStoreUri(context, uri)
+                if (mediaStoreUri == null) {
+                    Log.e(TAG, "Unable to rename due to unsupported URI")
+                    return@supplyAsync false
+                }
+
+                var success = false
+
+                try {
+                    val file = query(mediaStoreUri, null, null).get()
+                    if (file == null) {
+                        Log.e(TAG, "Unable to rename due to inability to query the backing file")
+                    } else {
+                        success =
+                            context.contentResolver.update(
+                                /*uri=*/ mediaStoreUri,
+                                /*contentValues=*/ ContentValues().apply {
+                                    // NOTE: The media provider performs its own sanitization/
+                                    // validation of the [DISPLAY_NAME] column.
+                                    put(DISPLAY_NAME, name)
+                                    if (file.isDirectory) {
+                                        put(MIME_TYPE, MIME_TYPE_DIR)
+                                    } else {
+                                        MimeTypeMap.getSingleton()
+                                            .getMimeTypeFromExtension(File(name).extension)
+                                            .run { put(MIME_TYPE, this ?: MIMETYPE_UNKNOWN) }
+                                    }
+                                },
+                                /*where=*/ "$RELATIVE_PATH == ?",
+                                /*selectionArgs=*/ arrayOf(HOME_SCREEN_FOLDER_RELATIVE_PATH),
+                            ) == 1
+                        if (!success) {
+                            Log.e(
+                                TAG,
+                                "Unable to rename possibly due to unmet selection criteria or " +
+                                    "the media provider itself enforcing additional unmet " +
+                                    "conditions",
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Unable to rename due to exception", e)
+                }
+
+                return@supplyAsync success
+            },
+            executorService,
+        )
 
     companion object {
         private const val MEDIA_STORE_VALUE_FALSE = "0"

@@ -26,6 +26,8 @@ import static com.android.launcher3.tapl.TestHelpers.getLauncherInMyProcess;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.rule.ShellCommandRule.disableHeadsUpNotification;
 import static com.android.launcher3.util.rule.ShellCommandRule.getLauncherCommand;
+import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
+import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.launcher3.util.ui.AbstractLauncherUiTest.DEFAULT_BROADCAST_TIMEOUT_SECS;
 import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
@@ -64,6 +66,7 @@ import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.launcher3.util.rule.SkipAfterTimeOutRule;
 import com.android.launcher3.util.rule.TestIsolationRule;
 import com.android.launcher3.util.rule.TestStabilityRule;
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 import com.android.quickstep.AbstractQuickStepTest;
 import com.android.quickstep.NavigationModeSwitchRule;
@@ -193,6 +196,7 @@ public class TaplOverviewFallbackTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280556)
     public void goToOverviewFromHome() {
         mDevice.pressHome();
         assertTrue("Fallback Launcher not visible", mDevice.wait(Until.hasObject(By.pkg(
@@ -203,6 +207,7 @@ public class TaplOverviewFallbackTest {
 
     //@NavigationModeSwitch
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280556)
     public void goToOverviewFromApp() {
         startAppFast(resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR));
         waitForRecentsClosed();
@@ -279,6 +284,7 @@ public class TaplOverviewFallbackTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280556)
     public void testOverview() throws Exception {
         startAppFast(getAppPackageName());
         startAppFast(resolveSystemApp(Intent.CATEGORY_APP_CALCULATOR));

@@ -118,7 +118,7 @@ public class SystemShortcutTest {
     @Rule(order = 2) public LazyInitRule lazyInitRule = lazyRule(
             lazyP(SandboxApplication.class, l -> spy(new SandboxApplication())),
             lazyP(TestActivityContext.class,
-                    l -> spy(new TestActivityContext(l.get(SandboxApplication.class)))),
+                    l -> new TestActivityContext(l.get(SandboxApplication.class))),
             lazyP(MockUsersRule.class, l -> new MockUsersRule(l.get(SandboxApplication.class)))
     );
 
