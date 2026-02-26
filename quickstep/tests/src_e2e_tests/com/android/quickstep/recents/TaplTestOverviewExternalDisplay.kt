@@ -18,6 +18,9 @@ package com.android.quickstep.recents
 
 import android.platform.test.annotations.LargeTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
+import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
+import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import com.android.launcher3.util.ui.BaseLauncherTaplTest.AllowInRecentsWindowTests
 import com.android.quickstep.AbstractQuickStepTest
 import com.android.quickstep.util.MultiDisplayTest
@@ -50,6 +53,7 @@ class TaplTestOverviewExternalDisplay : AbstractQuickStepTest() {
 
     @Test
     @MultiDisplayTest
+    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 488078155)
     fun testStartAppsAndGoToOverview() {
         mLauncher.launchedAppState.switchToOverview()
         assertThat(mLauncher.recentTasks.size).isEqualTo(2)
