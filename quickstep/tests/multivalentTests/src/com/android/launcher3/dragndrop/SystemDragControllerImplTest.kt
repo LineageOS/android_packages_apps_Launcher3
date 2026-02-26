@@ -80,7 +80,12 @@ class SystemDragControllerImplTest {
         initMock(mockSystemDragListener)
         initMock(mockSystemDragListenerFactory)
 
-        controller = SystemDragControllerImpl(mockContext, mockSystemDragListenerFactory)
+        controller =
+            SystemDragControllerImpl(
+                mockContext,
+                mockSystemDragListenerFactory,
+                /* isHomeScreenFilesFeatureEnabled= */ true,
+            )
     }
 
     @Test
@@ -192,6 +197,28 @@ class SystemDragControllerImplTest {
         whenever(mockContext.dragController.isDragging).thenReturn(false)
 
         // NOTE: Fulfillment is *not* delegated to the system drag listener.
+        assertFalse(controller.onDrag(mockDragEvent))
+        verifyNoInteractions(mockSystemDragListener)
+    }
+
+    @Test
+    fun testDragStartWhenHomeScreenFilesFeatureIsDisabled() {
+        controller =
+            SystemDragControllerImpl(
+                mockContext,
+                mockSystemDragListenerFactory,
+                /* isHomeScreenFilesFeatureEnabled= */ false,
+            )
+
+        val clipDescription = ClipDescription("", arrayOf("mimeType"))
+        clipDescription.extras =
+            PersistableBundle().apply { putString("$DOCS_UI_EXTRA_PREFIX...", null) }
+
+        whenever(mockDragEvent.action).thenReturn(DragEvent.ACTION_DRAG_STARTED)
+        whenever(mockDragEvent.clipDescription).thenReturn(clipDescription)
+        whenever(mockContext.dragController.isDragging).thenReturn(false)
+
+        // Drag should not occur if the home screen files feature is disabled.
         assertFalse(controller.onDrag(mockDragEvent))
         verifyNoInteractions(mockSystemDragListener)
     }

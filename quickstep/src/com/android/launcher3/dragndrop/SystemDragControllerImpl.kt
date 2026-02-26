@@ -39,6 +39,7 @@ import kotlin.math.roundToInt
 class SystemDragControllerImpl(
     private val context: ActivityContext,
     private val systemDragListenerFactory: SystemDragListenerFactory,
+    private val isHomeScreenFilesFeatureEnabled: Boolean,
 ) : SystemDragController() {
 
     private var systemDragListener: SystemDragListener? = null
@@ -62,6 +63,12 @@ class SystemDragControllerImpl(
     }
 
     private fun acceptDrag(event: DragEvent): Boolean {
+        // NOTE: We currently only support files dragged from other apps. If the home
+        // screen files feature is disabled, we won't be able to handle the drag payload
+        // so we can safely ignore the event.
+        if (!isHomeScreenFilesFeatureEnabled) {
+            return false
+        }
         // NOTE: This is an imperfect proxy to restrict drags from other apps to only those
         // originating from DocsUI. This does NOT establish trust and nothing breaks if this proxy
         // fails or is spoofed by another app; it exists solely to polish the user experience if we
