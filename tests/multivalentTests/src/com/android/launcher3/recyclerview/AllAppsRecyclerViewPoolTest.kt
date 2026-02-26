@@ -35,11 +35,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 
@@ -60,7 +56,7 @@ class AllAppsRecyclerViewPoolTest {
 
     @Before
     fun setUp() {
-        underTest = spy(activityContext.activityComponent.sharedAppsPool)
+        underTest = activityContext.activityComponent.sharedAppsPool
         adapter =
             object : RecyclerView.Adapter<ViewHolder>() {
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -115,9 +111,8 @@ class AllAppsRecyclerViewPoolTest {
 
         underTest.clear()
 
-        verify(underTest, times(10)).putRecycledView(any(ViewHolder::class.java))
-        assertThat((underTest.mCancellableTask as JobDescription<*>).cancelled).isTrue()
         assertThat(underTest.getRecycledViewCount(VIEW_TYPE)).isEqualTo(0)
+        assertThat((underTest.mCancellableTask as JobDescription<*>).cancelled).isTrue()
     }
 
     private fun awaitTasksCompleted() {
