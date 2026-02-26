@@ -43,6 +43,8 @@
     <uses-permission android:name="android.permission.READ_REMOTE_TASKS"/>
     <uses-permission android:name="android.permission.REQUEST_TASK_HANDOFF"/>
 
+    <uses-permission android:name="android.permission.REPORT_UI_LATENCY_STATS"
+                     android:featureFlag="com.android.server.ui_latency_stats.ui_latency_stats_service" />
     <uses-permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY" />
     <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_SYSTEM"/>
 

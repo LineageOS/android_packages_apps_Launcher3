@@ -19,6 +19,7 @@ package com.android.launcher3.dagger
 import android.annotation.ElapsedRealtimeLong
 import android.content.Context
 import android.net.Uri
+import android.uilatencystats.UiLatencyStatsManager
 import android.os.SystemClock
 import android.view.CrossWindowBlurListeners
 import android.widget.ImageView
@@ -230,6 +231,16 @@ object StaticObjectModule {
     fun provideComputerControlExtensions(
         @ApplicationContext context: Context
     ): ComputerControlExtensions? = ComputerControlExtensions.getInstance(context)
+
+    @Provides
+    fun provideUiLatencyStatsManager(
+        @ApplicationContext context: Context
+    ): UiLatencyStatsManager? =
+        if (com.android.server.ui_latency_stats.Flags.uiLatencyStatsService()) {
+            context.getSystemService(UiLatencyStatsManager::class.java)
+        } else {
+            null
+        }
 }
 
 @Module

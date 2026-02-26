@@ -819,6 +819,9 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
         /** Sets latency of the event. */
         fun withLatency(latencyInMillis: Long) = this
 
+        /** Sets timestamp of the end event. */
+        fun withEndTimestamp(timestampInMillis: Long) = this
+
         /** Sets [LatencyType] of log message. */
         fun withType(type: LatencyType?) = this
 
