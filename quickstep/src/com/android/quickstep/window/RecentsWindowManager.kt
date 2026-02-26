@@ -427,6 +427,7 @@ constructor(
         displayChangesSafeCloseable?.close()
         displayChangesSafeCloseable = null
         fallbackWindowInterface.setRecentsWindowManager(null)
+        recentsView?.post { requestInputFocus(focused = false) }
         uiExecutor.execute {
             onViewDestroyed()
             hideRecentsWindow()
