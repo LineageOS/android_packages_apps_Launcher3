@@ -149,6 +149,8 @@ class TaskbarWindowSandboxContext private constructor(private val params: Sandbo
                 .whenever(windowManagerSpy)
                 .shouldShowSystemDecors(any())
         }
+        // Setup WindowManager spy objects for all children window contexts
+        base.spyServiceForChildren(WindowManager::class.java)
 
         // Mocks required for QuickstepKeyGestureEventsManager
         base.spyService(InputManager::class.java).stub {
