@@ -24,7 +24,6 @@ import static com.android.launcher3.folder.FolderGridOrganizer.createFolderGridO
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Path;
 import android.graphics.Point;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -45,6 +44,7 @@ import com.android.launcher3.ShortcutAndWidgetContainer;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.apppairs.AppPairIcon;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
+import com.android.launcher3.graphics.PathWrapper;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
 import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.ItemInfo;
@@ -98,7 +98,7 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
 
     private Folder mFolder;
 
-    private Path mClipPath;
+    private PathWrapper mClipPath;
 
     // If the views are attached to the folder or not. A folder should be bound when its
     // animating or is open.
@@ -155,7 +155,7 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
     protected void dispatchDraw(Canvas canvas) {
         if (mClipPath != null) {
             int count = canvas.save();
-            canvas.clipPath(mClipPath);
+            canvas.clipPath(mClipPath.getPath());
             mFocusIndicatorHelper.draw(canvas);
             super.dispatchDraw(canvas);
             canvas.restoreToCount(count);
@@ -737,7 +737,7 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
     }
 
     @Override
-    public void setClipPath(Path clipPath) {
+    public void setClipPath(PathWrapper clipPath) {
         mClipPath = clipPath;
         invalidate();
     }

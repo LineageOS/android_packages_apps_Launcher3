@@ -45,7 +45,6 @@ import androidx.graphics.shapes.transformed
 import com.android.launcher3.Flags
 import com.android.launcher3.anim.SpringAnimationBuilder
 import com.android.launcher3.folder.Folder
-import com.android.launcher3.folder.FolderIcon
 import com.android.launcher3.folder.FolderPagedView
 import com.android.launcher3.icons.RoundRectEstimator.estimateRadius
 import com.android.launcher3.views.ClipPathView
@@ -71,6 +70,8 @@ interface ShapeDelegate {
 
     fun addToPath(path: Path, offsetX: Float, offsetY: Float, radius: Float)
 
+    fun addToPath(path: PathWrapper, offsetX: Float, offsetY: Float, radius: Float)
+
     fun <T> createRevealAnimator(
         target: T,
         startRect: Rect,
@@ -91,6 +92,12 @@ interface ShapeDelegate {
 
         override fun addToPath(path: Path, offsetX: Float, offsetY: Float, radius: Float) =
             path.addCircle(radius + offsetX, radius + offsetY, radius, Path.Direction.CW)
+
+        override fun addToPath(path: PathWrapper, offsetX: Float, offsetY: Float, radius: Float) {
+            addToPath(path.path, offsetX, offsetY, radius)
+            path.setBounds(offsetX, offsetY, offsetX + radius * 2, offsetY + radius * 2)
+            path.setCornerRadius(radius)
+        }
     }
 
     /** Rounded square with [radiusRatio] as a ratio of its half edge size */
@@ -124,6 +131,15 @@ interface ShapeDelegate {
             )
         }
 
+        override fun addToPath(path: PathWrapper, offsetX: Float, offsetY: Float, radius: Float) {
+            addToPath(path.path, offsetX, offsetY, radius)
+            val cx = radius + offsetX
+            val cy = radius + offsetY
+            val cr = radius * radiusRatio
+            path.setBounds(cx - radius, cy - radius, cx + radius, cy + radius)
+            path.setCornerRadius(cr)
+        }
+
         override fun <T> createRevealAnimator(
             target: T,
             startRect: Rect,
@@ -132,17 +148,15 @@ interface ShapeDelegate {
             isReversed: Boolean,
         ): ValueAnimator where T : View, T : ClipPathView {
             val startRadius = (startRect.width() / 2f) * radiusRatio
-            val pathProvider = { progress: Float, path: Path ->
+            val pathProvider = { progress: Float, path: PathWrapper ->
                 val radius = (1 - progress) * startRadius + progress * endRadius
-                path.addRoundRect(
-                    (1 - progress) * startRect.left + progress * endRect.left,
-                    (1 - progress) * startRect.top + progress * endRect.top,
-                    (1 - progress) * startRect.right + progress * endRect.right,
-                    (1 - progress) * startRect.bottom + progress * endRect.bottom,
-                    radius,
-                    radius,
-                    Path.Direction.CW,
-                )
+                val left = (1 - progress) * startRect.left + progress * endRect.left
+                val top = (1 - progress) * startRect.top + progress * endRect.top
+                val right = (1 - progress) * startRect.right + progress * endRect.right
+                val bottom = (1 - progress) * startRect.bottom + progress * endRect.bottom
+                path.path.addRoundRect(left, top, right, bottom, radius, radius, Path.Direction.CW)
+                path.setBounds(left, top, right, bottom)
+                path.setCornerRadius(radius)
             }
             return if (useFolderSpringAnimation(target)) {
                 ClipSpringAnimBuilder(target, pathProvider).toAnim(isReversed)
@@ -189,6 +203,11 @@ interface ShapeDelegate {
             addToPath(path, offsetX, offsetY, radius, Matrix())
         }
 
+        override fun addToPath(path: PathWrapper, offsetX: Float, offsetY: Float, radius: Float) {
+            addToPath(path.path, offsetX, offsetY, radius, Matrix())
+            path.estimateBoundsFromPath()
+        }
+
         private fun addToPath(
             path: Path,
             offsetX: Float,
@@ -231,19 +250,26 @@ interface ShapeDelegate {
                             cornerR = endRadius,
                         ),
                 )
+            val pathProvider = { progress: Float, path: PathWrapper ->
+                path.path.set(morph.toPath(progress, path.path))
+                path.estimateBoundsFromPath()
+            }
             return if (useFolderSpringAnimation(target)) {
-                ClipSpringAnimBuilder(target, morph::toPath).toAnim(isReversed)
+                ClipSpringAnimBuilder(target, pathProvider).toAnim(isReversed)
             } else {
-                ClipAnimBuilder(target, morph::toPath).toAnim(isReversed)
+                ClipAnimBuilder(target, pathProvider).toAnim(isReversed)
             }
         }
     }
 
-    private class ClipAnimBuilder<T>(val target: T, val pathProvider: (Float, Path) -> Unit) :
+    private class ClipAnimBuilder<T>(
+        val target: T,
+        val pathProvider: (Float, PathWrapper) -> Unit
+    ) :
         AnimatorListenerAdapter(), AnimatorUpdateListener where T : View, T : ClipPathView {
 
         private var oldOutlineProvider: ViewOutlineProvider? = null
-        val path = Path()
+        val path = PathWrapper()
 
         override fun onAnimationStart(animation: Animator) {
             target.apply {
@@ -275,11 +301,14 @@ interface ShapeDelegate {
                 }
     }
 
-    private class ClipSpringAnimBuilder<T>(val target: T, val pathProvider: (Float, Path) -> Unit) :
+    private class ClipSpringAnimBuilder<T>(
+        val target: T,
+        val pathProvider: (Float, PathWrapper) -> Unit
+    ) :
         AnimatorListenerAdapter() where T : View, T : ClipPathView {
 
         private var oldOutlineProvider: ViewOutlineProvider? = null
-        val path = Path()
+        val path = PathWrapper()
         private val animatorBuilder = SpringAnimationBuilder(target.context)
         private val progressProperty =
             object : FloatProperty<ClipSpringAnimBuilder<T>>("progress") {
