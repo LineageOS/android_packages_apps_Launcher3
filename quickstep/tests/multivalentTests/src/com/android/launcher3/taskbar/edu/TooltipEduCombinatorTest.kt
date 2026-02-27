@@ -16,8 +16,16 @@
 
 package com.android.launcher3.taskbar.edu
 
+import android.content.Intent
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.text.Spannable
+import android.text.style.URLSpan
+import android.view.View
+import androidx.core.net.toUri
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
@@ -40,6 +48,7 @@ import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.OnboardingPrefs
 import com.android.systemui.shared.Flags.FLAG_ENABLE_RECENTS_IN_TASKBAR
 import com.google.common.truth.Truth.assertThat
+import org.hamcrest.CoreMatchers.allOf
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -366,6 +375,39 @@ class TooltipEduCombinatorTest {
         tooltipEduCombinator =
             TooltipEduCombinator(taskbarContext, taskbarStashController, { sysuiLocked }, { false })
         assertThat(tooltipEduCombinator.getSearchEdu()).isNull()
+    }
+
+    @Test
+    @TaskbarMode(PINNED)
+    fun getSearchEdu_returnsEduWithClickableDisclosureLinks() {
+        // Initialize Espresso Intents to capture intents sent from the context.
+        Intents.init()
+        try {
+            // GIVEN a search EDU is available
+            val searchEdu = tooltipEduCombinator.getSearchEdu()!!
+            val searchTooltip = searchEdu.tooltips.first()
+            val disclosureText = searchTooltip.message
+
+            // THEN the disclosure text should be a Spannable containing URL links
+            assertThat(disclosureText).isInstanceOf(Spannable::class.java)
+            val spannable = disclosureText as Spannable
+            val urlSpans = spannable.getSpans(0, spannable.length, URLSpan::class.java)
+            assertThat(urlSpans).isNotEmpty()
+
+            // WHEN the first link in the disclosure text is clicked
+            urlSpans.first().onClick(View(taskbarContext))
+
+            // THEN an Intent to view the URL should be sent
+            Intents.intended(
+                allOf(
+                    hasAction(Intent.ACTION_VIEW),
+                    hasData(urlSpans.first().url.toUri())
+                )
+            )
+        } finally {
+            // Clean up and release Espresso Intents.
+            Intents.release()
+        }
     }
 
     private fun checkEduPage(
