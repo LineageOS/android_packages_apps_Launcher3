@@ -109,7 +109,7 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
                 }
             };
     private SafeCloseable mOnDeviceProfileChangeListenerClosable;
-    private SafeCloseable mIsOnTopResumeActivityListenerClosable;
+    private SafeCloseable mIsOnResumeActivityListenerClosable;
     private final HomeVisibilityState.VisibilityChangeListener mVisibilityChangeListener =
             new HomeVisibilityState.VisibilityChangeListener() {
                 @Override
@@ -175,9 +175,9 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
             return Unit.INSTANCE;
         });
 
-        mIsOnTopResumeActivityListenerClosable = mLauncherUiState.isTopResumedActivityRef().forEach(
-                getTaskbarUiThread(), isTopResumedActivity -> {
-                    boolean shouldStashTaskbar = !isTopResumedActivity
+        mIsOnResumeActivityListenerClosable = mLauncherUiState.isResumedActivityRef().forEach(
+                getTaskbarUiThread(), isResumedActivity -> {
+                    boolean shouldStashTaskbar = !isResumedActivity
                             && mControllers.taskbarActivityContext.isTransientTaskbar();
                     mControllers.taskbarStashController.updateStateForFlag(
                             FLAG_STASHED_IN_OVERVIEW_FOR_TRANSLUCENT_APP, shouldStashTaskbar);
@@ -206,8 +206,8 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         if (mOnDeviceProfileChangeListenerClosable != null) {
             mOnDeviceProfileChangeListenerClosable.close();
         }
-        if (mIsOnTopResumeActivityListenerClosable != null) {
-            mIsOnTopResumeActivityListenerClosable.close();
+        if (mIsOnResumeActivityListenerClosable != null) {
+            mIsOnResumeActivityListenerClosable.close();
         }
         super.onDestroy();
         mTaskbarLauncherStateController.onDestroy();
