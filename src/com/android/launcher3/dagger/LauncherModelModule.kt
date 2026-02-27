@@ -26,6 +26,8 @@ import com.android.launcher3.graphics.theme.MonoIconThemeFactory
 import com.android.launcher3.graphics.theme.MonoIconThemeFactory.MONO_FACTORY_ID
 import com.android.launcher3.graphics.theme.ThemePreference.Companion.THEME_OVERRIDES_DAGGER_KEY
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.organizer.creation.screen.ui.WorkspacePreviewRepository
+import com.android.launcher3.organizer.creation.screen.ui.WorkspacePreviewRepositoryFakeImpl
 import com.android.launcher3.popup.PopupDataRepository
 import com.android.launcher3.popup.PopupDataRepositoryImpl
 import dagger.Binds
@@ -39,6 +41,11 @@ import javax.inject.Named
 @Module
 abstract class LauncherModelModule {
     @Binds abstract fun bindPopupDataRepository(impl: PopupDataRepositoryImpl): PopupDataRepository
+
+    @Binds
+    abstract fun bindWorkspacePreviewRepository(
+        impl: WorkspacePreviewRepositoryFakeImpl
+    ): WorkspacePreviewRepository
 
     @Multibinds @Named("MODEL_ITEMS") abstract fun extraModelItems(): Set<ItemInfo>
 

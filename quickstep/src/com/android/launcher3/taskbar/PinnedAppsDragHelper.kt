@@ -76,6 +76,15 @@ abstract class PinnedAppsDragHelper(
         }
     }
 
+    override fun removeDraggedView() {
+        if (indexOfChildHiddenForDrag < 0 || indexOfChildHiddenForDrag >= container.childCount) {
+            return
+        }
+        container.removeViewAt(indexOfChildHiddenForDrag)
+        indexOfChildHiddenForDrag = -1
+        container.clearDisappearingChildren()
+    }
+
     override fun updateItemViewVisibilityForDragState(itemView: View, isDragged: Boolean): Boolean {
         val index = container.indexOfChild(itemView)
         if (index == -1) {

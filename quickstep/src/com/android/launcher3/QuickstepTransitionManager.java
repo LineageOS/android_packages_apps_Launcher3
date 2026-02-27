@@ -54,6 +54,7 @@ import static com.android.launcher3.Utilities.mapBoundToRange;
 import static com.android.launcher3.config.FeatureFlags.SEPARATE_RECENTS_ACTIVITY;
 import static com.android.launcher3.desktop.DesktopAppLaunchTransitionManager.createDesktopAppLaunchRemoteTransition;
 import static com.android.launcher3.desktop.DesktopAppLaunchTransitionManager.isDesktopAppLaunch;
+import static com.android.launcher3.taskbar.TaskbarStashController.TASKBAR_STASH_DURATION_WITHOUT_ICON_ALIGNMENT;
 import static com.android.launcher3.testing.shared.TestProtocol.WALLPAPER_OPEN_ANIMATION_FINISHED_MESSAGE;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
@@ -63,6 +64,7 @@ import static com.android.quickstep.TaskViewUtils.findTaskViewToLaunch;
 import static com.android.quickstep.util.AnimUtils.clampToDuration;
 import static com.android.quickstep.util.AnimUtils.completeRunnableListCallback;
 import static com.android.quickstep.util.FloatingIconViewHelper.getFloatingIconView;
+import static com.android.systemui.shared.Flags.enableRecentsInTaskbar;
 import static com.android.systemui.shared.system.QuickStepContract.getWindowCornerRadius;
 import static com.android.systemui.shared.system.QuickStepContract.supportsRoundedCornersOnWindows;
 
@@ -433,6 +435,20 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 createAppLaunchRemoteTransition(
                         appLaunchRunner, onEndCallback::executeAllAndDestroy);
 
+        RemoteTransition remoteTransition = new RemoteTransition(appLaunchRemoteTransition,
+                mLauncher.getIApplicationThread(), "QuickstepLaunch");
+
+        if (com.android.window.flags.Flags.crossDisplayTransition()) {
+            TransitionFilter filter = new TransitionFilter();
+            filter.mRequirements = new TransitionFilter.Requirement[]{
+                    new TransitionFilter.Requirement()};
+
+            // This animation should not run on cross-display transitions.
+            filter.mRequirements[0].mNot = true;
+            filter.mRequirements[0].mIsCrossDisplayMove = true;
+            remoteTransition.setFilter(filter);
+        }
+
         // Note that this duration is a guess as we do not know if the animation will be a
         // recents launch or not for sure until we know the opening app targets.
         long duration = fromRecents
@@ -443,8 +459,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 - STATUS_BAR_TRANSITION_PRE_DELAY;
       ActivityOptions options = ActivityOptions.makeRemoteAnimation(
               new RemoteAnimationAdapter(appLaunchRunner, duration, statusBarTransitionDelay),
-              new RemoteTransition(appLaunchRemoteTransition, mLauncher.getIApplicationThread(),
-                    "QuickstepLaunch"));
+              remoteTransition);
         IRemoteCallback endCallback = completeRunnableListCallback(
                 onEndCallback, mLauncher, MAIN_EXECUTOR);
         options.setOnAnimationAbortListener(endCallback);
@@ -509,7 +524,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             Runnable onEndCallback
     ) {
         IRemoteTransition defaultAppLaunchTransition = defaultAppLaunchRunner.toRemoteTransition();
-        if (!com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()) {
+        if (!com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()
+                || com.android.window.flags.Flags.crossDisplayTransition()) {
             return defaultAppLaunchTransition;
         }
 
@@ -1467,7 +1483,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
          * launch happens via a different means (e.g. desktop mode), we also need to handle the
          * cross-display move via a remote transition.
          */
-        if (com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()) {
+        if (com.android.window.flags.Flags.enableCrossDisplaysAppLaunchTransition()
+                && !com.android.window.flags.Flags.crossDisplayTransition()) {
             mMoveDisplayTransition = new RemoteTransition(new MoveDisplayChangeRunner(this),
                     mLauncher.getIApplicationThread(), "QuickstepDisplayMove");
             TransitionFilter changeCheck = new TransitionFilter();
@@ -2076,6 +2093,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             boolean isPersistentTaskbarAndNotInDesktopMode) {
         if (isPersistentTaskbarAndNotInDesktopMode) {
             return PINNED_TASKBAR_TRANSITION_DURATION;
+        } else if (enableRecentsInTaskbar()) {
+            return TASKBAR_STASH_DURATION_WITHOUT_ICON_ALIGNMENT;
         } else if (!shouldOverrideToFastAnimation) {
             return TASKBAR_TO_HOME_DURATION_SLOW;
         } else {

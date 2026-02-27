@@ -98,6 +98,7 @@ public class DragController implements DragDriver.EventListener, TouchController
     /** Who can receive drop events */
     private final ArrayList<DropTarget> mDropTargets = new ArrayList<>();
     private final ArrayList<DragListener> mListeners = new ArrayList<>();
+    private final ArrayList<DragSessionListener> mSessionListeners = new ArrayList<>();
 
     protected DropTarget mLastDropTarget;
 
@@ -121,21 +122,57 @@ public class DragController implements DragDriver.EventListener, TouchController
     private final int DRAG_VIEW_SCALE_DURATION_MS = 500;
 
     /**
-     * Interface to receive notifications when a drag starts or stops
+     * Interface to receive notifications when a drag starts or stops.
+     * <p>
+     * NOTE: Events may be propagated multiple times per drag session.
+     *
+     * @see DragSessionListener
      */
     public interface DragListener {
         /**
          * A drag has begun
+         * <p>
+         * NOTE: This event may be propagated multiple times per drag session.
          *
          * @param dragObject The object being dragged
          * @param options Options used to start the drag
+         *
+         * @see DragSessionListener#onDragSessionStart(DragObject, DragOptions)
          */
         void onDragStart(DropTarget.DragObject dragObject, DragOptions options);
 
         /**
          * The drag has ended
+         * <p>
+         * NOTE: This event may be propagated multiple times per drag session.
+         *
+         * @see DragSessionListener#onDragSessionEnd()
          */
         void onDragEnd();
+    }
+
+    /**
+     * Interface to receive notifications when a drag session starts or stops.
+     *
+     * @see DragListener
+     */
+    public interface DragSessionListener {
+        /**
+         * A drag session has begun
+         *
+         * @param dragObject The object being dragged
+         * @param options Options used to start the drag
+         *
+         * @see DragListener#onDragStart(DragObject, DragOptions)
+         */
+        default void onDragSessionStart(DropTarget.DragObject dragObject, DragOptions options) {}
+
+        /**
+         * The drag session has ended
+         *
+         * @see DragListener#onDragEnd()
+         */
+        default void onDragSessionEnd() {}
     }
 
     /**
@@ -399,6 +436,9 @@ public class DragController implements DragDriver.EventListener, TouchController
                     .start();
         }
         mDragObject.dragView.onDragStart();
+        for (DragSessionListener listener : new ArrayList<>(mSessionListeners)) {
+            listener.onDragSessionStart(mDragObject, mOptions);
+        }
         for (DragListener listener : new ArrayList<>(mListeners)) {
             listener.onDragStart(mDragObject, mOptions);
         }
@@ -519,6 +559,9 @@ public class DragController implements DragDriver.EventListener, TouchController
         mOptions = null;
         for (DragListener listener : new ArrayList<>(mListeners)) {
             listener.onDragEnd();
+        }
+        for (DragSessionListener listener : new ArrayList<>(mSessionListeners)) {
+            listener.onDragSessionEnd();
         }
     }
 
@@ -803,14 +846,38 @@ public class DragController implements DragDriver.EventListener, TouchController
     }
 
     /**
-     * Sets the drag listener which will be notified when a drag starts or ends.
+     * Installs a listener which will be notified when a drag session starts or ends.
+     *
+     * @see #addDragListener(DragListener)
+     */
+    public void addDragSessionListener(DragSessionListener l) {
+        mSessionListeners.add(l);
+    }
+
+    /**
+     * Removes a previously installed drag session listener.
+     *
+     * @see #removeDragListener(DragListener)
+     */
+    public void removeDragSessionListener(DragSessionListener l) {
+        mSessionListeners.remove(l);
+    }
+
+    /**
+     * Installs a listener which will be notified when a drag starts or ends.
+     * <p>
+     * NOTE: Events may be propagated multiple times per drag session.
+     *
+     * @see #addDragSessionListener(DragSessionListener)
      */
     public void addDragListener(DragListener l) {
         mListeners.add(l);
     }
 
     /**
-     * Remove a previously installed drag listener.
+     * Removes a previously installed drag listener.
+     *
+     * @see #removeDragSessionListener(DragSessionListener)
      */
     public void removeDragListener(DragListener l) {
         mListeners.remove(l);

@@ -754,6 +754,8 @@ class TransientBubbleStashControllerTest {
                     override fun setIsDragging(dragging: Boolean) {}
 
                     override fun onBubbleBarExpandedStateChanged(expanded: Boolean) {}
+
+                    override fun onMarginUpdated() {}
                 }
             )
             bubbleView = BubbleView(context)

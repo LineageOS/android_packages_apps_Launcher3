@@ -710,6 +710,113 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
+    fun updateHotseatItemInfos_filterOutItemsMarkedForDeletion() {
+        recentAppsController.canShowRunningApps = true
+        setInDesktopMode(true)
+
+        val initialHotseatItems =
+            prepareHotseatAndRunningAndRecentApps(
+                hotseatPackages = listOf(HOTSEAT_PACKAGE_1, HOTSEAT_PACKAGE_2),
+                runningTasks = emptyList(),
+                recentTaskPackages = emptyList(),
+            )
+        assertThat(initialHotseatItems.size).isEqualTo(2)
+
+        assertThat(recentAppsController.setItemMarkedForDeletion(initialHotseatItems[1]!!, true))
+            .isTrue()
+
+        recentAppsController.updateHotseatItemInfos(initialHotseatItems)
+        assertThat(recentAppsController.shownHotseatItems.size).isEqualTo(1)
+        assertThat(recentAppsController.shownHotseatItems.contains(initialHotseatItems[1]!!))
+            .isFalse()
+
+        assertThat(recentAppsController.setItemMarkedForDeletion(initialHotseatItems[1]!!, false))
+            .isTrue()
+
+        recentAppsController.updateHotseatItemInfos(initialHotseatItems)
+        assertThat(recentAppsController.shownHotseatItems.size).isEqualTo(2)
+        assertThat(recentAppsController.shownHotseatItems.contains(initialHotseatItems[1]!!))
+            .isTrue()
+    }
+
+    @Test
+    fun updateHotseatItemInfos_itemMarkedForDeletionReaddedAfterDeletion() {
+        recentAppsController.canShowRunningApps = true
+        setInDesktopMode(true)
+
+        val initialHotseatItems =
+            prepareHotseatAndRunningAndRecentApps(
+                hotseatPackages = listOf(HOTSEAT_PACKAGE_1, HOTSEAT_PACKAGE_2),
+                runningTasks = emptyList(),
+                recentTaskPackages = emptyList(),
+            )
+        assertThat(initialHotseatItems.size).isEqualTo(2)
+
+        assertThat(recentAppsController.setItemMarkedForDeletion(initialHotseatItems[1]!!, true))
+            .isTrue()
+
+        recentAppsController.updateHotseatItemInfos(initialHotseatItems)
+        assertThat(recentAppsController.shownHotseatItems.size).isEqualTo(1)
+        assertThat(recentAppsController.shownHotseatItems.contains(initialHotseatItems[1]!!))
+            .isFalse()
+
+        assertThat(recentAppsController.setItemMarkedForDeletion(initialHotseatItems[1]!!, false))
+            .isTrue()
+
+        recentAppsController.updateHotseatItemInfos(initialHotseatItems.sliceArray(0..0))
+        assertThat(recentAppsController.shownHotseatItems.size).isEqualTo(1)
+        assertThat(recentAppsController.shownHotseatItems.contains(initialHotseatItems[1]!!))
+            .isFalse()
+
+        recentAppsController.updateHotseatItemInfos(initialHotseatItems)
+        assertThat(recentAppsController.shownHotseatItems.size).isEqualTo(2)
+        assertThat(recentAppsController.shownHotseatItems.contains(initialHotseatItems[1]!!))
+            .isTrue()
+
+        assertThat(recentAppsController.setItemMarkedForDeletion(initialHotseatItems[1]!!, false))
+            .isFalse()
+    }
+
+    @Test
+    fun updateHotseatItemInfos_itemWithRunningTaskMarkedForDeletion() {
+        setInDesktopMode(true)
+
+        val initialHotseatItems =
+            prepareHotseatAndRunningAndRecentApps(
+                hotseatPackages = listOf(HOTSEAT_PACKAGE_1, HOTSEAT_PACKAGE_2),
+                runningTasks =
+                    listOf(
+                        createTask(id = 1, HOTSEAT_PACKAGE_1),
+                        createTask(id = 2, HOTSEAT_PACKAGE_2),
+                    ),
+                recentTaskPackages = emptyList(),
+            )
+
+        assertThat(initialHotseatItems.size).isEqualTo(2)
+
+        assertThat(recentAppsController.setItemMarkedForDeletion(initialHotseatItems[1]!!, true))
+            .isTrue()
+
+        recentAppsController.updateHotseatItemInfos(initialHotseatItems)
+        assertThat(recentAppsController.shownHotseatItems.size).isEqualTo(1)
+        assertThat(recentAppsController.shownHotseatItems.contains(initialHotseatItems[1]!!))
+            .isFalse()
+
+        recentAppsController.updateHotseatItemInfos(initialHotseatItems.sliceArray(0..0))
+        assertThat(recentAppsController.shownHotseatItems.size).isEqualTo(1)
+        assertThat(recentAppsController.shownHotseatItems.contains(initialHotseatItems[1]!!))
+            .isFalse()
+
+        recentAppsController.updateHotseatItemInfos(initialHotseatItems)
+        assertThat(recentAppsController.shownHotseatItems.size).isEqualTo(2)
+        assertThat(recentAppsController.shownHotseatItems.contains(initialHotseatItems[1]!!))
+            .isTrue()
+
+        assertThat(recentAppsController.setItemMarkedForDeletion(initialHotseatItems[1]!!, false))
+            .isFalse()
+    }
+
+    @Test
     fun onRecentTasksChanged_cantShowRunning_inDesktopMode_shownTasks_returnsEmptyList() {
         recentAppsController.canShowRunningApps = false
         setInDesktopMode(true)

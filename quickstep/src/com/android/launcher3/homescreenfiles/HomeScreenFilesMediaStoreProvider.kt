@@ -200,14 +200,19 @@ class HomeScreenFilesMediaStoreProvider(
 
     override fun moveToHomeScreen(
         uriList: List<Uri>,
+        extras: HomeScreenFilesUpdate.Extras,
         relativeFolderPath: String?,
     ): List<CompletableFuture<Boolean>> =
         uriList.map { uri: Uri ->
-            supplyAsync({ moveToHomeScreen(uri, relativeFolderPath) }, executorService)
+            supplyAsync({ moveToHomeScreen(uri, extras, relativeFolderPath) }, executorService)
         }
 
     @WorkerThread
-    private fun moveToHomeScreen(uri: Uri, relativeFolderPath: String?): Boolean {
+    private fun moveToHomeScreen(
+        uri: Uri,
+        extras: HomeScreenFilesUpdate.Extras,
+        relativeFolderPath: String?,
+    ): Boolean {
         val mediaUri = getExternalPrimaryMediaStoreUri(context, uri)
         if (mediaUri == null) {
             Log.e(
@@ -226,43 +231,49 @@ class HomeScreenFilesMediaStoreProvider(
             return false
         }
 
-        val originalFile =
-            runCatching { query(mediaUri, selection = null, selectionArgs = null).get() }
-                .getOrNull()
-        if (originalFile == null) {
-            Log.e(TAG, "Failed to query the media store item in its original location")
-            return false
-        }
+        // Cache extras to be applied during the next scheduled update task for [mediaUri]. These
+        // will be used when adding the new file to the launcher model.
+        inProgressChangeExtras[mediaUri] = extras
 
         var success = false
         try {
-            // NOTE: The selection criteria below prevents moving a URI to a path it already
-            // occupies; the media provider has additional protections to prevent recursive moves.
-            val relativePath = "$HOME_SCREEN_FOLDER_RELATIVE_PATH${relativeFolderPath ?: ""}"
-            success =
-                (context.contentResolver.update(
-                    /*uri=*/ mediaUri,
-                    /*contentValues=*/ ContentValues().apply {
-                        put(RELATIVE_PATH, relativePath)
-                        if (originalFile.isDirectory) {
-                            put(MIME_TYPE, MIME_TYPE_DIR)
-                        }
-                    },
-                    /*where=*/ "$RELATIVE_PATH != ?",
-                    /*selectionArgs=*/ arrayOf(relativePath),
-                ) == 1)
-            if (!success) {
+            val file = query(mediaUri, selection = null, selectionArgs = null).get()
+            if (file == null) {
                 Log.e(
                     TAG,
-                    "Unable to move to '$HOME_SCREEN_FOLDER_RELATIVE_PATH' possibly due to unmet " +
-                        "selection criteria or the media provider itself enforcing additional " +
-                        "unmet conditions",
+                    "Unable to move to '$HOME_SCREEN_FOLDER_RELATIVE_PATH' due to inability to " +
+                        "query the backing file.",
                 )
+            } else {
+                // NOTE: The selection criteria below prevents moving a URI to a path it already
+                // occupies; MediaProvider has additional protections to prevent recursive moves.
+                val relativePath = "$HOME_SCREEN_FOLDER_RELATIVE_PATH${relativeFolderPath ?: ""}"
+                success =
+                    (context.contentResolver.update(
+                        /*uri=*/ mediaUri,
+                        /*contentValues=*/ ContentValues().apply {
+                            put(RELATIVE_PATH, relativePath)
+                            if (file.isDirectory) {
+                                put(MIME_TYPE, MIME_TYPE_DIR)
+                            }
+                        },
+                        /*where=*/ "$RELATIVE_PATH != ?",
+                        /*selectionArgs=*/ arrayOf(relativePath),
+                    ) == 1)
+                if (!success) {
+                    Log.e(
+                        TAG,
+                        "Unable to move to '$HOME_SCREEN_FOLDER_RELATIVE_PATH' possibly due to " +
+                            "unmet selection criteria or the media provider itself enforcing " +
+                            "additional unmet conditions",
+                    )
+                }
             }
         } catch (e: RuntimeException) {
             Log.e(TAG, "Unable to move to '$HOME_SCREEN_FOLDER_RELATIVE_PATH' due to exception", e)
         } finally {
             if (!success) {
+                inProgressChangeExtras.remove(mediaUri)
                 inProgressMoveToHomeScreenUriAliases.remove(mediaUri)
             }
         }

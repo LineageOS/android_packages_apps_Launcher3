@@ -16,84 +16,74 @@
 
 package com.android.launcher3.taskbar.navbutton
 
-import android.platform.test.rule.LimitDevicesRule
-import android.platform.test.rule.SkipOnDeviceless
 import android.view.Display
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.launcher3.DeviceProfile
-import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.R
 import com.android.launcher3.deviceprofile.DeviceConfiguration
 import com.android.launcher3.deviceprofile.DeviceProperties
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.google.common.truth.Truth.assertThat
-import org.junit.Rule
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 
 @SmallTest
-@SkipOnDeviceless // Causing module errors: b/486737856 raised to fix this
 @RunWith(AndroidJUnit4::class)
 class TaskbarNavLayoutterTest : NavButtonLayoutterTest() {
 
-    @get:Rule val limitDevicesRule = LimitDevicesRule()
-
-    private val mockTaskbarActivityContext: TaskbarActivityContext = mock {
-        val realContext = ApplicationProvider.getApplicationContext<android.content.Context>()
-        on { theme } doReturn realContext.theme
-        on { resources } doReturn realContext.resources
-        on { obtainStyledAttributes(any<IntArray>()) } doAnswer
-            {
-                realContext.obtainStyledAttributes(it.getArgument<IntArray>(0))
-            }
-        on { obtainStyledAttributes(any<Int>(), any<IntArray>()) } doAnswer
-            {
-                realContext.obtainStyledAttributes(
-                    it.getArgument<Int>(0),
-                    it.getArgument<IntArray>(1),
-                )
-            }
-    }
-    private val mockDeviceProfile: DeviceProfile = mock()
+    private lateinit var mockTaskbarActivityContext: TaskbarActivityContext
+    private lateinit var mockDeviceProfile: DeviceProfile
     private val mockDeviceProperties: DeviceProperties = mock()
     private val mockDeviceConfiguration: DeviceConfiguration = mock()
-    private val mockInvariantDeviceProfile: InvariantDeviceProfile = mock()
     private val mockDisplay: Display = mock()
-    private val endContextualContainerReal by lazy {
-        FrameLayout(ApplicationProvider.getApplicationContext())
-    }
+    private lateinit var endContextualContainerReal: FrameLayout
 
-    init {
-        whenever(mockTaskbarActivityContext.deviceProfile).thenReturn(mockDeviceProfile)
-        whenever(mockTaskbarActivityContext.display).thenReturn(mockDisplay)
+    @Before
+    fun setUp() {
+        // Use the sandbox IDP to avoid manual field initialization
+        val idp = context.base.appComponent.idp
+        idp.inlineNavButtonsEndSpacing = R.dimen.taskbar_button_margin_default
 
-        try {
-            val invField = DeviceProfile::class.java.getField("inv")
-            invField.isAccessible = true
-            invField.set(mockDeviceProfile, mockInvariantDeviceProfile)
-        } catch (e: Exception) {
-            throw RuntimeException("Failed to set DeviceProfile.inv field via reflection", e)
+        val dp = idp.getDeviceProfile(context)
+        mockDeviceProfile = spy(dp)
+
+        endContextualContainerReal = FrameLayout(context)
+
+        mockTaskbarActivityContext = mock {
+            on { deviceProfile } doReturn mockDeviceProfile
+            on { display } doReturn mockDisplay
+            on { theme } doReturn context.theme
+            on { resources } doReturn context.resources
+            on { obtainStyledAttributes(any<IntArray>()) } doAnswer
+                {
+                    context.obtainStyledAttributes(it.getArgument<IntArray>(0))
+                }
+            on { obtainStyledAttributes(any<Int>(), any<IntArray>()) } doAnswer
+                {
+                    context.obtainStyledAttributes(
+                        it.getArgument<Int>(0),
+                        it.getArgument<IntArray>(1),
+                    )
+                }
         }
 
         whenever(mockDeviceProfile.deviceProperties).thenReturn(mockDeviceProperties)
         whenever(mockDeviceProperties.deviceConfiguration).thenReturn(mockDeviceConfiguration)
 
-        // Mock some dimensions to avoid NPE
+        // Mock dimensions on the mock resources from the base class
         whenever(resources.getDimensionPixelSize(any())).thenReturn(10)
         whenever(resources.getDimension(any())).thenReturn(10f)
-
-        mockInvariantDeviceProfile.inlineNavButtonsEndSpacing =
-            R.dimen.taskbar_button_margin_default
     }
 
     @Test

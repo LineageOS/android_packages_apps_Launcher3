@@ -131,6 +131,8 @@ public class TaskOverlayFactory {
         protected ImageActionsApi mImageApi;
         private ThumbnailData mThumbnailData = null;
 
+        private OverlayUICallbacksImpl mOverlayUICallbacks;
+
         protected TaskOverlay(TaskContainer taskContainer) {
             mApplicationContext = taskContainer.getTaskView().getContext().getApplicationContext();
             mTaskContainer = taskContainer;
@@ -188,7 +190,8 @@ public class TaskOverlayFactory {
         public void initOverlay(Task task, @Nullable Bitmap thumbnail, Matrix matrix,
                 boolean rotated) {
             if (thumbnail != null) {
-                getActionsView().setCallbacks(new OverlayUICallbacksImpl(isRealSnapshot(), task));
+                mOverlayUICallbacks = new OverlayUICallbacksImpl(isRealSnapshot(), task);
+                getActionsView().setCallbacks(mOverlayUICallbacks);
             }
         }
 
@@ -270,6 +273,9 @@ public class TaskOverlayFactory {
          */
         public SystemShortcut getScreenshotShortcut(RecentsViewContainer container,
                 ItemInfo iteminfo, View originalView) {
+            if (mOverlayUICallbacks == null) {
+                return null;
+            }
             return new ScreenshotSystemShortcut(container, iteminfo, originalView);
         }
 
@@ -368,7 +374,7 @@ public class TaskOverlayFactory {
 
             @Override
             public void onClick(View view) {
-                saveScreenshot(mTaskContainer.getTask());
+                mOverlayUICallbacks.onScreenshot();
                 dismissTaskMenuView();
             }
         }

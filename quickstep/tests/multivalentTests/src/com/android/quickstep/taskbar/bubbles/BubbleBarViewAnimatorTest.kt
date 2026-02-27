@@ -1600,6 +1600,8 @@ class BubbleBarViewAnimatorTest {
                 override fun setIsDragging(dragging: Boolean) {}
 
                 override fun onBubbleBarExpandedStateChanged(expanded: Boolean) {}
+
+                override fun onMarginUpdated() {}
             }
         )
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
@@ -1837,6 +1839,8 @@ class BubbleBarViewAnimatorTest {
         override fun getHandleTranslationY() = 0f
 
         override fun getHandleBounds(bounds: Rect) {}
+
+        override fun updateHandleBounds() {}
     }
 }
 

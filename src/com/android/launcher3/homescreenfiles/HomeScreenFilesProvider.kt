@@ -56,15 +56,11 @@ interface HomeScreenFilesProvider {
      */
     fun canMoveToHomeScreen(uriList: List<Uri>?): Boolean
 
-    // NOTE: [@JvmOverloads] cannot be used with interfaces.
-    fun moveToHomeScreen(uriList: List<Uri>): List<CompletableFuture<Boolean>> =
-        moveToHomeScreen(uriList = uriList, relativeFolderPath = null)
-
-    // TODO(b/474521109): Add parameter to accept [HomeScreenFilesUpdate#Extras].
     /**
      * Attempts to asynchronously move all URIs in the specified list to the home screen.
      *
      * @param uriList The list of URIs to move.
+     * @param extras The extras to be applied when adding items to the launcher model.
      * @param relativeFolderPath If specified, URIs will be moved to
      *   [HOME_SCREEN_FOLDER_RELATIVE_PATH]/{relativeFolderPath}.
      * @return List of futures indicating the success or failure of each move attempt. Futures are
@@ -72,6 +68,7 @@ interface HomeScreenFilesProvider {
      */
     fun moveToHomeScreen(
         uriList: List<Uri>,
+        extras: HomeScreenFilesUpdate.Extras,
         relativeFolderPath: String?,
     ): List<CompletableFuture<Boolean>>
 

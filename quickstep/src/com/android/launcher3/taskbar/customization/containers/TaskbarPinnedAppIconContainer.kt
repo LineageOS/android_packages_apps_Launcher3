@@ -327,6 +327,15 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         dropTargetGhostView?.let { removeView(it) }
     }
 
+    fun removeDraggedView() {
+        if (indexOfChildHiddenForDrag < 0 || indexOfChildHiddenForDrag >= childCount) {
+            return
+        }
+        removeViewAt(indexOfChildHiddenForDrag)
+        indexOfChildHiddenForDrag = -1
+        clearDisappearingChildren()
+    }
+
     /** Applies and traces [body] for each [icons] instance. */
     private inline fun forEachIcon(icons: List<ItemInfo>, body: (Int, ItemInfo) -> Unit) {
         for ((index, icon) in icons.withIndex()) {

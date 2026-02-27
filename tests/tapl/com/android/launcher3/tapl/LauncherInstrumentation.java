@@ -1020,6 +1020,10 @@ public final class LauncherInstrumentation {
     }
 
     public String getNavigationModeMismatchError(boolean waitForCorrectState) {
+        if (mDisplayId != DEFAULT_DISPLAY) {
+            // TODO(b/487920273): Add navigation mode check for external displays.
+            return null;
+        }
         final int waitTime = waitForCorrectState ? WAIT_TIME_MS : 0;
         final NavigationModel navigationModel = getNavigationModel();
         String resPackage = getLauncherPackageName();

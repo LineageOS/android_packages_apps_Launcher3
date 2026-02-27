@@ -188,6 +188,9 @@ interface BubbleStashController {
     /** Returns MultiValueAlpha of the handle view when the handle view is shown. */
     fun getHandleViewAlpha(): MultiPropertyFactory<View>.MultiProperty? = null
 
+    /** Updates the handle bounds. */
+    fun updateHandleBounds()
+
     /**
      * Default implementation only analyse [isBubblesShowingOnHome] and return value is equal to
      * [targetTranslationYForState].

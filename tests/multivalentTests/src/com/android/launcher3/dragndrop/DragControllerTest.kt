@@ -30,6 +30,7 @@ import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
 import com.android.launcher3.Flags.enableSystemDrag
 import com.android.launcher3.dragndrop.DragController.DragListener
+import com.android.launcher3.dragndrop.DragController.DragSessionListener
 import com.android.launcher3.dragndrop.DragController.SystemDragHandler
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.LauncherMultivalentJUnit
@@ -42,13 +43,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.inOrder
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
@@ -250,6 +251,21 @@ class DragControllerTest {
     }
 
     @Test
+    fun testDragSessionListenerEvents() {
+        with(controller) {
+            val mockListener = mock<DragSessionListener>().also(::addDragSessionListener)
+            mDragObject = mock<DragObject>().apply { dragView = mock() }
+            mOptions = mock()
+
+            callOnDragStart()
+            verify(mockListener).onDragSessionStart(mDragObject, mOptions)
+
+            callOnDragEnd()
+            verify(mockListener).onDragSessionEnd()
+        }
+    }
+
+    @Test
     @EnableFlags(FLAG_ENABLE_SYSTEM_DRAG)
     fun testRemoveSystemDragHandlerCancelsDrag() {
         controller.addDragListener(mockDragListener)
@@ -290,20 +306,20 @@ class DragControllerTest {
         override fun exitDrag() {}
 
         override fun getDefaultDropTarget(dropCoordinates: IntArray?): DropTarget =
-            mock(DropTarget::class.java)
+            mock<DropTarget>()
 
         fun startDrag() =
             startDrag(
-                mock(Drawable::class.java),
-                mock(DraggableView::class.java),
+                mock<Drawable>(),
+                mock<DraggableView>(),
                 /*dragLayerX=*/ 0,
                 /*dragLayerY=*/ 0,
-                mock(DragSource::class.java),
-                mock(ItemInfo::class.java),
+                mock<DragSource>(),
+                mock<ItemInfo>(),
                 /*dragRegion=*/ Rect(),
                 /*initialDragViewScale=*/ 1.0f,
                 /*dragViewScaleOnDrop=*/ 1.0f,
-                mock(DragOptions::class.java),
+                mock<DragOptions>(),
             )
 
         override fun startDrag(
@@ -319,10 +335,10 @@ class DragControllerTest {
             dragViewScaleOnDrop: Float,
             options: DragOptions?,
         ): DragView =
-            mock(DragView::class.java).also { dv ->
+            mock<DragView>().also { dv ->
                 mDragDriver = DragDriver.create(this, options) {}
                 mDragObject =
-                    mock(DragObject::class.java).apply {
+                    mock<DragObject>().apply {
                         dragSource = source
                         dragView = dv
                     }
