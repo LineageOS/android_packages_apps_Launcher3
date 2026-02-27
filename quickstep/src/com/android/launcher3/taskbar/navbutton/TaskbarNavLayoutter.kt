@@ -75,6 +75,10 @@ class TaskbarNavLayoutter(
             gravity = Gravity.END or Gravity.CENTER_VERTICAL
             marginEnd = navMarginEnd
         }
+
+        // Ensure order of buttons is correct
+        addThreeButtons()
+
         navButtonContainer.orientation = LinearLayout.HORIZONTAL
         navButtonContainer.layoutParams = navButtonParams
 
