@@ -620,7 +620,9 @@ public class TaskbarLauncherStateController {
             }
         }
 
-        if (hasAnyFlag(changedFlags, FLAGS_LAUNCHER_ACTIVE)) {
+        // Comparing FLAGS_LAUNCHER_ACTIVE directly does not compare isInLauncher correctly,
+        // so use the previous state to compare instead
+        if (isInLauncher != isInLauncher(mState ^ changedFlags)) {
             animatorSet.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
@@ -1055,10 +1057,14 @@ public class TaskbarLauncherStateController {
 
     /** Whether the launcher is considered active. */
     private boolean isInLauncher() {
-        if (hasAnyFlag(FLAG_AWAKE)) {
-            return hasAnyFlag(FLAGS_LAUNCHER_ACTIVE);
+        return isInLauncher(mState);
+    }
+
+    private boolean isInLauncher(int state) {
+        if (hasAnyFlag(state, FLAG_AWAKE)) {
+            return hasAnyFlag(state, FLAGS_LAUNCHER_ACTIVE);
         } else {
-            return hasAnyFlag(FLAG_LAUNCHER_WAS_ACTIVE_WHILE_AWAKE);
+            return hasAnyFlag(state, FLAG_LAUNCHER_WAS_ACTIVE_WHILE_AWAKE);
         }
     }
 
