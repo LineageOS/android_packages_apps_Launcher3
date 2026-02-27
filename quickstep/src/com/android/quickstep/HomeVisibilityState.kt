@@ -23,7 +23,6 @@ import android.view.InsetsState
 import android.view.WindowInsets
 import androidx.annotation.AnyThread
 import com.android.launcher3.Utilities
-import com.android.launcher3.config.FeatureFlags
 import com.android.launcher3.util.Executors
 import com.android.wm.shell.shared.IHomeTransitionListener.Stub
 import com.android.wm.shell.shared.IShellTransitions
@@ -51,7 +50,6 @@ class HomeVisibilityState {
     @AnyThread fun removeListener(l: VisibilityChangeListener) = listeners.remove(l)
 
     fun init(transitions: IShellTransitions?) {
-        if (!FeatureFlags.enableHomeTransitionListener()) return
         try {
             transitions?.setHomeTransitionListener(
                 object : Stub() {
