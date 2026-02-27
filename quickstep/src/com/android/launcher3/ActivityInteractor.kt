@@ -34,7 +34,11 @@ open class ActivityInteractor(private val statefulActivity: StatefulActivity<*>)
     @get:AnyThread
     val recentsViewContainerInteractor = statefulActivity as? RecentsViewContainerInteractor
 
-    @AnyThread fun isActivitySameObj(obj: Any?) = statefulActivity === obj
+    @AnyThread
+    fun isActivitySameObj(obj: Any?): Boolean {
+        return if (obj is ActivityInteractor) statefulActivity === obj.statefulActivity
+        else statefulActivity === obj
+    }
 
     @AnyThread fun getDeviceProfile(): DeviceProfile = statefulActivity.mDeviceProfile
 

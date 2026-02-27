@@ -651,7 +651,8 @@ public class TaskbarManagerImpl {
     public void setActivityInteractor(@NonNull ActivityInteractor activityInteractor) {
         mPrimaryResource.debugMsg(
                 "setActivityInteractor: mActivityInteractor=" + mActivityInteractor);
-        if (mActivityInteractor == activityInteractor) {
+        if (mActivityInteractor == activityInteractor
+                || activityInteractor.isActivitySameObj(mActivityInteractor)) {
             mPrimaryResource.debugMsg("setActivityInteractor: No need to set activityInteractor!");
             return;
         }

@@ -1173,6 +1173,12 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         if (transitionManager != null) {
             transitionManager.onOverviewTargetChange();
         }
+        if (isHomeAndOverviewSame) {
+            var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+            if (conn != null) {
+                conn.getTaskbarManager().setActivity(this);
+            }
+        }
     }
 
     private void initUnfoldTransitionProgressProvider() {
