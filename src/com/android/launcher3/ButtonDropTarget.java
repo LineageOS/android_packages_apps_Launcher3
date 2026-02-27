@@ -18,6 +18,8 @@ package com.android.launcher3;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import static com.android.launcher3.Flags.fixDropTargetAccessibilityInputType;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Paint;
@@ -369,12 +371,15 @@ public abstract class ButtonDropTarget extends TextView
             mTextMultiLine = isMultiLine;
             setSingleLine(!isMultiLine);
             setMaxLines(isMultiLine ? MAX_LINES_TEXT_MULTI_LINE : MAX_LINES_TEXT_SINGLE_LINE);
-            int inputType = InputType.TYPE_CLASS_TEXT;
-            if (isMultiLine) {
-                inputType |= InputType.TYPE_TEXT_FLAG_MULTI_LINE;
 
+            if (!fixDropTargetAccessibilityInputType()) {
+                // FLAG OFF: Preserve legacy behavior in case of visual regressions.
+                int inputType = InputType.TYPE_CLASS_TEXT;
+                if (isMultiLine) {
+                    inputType |= InputType.TYPE_TEXT_FLAG_MULTI_LINE;
+                }
+                setInputType(inputType);
             }
-            setInputType(inputType);
         }
     }
 
