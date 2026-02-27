@@ -2326,7 +2326,8 @@ public final class LauncherInstrumentation {
     }
 
     /**
-     * returns if multi-desks feature is enabled or not.
+     * Returns {@code true} if desktop mode is supported on launcher's current display id,
+     * {@code false} otherwise.
      */
     public boolean isDesktopModeSupported() {
         Bundle bundle = getTestInfo(TestProtocol.REQUEST_FLAG_IS_DESKTOP_MODE_SUPPORTED,
