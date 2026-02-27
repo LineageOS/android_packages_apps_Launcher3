@@ -410,6 +410,7 @@ android_library {
         "protolog-group",
         "displaylib",
         "com.android.window.flags.window-aconfig-java",
+        "uilatencystats_flags_core_java_lib",
         "com.android.extensions.computercontrol",
         // Compose dependencies
         "androidx.compose.runtime_runtime",
@@ -426,6 +427,7 @@ android_library {
     },
     flags_packages: [
         "com.android.window.flags.window-aconfig",
+        "uilatencystats_flags",
     ],
 }
 

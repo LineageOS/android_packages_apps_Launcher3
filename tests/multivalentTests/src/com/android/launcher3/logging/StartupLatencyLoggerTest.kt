@@ -147,6 +147,25 @@ class StartupLatencyLoggerTest {
     }
 
     @Test
+    fun finishLogs_commits_logs_with_end_timestamp() {
+        whenever(timeProvider.invoke())
+            .thenReturn(100) // TOTAL_DURATION start (init)
+            .thenReturn(150) // ACTIVITY_ON_CREATE start
+            .thenReturn(200) // ACTIVITY_ON_CREATE end
+            .thenReturn(300) // TOTAL_DURATION end (finishLogs)
+
+        underTest.logStart(LAUNCHER_LATENCY_STARTUP_ACTIVITY_ON_CREATE)
+        underTest.logEnd(LAUNCHER_LATENCY_STARTUP_ACTIVITY_ON_CREATE)
+
+        underTest.finishLogs(10, true)
+        TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {}
+
+        val logger = trackedLoggers[LAUNCHER_LATENCY_STARTUP_TOTAL_DURATION]!!
+        verify(logger).withLatency(200) // 300 - 100
+        verify(logger).withEndTimestamp(300)
+    }
+
+    @Test
     fun finishLogs_logs_workspace_async_load_on_async_bind() {
         whenever(timeProvider.invoke()).thenReturn(100).thenReturn(200).thenReturn(250)
         underTest.logWorkspaceLoadStartTime()
