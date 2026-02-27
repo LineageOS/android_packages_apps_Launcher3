@@ -68,7 +68,7 @@
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"Чудово!"</string>
     <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"Проведіть пальцем угору від нижнього краю екрана"</string>
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"Спробуйте втримувати вікно довше, перш ніж відпустити"</string>
-    <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Проведіть пальцем вертикально вгору, а тоді зробіть паузу"</string>
+    <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"Проведіть по екрану вертикально вгору й затримайте палець"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"Ви вивчили жести. Щоб вимкнути їх, перейдіть у налаштування."</string>
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Ви виконали жест перемикання між додатками"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"Проведіть пальцем, щоб перейти в інший додаток"</string>
@@ -92,7 +92,7 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"Ваш пристрій \nготовий до використання!"</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"Усе готово!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"Насолоджуйтеся своїм новим <xliff:g id="DEVICE">%1$s</xliff:g>ом!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Проведіть пальцем угору, щоб почати роботу з пристроєм \"<xliff:g id="DEVICE">%1$s</xliff:g>\""</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"Щоб використовувати <xliff:g id="DEVICE">%1$s</xliff:g>, проведіть пальцем угору"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"Натисніть, щоб почати користуватися пристроєм (<xliff:g id="DEVICE">%1$s</xliff:g>)"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"Вибрати спосіб навігації"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"Проведіть пальцем угору"</string>
@@ -140,8 +140,7 @@
     <string name="taskbar_button_recents" msgid="7273376136216613134">"Нещодавні"</string>
     <string name="taskbar_button_notifications" msgid="7471740351507357318">"Сповіщення"</string>
     <string name="taskbar_button_quick_settings" msgid="227662894293189391">"Швидкі налаштув."</string>
-    <!-- no translation found for taskbar_button_more_options (8685586215650683202) -->
-    <skip />
+    <string name="taskbar_button_more_options" msgid="8685586215650683202">"Інші опції"</string>
     <string name="taskbar_a11y_title" msgid="6432169809852243110">"Панель завдань"</string>
     <string name="bubble_bar_a11y_title" msgid="7743340801055597168">"Панель спливаючих вікон"</string>
     <string name="taskbar_phone_a11y_title" msgid="4933360237131229395">"Панель навігації"</string>
@@ -159,8 +158,7 @@
     <string name="quick_switch_overflow" msgid="3679780650881041632">"{count,plural, =1{інший додаток}one{інший додаток}few{інші додатки}many{інших додатків}other{іншого додатка}}"</string>
     <string name="quick_switch_desktop" msgid="8393802056024499749">"Комп’ютер"</string>
     <string name="quick_switch_split_task" msgid="5598194724255333896">"<xliff:g id="APP_NAME_1">%1$s</xliff:g> та <xliff:g id="APP_NAME_2">%2$s</xliff:g>"</string>
-    <!-- no translation found for quick_switch_task_with_position_in_parent (9082434281522648105) -->
-    <skip />
+    <string name="quick_switch_task_with_position_in_parent" msgid="9082434281522648105">"<xliff:g id="TASK_DESCRIPTION">%1$s</xliff:g>; об’єкт <xliff:g id="INDEX_IN_PARENT">%2$d</xliff:g> з <xliff:g id="TOTAL_TASKS">%3$d</xliff:g>; відпустіть клавіші, щоб вибрати"</string>
     <string name="quick_switch_scroll_arrow_left" msgid="6527033155534184309">"Прокрутити вліво"</string>
     <string name="quick_switch_scroll_arrow_right" msgid="7319779291086916348">"Прокрутити вправо"</string>
     <string name="bubble_bar_bubble_fallback_description" msgid="7811684548953452009">"Повідомлення"</string>

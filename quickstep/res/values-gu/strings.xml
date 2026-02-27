@@ -58,7 +58,7 @@
     <string name="back_gesture_tutorial_subtitle" msgid="6639993416000920142">"જમણી કે ડાબી કિનારીએથી સ્ક્રીનના મધ્ય ભાગ સુધી સ્વાઇપ કરો"</string>
     <string name="home_gesture_feedback_swipe_too_far_from_edge" msgid="4816365433160895458">"ખાતરી કરો કે તમે સ્ક્રીનની નીચેની કિનારીએથી ઉપરની તરફ સ્વાઇપ કરો છો"</string>
     <string name="home_gesture_feedback_overview_detected" msgid="5177627157303895077">"ખાતરી કરો કે તમે આંગળી ઊંચકી લેતા પહેલાં સ્વાઇપ કરવાનું થોભાવતા નથી"</string>
-    <string name="home_gesture_feedback_wrong_swipe_direction" msgid="8328465201424027148">"ખાતરી કરો કે તમે સીધું ઉપરની તરફ સ્વાઇપ કરો છો"</string>
+    <string name="home_gesture_feedback_wrong_swipe_direction" msgid="8328465201424027148">"ખાતરી કરો કે તમે સીધું ઉપર સ્વાઇપ કરો છો"</string>
     <string name="home_gesture_feedback_complete_with_follow_up" msgid="8766981412895888417">"તમે હોમ સ્ક્રીન પર જવાનો સંકેત પૂર્ણ કર્યો. હવે પછી, પાછા જવાની રીત વિશે જાણો."</string>
     <string name="home_gesture_feedback_complete_without_follow_up" msgid="2978063221383413443">"તમે હોમ સ્ક્રીન પર જવાનો સંકેત પૂર્ણ કર્યો"</string>
     <string name="home_gesture_intro_title" msgid="836590312858441830">"હોમ સ્ક્રીન પર જવા માટે સ્વાઇપ કરો"</string>
