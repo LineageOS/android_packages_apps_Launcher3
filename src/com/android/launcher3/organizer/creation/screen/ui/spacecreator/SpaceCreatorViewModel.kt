@@ -19,13 +19,55 @@ package com.android.launcher3.organizer.creation.screen.ui.spacecreator
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout.ChooseLayoutState
 
+enum class ScreenCreationStates {
+    CHOOSE_LAYOUT,
+    SCREEN_CREATION,
+}
+
+/** View model used for [SpaceCreatorActivity] and all it's composables. */
 class SpaceCreatorViewModel {
 
     var createScreenState: CreateScreenState by mutableStateOf(CreateScreenState())
         private set
 
+    var state: ScreenCreationStates by mutableStateOf(ScreenCreationStates.SCREEN_CREATION)
+        private set
+
+    var chooseLayoutState: ChooseLayoutState by mutableStateOf(ChooseLayoutState())
+        private set
+
+    /**
+     * Update the topics list.
+     *
+     * @param topics The new list of topics.
+     */
     fun updateTopics(topics: List<String>) {
         createScreenState = createScreenState.copy(topics = topics)
+    }
+
+    /**
+     * Go to a new state.
+     *
+     * @param toState The new state. See [ScreenCreationStates] for all the available states.
+     */
+    fun goToState(toState: ScreenCreationStates) {
+        state = toState
+    }
+
+    /**
+     * Set to keep track of the currently selected Layout.
+     *
+     * @param index The index of the selected layout.
+     */
+    fun setSelectedLayout(index: Int) {
+        chooseLayoutState = chooseLayoutState.copy(selectedLayout = index)
+    }
+
+    /** TODO(): Add a real implementation to update the Layouts. */
+    fun updateLayouts(n: Int) {
+        chooseLayoutState =
+            chooseLayoutState.copy(layouts = (0 until n).toList(), selectedLayout = 0)
     }
 }

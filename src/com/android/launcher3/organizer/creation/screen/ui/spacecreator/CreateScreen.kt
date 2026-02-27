@@ -64,7 +64,7 @@ fun CreateScreen(viewModel: SpaceCreatorViewModel) {
                     ),
                 title = {
                     Text(
-                        text = stringResource(R.string.organizer_create_screen),
+                        text = stringResource(R.string.organizer_create_screen_title),
                         color = colorResource(R.color.materialColorOnSurface),
                     )
                 },
@@ -90,7 +90,7 @@ fun CreateScreen(viewModel: SpaceCreatorViewModel) {
             CreateScreenContent(
                 padding = padding,
                 topics = viewModel.createScreenState.topics,
-                onTopicClick = {},
+                onTopicClick = { viewModel.goToState(ScreenCreationStates.CHOOSE_LAYOUT) },
             )
         },
     )

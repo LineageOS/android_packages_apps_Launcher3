@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui.spacecreator
+package com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout
 
-/**
- * State for [CreateScreen] and all it's composables.
- *
- * @param topics list of topics to classify the applications.
- */
-data class CreateScreenState(val topics: List<String> = listOf())
+data class ChooseLayoutState(
+    // TODO(): Add real item instead of Int
+    val layouts: List<Int> = listOf(),
+    val selectedLayout: Int = 0,
+)
