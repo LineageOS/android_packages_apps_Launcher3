@@ -31,6 +31,11 @@ import kotlinx.coroutines.flow.asStateFlow
 
 data class BitmapBackedPageUI(val bitmap: Bitmap) : PageUI
 
+/**
+ * Placeholder implementation of [WorkspacePreviewRepository].
+ *
+ * It needs to be removed by a real implementation that constructs the real pages.
+ */
 @LauncherAppSingleton
 class WorkspacePreviewRepositoryFakeImpl
 @Inject

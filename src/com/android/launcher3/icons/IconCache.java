@@ -564,7 +564,7 @@ public class IconCache extends BaseIconCache {
                             lai,
                             entry,
                             LauncherActivityCachingLogic.INSTANCE,
-                            DEFAULT_LOOKUP_FLAG.withUsePackageIcon(false),
+                            iconRequestInfo.lookupFlag.withUsePackageIcon(false),
                             /* usePackageTitle= */ loadFallbackTitle,
                             cn,
                             sectionKey.first);

@@ -198,6 +198,7 @@ public abstract class Background extends LauncherInstrumentation.VisibleContaine
                 downTime,
                 downTime,
                 ZERO_BUTTON_SWIPE_UP_GESTURE_DURATION,
+                /* isDecelerating= */ true,
                 start,
                 end,
                 LauncherInstrumentation.GestureScope.EXPECT_PILFER);

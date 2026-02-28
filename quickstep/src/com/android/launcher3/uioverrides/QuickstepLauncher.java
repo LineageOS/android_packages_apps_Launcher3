@@ -485,13 +485,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             mDepthController.setActivityStarted(isStarted());
         }
 
-        if ((changeBits & ACTIVITY_STATE_RESUMED) != 0) {
-            TaskbarInteractor ti = mTaskbarInteractor;
-            if (!FeatureFlags.enableHomeTransitionListener() && ti != null) {
-                ti.onLauncherVisibilityChanged(hasBeenResumed());
-            }
-        }
-
         super.onActivityFlagsChanged(changeBits);
         if ((changeBits & (ACTIVITY_STATE_DEFERRED_RESUMED | ACTIVITY_STATE_STARTED
                 | ACTIVITY_STATE_USER_ACTIVE | ACTIVITY_STATE_TRANSITION_ACTIVE)) != 0) {
@@ -897,7 +890,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         }
 
         TaskbarInteractor ti = mTaskbarInteractor;
-        if (ti != null && FeatureFlags.enableHomeTransitionListener()) {
+        if (ti != null) {
             ti.onLauncherResume();
         }
     }
@@ -921,7 +914,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         }
 
         TaskbarInteractor ti = mTaskbarInteractor;
-        if (ti != null && FeatureFlags.enableHomeTransitionListener()) {
+        if (ti != null) {
             ti.onLauncherPause();
         }
     }
@@ -930,7 +923,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     protected void onStop() {
         super.onStop();
         TaskbarInteractor ti = mTaskbarInteractor;
-        if (ti != null && FeatureFlags.enableHomeTransitionListener()) {
+        if (ti != null) {
             ti.onLauncherStop();
         }
     }
@@ -1172,6 +1165,12 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         QuickstepTransitionManager transitionManager = getAppTransitionManager();
         if (transitionManager != null) {
             transitionManager.onOverviewTargetChange();
+        }
+        if (isHomeAndOverviewSame) {
+            var conn = mSysUIConnectionTracker.getActiveComponent().getValue();
+            if (conn != null) {
+                conn.getTaskbarManager().setActivity(this);
+            }
         }
     }
 

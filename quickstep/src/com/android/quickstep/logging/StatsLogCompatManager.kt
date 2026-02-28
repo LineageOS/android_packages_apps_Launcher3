@@ -16,6 +16,7 @@
 package com.android.quickstep.logging
 
 import android.content.Context
+import android.uilatencystats.UiLatencyStatsManager
 import android.util.Log
 import android.util.StatsEvent
 import android.view.Surface
@@ -96,15 +97,20 @@ import javax.inject.Inject
  * $ wwdebug (to turn on the logcat printout) $ wwlogcat (see logcat with grep filter on) $
  * statsd_testdrive (see how ww is writing the proto to statsd buffer)
  */
-class StatsLogCompatManager private constructor(context: Context) : StatsLogManager(context) {
+class StatsLogCompatManager private constructor(
+    context: Context,
+    private val uiLatencyStatsManager: UiLatencyStatsManager?
+) : StatsLogManager(context) {
     /**
      * This class is purely used to support dagger bindings to be overridden in launcher variants.
      * Very similar to [dagger.assisted.AssistedFactory]. But [dagger.assisted.AssistedFactory]
      * cannot be overridden and this makes dagger binding difficult.
      */
-    class StatsLogCompatManagerFactory @Inject internal constructor() : StatsLogManagerFactory() {
+    class StatsLogCompatManagerFactory @Inject internal constructor(
+        private val uiLatencyStatsManager: UiLatencyStatsManager?
+    ) : StatsLogManagerFactory() {
         override fun create(context: Context): StatsLogManager {
-            return StatsLogCompatManager(context)
+            return StatsLogCompatManager(context, uiLatencyStatsManager)
         }
     }
 
@@ -113,7 +119,7 @@ class StatsLogCompatManager private constructor(context: Context) : StatsLogMana
     }
 
     override fun createLatencyLogger(): StatsLatencyLogger {
-        return StatsCompatLatencyLogger()
+        return StatsCompatLatencyLogger(uiLatencyStatsManager)
     }
 
     override fun createImpressionLogger(): StatsImpressionLogger {
@@ -413,11 +419,14 @@ class StatsLogCompatManager private constructor(context: Context) : StatsLogMana
     }
 
     /** Helps to construct and log statsd compatible latency events. */
-    private class StatsCompatLatencyLogger : StatsLatencyLogger {
+    private class StatsCompatLatencyLogger(
+        private val uiLatencyStatsManager: UiLatencyStatsManager?
+    ) : StatsLatencyLogger {
         private var mInstanceId: InstanceId? = DEFAULT_INSTANCE_ID
         private var mType: LatencyType? = UNKNOWN
         private var mPackageId = 0
         private var mLatencyInMillis: Long = 0
+        private var mEndTimeInMillis: Long = -1
         private var mQueryLength = -1
         private var mSubEventType = 0
         private var mCardinality = -1
@@ -432,6 +441,10 @@ class StatsLogCompatManager private constructor(context: Context) : StatsLogMana
 
         override fun withLatency(latencyInMillis: Long) = apply {
             this.mLatencyInMillis = latencyInMillis
+        }
+
+        override fun withEndTimestamp(endTimeInMillis: Long) = apply {
+            this.mEndTimeInMillis = endTimeInMillis
         }
 
         override fun withQueryLength(queryLength: Int) = apply { this.mQueryLength = queryLength }
@@ -458,6 +471,16 @@ class StatsLogCompatManager private constructor(context: Context) : StatsLogMana
                 mSubEventType, // sub_event_type
                 mCardinality, // cardinality
             )
+
+            if (
+                event == StatsLogManager.LauncherLatencyEvent.LAUNCHER_LATENCY_STARTUP_TOTAL_DURATION &&
+                mEndTimeInMillis > 0
+            ) {
+                uiLatencyStatsManager?.reportEvent(
+                    UiLatencyStatsManager.EVENT_LAUNCHER_SHOWN,
+                    mEndTimeInMillis
+                )
+            }
         }
     }
 

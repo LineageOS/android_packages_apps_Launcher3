@@ -44,13 +44,6 @@ flag {
 }
 
 flag {
-    name: "enable_home_transition_listener"
-    namespace: "launcher"
-    description: "Enables launcher to listen to all transitions that include home activity"
-    bug: "306053414"
-}
-
-flag {
     name: "enable_taskbar_pinning"
     namespace: "launcher"
     description: "Enables taskbar pinning to allow user to switch between transient and persistent taskbar flavors."
@@ -730,4 +723,14 @@ flag {
     namespace: "launcher"
     description: "Enables a desktop specific layout for the cue bar."
     bug: "481800795"
+}
+
+flag {
+  name: "fix_drop_target_accessibility_input_type"
+  namespace: "launcher"
+  description: "Removes TYPE_CLASS_TEXT from ButtonDropTarget to prevent TalkBack from announcing extra actions."
+  bug: "447064345"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

@@ -83,7 +83,7 @@ class ShapeDelegateTest {
         anim.setCurrentFraction(0f)
         assertThat(
                 getAreaDiff(
-                    target.currentClip!!,
+                    target.currentClip!!.path,
                     cookiePath().resize(animationTestSize),
                     animationTestSize,
                 )
@@ -94,7 +94,7 @@ class ShapeDelegateTest {
         anim.setCurrentFraction(1f)
         assertThat(
                 getAreaDiff(
-                    target.currentClip!!,
+                    target.currentClip!!.path,
                     roundedRectPath(0.5f).resize(animationTestSize),
                     animationTestSize,
                 )
@@ -113,7 +113,7 @@ class ShapeDelegateTest {
         var lastPath = cookiePath().resize(animationTestSize)
         for (progress in 1..steps) {
             anim.setCurrentFraction(progress / 1000f)
-            val currentPath = Path(target.currentClip!!)
+            val currentPath = Path(target.currentClip!!.path)
             assertThat(getAreaDiff(lastPath, currentPath, animationTestSize))
                 .isLessThan(incrementalDiff)
             lastPath = currentPath
@@ -159,9 +159,9 @@ class ShapeDelegateTest {
 
     class TestClipView : View(context), ClipPathView {
 
-        var currentClip: Path? = null
+        var currentClip: PathWrapper? = null
 
-        override fun setClipPath(clipPath: Path?) {
+        override fun setClipPath(clipPath: PathWrapper?) {
             currentClip = clipPath
         }
     }

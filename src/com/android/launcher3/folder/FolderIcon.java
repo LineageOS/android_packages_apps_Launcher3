@@ -807,13 +807,13 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
                         : R.string.folder_type_name);
         if (size < MAX_NUM_ITEMS_IN_PREVIEW) {
             return getContext().getString(hasDot()
-                            ? R.string.apps_folder_name_format_exact_with_dot
-                            : R.string.apps_folder_name_format_exact,
+                            ? R.string.folder_name_format_exact_with_dot
+                            : R.string.folder_name_format_exact,
                     folder_type, title, size);
         } else {
             return getContext().getString(hasDot()
-                            ? R.string.apps_folder_name_format_overflow_with_dot
-                            : R.string.apps_folder_name_format_overflow,
+                            ? R.string.folder_name_format_overflow_with_dot
+                            : R.string.folder_name_format_overflow,
                     folder_type, title, MAX_NUM_ITEMS_IN_PREVIEW);
         }
     }

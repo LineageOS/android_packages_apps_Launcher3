@@ -97,16 +97,6 @@ public final class FeatureFlags {
         return ENABLE_TASKBAR_PINNING.get() || Flags.enableTaskbarPinning();
     }
 
-    // TODO(Block 20): Clean up flags
-    // Aconfig migration complete for ENABLE_HOME_TRANSITION_LISTENER.
-    public static final BooleanFlag ENABLE_HOME_TRANSITION_LISTENER = getDebugFlag(306053414,
-            "ENABLE_HOME_TRANSITION_LISTENER", DISABLED,
-            "Enables launcher to listen to all transitions that include home activity.");
-
-    public static boolean enableHomeTransitionListener() {
-        return ENABLE_HOME_TRANSITION_LISTENER.get() || Flags.enableHomeTransitionListener();
-    }
-
     // TODO(Block 21): Clean up flags
     public static final BooleanFlag ENABLE_APP_ICON_FOR_INLINE_SHORTCUTS = getDebugFlag(270395087,
             "ENABLE_APP_ICON_IN_INLINE_SHORTCUTS", DISABLED, "Show app icon for inline shortcut");

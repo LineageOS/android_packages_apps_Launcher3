@@ -123,6 +123,10 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Δεν είναι δυνατή η αναίρεση. Μεταβείτε στην εφαρμογή Files για επαναφορά."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Ενέργειες"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"Συντομεύσεις"</string>
+    <!-- no translation found for actions_popup_menu_button_description (4224192559473869722) -->
+    <skip />
+    <!-- no translation found for shortcuts_popup_menu_button_description (7566698511556454634) -->
+    <skip />
     <string name="pause_app_label" msgid="6796255881727695791">"Παύση εφαρμογής"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"εγκατάσταση συντομεύσεων"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"Επιτρέπει σε μια εφαρμογή την προσθήκη συντομεύσεων χωρίς την παρέμβαση του χρήστη."</string>
@@ -150,11 +154,21 @@
     <string name="folder_tap_to_rename" msgid="4017685068016979677">"Πατήστε για να αποθηκεύσετε τη νέα ονομασία"</string>
     <string name="folder_closed" msgid="4100806530910930934">"Ο φάκελος έκλεισε"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"Ο φάκελος μετονομάστηκε σε <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="folder_name_format_exact" msgid="8626242716117004803">"Φάκελος: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> στοιχεία"</string>
-    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"Φάκελος: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> στοιχεία, υπάρχουν ειδοποιήσεις"</string>
-    <string name="folder_name_format_overflow" msgid="4270108890534995199">"Φάκελος: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> ή περισσότερα στοιχεία"</string>
-    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"Φάκελος: <xliff:g id="NAME">%1$s</xliff:g>, <xliff:g id="SIZE">%2$d</xliff:g> ή περισσότερα στοιχεία, υπάρχουν ειδοποιήσεις"</string>
+    <!-- no translation found for folder_type_name (506043307348675355) -->
+    <skip />
+    <!-- no translation found for app_folder_type_name (149643408248060284) -->
+    <skip />
+    <!-- no translation found for folder_name_format_exact (3699127874865971331) -->
+    <skip />
+    <!-- no translation found for folder_name_format_exact_with_dot (5844176801938785593) -->
+    <skip />
+    <!-- no translation found for folder_name_format_overflow (4492486727595816291) -->
+    <skip />
+    <!-- no translation found for folder_name_format_overflow_with_dot (6701701338010067565) -->
+    <skip />
     <string name="unnamed_folder" msgid="2420192029474044442">"Φάκελος χωρίς όνομα"</string>
+    <!-- no translation found for files_folder_name (7712191128817533622) -->
+    <skip />
     <string name="app_pair_name_format" msgid="8134106404716224054">"Ζεύγος εφαρμογών: <xliff:g id="APP1">%1$s</xliff:g> και <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"Ταπετσαρία και στιλ"</string>
     <string name="edit_home_screen" msgid="8947858375782098427">"Επεξεργασία αρχικής οθόνης"</string>

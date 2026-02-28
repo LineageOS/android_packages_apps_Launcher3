@@ -123,6 +123,10 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"មិន​អាច​ត្រឡប់​វិញ​បាន​ទេ។ ចូលទៅកាន់កម្មវិធី Files ដើម្បីស្ដារ។"</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"សកម្មភាព"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"ផ្លូវកាត់"</string>
+    <!-- no translation found for actions_popup_menu_button_description (4224192559473869722) -->
+    <skip />
+    <!-- no translation found for shortcuts_popup_menu_button_description (7566698511556454634) -->
+    <skip />
     <string name="pause_app_label" msgid="6796255881727695791">"ផ្អាក​កម្មវិធី"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"ដំឡើង​ផ្លូវកាត់"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​បន្ថែម​ផ្លូវកាត់​ ដោយ​មិន​ចាំបាច់​​អំពើ​ពី​អ្នក​ប្រើ។"</string>
@@ -150,11 +154,21 @@
     <string name="folder_tap_to_rename" msgid="4017685068016979677">"ប៉ះដើម្បីរក្សាទុកឈ្មោះដែលបានប្តូរ"</string>
     <string name="folder_closed" msgid="4100806530910930934">"បាន​បិទ​ថត"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"បាន​ប្ដូរ​ឈ្មោះ​ថត​ជា <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="folder_name_format_exact" msgid="8626242716117004803">"ថត៖ <xliff:g id="NAME">%1$s</xliff:g>, ធាតុ <xliff:g id="SIZE">%2$d</xliff:g>"</string>
-    <string name="folder_name_format_exact_with_dot" msgid="30828041991324911">"ថត៖ <xliff:g id="NAME">%1$s</xliff:g>, ធាតុ <xliff:g id="SIZE">%2$d</xliff:g>, មានការជូនដំណឹង"</string>
-    <string name="folder_name_format_overflow" msgid="4270108890534995199">"ថត៖ <xliff:g id="NAME">%1$s</xliff:g>, ធាតុ <xliff:g id="SIZE">%2$d</xliff:g> ឬច្រើនជាងនេះ"</string>
-    <string name="folder_name_format_overflow_with_dot" msgid="9174809519194154156">"ថត៖ <xliff:g id="NAME">%1$s</xliff:g>, ធាតុ <xliff:g id="SIZE">%2$d</xliff:g> ឬច្រើន, មានការជូនដំណឹង"</string>
+    <!-- no translation found for folder_type_name (506043307348675355) -->
+    <skip />
+    <!-- no translation found for app_folder_type_name (149643408248060284) -->
+    <skip />
+    <!-- no translation found for folder_name_format_exact (3699127874865971331) -->
+    <skip />
+    <!-- no translation found for folder_name_format_exact_with_dot (5844176801938785593) -->
+    <skip />
+    <!-- no translation found for folder_name_format_overflow (4492486727595816291) -->
+    <skip />
+    <!-- no translation found for folder_name_format_overflow_with_dot (6701701338010067565) -->
+    <skip />
     <string name="unnamed_folder" msgid="2420192029474044442">"ថត​ដែលគ្មាន​ឈ្មោះ"</string>
+    <!-- no translation found for files_folder_name (7712191128817533622) -->
+    <skip />
     <string name="app_pair_name_format" msgid="8134106404716224054">"គូកម្មវិធី៖ <xliff:g id="APP1">%1$s</xliff:g> និង <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"ផ្ទាំងរូបភាព និងរចនាបថ"</string>
     <string name="edit_home_screen" msgid="8947858375782098427">"កែអេក្រង់ដើម"</string>
