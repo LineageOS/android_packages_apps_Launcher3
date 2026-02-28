@@ -13,24 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
+package com.android.launcher3.organizer.creation.screen.ui.spacecreator
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.android.launcher3.dagger.LauncherComponentProvider.get
+import com.android.launcher3.R
 import com.android.launcher3.organizer.creation.screen.ui.BlurController
 
-class WorkspaceOrganizerActivity : ComponentActivity() {
-
+class SpaceCreatorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val appComponent = get(application)
-        val homeOrganizerRepository = appComponent.workspacePreviewRepository
-        homeOrganizerRepository.refreshPages()
-        val viewModel = WorkspaceOrganizerViewModel(homeOrganizerRepository)
-        setContent { WorkspaceOrganizer(viewModel, {}) }
+        val viewModel = SpaceCreatorViewModel()
+        viewModel.updateTopics(
+            listOf(
+                getString(R.string.organizer_topic_0),
+                getString(R.string.organizer_topic_1),
+                getString(R.string.organizer_topic_2),
+                getString(R.string.organizer_topic_3),
+                getString(R.string.organizer_topic_4),
+                getString(R.string.organizer_topic_5),
+            )
+        )
+        setContent { CreateScreen(viewModel) }
     }
 
     override fun onResume() {

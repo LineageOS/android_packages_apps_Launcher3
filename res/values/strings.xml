@@ -676,4 +676,17 @@
     <string name="topic_category_productivity" translatable="false">Productivity</string>
     <string name="topic_category_accessibility" translatable="false">Accessibility</string>
 
+
+    <!-- Screen Creation -->
+    <!-- Screen to create new workspace screens using the organizer. [CHAR_LIMIT=300] -->
+    <string name="organizer_create_screen">Create screen</string>
+    <string name="organizer_create_screen_description">Choose a category to add apps and widgets from your phone</string>
+    <string name="organizer_topic_0">Most used</string>
+    <string name="organizer_topic_1">Games</string>
+    <string name="organizer_topic_2">Health &amp; Fitness</string>
+    <string name="organizer_topic_3">Productivity</string>
+    <string name="organizer_topic_4">Travel</string>
+    <string name="organizer_topic_5">Social</string>
+    <string name="organizer_topic_6">Entertainment</string>
+
 </resources>
