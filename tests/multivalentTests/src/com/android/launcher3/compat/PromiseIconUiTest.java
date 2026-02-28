@@ -155,7 +155,6 @@ public class PromiseIconUiTest extends BaseLauncherActivityTest<Launcher> {
 
     @Test
     @RequiresFlagsEnabled(FLAG_ENABLE_SUPPORT_FOR_ARCHIVING)
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 485320643)
     public void testPromiseIcon_addedArchivedApp() throws Throwable {
         installDummyAppAndWaitForUIUpdate();
         assertThat(UiDevice.getInstance(getInstrumentation()).executeShellCommand(
