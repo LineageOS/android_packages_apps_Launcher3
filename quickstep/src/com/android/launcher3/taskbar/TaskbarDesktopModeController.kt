@@ -80,6 +80,10 @@ class TaskbarDesktopModeController(
             taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()
     }
 
+    fun getTopTaskId(): Int {
+        return desktopVisibilityController.getTopDesktopTaskId(taskbarActivityContext.displayId)
+    }
+
     fun getTaskbarCornerRoundness(doesAnyTaskRequireTaskbarRounding: Boolean): Float {
         return if (doesAnyTaskRequireTaskbarRounding) {
             MAX_ROUNDNESS

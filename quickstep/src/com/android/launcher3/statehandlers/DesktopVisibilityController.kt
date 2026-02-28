@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.statehandlers
 
+import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.content.Context
 import android.util.Log
 import android.util.SparseArray
@@ -34,6 +35,7 @@ import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.SystemUiProxy
+import com.android.quickstep.TopTaskTracker
 import com.android.quickstep.fallback.RecentsState
 import com.android.wm.shell.desktopmode.DisplayDeskState
 import com.android.wm.shell.desktopmode.IDesktopTaskListener.Stub
@@ -111,6 +113,14 @@ constructor(
      */
     fun getActiveDeskId(displayId: Int): Int {
         return getDisplayDeskConfig(displayId)?.activeDeskId ?: INACTIVE_DESK_ID
+    }
+
+    /** Returns the ID of the top-most task on the given display. */
+    fun getTopDesktopTaskId(displayId: Int): Int {
+        val topTaskInfo =
+            TopTaskTracker.INSTANCE.get(context)
+                .getCachedTopTask(true /* filterOnlyVisibleRecents */, displayId)
+        return topTaskInfo.getLegacyBaseTask()?.taskId ?: INVALID_TASK_ID
     }
 
     /** Returns whether a desk is currently active on the display with the given [displayId]. */
