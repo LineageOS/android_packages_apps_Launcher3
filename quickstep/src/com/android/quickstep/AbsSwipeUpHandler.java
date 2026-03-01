@@ -1194,10 +1194,11 @@ public abstract class AbsSwipeUpHandler<
                     }
                     mHandled = true;
 
-                    InteractionJankMonitorWrapper.begin(
-                            rv, Cuj.CUJ_LAUNCHER_QUICK_SWITCH, /* timeoutMs= */ 2000);
+                    InteractionJankMonitorWrapper.begin(rv, Cuj.CUJ_LAUNCHER_QUICK_SWITCH);
                     InteractionJankMonitorWrapper.begin(rv, Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
-                    InteractionJankMonitorWrapper.begin(rv, Cuj.CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS);
+                    // This gesture can need additional time in tests
+                    InteractionJankMonitorWrapper.begin(
+                            rv, Cuj.CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS, /* timeoutMs= */ 3000);
 
                     rv.post(() -> rv.getViewTreeObserver().removeOnDrawListener(this));
                 }
