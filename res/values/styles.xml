@@ -183,6 +183,13 @@
     <!-- Theme overrides in All Apps when blur is enabled. -->
     <style name="AllAppsBlurStyle" />
 
+    <style name="FolderBlurStyle">
+        <item name="folderBackgroundColor">@color/customColorSurfaceEffect0</item>
+    </style>
+    <style name="FolderBlurFallbackStyle">
+        <item name="folderBackgroundColor">@color/customColorSurfaceEffect0Fallback</item>
+    </style>
+
     <style name="HomeSettings.Theme" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:navigationBarColor">?android:colorPrimaryDark</item>
         <item name="android:windowActionBar">false</item>
