@@ -98,7 +98,7 @@ class HomeScreenFilesMediaStoreProvider(
 
                     updates.dispatchValue(
                         HomeScreenFilesUpdate(
-                            query(uri).thenApply { file ->
+                            supplyAsync({ query(uri) }, executorService).thenApply { file ->
                                 buildMap {
                                     put(uri, file)
                                     uriAlias?.run { put(this, file) }
@@ -237,7 +237,7 @@ class HomeScreenFilesMediaStoreProvider(
 
         var success = false
         try {
-            val file = query(mediaUri, selection = null, selectionArgs = null).get()
+            val file = query(mediaUri, selection = null, selectionArgs = null)
             if (file == null) {
                 Log.e(
                     TAG,
@@ -384,52 +384,42 @@ class HomeScreenFilesMediaStoreProvider(
     }
 
     /** Queries a single file from MediaStore by its URI. */
+    @WorkerThread
     private fun query(
         uri: Uri,
         selection: String? = QUERY_DEFAULT_SELECTION,
         selectionArgs: Array<String>? = QUERY_DEFAULT_SELECTION_ARGS,
-    ): CompletableFuture<HomeScreenFile?> {
+    ): HomeScreenFile? {
         if (!isExternalPrimaryMediaStoreUri(uri)) {
-            return CompletableFuture.completedFuture(null)
+            return null
         }
-        return supplyAsync(
-                {
-                    context.contentResolver.query(
-                        uri,
-                        QUERY_DEFAULT_PROJECTION,
-                        selection,
-                        selectionArgs,
-                        null,
-                        null,
-                    )
-                },
-                executorService,
-            )
-            .thenApply { cursor ->
-                cursor?.use {
-                    if (it.count == 1) {
-                        it.moveToFirst()
-                        val displayNameColumnIndex = it.getColumnIndex(DISPLAY_NAME)
-                        val dataColumnIndex = it.getColumnIndex(DATA)
-                        val mimeTypeColumnIndex = it.getColumnIndex(MIME_TYPE)
-                        val mimeType = it.getStringOrNull(mimeTypeColumnIndex)
-                        HomeScreenFile(
-                            uri = uri,
-                            displayName = it.getString(displayNameColumnIndex),
-                            mimeType = mimeType,
-                            isDirectory =
-                                fileFactory.invoke(it.getString(dataColumnIndex)).let { f ->
-                                    // Defer to [mimeType] when the file does not yet exist.
-                                    (f.exists() && f.isDirectory) || (mimeType == MIME_TYPE_DIR)
-                                },
-                            user = Process.myUserHandle(),
-                        )
-                    } else {
-                        null
+        return runCatching {
+                context.contentResolver
+                    .query(uri, QUERY_DEFAULT_PROJECTION, selection, selectionArgs, null, null)
+                    ?.use {
+                        if (it.count == 1) {
+                            it.moveToFirst()
+                            val displayNameColumnIndex = it.getColumnIndex(DISPLAY_NAME)
+                            val dataColumnIndex = it.getColumnIndex(DATA)
+                            val mimeTypeColumnIndex = it.getColumnIndex(MIME_TYPE)
+                            val mimeType = it.getStringOrNull(mimeTypeColumnIndex)
+                            HomeScreenFile(
+                                uri = uri,
+                                displayName = it.getString(displayNameColumnIndex),
+                                mimeType = mimeType,
+                                isDirectory =
+                                    fileFactory.invoke(it.getString(dataColumnIndex)).let { f ->
+                                        // Defer to [mimeType] when the file does not yet exist.
+                                        (f.exists() && f.isDirectory) || (mimeType == MIME_TYPE_DIR)
+                                    },
+                                user = Process.myUserHandle(),
+                            )
+                        } else {
+                            null
+                        }
                     }
-                }
             }
-            .exceptionally {
+            .getOrElse {
                 Log.e(TAG, "Unable to query a single file or folder by its URI", it)
                 null
             }
@@ -447,7 +437,7 @@ class HomeScreenFilesMediaStoreProvider(
                 var success = false
 
                 try {
-                    val file = query(mediaStoreUri, null, null).get()
+                    val file = query(mediaStoreUri, null, null)
                     if (file == null) {
                         Log.e(TAG, "Unable to rename due to inability to query the backing file")
                     } else {
@@ -530,8 +520,7 @@ class HomeScreenFilesMediaStoreProvider(
         private fun isExternalPrimaryMediaStoreUri(uri: Uri) =
             uri.scheme == ContentResolver.SCHEME_CONTENT &&
                 uri.authority == MediaStore.AUTHORITY &&
-                kotlin
-                    .runCatching { MediaStore.getVolumeName(uri) == VOLUME_EXTERNAL_PRIMARY }
+                runCatching { MediaStore.getVolumeName(uri) == VOLUME_EXTERNAL_PRIMARY }
                     .getOrDefault(false)
 
         private fun isExternalStorageProviderUri(uri: Uri?) =
@@ -539,6 +528,6 @@ class HomeScreenFilesMediaStoreProvider(
                 uri.authority == DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY
 
         private fun Uri.hasIdSegment(): Boolean =
-            kotlin.runCatching { ContentUris.parseId(this) != -1L }.getOrDefault(false)
+            runCatching { ContentUris.parseId(this) != -1L }.getOrDefault(false)
     }
 }
