@@ -76,8 +76,7 @@ class ItemInflaterTest {
 
     @get:Rule val grantWidgetRule = RoboApiWrapper.grantWidgetBindPermissionRule()
     @get:Rule val mockitoRule = MockitoJUnit.rule()
-    @get:Rule val uiContextSpy = lazyRule { spy(TestActivityContext()) }
-    private val uiContext: TestActivityContext by uiContextSpy
+    private val uiContext = spy(TestActivityContext())
 
     private val clickListener = OnClickListener {}
     private val focusListener = OnFocusChangeListener { _, _ -> }
