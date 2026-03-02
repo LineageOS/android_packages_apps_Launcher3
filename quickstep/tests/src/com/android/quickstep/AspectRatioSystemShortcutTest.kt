@@ -21,9 +21,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.LayoutInflater
@@ -80,7 +77,6 @@ import org.mockito.kotlin.whenever
 /** Test for [AspectRatioSystemShortcut] */
 class AspectRatioSystemShortcutTest {
 
-    @get:Rule val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
     @get:Rule val testStabilityRule = TestStabilityRule()
 
     /** Spy on a concrete Context so we can reference real View, Layout, and Display properties. */
@@ -148,26 +144,9 @@ class AspectRatioSystemShortcutTest {
     }
 
     /**
-     * When the corresponding feature flag is off, there will not be an option to open aspect ratio
-     * settings.
-     */
-    @DisableFlags(com.android.window.flags.Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT)
-    @Test
-    fun createShortcut_flaggedOff_notCreated() {
-        val task = createTask()
-        val taskContainer = createTaskContainer(task)
-
-        setScreenSizeDp(widthDp = 1200, heightDp = 800)
-        taskView.bind(SingleTask(task), orientedState, taskOverlayFactory)
-
-        assertThat(factory.getShortcuts(launcher, taskContainer)).isNull()
-    }
-
-    /**
      * When the screen doesn't meet or exceed sw600dp (eg. phone, watch), there will not be an
      * option to open aspect ratio settings.
      */
-    @EnableFlags(com.android.window.flags.Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT)
     @Test
     @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280489)
     fun createShortcut_sw599dp_notCreated() {
@@ -184,7 +163,6 @@ class AspectRatioSystemShortcutTest {
      * When the screen does meet or exceed sw600dp (eg. tablet, inner foldable screen, home cinema)
      * there will be an option to open aspect ratio settings.
      */
-    @EnableFlags(com.android.window.flags.Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT)
     @Test
     fun createShortcut_sw800dp_created_andOpensSettings() {
         val task = createTask()
