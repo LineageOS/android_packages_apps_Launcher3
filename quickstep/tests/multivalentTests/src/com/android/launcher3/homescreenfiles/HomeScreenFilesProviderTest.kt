@@ -49,10 +49,12 @@ import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.TestUtil
 import com.google.common.truth.Truth.assertThat
+import com.google.common.util.concurrent.ForwardingExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -396,6 +398,12 @@ class HomeScreenFilesProviderTest {
                 }
             }
 
+        // Init [provider].
+        val executorService = CountingExecutorService(MoreExecutors.newDirectExecutorService())
+        clearInvocations(context)
+        clearInvocations(contentResolver)
+        provider = createProvider(executorService)
+
         // Cache updates.
         val updates = mutableListOf<HomeScreenFilesUpdate>()
         val updatesStream = provider.updates.forEach(Runnable::run, updates::add)
@@ -422,6 +430,10 @@ class HomeScreenFilesProviderTest {
                 )
                 .map(CompletableFuture<Boolean>::get),
         )
+
+        // Verify expected number of [executorService] interactions. If the count is greater than
+        // expected, that implies there is a nested execution which could result in deadlock.
+        assertEquals(expectSuccessByUri.size, executorService.executionCount)
 
         // Verify [extras] propagation.
         val contentObserver = captureContentObserver()
@@ -869,8 +881,18 @@ class HomeScreenFilesProviderTest {
                 }
             }
 
+        // Init [provider].
+        val executorService = CountingExecutorService(MoreExecutors.newDirectExecutorService())
+        clearInvocations(context)
+        clearInvocations(contentResolver)
+        provider = createProvider(executorService)
+
         // Perform rename.
         assertEquals(expectSuccess, provider.rename(usingUri, usingName).get())
+
+        // Verify expected number of [executorService] interactions. If the count is greater than
+        // expected, that implies there is a nested execution which could result in deadlock.
+        assertEquals(1, executorService.executionCount)
     }
 
     @Test
@@ -941,16 +963,28 @@ class HomeScreenFilesProviderTest {
             /*documentId=*/ "primary:$relativePath%3F$displayName",
         )
 
-    private fun createProvider() =
+    private fun createProvider(executorService: ExecutorService? = null) =
         HomeScreenFilesMediaStoreProvider(
             context,
-            MoreExecutors.newDirectExecutorService(),
+            executorService ?: MoreExecutors.newDirectExecutorService(),
             fileFactory,
             environmentWrapper,
             context.appComponent.daggerSingletonTracker,
         )
 
     private fun createTestUri(id: String) = "content://test/path/$id".toUri()
+
+    private class CountingExecutorService(private val delegate: ExecutorService) :
+        ForwardingExecutorService() {
+        var executionCount = 0
+
+        override fun delegate(): ExecutorService = delegate
+
+        override fun execute(command: Runnable) {
+            super.execute(command)
+            executionCount++
+        }
+    }
 
     companion object {
         private const val GET_MEDIA_URI_CALL = "get_media_uri"
