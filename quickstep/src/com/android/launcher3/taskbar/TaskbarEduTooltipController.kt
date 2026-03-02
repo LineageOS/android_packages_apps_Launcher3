@@ -45,7 +45,6 @@ import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
 import com.android.launcher3.RemoveAnimationSettingsTracker
 import com.android.launcher3.Utilities
-import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_EDU_OPEN
 import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarController
 import com.android.launcher3.taskbar.edu.TooltipEduCombinator
@@ -324,7 +323,7 @@ constructor(
                 splitscreenAnim.setAnimation(R.raw.taskbar_edu_splitscreen_transient)
                 bubblesAnim.setAnimation(R.raw.taskbar_edu_bubbles_transient)
                 suggestionsAnim.setAnimation(R.raw.taskbar_edu_suggestions_transient)
-                pinningEdu.visibility = if (enableTaskbarPinning()) VISIBLE else GONE
+                pinningEdu.visibility = VISIBLE
             } else {
                 splitscreenAnim.setAnimation(R.raw.taskbar_edu_splitscreen_persistent)
                 bubblesAnim.setAnimation(R.raw.taskbar_edu_bubbles_persistent)
@@ -359,9 +358,7 @@ constructor(
                 if (activityContext.isTransientTaskbar) {
                     width =
                         resources.getDimensionPixelSize(
-                            if (enableTaskbarPinning())
-                                R.dimen.taskbar_edu_features_tooltip_width_with_three_features
-                            else R.dimen.taskbar_edu_features_tooltip_width_with_two_features
+                            R.dimen.taskbar_edu_features_tooltip_width_with_three_features
                         )
 
                     bottomMargin += activityContext.deviceProfile.taskbarProfile.height
@@ -389,7 +386,6 @@ constructor(
         // for the original 2 edu steps) as a proxy to needing to show the separate pinning edu
         if (
             blockedBySysuiState ||
-                !enableTaskbarPinning() ||
                 !activityContext.isTransientTaskbar ||
                 !isTooltipEnabled ||
                 tooltipStep > TOOLTIP_STEP_PINNING ||
@@ -481,8 +477,7 @@ constructor(
             return
         }
         if (
-            !enableTaskbarPinning() ||
-                !activityContext.isPinnedTaskbar ||
+            !activityContext.isPinnedTaskbar ||
                 !isTooltipEnabled ||
                 blockedBySysuiState ||
                 !shouldShowSearchEdu ||

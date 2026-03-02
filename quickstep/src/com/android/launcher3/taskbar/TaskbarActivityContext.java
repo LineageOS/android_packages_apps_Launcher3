@@ -33,7 +33,6 @@ import static com.android.launcher3.AbstractFloatingView.TYPE_ON_BOARD_POPUP;
 import static com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_OVERLAY_PROXY;
 import static com.android.launcher3.Utilities.calculateTextHeight;
 import static com.android.launcher3.Utilities.isRunningInTestHarness;
-import static com.android.launcher3.config.FeatureFlags.enableTaskbarPinning;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_FOLDER_OPEN;
 import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_DRAGGING;
 import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_FULLSCREEN;
@@ -1565,9 +1564,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         ).orElse(0);
         int taskbarWindowSize;
         boolean shouldTreatAsTransient =
-                isTransientTaskbar() || (enableTaskbarPinning()
-                        && mTaskbarFeatureEvaluator.getSupportsTransitionToTransientTaskbar()
-                        && isPrimaryDisplay());
+                isTransientTaskbar() || (
+                        mTaskbarFeatureEvaluator.getSupportsTransitionToTransientTaskbar()
+                                && isPrimaryDisplay());
 
         int extraHeightForTaskbarTooltips = resources.getDimensionPixelSize(
                 R.dimen.arrow_toast_arrow_height)
