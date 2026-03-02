@@ -715,6 +715,16 @@ flag {
 }
 
 flag {
+    name: "widget_return_animation_minor_fixes"
+    namespace: "launcher"
+    description: "Fixed return animation for launcher widgets. Did some minor tweaks for improving the animation."
+    bug: "453966496"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "kondo_planner"
     namespace: "launcher"
     description: "Enables the kondo planner experience."
