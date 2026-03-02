@@ -82,6 +82,15 @@ flag {
     bug: "447292419"
 }
 
+flag {
+    name: "update_recents_wm_wwm_configuration"
+    namespace: "launcher_overview"
+    description: "Bugfix for missing configurations in RWM"
+    bug: "448688934"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
 
 flag {
     name: "enable_recents_window_blur"
