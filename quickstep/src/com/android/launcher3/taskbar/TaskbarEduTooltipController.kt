@@ -130,6 +130,7 @@ constructor(
 
     private lateinit var controllers: TaskbarControllers
     private lateinit var taskbarUIState: TaskbarUiState
+    private var userUnlocked: Boolean = false
 
     @VisibleForTesting lateinit var tooltipEduCombinator: TooltipEduCombinator
 
@@ -165,9 +166,15 @@ constructor(
 
     private var waiterForSearchEduAnchor: OnAttachStateChangeListener? = null
 
-    fun init(controllers: TaskbarControllers, taskbarUiState: TaskbarUiState) {
+    fun init(
+        controllers: TaskbarControllers,
+        taskbarUiState: TaskbarUiState,
+        userUnlocked: Boolean,
+    ) {
         this.controllers = controllers
         this.taskbarUIState = taskbarUiState
+        this.userUnlocked = userUnlocked
+
         tooltipEduCombinator =
             TooltipEduCombinator(
                 activityContext,
@@ -192,7 +199,9 @@ constructor(
 
     fun updateStateForSysuiFlags(@SystemUiStateFlags stateFlags: Long) {
         blockedBySysuiState =
-            isLocked(stateFlags) || (stateFlags and QuickStepContract.SYSUI_STATE_AWAKE == 0L)
+            !userUnlocked ||
+                isLocked(stateFlags) ||
+                (stateFlags and QuickStepContract.SYSUI_STATE_AWAKE == 0L)
         if (blockedBySysuiState) {
             hide()
         }

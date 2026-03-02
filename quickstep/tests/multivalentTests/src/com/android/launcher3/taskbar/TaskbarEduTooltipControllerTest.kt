@@ -371,7 +371,11 @@ class TaskbarEduTooltipControllerTest {
 
         assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
         runOnTaskbarUiThreadSync {
-            taskbarEduTooltipController.init(taskbarContext.controllers, TaskbarUiState())
+            taskbarEduTooltipController.init(
+                taskbarContext.controllers,
+                TaskbarUiState(),
+                userUnlocked = true,
+            )
         }
         assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
     }
@@ -468,6 +472,59 @@ class TaskbarEduTooltipControllerTest {
 
         // Updating items will ensure that all apps button gets shown - in response toolltip should
         // show as well.
+        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnTaskbarUiThreadSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+        }
+
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSearchEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    @TaskbarMode(PINNED)
+    fun testMaybeShowSearchEdu_whenUserIsLocked_shouldNotShowSearchEdu() {
+        searchEduSeen = false
+
+        runOnTaskbarUiThreadSync {
+            taskbarEduTooltipController.init(
+                taskbarContext.controllers,
+                TaskbarUiState(),
+                userUnlocked = false,
+            )
+            taskbarEduTooltipController.updateStateForSysuiFlags(
+                QuickStepContract.SYSUI_STATE_AWAKE
+            )
+        }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+
+        runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
+        runOnTaskbarUiThreadSync {
+            assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
+        }
+
+        runOnTaskbarUiThreadSync { taskbarEduTooltipController.maybeShowSearchEdu() }
+        assertThat(taskbarEduTooltipController.isTooltipOpen).isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_TOOLTIP_EDU_COMBINATOR)
+    @TaskbarMode(PINNED)
+    fun testMaybeShowSearchEdu_whenUserIsLocked_shouldNotShowSearchEdu_eduCombinator() {
+        searchEduSeen = false
+
+        runOnTaskbarUiThreadSync {
+            taskbarEduTooltipController.init(
+                taskbarContext.controllers,
+                TaskbarUiState(),
+                userUnlocked = false,
+            )
+            taskbarEduTooltipController.updateStateForSysuiFlags(
+                QuickStepContract.SYSUI_STATE_AWAKE
+            )
+        }
+
         runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
         runOnTaskbarUiThreadSync {
             assertThat(taskbarView.allAppsButtonContainer.isAttachedToWindow).isTrue()
