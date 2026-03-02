@@ -53,7 +53,6 @@ import com.android.launcher3.util.PackageManagerHelper;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.Snackbar;
-import com.android.launcher3.widget.WidgetsBottomSheet;
 import com.android.launcher3.widget.picker.model.data.WidgetPickerData;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
 
@@ -179,21 +178,13 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
         @Override
         public void onClick(View view) {
             AbstractFloatingView.closeAllOpenViews(mTarget);
-            if (Flags.enableAppWidgetPickerRefactor()) {
-                Context context = view.getContext();
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.putExtra(Intent.EXTRA_PACKAGE_NAME,
-                        mItemInfo.getTargetPackage());
-                intent.putExtra(Intent.EXTRA_USER, mItemInfo.user);
-                intent.setPackage(context.getPackageName());
-                context.startActivity(intent);
-            } else {
-                WidgetsBottomSheet widgetsBottomSheet =
-                        (WidgetsBottomSheet) mTarget.getLayoutInflater().inflate(
-                                R.layout.widgets_bottom_sheet, mTarget.getDragLayer(), false);
-                widgetsBottomSheet.populateAndShow(mItemInfo);
-            }
-
+            Context context = view.getContext();
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME,
+                    mItemInfo.getTargetPackage());
+            intent.putExtra(Intent.EXTRA_USER, mItemInfo.user);
+            intent.setPackage(context.getPackageName());
+            context.startActivity(intent);
             mTarget.getStatsLogManager().logger().withItemInfo(mItemInfo)
                     .log(LAUNCHER_SYSTEM_SHORTCUT_WIDGETS_TAP);
         }

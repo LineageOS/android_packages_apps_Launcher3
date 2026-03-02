@@ -28,7 +28,6 @@ import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.lifecycle.LifecycleOwner
 import com.android.launcher3.BaseActivity
-import com.android.launcher3.Flags
 import com.android.launcher3.R
 import com.android.launcher3.dagger.LauncherComponentProvider
 import com.android.launcher3.dragndrop.SimpleDragLayer
@@ -63,12 +62,7 @@ open class WidgetPickerActivity :
             .decorView
             .setViewTreeOnBackPressedDispatcherOwner(onBackPressedDispatcherOwner = this)
 
-        val appPackageName =
-            if (Flags.enableAppWidgetPickerRefactor()) {
-                intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)
-            } else {
-                null
-            }
+        val appPackageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)
 
         if (appPackageName != null) {
             val userHandle = intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle::class.java)

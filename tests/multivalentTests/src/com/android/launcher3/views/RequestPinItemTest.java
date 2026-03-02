@@ -20,11 +20,12 @@ import static android.app.PendingIntent.FLAG_ONE_SHOT;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
+import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
-import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 import android.app.PendingIntent;
@@ -32,7 +33,6 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.rule.LimitDevicesRule;
 import android.platform.test.rule.SkipOnDeviceless;
@@ -43,7 +43,6 @@ import androidx.test.filters.LargeTest;
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
 
-import com.android.launcher3.Flags;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.model.data.ItemInfo;
@@ -104,7 +103,6 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
-    @EnableFlags(Flags.FLAG_ENABLE_APP_WIDGET_PICKER_REFACTOR)
     @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280528)
     public void testPinWidgetNoConfig() throws Throwable {
         runTest("pinWidgetNoConfig", true, (info, view) -> info instanceof LauncherAppWidgetInfo
@@ -118,7 +116,6 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
-    @EnableFlags(Flags.FLAG_ENABLE_APP_WIDGET_PICKER_REFACTOR)
     @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280528)
     public void testPinWidgetNoConfig_customPreview() throws Throwable {
         // Command to set custom preview
@@ -137,7 +134,6 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
-    @EnableFlags(Flags.FLAG_ENABLE_APP_WIDGET_PICKER_REFACTOR)
     @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280528)
     public void testPinWidgetWithConfig() throws Throwable {
         runTest("pinWidgetWithConfig", true,
@@ -152,7 +148,6 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
-    @EnableFlags(Flags.FLAG_ENABLE_APP_WIDGET_PICKER_REFACTOR)
     public void testPinShortcut() throws Throwable {
         // Command to set the shortcut id
         Intent command = RequestPinItemActivity.getCommandIntent(
