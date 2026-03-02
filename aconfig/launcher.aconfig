@@ -193,16 +193,6 @@ flag {
 }
 
 flag {
-    name: "accessibility_scroll_on_allapps"
-    namespace: "launcher"
-    description: "Scroll to item position if accessibility focused"
-    bug: "265392261"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "enable_all_apps_button_in_hotseat"
     namespace: "launcher"
     description: "Enables displaying the all apps button in the hotseat."
