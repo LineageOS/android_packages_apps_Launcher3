@@ -27,7 +27,9 @@ import androidx.test.filters.SmallTest
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget
 import com.android.launcher3.DropTarget.DragObject
+import com.android.launcher3.Flags.FLAG_ENABLE_DRAG_START_END_MULTI_DISPATCH
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
+import com.android.launcher3.Flags.enableDragStartEndMultiDispatch
 import com.android.launcher3.Flags.enableSystemDrag
 import com.android.launcher3.dragndrop.DragController.DragListener
 import com.android.launcher3.dragndrop.DragController.DragSessionListener
@@ -48,6 +50,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
+import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoInteractions
@@ -251,17 +254,86 @@ class DragControllerTest {
     }
 
     @Test
-    fun testDragSessionListenerEvents() {
+    @DisableFlags(FLAG_ENABLE_DRAG_START_END_MULTI_DISPATCH)
+    fun testDragListenerEventsWithFlagDisabled() {
+        testDragListenerEvents(useSystemDrag = true)
+        testDragListenerEvents(useSystemDrag = false)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DRAG_START_END_MULTI_DISPATCH)
+    fun testDragListenerEventsWithFlagEnabled() {
+        testDragListenerEvents(useSystemDrag = true)
+        testDragListenerEvents(useSystemDrag = false)
+    }
+
+    private fun testDragListenerEvents(useSystemDrag: Boolean) {
         with(controller) {
-            val mockListener = mock<DragSessionListener>().also(::addDragSessionListener)
-            mDragObject = mock<DragObject>().apply { dragView = mock() }
             mOptions = mock()
+            mOptions.simulatedDndStartPoint = if (useSystemDrag) mock() else null
+            mDragDriver = DragDriver.create(this, mOptions) {}
+            mDragObject = mock<DragObject>().apply { dragView = mock() }
 
+            val mockListener = mock<DragListener>().also(::addDragListener)
+            val mockSessionListener = mock<DragSessionListener>().also(::addDragSessionListener)
+
+            // Step 1: Drag start.
             callOnDragStart()
-            verify(mockListener).onDragSessionStart(mDragObject, mOptions)
+            verify(mockSessionListener).onDragSessionStart(mDragObject, mOptions)
+            if (!enableDragStartEndMultiDispatch() || !useSystemDrag) {
+                verify(mockListener).onDragStart(mDragObject, mOptions)
+            }
+            verifyNoMoreInteractions(mockListener, mockSessionListener)
+            clearInvocations(mockListener, mockSessionListener)
 
+            // Step 2: Drag enter.
+            if (useSystemDrag) {
+                onDriverDragEnterWindow()
+                if (enableDragStartEndMultiDispatch()) {
+                    verify(mockListener).onDragStart(mDragObject, mOptions)
+                }
+                verifyNoMoreInteractions(mockListener, mockSessionListener)
+                clearInvocations(mockListener, mockSessionListener)
+            }
+
+            // Step 3: Drag exit.
+            if (useSystemDrag) {
+                onDriverDragExitWindow()
+                if (enableDragStartEndMultiDispatch()) {
+                    verify(mockListener).onDragEnd()
+                }
+                verifyNoMoreInteractions(mockListener, mockSessionListener)
+                clearInvocations(mockListener, mockSessionListener)
+            }
+
+            // Step 4: Drag re-enter.
+            if (useSystemDrag) {
+                onDriverDragEnterWindow()
+                if (enableDragStartEndMultiDispatch()) {
+                    verify(mockListener).onDragStart(mDragObject, mOptions)
+                }
+                verifyNoMoreInteractions(mockListener, mockSessionListener)
+                clearInvocations(mockListener, mockSessionListener)
+            }
+
+            // Step 5. Drag re-exit.
+            if (useSystemDrag) {
+                onDriverDragExitWindow()
+                if (enableDragStartEndMultiDispatch()) {
+                    verify(mockListener).onDragEnd()
+                }
+                verifyNoMoreInteractions(mockListener, mockSessionListener)
+                clearInvocations(mockListener, mockSessionListener)
+            }
+
+            // Step 6: Drag end.
             callOnDragEnd()
-            verify(mockListener).onDragSessionEnd()
+            if (!enableDragStartEndMultiDispatch() || !useSystemDrag) {
+                verify(mockListener).onDragEnd()
+            }
+            verify(mockSessionListener).onDragSessionEnd()
+            verifyNoMoreInteractions(mockListener, mockSessionListener)
+            clearInvocations(mockListener, mockSessionListener)
         }
     }
 

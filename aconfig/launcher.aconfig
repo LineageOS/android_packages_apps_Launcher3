@@ -717,3 +717,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "enable_drag_start_end_multi_dispatch"
+  namespace: "launcher"
+  description: "Enables support for multi-dispatch of drag start/end events."
+  bug: "456191832"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
