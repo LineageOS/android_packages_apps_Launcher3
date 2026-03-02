@@ -35,14 +35,12 @@ import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
-import android.widget.TextView
 import android.window.OnBackAnimationCallback
 import android.window.OnBackInvokedDispatcher
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import com.android.launcher3.BaseActivity
-import com.android.launcher3.Flags
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherAppState
@@ -69,13 +67,10 @@ import com.android.launcher3.views.BaseDragLayer
 import com.android.launcher3.widget.AddItemWidgetsBottomSheet
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.widget.LauncherWidgetHolder
-import com.android.launcher3.widget.PendingAddShortcutInfo
 import com.android.launcher3.widget.PendingAddWidgetInfo
 import com.android.launcher3.widget.WidgetCell
 import com.android.launcher3.widget.WidgetCell.PreviewReadyListener
-import com.android.launcher3.widget.WidgetCellPreview
 import com.android.launcher3.widget.WidgetManagerHelper
-import com.android.launcher3.widget.WidgetSections
 import com.android.launcher3.widgetpicker.WidgetPickerConfig
 import java.lang.ref.WeakReference
 import java.util.function.Supplier
@@ -110,9 +105,6 @@ open class AddItemActivity :
 
     private var mFinishOnPause = false
 
-    private val showComposeView
-        get() = Flags.enableAppWidgetPickerRefactor()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -130,11 +122,7 @@ open class AddItemActivity :
         // confirmation activity might be rotated.
         mDeviceProfile = idp.getDeviceProfile(applicationContext)
 
-        if (showComposeView) {
-            setContentView(R.layout.add_item_confirmation_activity_compose)
-        } else {
-            setContentView(R.layout.add_item_confirmation_activity)
-        }
+        setContentView(R.layout.add_item_confirmation_activity_compose)
 
         // Set flag to allow activity to draw over navigation and status bar.
         checkNotNull(window)
@@ -148,13 +136,6 @@ open class AddItemActivity :
             checkNotNull(applicationContext.getSystemService(AccessibilityManager::class.java))
         appWidgetManager = WidgetManagerHelper(this)
         appWidgetHolder = LauncherWidgetHolder.newInstance(this)
-
-        if (!showComposeView) {
-            widgetCell =
-                findViewById<WidgetCell>(R.id.widget_cell).apply {
-                    addPreviewReadyListener(this@AddItemActivity)
-                }
-        }
 
         val targetApp =
             when (pinItemRequest.requestType) {
@@ -173,62 +154,25 @@ open class AddItemActivity :
             return
         }
 
-        if (showComposeView) {
-            window?.decorView?.setViewTreeOnBackPressedDispatcherOwner(this)
+        window?.decorView?.setViewTreeOnBackPressedDispatcherOwner(this)
 
-            // Wait for activity slide in to happen before starting sheet open animation.
-            // Otherwise, the activity background also appears as if it slides in.
-            // This is since we use background dim (in styles.xml) for activity.
-            dragLayer.postDelayed(
-                {
-                    LauncherComponentProvider.get(this)
-                        .widgetPickerComposeWrapper
-                        .showWidgetsForPinRequest(
-                            activity = this,
-                            targetApp = targetApp.toPackageUserKey(),
-                            pinItemRequest = pinItemRequest,
-                            widgetPickerConfig = WidgetPickerConfig(),
-                            pinItemAddHandler = this,
-                        )
-                },
-                ACTIVITY_SLIDE_IN_DURATION_MS,
-            )
-            return
-        }
-
-        widgetCell?.findViewById<WidgetCellPreview>(R.id.widget_preview_container)?.apply {
-            setOnTouchListener(this@AddItemActivity)
-            setOnLongClickListener(this@AddItemActivity)
-        }
-
-        // savedInstanceState is null when the activity is created the first time (i.e., avoids
-        // duplicate logging during rotation)
-        if (savedInstanceState == null) {
-            logCommand(LauncherEvent.LAUNCHER_ADD_EXTERNAL_ITEM_START)
-        }
-
-        // Set the label synchronously instead of via IconCache as this is the first thing
-        // user sees
-        val widgetAppName = findViewById<TextView>(R.id.widget_appName)
-        val section =
-            if (targetApp.widgetCategory == WidgetSections.NO_CATEGORY) {
-                null
-            } else {
-                WidgetSections.getWidgetSections(this)[targetApp.widgetCategory]
-            }
-        widgetAppName.text =
-            if (section == null) {
-                info.loadLabel(packageManager)
-            } else {
-                getString(section.mSectionTitle)
-            }
-
-        slideInView =
-            findViewById<AddItemWidgetsBottomSheet>(R.id.add_item_bottom_sheet).apply {
-                addOnCloseListener(this@AddItemActivity)
-                show()
-            }
-        setupNavBarColor()
+        // Wait for activity slide in to happen before starting sheet open animation.
+        // Otherwise, the activity background also appears as if it slides in.
+        // This is since we use background dim (in styles.xml) for activity.
+        dragLayer.postDelayed(
+            {
+                LauncherComponentProvider.get(this)
+                    .widgetPickerComposeWrapper
+                    .showWidgetsForPinRequest(
+                        activity = this,
+                        targetApp = targetApp.toPackageUserKey(),
+                        pinItemRequest = pinItemRequest,
+                        widgetPickerConfig = WidgetPickerConfig(),
+                        pinItemAddHandler = this,
+                    )
+            },
+            ACTIVITY_SLIDE_IN_DURATION_MS,
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -317,13 +261,6 @@ open class AddItemActivity :
     }
 
     private fun setupShortcut(): PackageItemInfo {
-        val shortcutInfo = PinShortcutRequestActivityInfo(pinItemRequest, this)
-
-        if (!showComposeView) {
-            checkNotNull(widgetCell).widgetView.tag = PendingAddShortcutInfo(shortcutInfo)
-            applyWidgetItemAsync { WidgetItem(shortcutInfo, app.iconCache) }
-        }
-
         return checkNotNull(pinItemRequest.shortcutInfo).let {
             PackageItemInfo(it.getPackage(), it.userHandle)
         }
@@ -347,11 +284,6 @@ open class AddItemActivity :
         pendingInfo.spanX = min(idp.numColumns.toDouble(), widgetInfo.spanX.toDouble()).toInt()
         pendingInfo.spanY = min(idp.numRows.toDouble(), widgetInfo.spanY.toDouble()).toInt()
         widgetOptions = pendingInfo.getDefaultSizeOptions(this)
-
-        if (!showComposeView) {
-            widgetCell?.apply { widgetView.tag = pendingInfo }
-            applyWidgetItemAsync { WidgetItem(widgetInfo, idp, app.iconCache, app.context) }
-        }
 
         return WidgetsModel.newPendingItemInfo(this, widgetInfo.component, widgetInfo.user)
     }
