@@ -82,6 +82,35 @@ class TaskbarViewDragDropController(
         modelCallbacks = callbacks
     }
 
+    /**
+     * Moves the given item to the left or right in hotseat and updates the database.
+     *
+     * @param item the item to move
+     * @param moveLeft true if moving left, false if moving right
+     * @return true if item is moved
+     */
+    fun moveHotseatItem(item: ItemInfo, moveLeft: Boolean): Boolean {
+        val hotseatItems = modelCallbacks?.hotseatItems ?: return false
+        val currentIndex =
+            activityContext.controllers.taskbarViewController.getHotseatItemIndex(item)
+        if (currentIndex == -1) return false
+
+        targetPinIndex = if (moveLeft) currentIndex - 1 else currentIndex + 1
+        if (targetPinIndex < 0 || targetPinIndex >= hotseatItems.size) {
+            targetPinIndex = -1
+            return false
+        }
+
+        val updates = addOrMoveItemInDatabase(item)
+        targetPinIndex = -1
+        return if (updates != null) {
+            modelCallbacks?.updateItemsForDragAndDrop(updates)
+            true
+        } else {
+            false
+        }
+    }
+
     fun addDropTargets(dragController: DragController) {
         dragController.addDropTarget(taskbarPinningDropTarget)
         dragController.addDropTarget(unpinDropTarget)

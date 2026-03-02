@@ -87,6 +87,7 @@ import com.android.launcher3.taskbar.bubbles.BubbleControllers;
 import com.android.launcher3.taskbar.customization.TaskbarIconSpecs;
 import com.android.launcher3.taskbar.customization.containers.TaskbarPinnedAppIconContainer;
 import com.android.launcher3.taskbar.handoff.HandoffSuggestion;
+import com.android.launcher3.util.IntSparseArrayMap;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.MultiPropertyFactory;
@@ -1395,6 +1396,22 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
 
     public LauncherBindableItemsContainer getContent() {
         return mModelCallbacks;
+    }
+
+    /** Returns the current hotseat items in Taskbar. */
+    public IntSparseArrayMap<ItemInfo> getHotseatItems() {
+        return mModelCallbacks.getHotseatItems();
+    }
+
+    /** Returns the index of the given hotseat item, or -1 if not found. */
+    public int getHotseatItemIndex(ItemInfo itemInfo) {
+        IntSparseArrayMap<ItemInfo> hotseatItems = mModelCallbacks.getHotseatItems();
+        for (int i = 0; i < hotseatItems.size(); i++) {
+            if (TaskItemInfo.isSameItem(hotseatItems.valueAt(i), itemInfo)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
