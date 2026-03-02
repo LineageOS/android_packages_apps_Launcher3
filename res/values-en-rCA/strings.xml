@@ -153,10 +153,14 @@
     <string name="folder_renamed" msgid="1794088362165669656">"Folder renamed to <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="folder_type_name" msgid="506043307348675355">"Folder"</string>
     <string name="app_folder_type_name" msgid="149643408248060284">"App folder"</string>
-    <string name="folder_name_format_exact" msgid="3699127874865971331">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> items"</string>
-    <string name="folder_name_format_exact_with_dot" msgid="5844176801938785593">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> items, has notifications"</string>
-    <string name="folder_name_format_overflow" msgid="4492486727595816291">"<xliff:g id="TYPE">%1$s</xliff:g> <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> or more items"</string>
-    <string name="folder_name_format_overflow_with_dot" msgid="6701701338010067565">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> or more items, has notifications"</string>
+    <!-- no translation found for apps_folder_name_format_exact (891345161390366700) -->
+    <skip />
+    <!-- no translation found for apps_folder_name_format_exact_with_dot (7729062268048931718) -->
+    <skip />
+    <!-- no translation found for apps_folder_name_format_overflow (4614729357510054194) -->
+    <skip />
+    <!-- no translation found for apps_folder_name_format_overflow_with_dot (4738681518782744688) -->
+    <skip />
     <string name="unnamed_folder" msgid="2420192029474044442">"Unnamed folder"</string>
     <string name="files_folder_name" msgid="7712191128817533622">"File folder: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"App pair: <xliff:g id="APP1">%1$s</xliff:g> and <xliff:g id="APP2">%2$s</xliff:g>"</string>
@@ -164,6 +168,7 @@
     <string name="edit_home_screen" msgid="8947858375782098427">"Edit Home Screen"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"Home settings"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Disabled by your admin"</string>
+    <string name="settings_home_organizer" msgid="5184766349407080054">"Home organizer"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"When phone is rotated"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Enable composition tracing"</string>
@@ -264,4 +269,22 @@
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"New folder"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"New folder"</string>
     <string name="something_went_wrong" msgid="1492883246069060632">"Something went wrong"</string>
+    <!-- no translation found for organizer_create_screen (284001317063451431) -->
+    <skip />
+    <!-- no translation found for organizer_create_screen_description (3224132391919219061) -->
+    <skip />
+    <!-- no translation found for organizer_topic_0 (2289302981298465926) -->
+    <skip />
+    <!-- no translation found for organizer_topic_1 (9139266779598899604) -->
+    <skip />
+    <!-- no translation found for organizer_topic_2 (2890586328846836407) -->
+    <skip />
+    <!-- no translation found for organizer_topic_3 (4708170964708215008) -->
+    <skip />
+    <!-- no translation found for organizer_topic_4 (7852628756329993717) -->
+    <skip />
+    <!-- no translation found for organizer_topic_5 (3391565770865209078) -->
+    <skip />
+    <!-- no translation found for organizer_topic_6 (5372680031834537103) -->
+    <skip />
 </resources>
