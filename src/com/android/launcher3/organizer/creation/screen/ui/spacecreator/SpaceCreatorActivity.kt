@@ -20,10 +20,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.android.launcher3.R
 import com.android.launcher3.organizer.creation.screen.ui.BlurController
+import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout.ChooseLayout
 
 class SpaceCreatorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // TODO(): This is for testing purpose, remove when connecting with the business logic.
         val viewModel = SpaceCreatorViewModel()
         viewModel.updateTopics(
             listOf(
@@ -35,7 +37,11 @@ class SpaceCreatorActivity : ComponentActivity() {
                 getString(R.string.organizer_topic_5),
             )
         )
-        setContent { CreateScreen(viewModel) }
+        viewModel.updateLayouts(5)
+        setContent {
+            if (viewModel.state == ScreenCreationStates.SCREEN_CREATION) CreateScreen(viewModel)
+            else ChooseLayout(viewModel)
+        }
     }
 
     override fun onResume() {
