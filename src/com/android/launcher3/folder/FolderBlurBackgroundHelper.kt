@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.graphics
+package com.android.launcher3.folder
 
-import android.graphics.Path
-import android.graphics.RectF
+import android.graphics.Canvas
+import android.view.View
+import com.android.launcher3.dagger.ActivityContextSingleton
+import com.android.launcher3.graphics.PathWrapper
+import javax.inject.Inject
 
-/** A wrapper class of [Path] that also tracks the [bounds] and corner radii. */
-class PathWrapper {
+/**
+ * Helper class that creates and updates the blur drawable used for folders.
+ */
+@ActivityContextSingleton
+open class FolderBlurBackgroundHelper
+@Inject
+constructor() {
 
-    val path: Path = Path()
-    val bounds: RectF = RectF()
-    var cornerRadius = 0f
+    open fun prepareToOpen(folder: Folder) {}
 
-    fun setBounds(left: Float, top: Float, right: Float, bottom: Float) {
-        bounds.set(left, top, right, bottom)
-    }
+    open fun drawBlur(canvas: Canvas, pathWrapper: PathWrapper?, view: View) {}
 
-    fun estimateBoundsFromPath() {
-        path.computeBounds(bounds, true /* exact */)
-    }
-
-    fun reset() {
-        path.reset()
-    }
+    open fun folderCloseComplete() {}
 }
