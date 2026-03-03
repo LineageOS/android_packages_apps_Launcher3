@@ -25,7 +25,6 @@ import android.view.View
 import android.view.ViewGroup.OnHierarchyChangeListener
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget.DragObject
-import com.android.launcher3.Flags.enableHotseatDropTargetValidityChecks
 import com.android.launcher3.LauncherAnimUtils
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.WorkspaceLayoutManager
@@ -264,10 +263,7 @@ class HybridHotseatOrganizer(
     }
 
     override fun onDragStart(dragObject: DragObject, options: DragOptions?) {
-        if (
-            enableHotseatDropTargetValidityChecks() &&
-                hotseat?.isValidDropTarget(dragObject) != true
-        ) {
+        if (hotseat?.isValidDropTarget(dragObject) != true) {
             return
         }
         removePredictedApps(outlineDrawings, dragObject)
@@ -280,9 +276,7 @@ class HybridHotseatOrganizer(
     }
 
     override fun onDragEnd() {
-        if (
-            enableHotseatDropTargetValidityChecks() && (pauseFlags and FLAG_DRAG_IN_PROGRESS) == 0
-        ) {
+        if ((pauseFlags and FLAG_DRAG_IN_PROGRESS) == 0) {
             return
         }
         pauseFlags = pauseFlags and FLAG_DRAG_IN_PROGRESS.inv()

@@ -834,7 +834,7 @@ public class TaskbarManagerImpl {
             sharedState.allAppsVisible = sharedState.allAppsVisible && isLargeScreenTaskbar;
             Trace.beginSection("taskbar.init");
             try {
-                taskbar.init(sharedState, duration);
+                taskbar.init(sharedState, mUserUnlocked, duration);
             } finally {
                 Trace.endSection();
             }
@@ -1129,7 +1129,8 @@ public class TaskbarManagerImpl {
             TaskbarActivityContext taskbarActivityContext =
                     new TaskbarActivityContext(displayId, windowContext, navigationBarPanelContext,
                             dp, resource.getNavButtonController(), mUnfoldProgressProvider,
-                            !resource.isExternalDisplay(), getPrimaryDisplayId(), mSystemUiProxy);
+                            !resource.isExternalDisplay(), getPrimaryDisplayId(),
+                            mSystemUiProxy);
             mAmbientCueRepository = taskbarActivityContext.getControllers().cueBarController
                     .getAmbientCueRepository();
             return taskbarActivityContext;

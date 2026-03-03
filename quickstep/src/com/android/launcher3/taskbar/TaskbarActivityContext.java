@@ -595,7 +595,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * @param duration If duration is greater than 0, it will be used to create an animation
  *                     for the taskbar create/recreate process.
      */
-    public void init(@NonNull TaskbarSharedState sharedState, int duration) {
+    public void init(@NonNull TaskbarSharedState sharedState, boolean userUnlocked, int duration) {
         mImeDrawsImeNavBar = getBoolByName(IME_DRAWS_IME_NAV_BAR_RES_NAME, getResources(), false)
                 && isPrimaryDisplay();
         mLastRequestedNonFullscreenSize = getDefaultTaskbarWindowSize();
@@ -609,7 +609,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         }
 
         // Initialize controllers after all are constructed.
-        mControllers.init(sharedState, recreateAnim, mTaskbarUiState);
+        mControllers.init(sharedState, recreateAnim, mTaskbarUiState, userUnlocked);
         // This may not be necessary and can be reverted once we move towards recreating all
         // controllers without re-creating the window
         mControllers.rotationButtonController.onNavigationModeChanged(mNavMode.resValue);

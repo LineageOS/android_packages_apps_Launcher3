@@ -21,14 +21,6 @@ import com.android.launcher3.Flags
 
 object TaskbarDesktopExperienceFlags {
     @JvmField
-    val enableAltTabKqsOnConnectedDisplays: DesktopExperienceFlag =
-        DesktopExperienceFlag(
-            Flags::enableAltTabKqsOnConnectedDisplays,
-            /* shouldOverrideByDevOption= */ true,
-            Flags.FLAG_ENABLE_ALT_TAB_KQS_ON_CONNECTED_DISPLAYS,
-        )
-
-    @JvmField
     val enableAltTabKqsFlatenning: DesktopExperienceFlag =
         DesktopExperienceFlag(
             Flags::enableAltTabKqsFlatenning,

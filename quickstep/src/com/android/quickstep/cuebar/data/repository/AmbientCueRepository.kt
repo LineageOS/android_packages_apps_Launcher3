@@ -326,26 +326,25 @@ constructor(
                 extras = null
 
                 onPerformAction = {
-                    when {
-                        // 1. Remote Action Send
-                        action.hasActionType(InsightActionDetails.ACTION_TYPE_REMOTE_ACTION) -> {
-                            action.remoteAction?.actionIntent?.let { launchPendingIntent(it) }
-                        }
-                        // 2. Start Activity Intent
-                        action.hasActionType(InsightActionDetails.ACTION_TYPE_PENDING_INTENT) -> {
-                            // TODO(b/485706132): Handle egress case.
-                            //                            actionPendingIntent?.let { pendingIntent
-                            // ->
-                            //                                if
-                            // (extras?.getBoolean(NEEDS_DATA_EGRESS) == true) {
-                            //                                    insightHandler.egress(insight)
-                            //                                } else {
-                            //
-                            // intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            //                                    appContext.startActivity(intent)
-                            //                                }
-                            //                            }
-                            actionPendingIntent?.let { launchPendingIntent(it) }
+                    if (
+                        contextHint is BundleHint &&
+                        contextHint.dataBundle.getBoolean(NEEDS_DATA_EGRESS, false)
+                    ) {
+                        insightHandler.egress(insight)
+                    } else {
+                        when {
+                            // 1. Remote Action Send
+                            action.hasActionType(
+                                InsightActionDetails.ACTION_TYPE_REMOTE_ACTION
+                            ) -> {
+                                action.remoteAction?.actionIntent?.let { launchPendingIntent(it) }
+                            }
+                            // 2. Start Activity Intent
+                            action.hasActionType(
+                                InsightActionDetails.ACTION_TYPE_PENDING_INTENT
+                            ) -> {
+                                actionPendingIntent?.let { launchPendingIntent(it) }
+                            }
                         }
                     }
                     ambientCueLogger.setFulfilledWithMaStatus()

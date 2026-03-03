@@ -26,7 +26,6 @@ import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.popup.SystemShortcut
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskContainer
-import com.android.window.flags.Flags.universalResizableByDefault
 import javax.inject.Inject
 
 /**
@@ -75,8 +74,6 @@ private constructor(
             taskContainer: TaskContainer,
         ): List<AspectRatioSystemShortcut>? =
             when {
-                // Only available when the feature flag is on.
-                !universalResizableByDefault() -> null
                 // The option is only shown on sw600dp+ screens (checked by isTablet)
                 !viewContainer.deviceProfile.deviceProperties.isLargeScreen -> null
                 else -> {
