@@ -18,6 +18,7 @@ package com.android.launcher3.organizer.creation.screen.ui.spacecreator.choosela
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -55,6 +57,10 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.R
+import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutCompose
+import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutComposeItemSpacing
+import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutComposeSize
+import com.android.launcher3.organizer.creation.screen.ui.components.ItemLocation
 import com.android.launcher3.organizer.creation.screen.ui.spacecreator.SpaceCreatorViewModel
 import kotlinx.coroutines.launch
 
@@ -114,9 +120,9 @@ fun ChooseLayoutContent(padding: PaddingValues, viewModel: SpaceCreatorViewModel
     ) {
         HorizontalUncontainedCarousel(
             state = carouselState,
-            itemWidth = ChooseLayoutDimens.itemWidth,
+            itemWidth = ChooseLayoutDimens.itemWidth + ChooseLayoutDimens.carouselPadding.times(2),
             itemSpacing = ChooseLayoutDimens.carouselItemSpacing,
-            contentPadding = ChooseLayoutDimens.carouselPadding,
+            contentPadding = PaddingValues(ChooseLayoutDimens.carouselPadding),
         ) { i ->
             LayoutPreview()
         }
@@ -127,13 +133,66 @@ fun ChooseLayoutContent(padding: PaddingValues, viewModel: SpaceCreatorViewModel
 
 @Composable
 fun LayoutPreview() {
-    Row(
-        Modifier.width(ChooseLayoutDimens.itemWidth)
-            .height(ChooseLayoutDimens.itemHeight)
-            // TODO(): Remove for real implementation.
-            .background(Color.Magenta, shape = RoundedCornerShape(size = 24.dp))
-    ) {
-        // TODO(): PreviewLayout goes here.
+    Row(Modifier.wrapContentSize()) {
+        CellLayoutCompose(
+            width = ChooseLayoutDimens.itemWidth,
+            height = ChooseLayoutDimens.itemHeight,
+            gridSize = CellLayoutComposeSize(x = 4, y = 5),
+            spacing = CellLayoutComposeItemSpacing(8.dp, 8.dp),
+            modifier = Modifier.padding(ChooseLayoutDimens.carouselPadding),
+        ) {
+            item(cellAndSpan = ItemLocation(0, 0)) { size ->
+                Box(
+                    modifier =
+                        Modifier.width(size.width)
+                            .height(size.height)
+                            .background(Color.Blue, CircleShape)
+                ) {}
+            }
+
+            item(cellAndSpan = ItemLocation(0, 1)) { size ->
+                Box(
+                    modifier =
+                        Modifier.width(size.width)
+                            .height(size.height)
+                            .background(Color.Blue, CircleShape)
+                ) {}
+            }
+
+            item(cellAndSpan = ItemLocation(0, 4)) { size ->
+                Box(
+                    modifier =
+                        Modifier.width(size.width)
+                            .height(size.height)
+                            .background(Color.Blue, CircleShape)
+                ) {}
+            }
+
+            item(cellAndSpan = ItemLocation(3, 4)) { size ->
+                Box(
+                    modifier =
+                        Modifier.width(size.width)
+                            .height(size.height)
+                            .background(Color.Blue, CircleShape)
+                ) {}
+            }
+
+            item(cellAndSpan = ItemLocation(1, 0)) { size ->
+                Box(
+                    modifier =
+                        Modifier.width(size.width)
+                            .height(size.height)
+                            .background(Color.Blue, CircleShape)
+                ) {}
+            }
+
+            item(cellAndSpan = ItemLocation(1, 1, 2, 2)) { size ->
+                Box(
+                    modifier =
+                        Modifier.width(size.width).height(size.height).background(Color.Green)
+                ) {}
+            }
+        }
     }
 }
 
@@ -219,7 +278,7 @@ object ChooseLayoutDimens {
     val iconSize = 41.dp
     val itemWidth = 312.00003.dp
     val itemHeight = 499.04849.dp
-    val carouselPadding = PaddingValues(start = 16.dp, end = 16.dp)
+    val carouselPadding = 15.14563.dp
     val carouselItemSpacing = 16.dp
     val contentSidePadding = 24.dp
     val AndroidOnlySe1Se1: Color = Color(0x8A081034)
