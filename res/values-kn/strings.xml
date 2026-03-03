@@ -122,10 +122,8 @@
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"ರದ್ದುಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ ಮರುಸ್ಥಾಪಿಸಲು Files ಆ್ಯಪ್‌ಗೆ ಹೋಗಿ."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"ಕ್ರಿಯೆಗಳು"</string>
     <string name="shortcuts_popup_menu_button" msgid="766598805805882499">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
-    <!-- no translation found for actions_popup_menu_button_description (4224192559473869722) -->
-    <skip />
-    <!-- no translation found for shortcuts_popup_menu_button_description (7566698511556454634) -->
-    <skip />
+    <string name="actions_popup_menu_button_description" msgid="4224192559473869722">"ಕ್ರಿಯೆಗಳ ಮೆನುವನ್ನು ತೋರಿಸಿ"</string>
+    <string name="shortcuts_popup_menu_button_description" msgid="7566698511556454634">"ಆ್ಯಪ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳ ಮೆನುವನ್ನು ತೋರಿಸಿ"</string>
     <string name="pause_app_label" msgid="6796255881727695791">"ಆ್ಯಪ್ ವಿರಾಮಗೊಳಿಸಿ"</string>
     <string name="permlab_install_shortcut" msgid="5632423390354674437">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
     <string name="permdesc_install_shortcut" msgid="923466509822011139">"ಬಳಕೆದಾರರ ಹಸ್ತಕ್ಷೇಪವಿಲ್ಲದೆ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -153,26 +151,24 @@
     <string name="folder_tap_to_rename" msgid="4017685068016979677">"ಮರುಹೆಸರನ್ನು ಉಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="folder_closed" msgid="4100806530910930934">"ಫೋಲ್ಡರ್ ಮುಚ್ಚಿದೆ"</string>
     <string name="folder_renamed" msgid="1794088362165669656">"ಫೋಲ್ಡರ್‌ ಅನ್ನು <xliff:g id="NAME">%1$s</xliff:g> ಗೆ ಮರುಹೆಸರಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for folder_type_name (506043307348675355) -->
+    <string name="folder_type_name" msgid="506043307348675355">"ಫೋಲ್ಡರ್"</string>
+    <string name="app_folder_type_name" msgid="149643408248060284">"ಆ್ಯಪ್ ಫೋಲ್ಡರ್"</string>
+    <!-- no translation found for apps_folder_name_format_exact (891345161390366700) -->
     <skip />
-    <!-- no translation found for app_folder_type_name (149643408248060284) -->
+    <!-- no translation found for apps_folder_name_format_exact_with_dot (7729062268048931718) -->
     <skip />
-    <!-- no translation found for folder_name_format_exact (3699127874865971331) -->
+    <!-- no translation found for apps_folder_name_format_overflow (4614729357510054194) -->
     <skip />
-    <!-- no translation found for folder_name_format_exact_with_dot (5844176801938785593) -->
-    <skip />
-    <!-- no translation found for folder_name_format_overflow (4492486727595816291) -->
-    <skip />
-    <!-- no translation found for folder_name_format_overflow_with_dot (6701701338010067565) -->
+    <!-- no translation found for apps_folder_name_format_overflow_with_dot (4738681518782744688) -->
     <skip />
     <string name="unnamed_folder" msgid="2420192029474044442">"ಹೆಸರಿಲ್ಲದ ಫೋಲ್ಡರ್"</string>
-    <!-- no translation found for files_folder_name (7712191128817533622) -->
-    <skip />
+    <string name="files_folder_name" msgid="7712191128817533622">"ಫೈಲ್ ಫೋಲ್ಡರ್: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"ಆ್ಯಪ್ ಜೋಡಿ: <xliff:g id="APP1">%1$s</xliff:g> ಮತ್ತು <xliff:g id="APP2">%2$s</xliff:g>"</string>
     <string name="styles_wallpaper_button_text" msgid="8216961355289236794">"ವಾಲ್‌ಪೇಪರ್ ಮತ್ತು ಶೈಲಿ"</string>
     <string name="edit_home_screen" msgid="8947858375782098427">"ಹೋಮ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"ಹೋಮ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದ್ದಾರೆ"</string>
+    <string name="settings_home_organizer" msgid="5184766349407080054">"ಹೋಮ್ ಆರ್ಗನೈಸರ್"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"ಫೋನ್‌ ತಿರುಗಿಸಿದಾಗ"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"ಕಾಂಪೋಸಿಶನ್ ಜಾಡನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
@@ -273,4 +269,22 @@
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"ಹೊಸ ಫೋಲ್ಡರ್"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"ಹೊಸ ಫೋಲ್ಡರ್"</string>
     <string name="something_went_wrong" msgid="1492883246069060632">"ಏನೋ ತಪ್ಪಾಗಿದೆ"</string>
+    <!-- no translation found for organizer_create_screen (284001317063451431) -->
+    <skip />
+    <!-- no translation found for organizer_create_screen_description (3224132391919219061) -->
+    <skip />
+    <!-- no translation found for organizer_topic_0 (2289302981298465926) -->
+    <skip />
+    <!-- no translation found for organizer_topic_1 (9139266779598899604) -->
+    <skip />
+    <!-- no translation found for organizer_topic_2 (2890586328846836407) -->
+    <skip />
+    <!-- no translation found for organizer_topic_3 (4708170964708215008) -->
+    <skip />
+    <!-- no translation found for organizer_topic_4 (7852628756329993717) -->
+    <skip />
+    <!-- no translation found for organizer_topic_5 (3391565770865209078) -->
+    <skip />
+    <!-- no translation found for organizer_topic_6 (5372680031834537103) -->
+    <skip />
 </resources>
