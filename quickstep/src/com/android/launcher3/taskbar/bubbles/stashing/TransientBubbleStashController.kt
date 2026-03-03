@@ -62,6 +62,7 @@ import com.android.launcher3.util.SimpleBroadcastReceiver
 import com.android.launcher3.util.SimpleBroadcastReceiver.Companion.actionsFilter
 import com.android.quickstep.util.SystemActionConstants
 import com.android.quickstep.util.SystemActionConstants.SYSTEM_ACTION_ID_BUBBLE_BAR
+import com.android.wm.shell.Flags
 import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.ContextUtils.isRtl
@@ -256,6 +257,10 @@ constructor(
         } else {
             isStashed = true
             stashHandleViewAlpha?.let { animatorSet.playTogether(it.animateToValue(1f)) }
+        }
+        if (Flags.fixBubblesStashingOnHome()) {
+            cancelAnimation()
+            animator = animatorSet
         }
         animatorSet
             .updateBarVisibility(isStashed)

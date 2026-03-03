@@ -19,6 +19,8 @@ package com.android.launcher3.taskbar.bubbles.stashing
 import android.animation.AnimatorSet
 import android.content.Context
 import android.content.Intent
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.view.View
 import android.view.accessibility.AccessibilityManager
 import android.widget.FrameLayout
@@ -41,6 +43,7 @@ import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController.Bubb
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.util.MultiValueAlpha
 import com.android.quickstep.util.SystemActionConstants.SYSTEM_ACTION_ID_BUBBLE_BAR
+import com.android.wm.shell.Flags
 import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
@@ -54,6 +57,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
@@ -76,6 +80,8 @@ class TransientBubbleStashControllerTest {
         const val HANDLE_VIEW_HEIGHT = 4
         const val BUBBLE_BAR_STASHED_TRANSLATION_Y = -4.5f
     }
+
+    @get:Rule val setFlagsRule = SetFlagsRule()
 
     @get:Rule val animatorTestRule = TaskbarAnimatorTestRule(this)
 
@@ -724,6 +730,37 @@ class TransientBubbleStashControllerTest {
         // Then it should unstash
         assertThat(mTransientBubbleStashController.isStashed).isFalse()
         verify(bubbleBarViewController, atLeastOnce()).onStashStateChanging()
+    }
+
+    @EnableFlags(Flags.FLAG_FIX_BUBBLES_STASHING_ON_HOME)
+    @Test
+    fun unlockAnimationInterrupted_unstashesBubbleBar() {
+        // We have bubbles
+        whenever(bubbleBarViewController.isHiddenForNoBubbles).thenReturn(false)
+        whenever(bubbleBarViewController.hasBubbles()).thenReturn(true)
+
+        // Simultaneously unlock and get an update for being on home
+        getInstrumentation().runOnMainSync {
+            mTransientBubbleStashController.isSysuiLocked = true
+            mTransientBubbleStashController.isSysuiLocked = false
+            mTransientBubbleStashController.launcherState = BubbleLauncherState.HOME
+        }
+        advanceTimeBy(BubbleStashController.BAR_STASH_DURATION)
+
+        // Verify that the most recent value set for stashed state is FALSE (not stashed)
+        val captor = argumentCaptor<Boolean>()
+        verify(bubbleBarViewController, atLeastOnce()).setHiddenForStashed(captor.capture())
+        assertThat(captor.lastValue).isFalse()
+
+        // And bubble bar is fully visible at the correct location for HOME
+        assertThat(mTransientBubbleStashController.isStashed).isFalse()
+        assertThat(bubbleBarView.scaleX).isEqualTo(1f)
+        assertThat(bubbleBarView.scaleY).isEqualTo(1f)
+        assertThat(bubbleBarView.translationY).isEqualTo(HOTSEAT_TRANSLATION_Y)
+        assertThat(bubbleBarView.alpha).isEqualTo(1f)
+        // Insets controller is notified
+        verify(taskbarInsetsController, atLeastOnce())
+            .onTaskbarOrBubblebarWindowHeightOrInsetsChanged()
     }
 
     private fun advanceTimeBy(advanceMs: Long) {
