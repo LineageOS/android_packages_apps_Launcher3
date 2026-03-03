@@ -16,7 +16,6 @@
 
 package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
 
-import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -35,6 +34,7 @@ import com.android.launcher3.icons.BitmapRenderer
 import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.repository.HomeScreenRepository
 import com.android.launcher3.model.scheduleTransactionSuspending
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,40 +66,79 @@ constructor(
     /**
      * Loads the workspace pages from the [Launcher]'s workspace.
      *
-     * This method captures a representation of the current workspace pages as a bitmap and updates
-     * the [_workspacePages] state flow.
-     *
-     * TODO: Make this more efficient by only loading the pages needed and load/unload pages as the
-     *   user scrolls.
+     * This method initializes the [_workspacePages] state flow with the current workspace screen
+     * IDs. Bitmaps are loaded lazily as the user scrolls through the workspace.
      */
     private suspend fun loadPages() {
-        val pages =
+        _workspacePages.value =
             withContext(lightweightBackgroundContext) {
-                val launcher =
-                    Launcher.ACTIVITY_TRACKER.getCreatedContext<Launcher>()
-                        ?: return@withContext null
-
-                val workspace = launcher.workspace ?: return@withContext null
-
-                val newPages = mutableListOf<WorkspacePage>()
-                for (i in 0 until workspace.pageCount) {
-                    val page = workspace.getPageAt(i) as? CellLayout ?: continue
-                    if (page.width <= 0 || page.height <= 0) continue
-
-                    // Use hardware-accelerated renderer to avoid "Software rendering doesn't
-                    // support hardware bitmaps" error when drawing themed icons.
-                    val bitmap =
-                        BitmapRenderer.createHardwareBitmap(page.width, page.height) { canvas ->
-                            page.draw(canvas)
-                        }
-                    // Copy to software bitmap to ensure compatibility when drawing in other
-                    // contexts.
-                    val swBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false)
-                    newPages.add(WorkspacePage(swBitmap, workspace.screenOrder[i]))
-                }
-                newPages
+                val screens = homeScreenRepository.workspaceState.value.collectWorkspaceScreens()
+                screens.map { screenId -> WorkspacePage(bitmap = null, screenId = screenId) }
             }
-        pages?.let { _workspacePages.value = it }
+    }
+
+    /**
+     * Loads the bitmap for the workspace page at the given [index].
+     *
+     * @param index The index of the page to load the bitmap for.
+     */
+    fun loadPageBitmap(index: Int) {
+        val pages = _workspacePages.value
+        if (index !in pages.indices || pages[index].bitmap != null) return
+
+        val cachedBitmap = pages[index].lastGeneratedBitmap?.get()
+        if (cachedBitmap != null) {
+            val updatedPages = pages.toMutableList()
+            updatedPages[index] = updatedPages[index].copy(bitmap = cachedBitmap)
+            _workspacePages.value = updatedPages
+            return
+        }
+
+        viewModelScope.launch {
+            val bitmap =
+                withContext(lightweightBackgroundContext) {
+                    val launcher =
+                        Launcher.ACTIVITY_TRACKER.getCreatedContext<Launcher>()
+                            ?: return@withContext null
+
+                    val workspace = launcher.workspace ?: return@withContext null
+                    val page = workspace.getPageAt(index) as? CellLayout ?: return@withContext null
+
+                    if (page.width <= 0 || page.height <= 0) return@withContext null
+
+                    BitmapRenderer.createHardwareBitmap(
+                        page.width / BITMAP_SCALE_FACTOR,
+                        page.height / BITMAP_SCALE_FACTOR,
+                    ) { canvas ->
+                        canvas.scale(CANVAS_SCALE_RATIO, CANVAS_SCALE_RATIO)
+                        page.draw(canvas)
+                    }
+                }
+
+            bitmap?.let {
+                val updatedPages = _workspacePages.value.toMutableList()
+                if (index in updatedPages.indices) {
+                    updatedPages[index] = updatedPages[index].copy(bitmap = it)
+                    _workspacePages.value = updatedPages
+                }
+            }
+        }
+    }
+
+    /**
+     * Unloads the bitmap for the workspace page at the given [index].
+     *
+     * @param index The index of the page to unload the bitmap for.
+     */
+    fun unloadPageBitmap(index: Int) {
+        val pages = _workspacePages.value.toMutableList()
+        if (index !in pages.indices || pages[index].bitmap == null) return
+
+        pages[index] =
+            pages[index].run {
+                copy(bitmap = null, lastGeneratedBitmap = bitmap?.let { WeakReference(it) })
+            }
+        _workspacePages.value = pages
     }
 
     /**
@@ -199,6 +238,9 @@ constructor(
     }
 
     companion object {
+        private const val BITMAP_SCALE_FACTOR = 4
+        private const val CANVAS_SCALE_RATIO = 1f / BITMAP_SCALE_FACTOR
+
         /** Returns a [ViewModelProvider.Factory] for [WorkspaceOrganizerViewModel]. */
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {

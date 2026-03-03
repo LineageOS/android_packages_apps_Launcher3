@@ -53,6 +53,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -125,10 +126,12 @@ fun WorkspaceOrganizerContent(viewModel: WorkspaceOrganizerViewModel, padding: P
             padding.plus(PaddingValues(horizontal = WorkspaceOrganizerDimens.contentSidePadding)),
         modifier = Modifier.fillMaxSize().consumeWindowInsets(padding),
     ) {
-        itemsIndexed(pages) { index, item ->
+        itemsIndexed(pages, key = { _, item -> item.screenId }) { index, item ->
             WorkspaceOrganizerPage(
                 item,
+                index,
                 index == viewModel.workspaceOrganizerState.selectedPage,
+                viewModel,
                 onClick = { viewModel.setSelectedWorkspacePage(index) },
             )
         }
@@ -137,7 +140,17 @@ fun WorkspaceOrganizerContent(viewModel: WorkspaceOrganizerViewModel, padding: P
 }
 
 @Composable
-fun WorkspaceOrganizerPage(page: WorkspacePage, isSelected: Boolean, onClick: () -> Unit) {
+fun WorkspaceOrganizerPage(
+    page: WorkspacePage,
+    index: Int,
+    isSelected: Boolean,
+    viewModel: WorkspaceOrganizerViewModel,
+    onClick: () -> Unit,
+) {
+    DisposableEffect(index) {
+        viewModel.loadPageBitmap(index)
+        onDispose { viewModel.unloadPageBitmap(index) }
+    }
     Box(
         modifier =
             Modifier.width(WorkspaceOrganizerDimens.workspacePageWidth)
@@ -161,11 +174,13 @@ fun WorkspaceOrganizerPage(page: WorkspacePage, isSelected: Boolean, onClick: ()
                 .clickable { onClick() }
                 .padding(WorkspaceOrganizerDimens.workspacePagePadding)
     ) {
-        Image(
-            page.bitmap.asImageBitmap(),
-            contentDescription = "Previous workspace",
-            modifier = Modifier.fillMaxSize(),
-        )
+        page.bitmap?.let {
+            Image(
+                it.asImageBitmap(),
+                contentDescription = "Previous workspace",
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }
 
