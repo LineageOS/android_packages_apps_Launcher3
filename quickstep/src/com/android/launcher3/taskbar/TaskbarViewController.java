@@ -875,14 +875,29 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         }
 
         Set<Integer> shownTasks = new HashSet<>();
+
+        // Add IDs for all running tasks currently visible on the taskbar.
         for (BubbleTextView iconView : getAllAppIcons()) {
-            if (iconView.getTag() instanceof TaskItemInfo itemInfo) {
-                shownTasks.add(itemInfo.getTaskId());
-            } else if (iconView.getTag() instanceof SingleTask task) {
-                shownTasks.add(task.getTask().getKey().id);
+            addTaskIdFromTag(iconView.getTag(), shownTasks);
+        }
+
+        // Add IDs for pinned apps that are running but currently hidden in the overflow.
+        TaskbarOverflowView pinnedOverflow = mTaskbarView.getTaskbarPinnedOverflowView();
+        if (pinnedOverflow != null) {
+            for (ItemInfo item : pinnedOverflow.getOverflowInfoList()) {
+                addTaskIdFromTag(item, shownTasks);
             }
         }
+
         return shownTasks;
+    }
+
+    private void addTaskIdFromTag(Object tag, Set<Integer> outSet) {
+        if (tag instanceof TaskItemInfo taskItem) {
+            outSet.add(taskItem.getTaskId());
+        } else if (tag instanceof SingleTask task) {
+            outSet.add(task.getTask().key.id);
+        }
     }
 
     /**
