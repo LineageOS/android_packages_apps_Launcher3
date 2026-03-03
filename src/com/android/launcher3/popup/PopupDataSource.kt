@@ -46,7 +46,6 @@ import com.android.launcher3.util.PendingRequestArgs
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.Snackbar
 import com.android.launcher3.widget.LauncherAppWidgetHostView
-import com.android.launcher3.widget.WidgetsBottomSheet
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint
 import java.io.File
 import javax.inject.Inject
@@ -126,28 +125,6 @@ constructor(@LauncherAppSingleton private val homeScreenFilesProvider: HomeScree
             labelResId = R.string.widget_settings,
             popupAction = handleWidgetSettings,
             category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
-        )
-
-    // Handles action from tapping widgets shortcut.
-    private val handleWidgets =
-        { activityContext: ActivityContext, itemInfo: ItemInfo, view: View ->
-            AbstractFloatingView.closeAllOpenViews(activityContext)
-            val widgetsBottomSheet =
-                activityContext
-                    .getLayoutInflater()
-                    .inflate(R.layout.widgets_bottom_sheet, activityContext.getDragLayer(), false)
-                    as WidgetsBottomSheet
-            widgetsBottomSheet.populateAndShow(itemInfo)
-        }
-
-    // Popup data for widgets shortcut.
-    val widgetsPopupData =
-        PopupData(
-            iconResId = R.drawable.widgets_24px,
-            labelResId = R.string.widget_button_text,
-            popupAction = handleWidgets,
-            category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
-            eventId = LauncherEvent.LAUNCHER_SYSTEM_SHORTCUT_WIDGETS_TAP,
         )
 
     // Handle action from tapping app info shortcut.
