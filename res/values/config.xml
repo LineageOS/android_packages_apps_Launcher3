@@ -80,18 +80,18 @@
 
     <item name="swipe_up_rect_scale_damping_ratio" type="dimen" format="float">0.75</item>
     <item name="swipe_up_rect_scale_stiffness" type="dimen" format="float">200</item>
-    <item name="swipe_up_rect_scale_higher_stiffness" type="dimen" format="float">400</item>
-    <!-- Flag: enableScalingRevealHomeAnimation() -->
     <item name="swipe_up_rect_scale_damping_ratio_v2" type="dimen" format="float">0.99</item>
     <item name="swipe_up_rect_scale_stiffness_v2" type="dimen" format="float">500</item>
+
+    <!-- Flag: widgetReturnAnimationMinorFixes() -->
+    <item name="widget_rect_scale_stiffness" type="dimen" format="float">1100</item>
+    <item name="widget_x_stiffness" type="dimen" format="float">900</item>
+    <item name="widget_y_stiffness" type="dimen" format="float">900</item>
 
     <item name="swipe_up_rect_xy_fling_friction" type="dimen" format="float">1.5</item>
 
     <item name="swipe_up_scale_start"  type="dimen" format="float">0.88</item>
 
-    <item name="swipe_up_rect_xy_damping_ratio" type="dimen" format="float">0.8</item>
-    <item name="swipe_up_rect_xy_stiffness" type="dimen" format="float">200</item>
-    <!-- Flag: enableScalingRevealHomeAnimation() -->
     <item name="swipe_up_rect_x_damping_ratio" type="dimen" format="float">0.965</item>
     <item name="swipe_up_rect_x_stiffness" type="dimen" format="float">450</item>
     <item name="swipe_up_rect_y_damping_ratio" type="dimen" format="float">0.95</item>

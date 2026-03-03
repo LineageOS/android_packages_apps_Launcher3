@@ -157,7 +157,7 @@ import com.android.quickstep.util.CrossDisplayMoveTransition;
 import com.android.quickstep.util.MultiValueUpdateListener;
 import com.android.quickstep.util.RectFSpringAnim;
 import com.android.quickstep.util.RectFSpringAnim.DefaultSpringConfig;
-import com.android.quickstep.util.RectFSpringAnim.TaskbarHotseatSpringConfig;
+import com.android.quickstep.util.RectFSpringAnim.WidgetSpringConfig;
 import com.android.quickstep.util.ScalingWorkspaceRevealAnim;
 import com.android.quickstep.util.SurfaceTransaction;
 import com.android.quickstep.util.SurfaceTransaction.SurfaceProperties;
@@ -179,6 +179,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Manages the opening and closing app transitions from Launcher
@@ -230,6 +231,9 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
     // Cross-fade duration between App Widget and App when launching from widget.
     private static final int WIDGET_CROSSFADE_DURATION_MILLIS = 125;
+    // The progress at which a window closing into a widget becomes fully transparent.
+    private static final float WIDGET_CLOSE_ALPHA_END_PROGRESS = 0.40f;
+    private static final float WIDGET_CLOSE_ALPHA_END_PROGRESS_LEGACY = 0.85f;
 
     private static final float MAX_SCRIM_ALPHA_DARK = 0.8f;
     private static final float MAX_SCRIM_ALPHA_LIGHT = 0.2f;
@@ -1676,6 +1680,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 targetX + halfIconSize, targetY + halfIconSize);
     }
 
+
     /**
      * Closing animator that animates the window into its final location on the workspace.
      */
@@ -1697,7 +1702,6 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         }
 
         // Get floating view and target rect.
-        boolean isInHotseat = false;
         if (launcherView instanceof LauncherAppWidgetHostView) {
             Size windowSize = new Size(mDeviceProfile.getDeviceProperties().getWidthPx(),
                     mDeviceProfile.getDeviceProperties().getHeightPx());
@@ -1718,13 +1722,12 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             targetRect.set(getDefaultWindowTargetRect());
         }
 
-        boolean useTaskbarHotseatParams =
-                mDeviceProfile.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()
-                        && isInHotseat;
-        RectFSpringAnim anim = new RectFSpringAnim(useTaskbarHotseatParams
-                ? new TaskbarHotseatSpringConfig(mLauncher, closingWindowStartRectF, targetRect)
-                : new DefaultSpringConfig(mLauncher, mDeviceProfile, closingWindowStartRectF,
-                        targetRect));
+        RectFSpringAnim anim = new RectFSpringAnim(floatingWidget != null
+                && Flags.widgetReturnAnimationMinorFixes()
+                ? new WidgetSpringConfig(
+                        mLauncher, mDeviceProfile, closingWindowStartRectF, targetRect)
+                : new DefaultSpringConfig(
+                        mLauncher, mDeviceProfile, closingWindowStartRectF, targetRect));
 
         // Hook up floating views to the closing window animators.
         // note the coordinate of closingWindowStartRect is based on launcher
@@ -1760,22 +1763,55 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             floatingWidget.setFastFinishRunnable(anim::end);
 
             final float floatingWidgetAlpha = isTransluscent ? 0 : 1;
+            final float alphaEndProgress = Flags.widgetReturnAnimationMinorFixes()
+                    ? WIDGET_CLOSE_ALPHA_END_PROGRESS : WIDGET_CLOSE_ALPHA_END_PROGRESS_LEGACY;
             FloatingWidgetView finalFloatingWidget = floatingWidget;
-            RectFSpringAnim.OnUpdateListener runner = new SpringAnimRunner(targets, targetRect,
-                    closingWindowStartRectF, mLauncher, startWindowCornerRadius) {
-                @Override
-                public void onUpdate(RectF currentRectF, float progress) {
-                    final float fallbackBackgroundAlpha =
-                            1 - mapBoundToRange(progress, 0.8f, 1, 0, 1, EXAGGERATED_EASE);
-                    final float foregroundAlpha =
-                            mapBoundToRange(progress, 0.5f, 1, 0, 1, EXAGGERATED_EASE);
-                    finalFloatingWidget.update(currentRectF, floatingWidgetAlpha, foregroundAlpha,
-                            fallbackBackgroundAlpha, 1 - progress);
 
-                    super.onUpdate(currentRectF, progress);
-                }
-            };
-            anim.addOnUpdateListener(runner);
+            final Function<RectF, Float> posProvider = LauncherAnimUtils
+                    .getPosProviderForRect(closingWindowStartRectF, targetRect);
+            final float totalDiff = Math.abs(posProvider.apply(closingWindowStartRectF)
+                    - posProvider.apply(targetRect));
+            final float startPos = posProvider.apply(closingWindowStartRectF);
+
+            anim.addOnUpdateListener(
+                    new SpringAnimRunner(targets, targetRect, closingWindowStartRectF, mLauncher,
+                            startWindowCornerRadius, alphaEndProgress) {
+                        private float mWidgetAlphaLowerBound = 1f;
+                        private boolean mThresholdCaptured = false;
+
+                        @Override
+                        public void onUpdate(RectF currentRectF, float progress) {
+                            if (Flags.widgetReturnAnimationMinorFixes()) {
+                                // The progress parameter represents the scaling progress (closing
+                                // window down to the size of FloatingWidget). currentProgress is
+                                // used to capture the progress for the primary axis(the axis with
+                                // longer distance between initial to final position).
+                                float currentProgress = totalDiff > 0
+                                        ? Math.abs(posProvider.apply(currentRectF) - startPos)
+                                        / totalDiff : 1f;
+
+                                // Capture the lower threshold for revealing the widget only once
+                                // when the scaling is nearly finished.
+                                if (!mThresholdCaptured && progress >= 0.99f) {
+                                    mWidgetAlphaLowerBound = currentProgress;
+                                    mThresholdCaptured = true;
+                                }
+
+                                finalFloatingWidget.update(currentProgress, mWidgetAlphaLowerBound,
+                                        currentRectF, floatingWidgetAlpha, 1 - progress);
+                                float radius = finalFloatingWidget.getOutlineRadius();
+                                setWindowCornerRadius(radius);
+                            } else {
+                                float fallbackBackgroundAlpha = 1 - mapBoundToRange(progress,
+                                        0.8f, 1, 0, 1, EXAGGERATED_EASE);
+                                float foregroundAlpha = mapBoundToRange(progress,
+                                        0.5f, 1, 0, 1, EXAGGERATED_EASE);
+                                finalFloatingWidget.update(currentRectF, floatingWidgetAlpha,
+                                        foregroundAlpha, fallbackBackgroundAlpha, 1 - progress);
+                            }
+                            super.onUpdate(currentRectF, progress);
+                        }
+                    });
         } else {
             // If no floating icon or widget is present, animate the to the default window
             // target rect.
