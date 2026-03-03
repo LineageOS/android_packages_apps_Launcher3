@@ -78,7 +78,7 @@ public class TestUtil {
     public static final long DEFAULT_UI_TIMEOUT = 10000;
 
     public static void installDummyApp() throws IOException {
-        final int defaultUserId = getMainUserId();
+        final int defaultUserId = getCurrentUserId();
         installDummyAppForUser(defaultUserId);
     }
 
@@ -117,15 +117,14 @@ public class TestUtil {
     }
 
     /**
-     * Returns the main user ID. NOTE: For headless system it is NOT 0. Returns 0 by default, if
-     * there is no main user.
+     * Returns the current user ID. Returns 0 by default, if there is no current user.
      *
-     * @return a main user ID
+     * @return a current user ID
      */
-    public static int getMainUserId() throws IOException {
+    public static int getCurrentUserId() throws IOException {
         Instrumentation instrumentation = getInstrumentation();
         final String result = UiDevice.getInstance(instrumentation)
-                .executeShellCommand("cmd user get-main-user");
+                .executeShellCommand("am get-current-user");
         try {
             return Integer.parseInt(result.trim());
         } catch (NumberFormatException e) {
