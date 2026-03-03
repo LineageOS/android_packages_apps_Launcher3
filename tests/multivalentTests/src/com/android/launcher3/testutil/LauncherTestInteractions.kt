@@ -54,17 +54,6 @@ constructor(
             it.appsView.appsStore.enableDeferUpdates(DEFER_UPDATES_TEST)
         }
 
-    /**
-     * Match the behavior with how widget is added in reality with "tap to add" (even with screen
-     * readers).
-     */
-    fun addWidgetToWorkspace(view: View) =
-        launcherActivity.executeOnLauncher {
-            view.performClick()
-            UiDevice.getInstance(getInstrumentation()).waitForIdle()
-            view.findViewById<View>(R.id.widget_add_button).performClick()
-        }
-
     @JvmOverloads
     fun startAppFast(
         packageName: String,

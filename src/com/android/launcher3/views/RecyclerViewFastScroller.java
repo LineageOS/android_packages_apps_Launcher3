@@ -283,7 +283,7 @@ public class RecyclerViewFastScroller extends View {
 
                 if ((Math.abs(mDy) < mDeltaThreshold &&
                         mRv.getScrollState() != SCROLL_STATE_IDLE)) {
-                    // now the touch events are being passed to the {@link WidgetCell} until the
+                    // now the touch events are being passed to the item until the
                     // touch sequence goes over the touch slop.
                     mRv.stopScroll();
                 }
