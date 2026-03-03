@@ -105,9 +105,11 @@ import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.views.RecentsViewContainerInteractor;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider;
+import com.android.wm.shell.shared.desktopmode.DesktopState;
 
 import kotlin.Unit;
 
@@ -142,6 +144,8 @@ public class TaskbarManagerImpl {
     private final int mPrimaryDisplayId;
     private final TaskbarNavButtonCallbacks mNavCallbacks;
     private final PostUnlockObject<InvariantDeviceProfile> mUnlockedIDP;
+    private final ActivityManagerWrapper mActivityManagerWrapper;
+    private final DesktopState mDesktopState;
 
     // TODO: Remove this during the connected displays lifecycle refactor.
     private final PerDisplayTaskbarResource mPrimaryResource;
@@ -339,7 +343,9 @@ public class TaskbarManagerImpl {
             LauncherPrefs launcherPrefs,
             SystemUiProxy systemUiProxy,
             PostUnlockObject<InvariantDeviceProfile> unlockedIdp,
-            @Named(CONNECTION_CLEANER) ThreadSafeRunnableList cleanupTasks) {
+            @Named(CONNECTION_CLEANER) ThreadSafeRunnableList cleanupTasks,
+            ActivityManagerWrapper activityManagerWrapper,
+            DesktopState desktopState) {
         Preconditions.assertTaskbarUiThread();
         mBaseContext = context;
         mPrimaryDisplayId = mBaseContext.getDisplayId();
@@ -348,6 +354,8 @@ public class TaskbarManagerImpl {
         mDisplayManager = mBaseContext.getSystemService(DisplayManager.class);
         mSystemUiProxy = systemUiProxy;
         mUnlockedIDP = unlockedIdp;
+        mActivityManagerWrapper = activityManagerWrapper;
+        mDesktopState = desktopState;
 
         // Only initialize this context when the user is truly locked. Thus, check unlock state
         // separately from mUserUnlocked, which starts at false until TIS calls onUserUnlocked().
@@ -1130,7 +1138,7 @@ public class TaskbarManagerImpl {
                     new TaskbarActivityContext(displayId, windowContext, navigationBarPanelContext,
                             dp, resource.getNavButtonController(), mUnfoldProgressProvider,
                             !resource.isExternalDisplay(), getPrimaryDisplayId(),
-                            mSystemUiProxy);
+                            mSystemUiProxy, mActivityManagerWrapper, mDesktopState);
             mAmbientCueRepository = taskbarActivityContext.getControllers().cueBarController
                     .getAmbientCueRepository();
             return taskbarActivityContext;

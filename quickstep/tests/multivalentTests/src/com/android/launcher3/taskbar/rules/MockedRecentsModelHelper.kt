@@ -26,6 +26,7 @@ import com.android.quickstep.TaskThumbnailCache
 import com.android.quickstep.util.GroupTask
 import java.util.function.BiConsumer
 import java.util.function.Consumer
+import java.util.function.Predicate
 import kotlin.reflect.KProperty
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -81,11 +82,18 @@ class MockedRecentsModelHelper {
                 taskListId
             }
 
-        on { getTasks(anyOrNull(), anyOrNull<Consumer<List<GroupTask>>>()) } doAnswer
+        on {
+            getTasks(anyOrNull<Predicate<GroupTask>>(), anyOrNull<Consumer<List<GroupTask>>>())
+        } doAnswer
             {
+                val predicate: Predicate<GroupTask>? = it.getArgument<Predicate<GroupTask>>(0)
                 val request = it.getArgument<Consumer<List<GroupTask>>?>(1)
                 if (request != null) {
-                    taskRequests.add { response -> request.accept(response) }
+                    taskRequests.add { response ->
+                        request.accept(
+                            response.filter { groupTask -> predicate?.test(groupTask) ?: true }
+                        )
+                    }
                 }
                 taskListId
             }
