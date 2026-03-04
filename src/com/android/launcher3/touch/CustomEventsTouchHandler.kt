@@ -24,6 +24,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import com.android.launcher3.Flags
+import com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_LAUNCH
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_POPUP_MENU
 import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_START_DRAG
@@ -133,7 +134,8 @@ class CustomEventsTouchHandler(
         if (
             !isMouseEvent(event) ||
                 event.action != MotionEvent.ACTION_MOVE ||
-                TouchUtil.isMouseRightClickDownOrMove(event)
+                TouchUtil.isMouseRightClickDownOrMove(event) ||
+                isTrackpadMotionEvent(event)
         ) {
             return false
         }
