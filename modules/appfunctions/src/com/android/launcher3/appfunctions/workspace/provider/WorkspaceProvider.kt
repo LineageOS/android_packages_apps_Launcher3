@@ -25,5 +25,5 @@ interface WorkspaceProvider<T> {
      *
      * @return The current workspace.
      */
-    fun getWorkspace(): T
+    suspend fun getWorkspace(): T
 }

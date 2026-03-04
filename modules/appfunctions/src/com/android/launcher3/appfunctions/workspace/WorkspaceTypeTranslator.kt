@@ -28,12 +28,4 @@ interface WorkspaceTypeTranslator<T> {
      * @return The converted [WorkspaceSpec].
      */
     fun toSpec(workspace: T): WorkspaceSpec
-
-    /**
-     * Converts a [WorkspaceSpec] to a [T].
-     *
-     * @param spec The [WorkspaceSpec] to convert.
-     * @return The converted [T].
-     */
-    fun toWorkspace(spec: WorkspaceSpec): T
 }

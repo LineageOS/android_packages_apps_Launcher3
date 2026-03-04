@@ -27,10 +27,16 @@ import javax.inject.Inject
  * model. It will use the [LauncherWorkspaceProvider] to read data and the `IModelWriter` (not yet
  * injected) to handle transactions.
  */
-class WorkspaceRepositoryImpl @Inject constructor() : WorkspaceRepository {
+class WorkspaceRepositoryImpl
+@Inject
+constructor(
+    private val provider: LauncherWorkspaceProvider,
+    private val translator: LauncherWorkspaceTypeTranslator,
+) : WorkspaceRepository {
 
     override suspend fun getWorkspace(): WorkspaceSpec {
-        TODO("Not yet implemented")
+        val workspace = provider.getWorkspace()
+        return translator.toSpec(workspace)
     }
 
     override fun newTransaction(): WorkspaceTransaction {
