@@ -1577,13 +1577,6 @@ public final class LauncherInstrumentation {
         }
     }
 
-    @NonNull
-    public AddToHomeScreenPrompt getAddToHomeScreenPrompt() {
-        try (LauncherInstrumentation.Closable c = addContextLayer("want to get widget cell")) {
-            return new AddToHomeScreenPrompt(this);
-        }
-    }
-
     /**
      * Gets the Overview object if the current state is showing the overview panel. Fails if the
      * launcher is not in that state.
