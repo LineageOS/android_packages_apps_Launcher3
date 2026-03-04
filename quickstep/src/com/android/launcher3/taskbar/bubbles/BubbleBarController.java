@@ -291,7 +291,6 @@ public class BubbleBarController {
             Log.e(TAG, "Update info missing from bubble state change");
             return;
         }
-        BubbleLog.d("BubbleBarController.onBubbleStateChange(), update=%s", update);
         if (Flags.sendBubbleRootTaskIdToLauncher()) {
             if (update.bubbleRootTaskId != ActivityTaskManager.INVALID_TASK_ID) {
                 // Cache bubble root task id if it is set in the update
@@ -391,7 +390,6 @@ public class BubbleBarController {
     }
 
     private void applyViewChanges(BubbleBarViewUpdate update) {
-        BubbleLog.d("BubbleBarController.applyViewChanges()");
         if (update.initialState) {
             // it is possible that we tried to notify shell too early with the bubble bar bounds,
             // so force update shell about the bubble bar bounds in the initial handshake.
@@ -597,9 +595,7 @@ public class BubbleBarController {
      * Removes the given bubble from the backing list of bubbles after it was dismissed by the user.
      */
     public void onBubbleDismissed(BubbleView bubble) {
-        String removedBubbleKey = bubble.getBubble().getKey();
-        BubbleLog.d("BubbleBarController.onBubbleDismissed() key=%s", removedBubbleKey);
-        mBubbles.remove(removedBubbleKey);
+        mBubbles.remove(bubble.getBubble().getKey());
     }
 
     /** Tells WMShell to show the currently selected bubble. */
@@ -607,16 +603,14 @@ public class BubbleBarController {
         if (getSelectedBubbleKey() != null) {
             mLastSentBubbleBarTopToScreenBottom = mBarView.getTopToScreenBottom();
             mSystemUiProxy.showBubble(getSelectedBubbleKey(), mLastSentBubbleBarTopToScreenBottom);
-            BubbleLog.d("BubbleBarController.showSelectedBubble() key=%s", getSelectedBubbleKey());
         } else {
-            BubbleLog.w("BubbleBarController.showSelectedBubble() Trying to show the selected"
-                    + "bubble but it's null");
+            Log.w(TAG, "Trying to show the selected bubble but it's null");
         }
     }
 
     /** Updates the currently selected bubble for launcher views and tells WMShell to show it. */
     public void showAndSelectBubble(BubbleBarItem b) {
-        BubbleLog.d("BubbleBarController.showAndSelectBubble() key=%s", b.getKey());
+        if (DEBUG) Log.w(TAG, "showingSelectedBubble: " + b.getKey());
         setSelectedBubbleInternal(b);
         showSelectedBubble();
     }
@@ -628,7 +622,7 @@ public class BubbleBarController {
      */
     private void setSelectedBubbleInternal(BubbleBarItem b) {
         if (!Objects.equals(b, mSelectedBubble)) {
-            BubbleLog.d("BubbleBarController.setSelectedBubble() key=%s", b.getKey());
+            if (DEBUG) Log.w(TAG, "selectingBubble: " + b.getKey());
             mSelectedBubble = b;
             mBubbleBarViewController.updateSelectedBubble(mSelectedBubble);
         }
@@ -652,8 +646,6 @@ public class BubbleBarController {
      */
     public void updateBubbleBarLocation(BubbleBarLocation location,
             @BubbleBarLocation.UpdateSource int source) {
-        BubbleLog.d("BubbleBarController.updateBubbleBarLocation() location=%s; source=%d",
-                location, source);
         updateBubbleBarLocationInternal(location);
         mSystemUiProxy.setBubbleBarLocation(location, source);
     }
@@ -665,8 +657,6 @@ public class BubbleBarController {
     }
 
     public void animateBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
-        BubbleLog.d("BubbleBarController.animateBubbleBarLocation() location=%s",
-                bubbleBarLocation);
         getTaskbarUiThread().execute(
                 () -> {
                     mBubbleBarViewController.animateBubbleBarLocation(bubbleBarLocation);
@@ -706,8 +696,6 @@ public class BubbleBarController {
 
     private void addBubbleInternally(BubbleBarBubble bubble, boolean isExpanding,
             boolean suppressAnimation) {
-        BubbleLog.d("BubbleBarController.addBubbleInternally() key=%s,expanding=%b,suppressAnim=%b",
-                bubble.getKey(), isExpanding, suppressAnimation);
         mBubbles.put(bubble.getKey(), bubble);
         mBubbleBarViewController.addBubble(bubble, isExpanding,
                 suppressAnimation, /* bubbleToSelect = */ null);
