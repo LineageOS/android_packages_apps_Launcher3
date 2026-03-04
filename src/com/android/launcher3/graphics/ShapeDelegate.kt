@@ -96,7 +96,7 @@ interface ShapeDelegate {
         override fun addToPath(path: PathWrapper, offsetX: Float, offsetY: Float, radius: Float) {
             addToPath(path.path, offsetX, offsetY, radius)
             path.setBounds(offsetX, offsetY, offsetX + radius * 2, offsetY + radius * 2)
-            path.setCornerRadius(radius)
+            path.cornerRadius = radius
         }
     }
 
@@ -137,7 +137,7 @@ interface ShapeDelegate {
             val cy = radius + offsetY
             val cr = radius * radiusRatio
             path.setBounds(cx - radius, cy - radius, cx + radius, cy + radius)
-            path.setCornerRadius(cr)
+            path.cornerRadius = cr
         }
 
         override fun <T> createRevealAnimator(
@@ -156,7 +156,7 @@ interface ShapeDelegate {
                 val bottom = (1 - progress) * startRect.bottom + progress * endRect.bottom
                 path.path.addRoundRect(left, top, right, bottom, radius, radius, Path.Direction.CW)
                 path.setBounds(left, top, right, bottom)
-                path.setCornerRadius(radius)
+                path.cornerRadius = radius
             }
             return if (useFolderSpringAnimation(target)) {
                 ClipSpringAnimBuilder(target, pathProvider).toAnim(isReversed)

@@ -23,16 +23,11 @@ import android.graphics.RectF
 class PathWrapper {
 
     val path: Path = Path()
-
-    private val bounds: RectF = RectF()
-    private var cornerRadius = 0f
+    val bounds: RectF = RectF()
+    var cornerRadius = 0f
 
     fun setBounds(left: Float, top: Float, right: Float, bottom: Float) {
         bounds.set(left, top, right, bottom)
-    }
-
-    fun setCornerRadius(radius: Float) {
-        cornerRadius = radius
     }
 
     fun estimateBoundsFromPath() {

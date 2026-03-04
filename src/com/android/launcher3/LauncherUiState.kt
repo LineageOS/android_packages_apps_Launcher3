@@ -24,6 +24,7 @@ class LauncherUiState {
 
     private val _deviceProfileRef = MutableListenableRef(DEFAULT_DEVICE_PROFILE)
     private val _isTopResumedActivityRef = MutableListenableRef(false)
+    private val _isResumedActivityRef = MutableListenableRef(false)
 
     @Volatile private var _activityFlags = 0
 
@@ -34,6 +35,8 @@ class LauncherUiState {
     val splitScreenUiState = SplitScreenUiState()
     val deviceProfileRef = _deviceProfileRef.asListenable()
     val isTopResumedActivityRef = _isTopResumedActivityRef.asListenable()
+
+    val isResumedActivityRef = _isResumedActivityRef.asListenable()
 
     val isResumed: Boolean
         get() = (_activityFlags and BaseActivity.ACTIVITY_STATE_RESUMED) != 0
@@ -51,6 +54,10 @@ class LauncherUiState {
 
     fun setIsTopResumedActivity(isTopResumedActivity: Boolean) {
         _isTopResumedActivityRef.diffAndDispatch(isTopResumedActivity)
+    }
+
+    fun setIsResumedActivity(isResumedActivity: Boolean) {
+        _isResumedActivityRef.diffAndDispatch(isResumedActivity)
     }
 
     private fun <T> MutableListenableRef<T>.diffAndDispatch(newValue: T) {

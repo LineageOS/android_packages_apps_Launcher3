@@ -19,6 +19,7 @@ package com.android.launcher3.dragndrop;
 import static android.view.View.VISIBLE;
 
 import static com.android.launcher3.AbstractFloatingView.TYPE_DISCOVERY_BOUNCE;
+import static com.android.launcher3.Flags.enableDragStartEndMultiDispatch;
 import static com.android.launcher3.Flags.enableSystemDrag;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_NOT_PINNABLE;
 
@@ -439,8 +440,16 @@ public class DragController implements DragDriver.EventListener, TouchController
         for (DragSessionListener listener : new ArrayList<>(mSessionListeners)) {
             listener.onDragSessionStart(mDragObject, mOptions);
         }
-        for (DragListener listener : new ArrayList<>(mListeners)) {
-            listener.onDragStart(mDragObject, mOptions);
+        if (enableDragStartEndMultiDispatch()) {
+            if (mDragDriver == null || mDragDriver.isDragWithinWindow()) {
+                for (DragListener listener : new ArrayList<>(mListeners)) {
+                    listener.onDragStart(mDragObject, mOptions);
+                }
+            }
+        } else {
+            for (DragListener listener : new ArrayList<>(mListeners)) {
+                listener.onDragStart(mDragObject, mOptions);
+            }
         }
     }
 
@@ -555,11 +564,23 @@ public class DragController implements DragDriver.EventListener, TouchController
         if (mIsInPreDrag && mOptions.preDragCondition != null) {
             mOptions.preDragCondition.onPreDragEnd(mDragObject, false /* dragStarted*/);
         }
+
+        final boolean wasInPreDrag = mIsInPreDrag;
         mIsInPreDrag = false;
         mOptions = null;
-        for (DragListener listener : new ArrayList<>(mListeners)) {
-            listener.onDragEnd();
+
+        if (enableDragStartEndMultiDispatch()) {
+            if (mDragDriver == null || (!wasInPreDrag && mDragDriver.isDragWithinWindow())) {
+                for (DragListener listener : new ArrayList<>(mListeners)) {
+                    listener.onDragEnd();
+                }
+            }
+        } else {
+            for (DragListener listener : new ArrayList<>(mListeners)) {
+                listener.onDragEnd();
+            }
         }
+
         for (DragSessionListener listener : new ArrayList<>(mSessionListeners)) {
             listener.onDragSessionEnd();
         }
@@ -594,10 +615,24 @@ public class DragController implements DragDriver.EventListener, TouchController
     }
 
     @Override
+    public void onDriverDragEnterWindow() {
+        if (enableDragStartEndMultiDispatch() && !mIsInPreDrag) {
+            for (DragListener listener : new ArrayList<>(mListeners)) {
+                listener.onDragStart(mDragObject, mOptions);
+            }
+        }
+    }
+
+    @Override
     public void onDriverDragExitWindow() {
         if (mLastDropTarget != null) {
             mLastDropTarget.onDragExit(mDragObject);
             mLastDropTarget = null;
+        }
+        if (enableDragStartEndMultiDispatch() && !mIsInPreDrag) {
+            for (DragListener listener : new ArrayList<>(mListeners)) {
+                listener.onDragEnd();
+            }
         }
     }
 
@@ -813,6 +848,11 @@ public class DragController implements DragDriver.EventListener, TouchController
     }
 
     private DropTarget findDropTarget(final int x, final int y) {
+        if (enableDragStartEndMultiDispatch()
+                && mDragDriver != null
+                && !mDragDriver.isDragWithinWindow()) {
+            return null;
+        }
         mCoordinatesTemp[0] = x;
         mCoordinatesTemp[1] = y;
         final Rect r = mRectTemp;

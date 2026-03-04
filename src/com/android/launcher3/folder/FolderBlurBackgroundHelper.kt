@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui
+package com.android.launcher3.folder
 
-import kotlinx.coroutines.flow.StateFlow
-
-/** Used for showing the */
-interface PageUI
+import android.graphics.Canvas
+import android.view.View
+import com.android.launcher3.dagger.ActivityContextSingleton
+import com.android.launcher3.graphics.PathWrapper
+import javax.inject.Inject
 
 /**
- * Repository used for showing the workspace preview.
- *
- * It holds the UI elements needed to show a preview of the workspace and manages it's lifecycle and
- * cache.
+ * Helper class that creates and updates the blur drawable used for folders.
  */
-interface WorkspacePreviewRepository {
+@ActivityContextSingleton
+open class FolderBlurBackgroundHelper
+@Inject
+constructor() {
 
-    fun getPages(): StateFlow<List<PageUI>>
+    open fun prepareToOpen(folder: Folder) {}
 
-    fun refreshPages()
+    open fun drawBlur(canvas: Canvas, pathWrapper: PathWrapper?, view: View) {}
+
+    open fun folderCloseComplete() {}
 }
