@@ -737,3 +737,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "enable_widget_resize_frame_accessibility_label"
+  namespace: "launcher"
+  description: "Use widget label for resize frame content description."
+  bug: "447283074"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
