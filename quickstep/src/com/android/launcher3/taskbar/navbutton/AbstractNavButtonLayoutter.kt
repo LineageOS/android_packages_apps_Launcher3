@@ -121,8 +121,7 @@ abstract class AbstractNavButtonLayoutter(
     }
 
     fun isFlipEnabledBySetting(): Boolean {
-        return android.view.accessibility.Flags.navbarFlipOrderOption() &&
-            SettingsCache.INSTANCE.get(navButtonContainer.context).getValue(NAVBAR_KEY_ORDER_URI)
+        return SettingsCache.INSTANCE.get(navButtonContainer.context).getValue(NAVBAR_KEY_ORDER_URI)
     }
 
     /** For ordered layouts, this determines if the order of buttons should be flipped. */
