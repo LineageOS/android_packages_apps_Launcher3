@@ -25,6 +25,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.toComposeRect
+import com.android.cuebar.ui.viewmodel.ActionType
+import com.android.cuebar.ui.viewmodel.ActionViewModel
+import com.android.cuebar.ui.viewmodel.IconViewModel
 import com.android.launcher3.LauncherPrefChangeListener
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.concurrent.annotations.Ui
