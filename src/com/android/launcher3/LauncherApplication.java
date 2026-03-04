@@ -16,17 +16,24 @@
 package com.android.launcher3;
 
 import android.app.Application;
-
+import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.appfunctions.service.AppFunctionConfiguration;
+import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions;
 import com.android.launcher3.dagger.DaggerLauncherAppComponent;
 import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherBaseAppComponent;
 import com.android.launcher3.dagger.LauncherComponentProvider;
+import com.android.launcher3.workspacefunctions.LauncherWorkspaceProvider;
+import com.android.launcher3.workspacefunctions.LauncherWorkspaceTypeTranslator;
 import com.android.launcher3.util.TraceHelper;
+
+import kotlin.jvm.functions.Function1;
 
 /**
  * Main application class for Launcher
  */
-public class LauncherApplication extends Application {
+public class LauncherApplication extends Application implements AppFunctionConfiguration.Provider {
 
     private volatile LauncherBaseAppComponent mAppComponent;
     @Override
@@ -63,6 +70,16 @@ public class LauncherApplication extends Application {
                 .appContext(this)
                 .setSafeModeEnabled(TraceHelper.allowIpcs(
                         "isSafeMode", () -> getPackageManager().isSafeMode()))
+                .build();
+    }
+
+    @NonNull
+    @Override
+    public AppFunctionConfiguration getAppFunctionConfiguration() {
+        Log.d("LauncherApp", "getAppFunctionConfiguration");
+        return new AppFunctionConfiguration.Builder()
+                .addEnclosingClassFactory(WorkspaceAppFunctions.class,
+                        () -> getAppComponent().getWorkspaceAppFunctions())
                 .build();
     }
 }

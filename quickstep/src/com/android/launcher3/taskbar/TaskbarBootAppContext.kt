@@ -40,6 +40,7 @@ import com.android.launcher3.dagger.StaticObjectModule
 import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WidgetModule
 import com.android.launcher3.dagger.WindowManagerProxyModule
+import com.android.launcher3.workspacefunctions.WorkspaceFunctionsModule
 import com.android.launcher3.qsb.QsbWidgetFactory
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.util.PluginManagerWrapper
@@ -118,6 +119,7 @@ abstract class QsbWidgetModule {
             QsbWidgetModule::class,
             AutomationModule::class,
             TaskOverlayModule::class,
+            WorkspaceFunctionsModule::class,
         ]
 )
 interface TaskbarBootComponent : LauncherAppComponent {

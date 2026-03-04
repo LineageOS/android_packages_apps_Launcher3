@@ -41,8 +41,5 @@ android_library {
     plugins: ["androidx.appfunctions_appfunctions-compiler-plugin"],
     kotlincflags: ["-Xjvm-default=all"],
     enable_ksp: true, // required for appfunctions
-    annotation_processor_flags: [
-        "appfunctions\\:aggregateAppFunctions=true",
-    ],
     optional_uses_libs: ["com.android.extensions.appfunctions"],
 }
