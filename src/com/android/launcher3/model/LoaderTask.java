@@ -182,6 +182,7 @@ public class LoaderTask implements Runnable {
     private final HomeScreenFilesUpdateTask.Factory mHomeScreenFilesUpdateTask;
     private final FirstScreenBroadcastHelper mFirstScreenBroadcastHelper;
     private final SettingsCache mSettingsCache;
+    private final ModelTaskController mModelTaskController;
     private final BrowserIconMigratorFactory mBrowserIconMigratorFactory;
     private final LauncherPrefs mPrefs;
     private final AutomationRepository mAutomationRepo;
@@ -212,6 +213,7 @@ public class LoaderTask implements Runnable {
             FirstScreenBroadcastHelper firstScreenBroadcastHelper,
             SettingsCache settingsCache,
             BrowserIconMigratorFactory browserIconMigratorFactory,
+            ModelTaskController modelTaskController,
             LauncherPrefs prefs,
             AutomationRepository automationRepo) {
         name = callerName;
@@ -241,6 +243,7 @@ public class LoaderTask implements Runnable {
         mSettingsCache = settingsCache;
         mUserManagerState = mUserCache.getUserManagerState();
         mBrowserIconMigratorFactory = browserIconMigratorFactory;
+        mModelTaskController = modelTaskController;
         mPrefs = prefs;
         mAutomationRepo = automationRepo;
 
@@ -530,7 +533,8 @@ public class LoaderTask implements Runnable {
                     itemProcessor.finalizeData(mModelDelegate, mModel.getModelDbController());
             if (mIsRestoreFromBackup || mPrefs.get(PREF_MIGRATION_PENDING)) {
                 mBrowserIconMigratorFactory
-                        .createBrowserIconMigrator(loadedItems).performMigration();
+                        .createBrowserIconMigrator(loadedItems,
+                                mModelTaskController.getModelWriter()).performMigration();
             }
 
             mBgDataModel.dataLoadComplete(loadedItems, name /* reason */);

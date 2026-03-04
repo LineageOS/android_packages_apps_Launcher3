@@ -18,13 +18,13 @@ package com.android.launcher3.model
 import androidx.annotation.WorkerThread
 import com.android.launcher3.util.Preconditions
 import java.util.function.Consumer
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
- * Schedules a block of code to be executed within a single database transaction
- * on the background model thread, suspending until the transaction is complete.
+ * Schedules a block of code to be executed within a single database transaction on the background
+ * model thread, suspending until the transaction is complete.
  *
  * This provides a more modern and convenient API for clients using Kotlin coroutines.
  *
@@ -34,9 +34,7 @@ import kotlin.coroutines.resumeWithException
  * @throws RuntimeException if the scheduled transaction fails to complete.
  */
 @WorkerThread
-suspend fun IModelWriter.scheduleTransactionSuspending(
-    block: (TransactionContext) -> Unit
-) {
+suspend fun IModelWriter.scheduleTransactionSuspending(block: (TransactionContext) -> Unit) {
     Preconditions.assertNonUiThread()
     return suspendCancellableCoroutine { continuation ->
         scheduleTransaction(
@@ -49,7 +47,7 @@ suspend fun IModelWriter.scheduleTransactionSuspending(
                     )
                 }
             },
-            block = Consumer { block(it) }
+            block = Consumer { block(it) },
         )
     }
 }
