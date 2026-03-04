@@ -45,37 +45,20 @@ data class ResolvedTargetInfo(
     }
 
     /**
-     * Checks if this resolved target matches the provided task user ID and component names.
+     * Checks if this resolved target matches the provided [baseIntent] and [userHandle].
      *
-     * The matching logic prioritizes the base activity component name:
-     * 1. Returns `false` immediately if the provided [userId] doesn't match the resolved target's
-     *    user ID.
-     * 2. If [baseActivity] is not null, it's compared against the resolved target's component name.
-     * 3. If [baseActivity] is null, the method falls back to comparing the [baseIntent]'s component
-     *    against either the resolved target's primary component name or its target activity
-     *    component name.
+     * The matching logic first verifies the [userHandle]. If it matches, it then checks if the
+     * [baseIntent]'s component name matches either the resolved target's primary [componentName] or
+     * its [targetActivityComponentName].
      *
-     * @param baseActivity The component name of the base activity for the task, which may be null.
-     * @param baseIntent The base intent for the task.
-     * @param userId The ID of the user the task belongs to.
-     * @return `true` if both the user ID and one of the component names match, `false` otherwise.
+     * @param baseIntent The base intent for the task containing the component to match.
+     * @param userHandle The handle of the user the task belongs to.
+     * @return `true` if the user matches and the intent component matches a known target component.
      */
-    fun matchTaskKey(
-        baseActivity: ComponentName?,
-        baseIntent: Intent,
-        userHandle: UserHandle,
-    ): Boolean {
-        if (userHandle != user) {
-            return false
-        }
-
-        baseActivity?.let {
-            val targetComponentName = targetActivityComponentName ?: componentName
-            return it == targetComponentName
-        }
+    fun matchTaskLaunchActivity(baseIntent: Intent, userHandle: UserHandle): Boolean {
+        if (userHandle != user) return false
 
         val intentComponent = baseIntent.component ?: return false
-
-        return intentComponent == componentName || intentComponent == targetActivityComponentName
+        return intentComponent in listOf(componentName, targetActivityComponentName)
     }
 }
