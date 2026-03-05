@@ -20,13 +20,11 @@ import android.database.sqlite.SQLiteDatabase
 import android.graphics.Point
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.android.launcher3.Flags
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME
 import com.android.launcher3.LauncherSettings.Favorites.TMP_TABLE
-import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.logging.FileLog
 import com.android.launcher3.logging.StatsLogManager
@@ -505,22 +503,15 @@ constructor(
         val itemsToPlace = WorkspaceItemsToPlace(sortedItemsToPlace, mutableListOf())
         val occupied = GridOccupancy(trgX, trgY)
         val trg = Point(trgX, trgY)
-        val next: Point =
-            if (screenId == 0 && qsbOnFirstScreen()) {
-                Point(0, 1 /* smartspace */)
-            } else {
-                Point(0, 0)
-            }
+        val next = Point(0, 0)
         if (existedEntries != null) {
             for (entry in existedEntries) {
                 occupied.markCells(entry, true)
             }
         }
-        if (Flags.injectableModelItems()) {
-            extraItemsProvider.get().forEach {
-                if (it.container == Favorites.CONTAINER_DESKTOP && it.screenId == screenId) {
-                    occupied.markCells(it, true)
-                }
+        extraItemsProvider.get().forEach {
+            if (it.container == Favorites.CONTAINER_DESKTOP && it.screenId == screenId) {
+                occupied.markCells(it, true)
             }
         }
 
