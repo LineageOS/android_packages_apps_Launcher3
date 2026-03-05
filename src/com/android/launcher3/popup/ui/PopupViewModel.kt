@@ -19,6 +19,7 @@ package com.android.launcher3.popup.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.popup.PopupCategory
 import com.android.launcher3.popup.PopupPopulator
@@ -53,6 +54,9 @@ class PopupViewModel {
     /** The maximum number of rows that can be displayed */
     private var maxRows = DEFAULT_MAX_ROWS
 
+    /** The [LauncherPrefs] used to persist the state of the popup menu. */
+    private lateinit var launcherPrefs: LauncherPrefs
+
     /**
      * Initializes the ViewModel with the initial set of system shortcuts and a placeholder count
      * for deep shortcuts. This method determines the initial [PopupUiState].
@@ -61,8 +65,15 @@ class PopupViewModel {
      * @param deepShortcutCount The initial count of deep shortcuts. Actual deep shortcuts are
      *   loaded asynchronously later.
      * @param availableHeightDp The available height of the display in dp.
+     * @param launcherPrefs The [LauncherPrefs] to use for persisting UI state.
      */
-    fun init(systemShortcuts: List<PopupItem>, deepShortcutCount: Int, availableHeightDp: Float) {
+    fun init(
+        systemShortcuts: List<PopupItem>,
+        deepShortcutCount: Int,
+        availableHeightDp: Float,
+        launcherPrefs: LauncherPrefs,
+    ) {
+        this.launcherPrefs = launcherPrefs
         maxRows = calculateMaxRows(availableHeightDp)
         updateState(systemShortcuts, deepShortcutCount)
     }
@@ -129,7 +140,7 @@ class PopupViewModel {
             }
 
         if (isAccordion) {
-            expandedSection = ExpandedSection.SYSTEM
+            expandedSection = launcherPrefs.get(LauncherPrefs.EXPANDED_POPUP_MENU_SECTION)
         }
 
         state =
@@ -153,22 +164,19 @@ class PopupViewModel {
     }
 
     /**
-     * Toggles the expansion state of a specific section (System or Deep Shortcuts). This method
-     * only has an effect if the current [PopupUiState.mainSegmentsStyle] is ACCORDION.
+     * Expands a specific section (System or Deep Shortcuts). This method only has an effect if the
+     * current [PopupUiState.mainSegmentsStyle] is ACCORDION and if the [sectionToExpand] is not
+     * already expanded.
      *
-     * If the [sectionToToggle] is currently expanded, it will be collapsed (set to null).
-     * Otherwise, the specified section will be expanded.
-     *
-     * @param sectionToToggle The section to expand or collapse.
+     * @param sectionToExpand The section to expand.
      */
-    fun toggleSectionExpansion(sectionToToggle: ExpandedSection) {
-        if (state.mainSegmentsStyle == MainSegmentsStyle.ACCORDION) {
-            expandedSection =
-                if (expandedSection == sectionToToggle) {
-                    null
-                } else {
-                    sectionToToggle
-                }
+    fun expandSection(sectionToExpand: ExpandedSection) {
+        if (
+            state.mainSegmentsStyle == MainSegmentsStyle.ACCORDION &&
+                expandedSection != sectionToExpand
+        ) {
+            expandedSection = sectionToExpand
+            launcherPrefs.putSync(LauncherPrefs.EXPANDED_POPUP_MENU_SECTION.to(sectionToExpand))
         }
     }
 

@@ -228,7 +228,7 @@ private fun ComposePopupContent(
             standardDeepShortcuts = targetState.deepShortcuts,
             isSystemShortcutsExpanded = isSystemShortcutsExpanded,
             isDeepShortcutsExpanded = isDeepShortcutsExpanded,
-            onToggle = viewModel::toggleSectionExpansion,
+            onToggle = viewModel::expandSection,
             onClickListener = onClickListener,
             onAddButtonClick = onAddIconClick,
             onDeepShortcutLongPress = onDeepShortcutLongPress,

@@ -29,6 +29,7 @@ import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.model.DeviceGridState
 import com.android.launcher3.pm.InstallSessionHelper
+import com.android.launcher3.popup.ui.ExpandedSection
 import com.android.launcher3.provider.RestoreDbTask
 import com.android.launcher3.provider.RestoreDbTask.Companion.FIRST_LOAD_AFTER_RESTORE_KEY
 import com.android.launcher3.settings.SettingsActivity
@@ -93,6 +94,10 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
                 sp.getLong(item.sharedPrefKey, default as Long)
             Set::class.java.isAssignableFrom(item.type) ->
                 sp.getStringSet(item.sharedPrefKey, default as? Set<String>)
+            item.type.isEnum -> {
+                val name = sp.getString(item.sharedPrefKey, (default as Enum<*>).name)
+                item.type.enumConstants?.find { (it as Enum<*>).name == name } ?: default
+            }
             else ->
                 throw IllegalArgumentException(
                     "item type: ${item.type}" + " is not compatible with sharedPref methods"
@@ -165,6 +170,7 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
                 putLong(item.sharedPrefKey, value as Long)
             Set::class.java.isAssignableFrom(item.type) ->
                 putStringSet(item.sharedPrefKey, value as? Set<String>)
+            item.type.isEnum -> putString(item.sharedPrefKey, (value as Enum<*>).name)
             else ->
                 throw IllegalArgumentException(
                     "item type: ${item.type} is not compatible with sharedPref methods"
@@ -309,6 +315,10 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
 
         @JvmField
         val WORKSPACE_ITEMS_LABEL_HIDDEN = backedUpItem("pref_workspace_items_label_hidden", false)
+
+        @JvmField
+        val EXPANDED_POPUP_MENU_SECTION =
+            backedUpItem("pref_expanded_popup_menu", ExpandedSection.SYSTEM)
 
         @JvmField
         val NON_FIXED_LANDSCAPE_GRID_NAME =
