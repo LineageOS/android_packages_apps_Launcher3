@@ -41,6 +41,7 @@ import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_SECON
 import static com.android.launcher3.taskbar.TaskbarStashController.FLAG_STASHED_IN_APP_AUTO;
 import static com.android.launcher3.taskbar.TaskbarStashController.SHOULD_BUBBLES_FOLLOW_DEFAULT_VALUE;
 import static com.android.launcher3.testing.shared.ResourceUtils.getBoolByName;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.quickstep.RecentsFilterState.EMPTY_FILTER;
@@ -91,6 +92,7 @@ import android.window.DesktopModeFlags.DesktopModeFlag;
 import android.window.RemoteTransition;
 
 import androidx.annotation.AnyThread;
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -181,6 +183,7 @@ import com.android.launcher3.util.TraceHelper;
 import com.android.launcher3.util.VibratorWrapper;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
+import com.android.quickstep.InputConsumer;
 import com.android.quickstep.NavHandle;
 import com.android.quickstep.RecentsModel;
 import com.android.quickstep.SystemUiProxy;
@@ -211,7 +214,9 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.StringJoiner;
+import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -301,6 +306,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     private final ActivityManagerWrapper mActivityManagerWrapper;
     private final DesktopState mDesktopState;
     private final Context mWindowContext;
+    private final Set<InputConsumer> mInputConsumerCleanUpSet =
+            Collections.newSetFromMap(new WeakHashMap<>());
 
     private final TaskbarFeatureEvaluator mTaskbarFeatureEvaluator;
 
@@ -531,6 +538,11 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     public boolean isDesktopFormFactor() {
         return mWindowContext.getResources().getBoolean(
                 R.bool.desktop_form_factor);
+    }
+
+    @MainThread
+    public void addInputConsumerToCleanUp(InputConsumer inputConsumer) {
+        mInputConsumerCleanUpSet.add(inputConsumer);
     }
 
     /**
@@ -1232,6 +1244,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mIsDestroyed = true;
         setUIController(TaskbarUIController.DEFAULT);
         mControllers.onDestroy();
+        MAIN_EXECUTOR.execute(() -> {
+            mInputConsumerCleanUpSet.forEach(InputConsumer::onConsumerAboutToBeSwitched);
+        });
     }
 
     public boolean isDestroyed() {

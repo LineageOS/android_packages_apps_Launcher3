@@ -252,7 +252,7 @@ object InputConsumerUtils {
                             gestureState,
                             ViewConfiguration.get(context).scaledTouchSlop,
                         )
-                    tac.closeOnDestroy { base.onConsumerAboutToBeSwitched() }
+                    tac.addInputConsumerToCleanUp(base)
                 }
             }
             if (Flags.fixBubblesLongPressNavHandle()) {
@@ -303,7 +303,7 @@ object InputConsumerUtils {
                         navHandle,
                         gestureState,
                     )
-                tac?.closeOnDestroy { base.onConsumerAboutToBeSwitched() }
+                tac?.addInputConsumerToCleanUp(base)
             }
 
             if (!Flags.fixBubblesLongPressNavHandle()) {
