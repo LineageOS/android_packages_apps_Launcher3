@@ -882,10 +882,14 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         }
 
         // Add IDs for pinned apps that are running but currently hidden in the overflow.
-        TaskbarOverflowView pinnedOverflow = mTaskbarView.getTaskbarPinnedOverflowView();
-        if (pinnedOverflow != null) {
-            for (ItemInfo item : pinnedOverflow.getOverflowInfoList()) {
-                addTaskIdFromTag(item, shownTasks);
+        // Required only when the overflow is not open.
+        boolean isOverflowOpen = mOverflownAppsContainerController.isOpen();
+        if (!isOverflowOpen) {
+            TaskbarOverflowView pinnedOverflow = mTaskbarView.getTaskbarPinnedOverflowView();
+            if (pinnedOverflow != null) {
+                for (ItemInfo item : pinnedOverflow.getOverflowInfoList()) {
+                    addTaskIdFromTag(item, shownTasks);
+                }
             }
         }
 
