@@ -29,7 +29,6 @@ import androidx.annotation.DrawableRes
 import androidx.core.view.setPadding
 import com.android.launcher3.R
 import com.android.launcher3.Utilities.dpToPx
-import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarViewCallbacks
 import com.android.launcher3.util.Executors.getTaskbarUiThread
@@ -110,8 +109,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         }
         val shouldSelectTransientIcon =
             isTransientTaskbar ||
-                (enableTaskbarPinning() &&
-                    activityContext.taskbarFeatureEvaluator.supportsTransitionToTransientTaskbar)
+                activityContext.taskbarFeatureEvaluator.supportsTransitionToTransientTaskbar
         return if (shouldSelectTransientIcon) R.drawable.ic_transient_taskbar_all_apps_search_button
         else R.drawable.ic_taskbar_all_apps_search_button
     }

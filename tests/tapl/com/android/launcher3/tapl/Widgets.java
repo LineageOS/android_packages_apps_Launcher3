@@ -205,10 +205,6 @@ public final class Widgets extends LauncherInstrumentation.VisibleContainer
                         if (widget.getVisibleCenter().y >= bottomGestureStartOnScreen) {
                             continue;
                         }
-                        mLauncher.assertEquals(
-                                "View is not WidgetCell",
-                                "com.android.launcher3.widget.WidgetCell",
-                                widget.getClassName());
                         UiObject2 preview = mLauncher.waitForObjectInContainer(widget,
                                 previewSelector);
                         return new Widget(mLauncher, preview);

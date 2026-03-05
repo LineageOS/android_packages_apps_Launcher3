@@ -18,7 +18,6 @@ package com.android.launcher3.util
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
-import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.display.LauncherDisplayInfo
@@ -44,10 +43,8 @@ constructor(
     fun isTransient(info: LauncherDisplayInfo): Boolean {
         return if (info.navigationMode != NavigationMode.NO_BUTTON) {
             false
-        } else if (enableTaskbarPinning()) {
-            !isPinned(info)
         } else {
-            true
+            !isPinned(info)
         }
     }
 
@@ -58,7 +55,7 @@ constructor(
                 ?: return launcherPrefs.get(TASKBAR_PINNING)
         return if (
             info.showDesktopTaskbarForFreeformDisplay ||
-            windowManagerProxy.isInDesktopMode(displayId)
+                windowManagerProxy.isInDesktopMode(displayId)
         ) {
             true
         } else {
@@ -67,7 +64,6 @@ constructor(
     }
 
     companion object {
-        @JvmField
-        val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getTaskbarModeUtil)
+        @JvmField val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getTaskbarModeUtil)
     }
 }

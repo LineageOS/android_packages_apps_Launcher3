@@ -86,6 +86,9 @@ constructor(
         if (widgetId <= 0) return
         executor.execute {
             val widgetManager = AppWidgetManager.getInstance(context)
+            if (widgetManager.getAppWidgetInfo(widgetId) == null) {
+                return@execute
+            }
             val sizeOptions = widgetSizeOptionsProvider.invoke()
             val widgetOptions = widgetManager.getAppWidgetOptions(widgetId)
             if (

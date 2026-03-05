@@ -16,7 +16,6 @@
 
 package com.android.launcher3.taskbar;
 
-import static com.android.launcher3.config.FeatureFlags.enableTaskbarPinning;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TASKBAR_ALLAPPS_BUTTON_LONG_PRESS;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_TASKBAR_ALLAPPS_BUTTON_TAP;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_LAUNCH_OMNI_SUCCESSFUL_META;
@@ -38,7 +37,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.jank.Cuj;
 import com.android.launcher3.BubbleTextView;
-import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.taskbar.bubbles.BubbleBarViewController;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
@@ -158,9 +156,7 @@ public class TaskbarViewCallbacks {
 
     /** Callback invoked before Taskbar icons are laid out. */
     void onPreLayoutChildren() {
-        if (enableTaskbarPinning()) {
-            mControllers.taskbarViewController.updateTaskbarIconTranslationXForPinning();
-        }
+        mControllers.taskbarViewController.updateTaskbarIconTranslationXForPinning();
     }
 
     /**

@@ -27,10 +27,8 @@ import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER;
 import static com.android.launcher3.Utilities.dpToPx;
-import static com.android.launcher3.config.FeatureFlags.enableTaskbarPinning;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
 import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR;
-import static com.android.systemui.shared.Flags.enableRecentsInTaskbar;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -270,10 +268,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
         mItemViewFactory = new TaskbarPinnedAppsIconsViewFactory(mActivityContext, this);
 
-        if (enableTaskbarPinning() || enableRecentsInTaskbar()) {
-            mTaskbarDividerContainer = (TaskbarDividerContainer) inflate(
-                    R.layout.taskbar_divider_button_container);
-        }
+        mTaskbarDividerContainer = (TaskbarDividerContainer) inflate(
+                R.layout.taskbar_divider_button_container);
 
         if (ENABLE_TASKBAR_OVERFLOW.isTrue()) {
             mTaskbarRecentsOverflowView = TaskbarOverflowView.inflateIcon(OverflowType.RECENTS,
@@ -321,8 +317,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
 
         // All apps icon takes less space compared to normal icon size, reserve space for the icon
         // separately.
-        boolean forceTransientTaskbarSize =
-                enableTaskbarPinning() && canTransitionToTransientTaskbar();
+        boolean forceTransientTaskbarSize = canTransitionToTransientTaskbar();
         availableWidth -= iconSize - (int) getResources().getDimension(
                 mAllAppsButtonContainer.getAllAppsButtonTranslationXOffset(
                         forceTransientTaskbarSize || mActivityContext.isTransientTaskbar()));
@@ -1636,7 +1631,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         int iconLayoutBoundsWidth =
                 expectedNumberOfTaskbarIcons * (mItemMarginLeftRight * 2 + mIconTouchSize);
 
-        if (enableTaskbarPinning() && expectedNumberOfTaskbarIcons > 1) {
+        if (expectedNumberOfTaskbarIcons > 1) {
             // We are removing 4 * mItemMarginLeftRight as there should be no space between
             // All Apps icon, divider icon, and first app icon in taskbar
             iconLayoutBoundsWidth -= mItemMarginLeftRight * 4;

@@ -92,7 +92,7 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"તમારું ડિવાઇસ \nતૈયાર છે!"</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"તમે સંપૂર્ણપણે તૈયાર છો!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"તમારા નવા <xliff:g id="DEVICE">%1$s</xliff:g>નો અનુભવ માણો!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> વડે શરૂઆત કરવા માટે ઉપર સ્વાઇપ કરો"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> વડે શરૂઆત કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g>નો ઉપયોગ કરવાનું શરૂ કરવા માટે ટૅપ કરો"</string>
     <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"નૅવિગેટ કરવાની રીત પસંદ કરો"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"ઉપરની તરફ સ્વાઇપ કરો"</string>

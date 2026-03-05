@@ -86,17 +86,6 @@ public final class FeatureFlags {
             "INJECT_FALLBACK_APP_CORPUS_RESULTS", DISABLED,
             "Inject fallback app corpus result when AiAi fails to return it.");
 
-    // TODO(Block 17): Clean up flags
-    // Aconfig migration complete for ENABLE_TASKBAR_PINNING.
-    private static final BooleanFlag ENABLE_TASKBAR_PINNING = getDebugFlag(296231746,
-            "ENABLE_TASKBAR_PINNING", DISABLED,
-            "Enables taskbar pinning to allow user to switch between transient and persistent "
-                    + "taskbar flavors");
-
-    public static boolean enableTaskbarPinning() {
-        return ENABLE_TASKBAR_PINNING.get() || Flags.enableTaskbarPinning();
-    }
-
     // TODO(Block 21): Clean up flags
     public static final BooleanFlag ENABLE_APP_ICON_FOR_INLINE_SHORTCUTS = getDebugFlag(270395087,
             "ENABLE_APP_ICON_IN_INLINE_SHORTCUTS", DISABLED, "Show app icon for inline shortcut");

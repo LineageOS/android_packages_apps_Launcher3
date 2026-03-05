@@ -27,7 +27,6 @@ import androidx.core.text.HtmlCompat
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
-import com.android.launcher3.config.FeatureFlags.enableTaskbarPinning
 import com.android.launcher3.taskbar.TOOLTIP_STEP_FEATURES
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.taskbar.TaskbarStashController
@@ -222,7 +221,6 @@ class TooltipEduCombinator(
                 optionalCondition = {
                     isTooltipEnabled &&
                         context.isPinnedTaskbar &&
-                        enableTaskbarPinning() &&
                         taskbarStashController.isTaskbarVisibleAndNotStashing &&
                         shouldShowSearchEduResolver.invoke()
                 },
@@ -356,11 +354,7 @@ class TooltipEduCombinator(
 
         if (
             setFlagIfUnset(
-                optionalCondition = {
-                    context.isTransientTaskbar &&
-                        enableTaskbarPinning() &&
-                        !userHasSeenOldPinningEdu
-                },
+                optionalCondition = { context.isTransientTaskbar && !userHasSeenOldPinningEdu },
                 flag = TASKBAR_PINNING_EDU_SEEN_FLAG,
                 updateFlag = updateFlags,
             )

@@ -102,11 +102,10 @@ public class PendingItemDragHelper extends DragPreviewProvider {
     /**
      * Starts the drag for the pending item associated with the view.
      *
-     * @param previewBounds The bounds where the image was displayed,
-     *                      {@link WidgetImageView#getBitmapBounds()}
+     * @param previewBounds The bounds where the image was displayed
      * @param previewBitmapWidth The actual width of the bitmap displayed in the view.
-     * @param previewViewWidth The width of {@link WidgetImageView} displaying the preview
-     * @param screenPos Position of {@link WidgetImageView} on the screen
+     * @param previewViewWidth The width of the view displaying the preview
+     * @param screenPos Position of the view on the screen
      */
     public void startDrag(Rect previewBounds, int previewBitmapWidth, int previewViewWidth,
             Point screenPos, DragSource source, DragOptions options) {

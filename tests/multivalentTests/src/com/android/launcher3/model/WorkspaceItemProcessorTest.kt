@@ -620,6 +620,7 @@ class WorkspaceItemProcessorTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WIDGET_RESIZE_FRAME_ACCESSIBILITY_LABEL)
     fun `When valid TYPE_REAL App Widget then add item`() {
 
         // Given
@@ -643,11 +644,13 @@ class WorkspaceItemProcessorTest {
                 appWidgetId = expectedAppWidgetId
                 providerName = ComponentName.unflattenFromString(expectedProvider)
                 restoreStatus = expectedRestoreStatus
+                contentDescription = "Widget Label"
             }
         val expectedWidgetProviderInfo =
             mock<LauncherAppWidgetProviderInfo>().apply {
                 provider = ComponentName.unflattenFromString(expectedProvider)
                 whenever(user).thenReturn(mUserHandle)
+                whenever(loadLabel(mContext.packageManager)).thenReturn("Widget Label")
             }
         val inflationResult =
             WidgetInflater.InflationResult(
@@ -674,6 +677,7 @@ class WorkspaceItemProcessorTest {
             assertThat(restoreStatus).isEqualTo(expectedWidgetInfo.restoreStatus)
             assertThat(targetComponent).isEqualTo(expectedWidgetInfo.targetComponent)
             assertThat(appWidgetId).isEqualTo(expectedWidgetInfo.appWidgetId)
+            assertThat(contentDescription).isEqualTo(expectedWidgetInfo.contentDescription)
         }
     }
 

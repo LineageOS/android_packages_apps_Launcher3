@@ -412,7 +412,7 @@ constructor(
                 findOrMakeFolder(info.container, loadedItems).add(info)
             }
             restoreEventLogger?.logSingleFavoritesItemRestored(info.itemType)
-        } else {
+        } else if (info.id != ItemInfo.NO_ID) {
             markDeleted("Item position overlap", RestoreError.OVERLAPPING_ITEM)
         }
     }
