@@ -532,6 +532,7 @@ android_app {
         proguard_flags_files: [":launcher-proguard-rules"],
         enabled: true,
         shrink_resources: true,
+        ignore_warnings: false,
     },
 
     platform_apis: true,
@@ -580,6 +581,7 @@ android_app {
         proguard_flags_files: ["proguard.flags"],
         enabled: true,
         shrink_resources: true,
+        ignore_warnings: false,
     },
 
     privileged: true,
@@ -617,6 +619,7 @@ android_app {
         proguard_flags_files: ["proguard.flags"],
         enabled: true,
         shrink_resources: true,
+        ignore_warnings: false,
     },
 
     privileged: true,
