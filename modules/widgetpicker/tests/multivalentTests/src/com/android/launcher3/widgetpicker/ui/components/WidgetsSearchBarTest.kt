@@ -16,6 +16,9 @@
 
 package com.android.launcher3.widgetpicker.ui.components
 
+import android.platform.test.rule.DeniedDevices
+import android.platform.test.rule.DeviceProduct
+import android.platform.test.rule.LimitDevicesRule
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,8 +31,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEditable
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -51,7 +56,10 @@ import org.junit.runner.RunWith
  * component with rest of picker.
  */
 @RunWith(AndroidJUnit4::class)
+@DeniedDevices(denied = [DeviceProduct.ROBOLECTRIC])
 class WidgetsSearchBarTest {
+    @get:Rule val limitDevicesRule = LimitDevicesRule()
+
     @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @OptIn(ExperimentalCoroutinesApi::class) private val testDispatcher = UnconfinedTestDispatcher()
@@ -75,17 +83,18 @@ class WidgetsSearchBarTest {
 
             composeTestRule.onNode(hasText(NOT_IN_SEARCH_MODE_TEXT)).assertExists()
 
-            composeTestRule
-                .onNode(isEditable())
-                .assertExists()
-                .assertHasClickAction()
-                .performClick()
+            val searchBar = composeTestRule.onNode(isEditable())
+            searchBar.assertExists().assertHasClickAction().performClick()
 
             testScope.runCurrent()
             composeTestRule.awaitIdle()
 
             // Enters search mode
             composeTestRule.onNode(hasText(SEARCH_MODE_TEXT)).assertExists()
+            composeTestRule.waitUntil {
+                searchBar.fetchSemanticsNode().config[SemanticsProperties.Focused] == true
+            }
+            searchBar.assertIsFocused()
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -110,6 +119,7 @@ class WidgetsSearchBarTest {
                 .onNode(isEditable())
                 .assertExists()
                 .assertIsEnabled()
+                .assertIsFocused()
                 .performTextInput(RESULT_TEXT)
 
             testScope.runCurrent()
