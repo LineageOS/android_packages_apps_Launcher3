@@ -67,8 +67,16 @@ public class LauncherAnimUtils {
 
                 @Override
                 public void setValue(View view, float scale) {
-                    view.setScaleX(scale);
-                    view.setScaleY(scale);
+                    if (view.getHandler() != null
+                            && view.getHandler().getLooper() != android.os.Looper.myLooper()) {
+                        view.post(() -> {
+                            view.setScaleX(scale);
+                            view.setScaleY(scale);
+                        });
+                    } else {
+                        view.setScaleX(scale);
+                        view.setScaleY(scale);
+                    }
                 }
             };
 

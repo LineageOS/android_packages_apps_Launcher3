@@ -16,7 +16,8 @@
 
 package com.android.quickstep.cuebar.data
 
-import android.service.personalcontext.insight.ContextInsight
+import android.service.personalcontext.RenderToken
+import android.service.personalcontext.insight.PublishedContextInsight
 
 interface InsightListener {
     /**
@@ -24,5 +25,5 @@ interface InsightListener {
      *
      * @param insight
      */
-    fun onInsightReceived(insight: List<ContextInsight>)
+    fun onInsightReceived(insight: PublishedContextInsight, token: RenderToken)
 }
