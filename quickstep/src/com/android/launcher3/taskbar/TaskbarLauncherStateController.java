@@ -291,6 +291,7 @@ public class TaskbarLauncherStateController {
 
     /**
      * Callback for when launcher state transition completes after user swipes to home.
+     *
      * @param finalState The final state of the transition.
      */
     public void onStateTransitionCompletedAfterSwipeToHome(LauncherState finalState) {
@@ -351,8 +352,8 @@ public class TaskbarLauncherStateController {
                     if (launcherUiState.isDeviceProfileInitialized()) {
                         mOnDeviceProfileChangeListener.onDeviceProfileChanged(dp);
                     }
-            return Unit.INSTANCE;
-        });
+                    return Unit.INSTANCE;
+                });
         updateOverviewDragState(mLauncherState);
     }
 
@@ -719,6 +720,7 @@ public class TaskbarLauncherStateController {
         boolean showTaskbar = shouldShowTaskbar(mControllers.taskbarActivityContext, isInLauncher,
                 isInOverview);
 
+        boolean showHotseat = !showTaskbar;
         if (mControllers.taskbarActivityContext.shouldAllowTaskbarToAutoStash()
                 && shouldShowTransientTaskbarAnimation()) {
             showTaskbar &= !mControllers.taskbarStashController.isStashed();
@@ -765,9 +767,9 @@ public class TaskbarLauncherStateController {
             Animator taskbarBackgroundAlpha = mTaskbarBackgroundAlpha.animateToValue(
                     backgroundAlpha);
             if (isPersistent) {
-                setupPersistentTaskbarAnimation(animatorSet, showTaskbar, isThreeButtonNav,
-                        taskbarBgOffset, taskbarBgOffsetStart, taskbarBgOffsetEnd, duration,
-                        taskbarBackgroundAlpha);
+                setupPersistentTaskbarAnimation(animatorSet, showTaskbar, showHotseat,
+                        isThreeButtonNav, taskbarBgOffset, taskbarBgOffsetStart, taskbarBgOffsetEnd,
+                        duration, taskbarBackgroundAlpha);
             } else if (!shouldShowTransientTaskbarAnimation()) {
                 setupTransientTaskbarAnimation(animatorSet, showTaskbar, isInLauncher,
                         (long) newDuration);
@@ -776,6 +778,9 @@ public class TaskbarLauncherStateController {
                 taskbarBackgroundAlpha.setStartDelay((long) startDelay);
             }
             animatorSet.play(taskbarBackgroundAlpha);
+        } else {
+            // Update the hotseat visibility even if taskbar is not animating.
+            updateHotseatIconAlpha(!showHotseat ? 0 : 1, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
         }
 
         float cornerRoundness = isInLauncher ? 0 : 1;
@@ -903,14 +908,12 @@ public class TaskbarLauncherStateController {
     }
 
     // Used to stash/unstash pinned/persistent taskbar between home, overview, in app states.
-    private void setupPersistentTaskbarAnimation(AnimatorSet animatorSet, boolean showTaskbar,
-            boolean isThreeNavButton, AnimatedFloat taskbarBgOffset, float taskbarBgOffsetStart,
-            float taskbarBgOffsetEnd, long duration, Animator taskbarBackgroundAlpha) {
-        float targetAlpha = !showTaskbar ? 1 : 0;
-        mLauncher.setHotseatIconsAlpha(targetAlpha, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
-        if (mIsQsbInline) {
-            mLauncher.setHotseatQsbAlpha(targetAlpha, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
-        }
+    private void setupPersistentTaskbarAnimation(AnimatorSet animatorSet,
+            boolean showUnstashedTaskbar,
+            boolean showHotseat, boolean isThreeNavButton, AnimatedFloat taskbarBgOffset,
+            float taskbarBgOffsetStart, float taskbarBgOffsetEnd, long duration,
+            Animator taskbarBackgroundAlpha) {
+        updateHotseatIconAlpha(!showHotseat ? 0 : 1, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
 
         if ((taskbarBgOffset.value != taskbarBgOffsetEnd && !taskbarBgOffset.isAnimating())
                 || !taskbarBgOffset.isAnimatingToValue(taskbarBgOffsetEnd)) {
@@ -926,7 +929,7 @@ public class TaskbarLauncherStateController {
                     .getDeviceProfile()
                     .getTaskbarProfile()
                     .getHeight();
-            if (showTaskbar) {
+            if (showUnstashedTaskbar) {
                 taskbarIconsYTranslation = taskbarIconTranslationYForHome.animateToValue(
                         taskbarHeight, 0);
             } else {
@@ -959,14 +962,14 @@ public class TaskbarLauncherStateController {
                     taskbarDp.getTaskbarProfile().getHeight() + offsetY);
 
             mControllers.taskbarActivityContext.setTaskbarWindowSize(
-                    showTaskbar ? collapsedHeight : expandedHeight);
+                    showUnstashedTaskbar ? collapsedHeight : expandedHeight);
 
             ObjectAnimator taskbarNavButtonTranslateY =
                     taskbarNavButtonTranslationY.animateToValue(
-                            showTaskbar ? 0 : -offsetY);
+                            showUnstashedTaskbar ? 0 : -offsetY);
             ObjectAnimator taskbarNavButtonTranslateYForInAppDisplay =
                     taskbarNavButtonTranslationYForInAppDisplay.animateToValue(
-                            showTaskbar ? 0 : offsetY);
+                            showUnstashedTaskbar ? 0 : offsetY);
 
             taskbarNavButtonTranslateY.setDuration(duration);
             taskbarNavButtonTranslateYForInAppDisplay.setDuration(duration);
@@ -974,7 +977,7 @@ public class TaskbarLauncherStateController {
                     taskbarNavButtonTranslateYForInAppDisplay);
         }
 
-        taskbarBackgroundAlpha.setInterpolator(showTaskbar ? INSTANT : FINAL_FRAME);
+        taskbarBackgroundAlpha.setInterpolator(showUnstashedTaskbar ? INSTANT : FINAL_FRAME);
         taskbarBackgroundAlpha.setDuration(duration);
     }
 
@@ -1187,10 +1190,14 @@ public class TaskbarLauncherStateController {
         if ((mControllers.taskbarActivityContext.isTransientTaskbar()
                 && !mControllers.taskbarDesktopModeController.isLauncherAnimationRunning())
                 || mControllers.taskbarActivityContext.showDesktopTaskbarForFreeformDisplay()) {
-            mLauncher.setHotseatIconsAlpha(targetAlpha, alphaChannel);
-            if (mIsQsbInline) {
-                mLauncher.setHotseatQsbAlpha(targetAlpha, alphaChannel);
-            }
+            updateHotseatIconAlpha(targetAlpha, alphaChannel);
+        }
+    }
+
+    private void updateHotseatIconAlpha(float targetAlpha, @HotseatQsbAlphaId int alphaChannel) {
+        mLauncher.setHotseatIconsAlpha(targetAlpha, alphaChannel);
+        if (mIsQsbInline) {
+            mLauncher.setHotseatQsbAlpha(targetAlpha, alphaChannel);
         }
     }
 
