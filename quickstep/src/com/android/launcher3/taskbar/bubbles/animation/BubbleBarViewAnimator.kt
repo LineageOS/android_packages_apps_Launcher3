@@ -31,6 +31,7 @@ import com.android.launcher3.taskbar.bubbles.BubbleView
 import com.android.launcher3.taskbar.bubbles.flyout.BubbleBarFlyoutController
 import com.android.launcher3.taskbar.bubbles.flyout.BubbleBarFlyoutMessage
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
+import com.android.wm.shell.Flags
 import com.android.wm.shell.shared.animation.PhysicsAnimator
 
 /** Handles animations for bubble bar bubbles. */
@@ -589,16 +590,24 @@ constructor(
 
     fun collapsedWhileAnimating() {
         val animatingBubble = animatingBubble ?: return
-        // we are collapsing in the middle of animating a bubble in, which means we previously
-        // received a signal to expand. if we already moved on to the IN state, the expand signal
-        // would have already interrupted the animation, so we must still be animating in.
-        if (animatingBubble.state == AnimatingBubble.State.ANIMATING_IN) {
+        if (
+            animatingBubble.state == AnimatingBubble.State.ANIMATING_IN ||
+                (Flags.fixBubbleBarNotCollapsedIfAnimatingBubble() &&
+                    animatingBubble.state == AnimatingBubble.State.IN)
+        ) {
+            // We are collapsing while a bubble is animating in, or it is already in the IN state if
+            // setupAndShowFlyout() was called just before collapsedWhileAnimating(). This implies
+            // we previously received a signal to expand.
             clearAnimatingBubble()
             // cancel the currently running animation
             PhysicsAnimator.getInstance(bubbleBarView).cancelIfRunning()
             bubbleStashController.getStashedHandlePhysicsAnimator().cancelIfRunning()
             scheduler.cancel(animatingBubble.hideAnimation)
             bubbleBarView.relativePivotY = 1f
+            // if animation is in IN state also cancel flyout
+            if (animatingBubble.state == AnimatingBubble.State.IN) {
+                cancelFlyout()
+            }
             if (
                 bubbleStashController.isBubblesShowingOnHome ||
                     bubbleStashController.isBubblesShowingOnOverview
