@@ -24,8 +24,10 @@ import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUB
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 import android.os.Process;
+import android.os.UserManager;
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -39,7 +41,6 @@ import com.android.launcher3.util.TestUtil;
 import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -63,6 +64,7 @@ public class TaplPrivateSpaceTest extends AbstractQuickStepTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        assumeTrue("Device does not support PRIVATE user type", isPrivateSpaceSupported());
         createAndStartPrivateProfileUser();
 
         mDevice.pressHome();
@@ -295,6 +297,16 @@ public class TaplPrivateSpaceTest extends AbstractQuickStepTest {
         } catch (IOException e) {
             Log.e(TAG, "error running shell command", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    protected boolean isPrivateSpaceSupported() {
+        try {
+            return mTargetContext.getSystemService(UserManager.class).isUserTypeEnabled(
+                    "android.os.usertype.profile.PRIVATE");
+        } catch (SecurityException e) {
+            Log.e(TAG, "SecurityException checking isUserTypeEnabled", e);
+            return false;
         }
     }
 }
