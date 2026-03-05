@@ -485,6 +485,13 @@ flag {
 }
 
 flag {
+  name: "enable_workspace_page_animation"
+  namespace: "launcher"
+  description: "Enables new workspace paging animation"
+  bug: "449196548"
+}
+
+flag {
   name: "app_launch_blur"
   namespace: "launcher"
   description: "Enable background blur at app launch"
