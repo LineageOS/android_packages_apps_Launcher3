@@ -37,7 +37,7 @@ class CueBarInsightRendererService : InsightRendererService() {
         val listener = listenerRef?.get()
         if (listener != null) {
             // Forward the data to the custom listener (the Repository)
-            listener.onInsightReceived(listOf(publishedInsight.getInsight()))
+            listener.onInsightReceived(publishedInsight, renderToken)
         } else {
             Log.w(TAG, "Insights received but no listener registered.")
         }

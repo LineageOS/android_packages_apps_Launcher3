@@ -29,7 +29,11 @@ import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightActionDetails
 import android.service.personalcontext.insight.InsightCollection
+import android.service.personalcontext.PersonalContextManager
+import android.service.personalcontext.RenderToken
 import android.service.personalcontext.insight.InsightDisplayDetails
+import android.service.personalcontext.insight.PublishedContextInsight
+import android.service.personalcontext.insight.interaction.InsightEvent
 import android.view.autofill.AutofillManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
@@ -75,6 +79,7 @@ class AmbientCueRepositoryTest {
     @Mock private lateinit var mockBgExecutor: Executor
     @Mock private lateinit var mockUiExecutor: Executor
     @Mock private lateinit var mockAutofillManager: AutofillManager
+    @Mock private lateinit var mockPersonalContextManager: PersonalContextManager
     @Mock private lateinit var mockDrawable: Drawable
     @Mock private lateinit var mockMutatedDrawable: Drawable
 
@@ -84,15 +89,18 @@ class AmbientCueRepositoryTest {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        `when`(mockTaskbarContext.getSystemService(AutofillManager::class.java))
+            .thenReturn(mockAutofillManager)
+        `when`(mockTaskbarContext.getSystemService(PersonalContextManager::class.java))
+            .thenReturn(mockPersonalContextManager)
+        `when`(mockTaskbarContext.applicationContext).thenReturn(context)
         repositoryImpl =
             AmbientCueRepositoryImpl(
-                taskbarActivityContext,
+                mockTaskbarContext,
                 mockAmbientCueLogger,
                 mockBgExecutor,
                 mockUiExecutor,
             )
-        `when`(mockTaskbarContext.getSystemService(AutofillManager::class.java))
-            .thenReturn(mockAutofillManager)
         `when`(mockDrawable.mutate()).thenReturn(mockMutatedDrawable)
         `when`(mockTaskbarContext.getDrawable(anyInt())).thenReturn(mockDrawable)
         `when`(mockTaskbarContext.resources)
@@ -227,16 +235,28 @@ class AmbientCueRepositoryTest {
     @Test
     fun mapContextInsightToAction_actionableInsight_remoteAction_createsMAModel() {
         val insight = mockActionableInsight()
+        val publishedInsight = mock(PublishedContextInsight::class.java)
+        `when`(publishedInsight.insight).thenReturn(insight)
+        val renderToken = mock(RenderToken::class.java)
         val conversationHint =
             mock(ContentCaptureConversationHint::class.java).apply {
                 `when`(conversationEvent)
                     .thenReturn(mock(ContentCaptureConversationEvent::class.java))
             }
+
+        // Populate last received insight/token
+        repository.onInsightReceived(publishedInsight, renderToken)
+
+        // Since onInsightReceived is async on uiExecutor, verify actions updated or access directly if tested method doesn't rely on actions list but on internal mapping.
+        // But mapContextInsightToAction is tested here directly.
+        // We need to verify side effects of onPerformAction which USES lastPublishedInsight.
+
         val result = repository.mapContextInsightToAction(insight, conversationHint)
         val actionModel = getSingleActionModel(result, MA_ACTION_TYPE_NAME)
 
         actionModel.onPerformAction.invoke()
 
+        verify(mockPersonalContextManager).reportInsightEvent(publishedInsight, InsightEvent.EVENT_USER_TAP, renderToken)
         verify(insight.actionDetails.remoteAction?.actionIntent)?.send(any<Bundle>())
         verify(mockAmbientCueLogger).setFulfilledWithMaStatus()
         verify(mockAmbientCueLogger, never()).setFulfilledWithMrStatus()
@@ -245,18 +265,46 @@ class AmbientCueRepositoryTest {
     @Test
     fun mapContextInsightToAction_displayInsight_conversationHint_createsMRModel() {
         val insight = mockDisplayInsight()
+        val publishedInsight = mock(PublishedContextInsight::class.java)
+        `when`(publishedInsight.insight).thenReturn(insight)
+        val renderToken = mock(RenderToken::class.java)
         val conversationHint =
             mock(ContentCaptureConversationHint::class.java).apply {
                 `when`(conversationEvent)
                     .thenReturn(mock(ContentCaptureConversationEvent::class.java))
             }
+
+        repository.onInsightReceived(publishedInsight, renderToken)
+
         val result = repository.mapContextInsightToAction(insight, conversationHint)
         val actionModel = getSingleActionModel(result, MR_ACTION_TYPE_NAME)
 
         actionModel.onPerformAction.invoke()
 
+        verify(mockPersonalContextManager).reportInsightEvent(publishedInsight, InsightEvent.EVENT_USER_TAP, renderToken)
         verify(mockAmbientCueLogger).setFulfilledWithMrStatus()
         verify(mockAmbientCueLogger, never()).setFulfilledWithMaStatus()
+    }
+
+    @Test
+    fun onPerformLongClick_reportsEvent() {
+        val insight = mockActionableInsight()
+        val publishedInsight = mock(PublishedContextInsight::class.java)
+        `when`(publishedInsight.insight).thenReturn(insight)
+        val renderToken = mock(RenderToken::class.java)
+        val conversationHint =
+            mock(ContentCaptureConversationHint::class.java).apply {
+                `when`(conversationEvent)
+                    .thenReturn(mock(ContentCaptureConversationEvent::class.java))
+            }
+
+        repository.onInsightReceived(publishedInsight, renderToken)
+        val result = repository.mapContextInsightToAction(insight, conversationHint)
+        val actionModel = result.first()
+
+        actionModel.onPerformLongClick.invoke()
+
+        verify(mockPersonalContextManager).reportInsightEvent(publishedInsight, InsightEvent.EVENT_USER_LONG_PRESS, renderToken)
     }
 
     @Test
