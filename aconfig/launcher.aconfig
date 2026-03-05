@@ -719,16 +719,6 @@ flag {
 }
 
 flag {
-  name: "fix_drop_target_accessibility_input_type"
-  namespace: "launcher"
-  description: "Removes TYPE_CLASS_TEXT from ButtonDropTarget to prevent TalkBack from announcing extra actions."
-  bug: "447064345"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "enable_drag_start_end_multi_dispatch"
   namespace: "launcher"
   description: "Enables support for multi-dispatch of drag start/end events."

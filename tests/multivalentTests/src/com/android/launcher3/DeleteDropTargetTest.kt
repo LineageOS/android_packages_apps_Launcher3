@@ -3,7 +3,6 @@ package com.android.launcher3
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.text.InputType
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.LauncherSettings.Favorites
@@ -123,26 +122,6 @@ class DeleteDropTargetTest {
             },
             "Move to trash",
         )
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_FIX_DROP_TARGET_ACCESSIBILITY_INPUT_TYPE)
-    fun isDropTargetInputTypeNull() {
-        buttonDropTarget.updateText("My Test")
-        buttonDropTarget.setTextMultiLine(false)
-
-        // Check if drop target input type is NULL.
-        assertThat(buttonDropTarget.getInputType()).isEqualTo(InputType.TYPE_NULL)
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_FIX_DROP_TARGET_ACCESSIBILITY_INPUT_TYPE)
-    fun isDropTargetInputTypeText() {
-        buttonDropTarget.updateText("My Test")
-        buttonDropTarget.setTextMultiLine(false)
-
-        // Check if drop target input type is TEXT.
-        assertThat(buttonDropTarget.getInputType()).isEqualTo(InputType.TYPE_CLASS_TEXT)
     }
 
     private fun verifyTextForItemInfo(item: ItemInfo, expectedText: String) {
