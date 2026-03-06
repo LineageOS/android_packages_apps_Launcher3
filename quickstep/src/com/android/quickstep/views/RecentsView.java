@@ -68,7 +68,6 @@ import static com.android.quickstep.views.OverviewActionsView.HIDDEN_SPLIT_SELEC
 import static com.android.quickstep.views.RecentsViewUtils.DESK_EXPLODE_PROGRESS;
 import static com.android.quickstep.views.TaskView.SPLIT_ALPHA;
 import static com.android.wm.shell.Flags.enableCreateAnyBubble;
-import static com.android.wm.shell.Flags.sendBubbleRootTaskIdToLauncher;
 
 import static java.util.Objects.requireNonNull;
 
@@ -666,10 +665,7 @@ public abstract class RecentsView<
         public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                 boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
             if (enableCreateAnyBubble()) {
-                boolean isAppBubble =
-                        sendBubbleRootTaskIdToLauncher() ? BubbleHelper.isAppBubbleTask(task)
-                                : task.isAppBubble;
-                if (isAppBubble && mHandleTaskStackChanges) {
+                if (BubbleHelper.isAppBubbleTask(task) && mHandleTaskStackChanges) {
                     // Remove task from recents if it moved to a bubble, but keep it running
                     dismissTask(task.taskId, /* removeTask= */ false);
                 }

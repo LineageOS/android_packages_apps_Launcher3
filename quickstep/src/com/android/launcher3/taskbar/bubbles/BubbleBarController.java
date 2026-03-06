@@ -292,11 +292,9 @@ public class BubbleBarController {
             Log.e(TAG, "Update info missing from bubble state change");
             return;
         }
-        if (Flags.sendBubbleRootTaskIdToLauncher()) {
-            if (update.bubbleRootTaskId != ActivityTaskManager.INVALID_TASK_ID) {
-                // Cache bubble root task id if it is set in the update
-                BubbleHelper.updateBubbleRootTaskId(update.bubbleRootTaskId);
-            }
+        if (update.bubbleRootTaskId != ActivityTaskManager.INVALID_TASK_ID) {
+            // Cache bubble root task id if it is set in the update
+            BubbleHelper.updateBubbleRootTaskId(update.bubbleRootTaskId);
         }
         BubbleBarViewUpdate viewUpdate = new BubbleBarViewUpdate(update);
         if (update.addedBubble != null
