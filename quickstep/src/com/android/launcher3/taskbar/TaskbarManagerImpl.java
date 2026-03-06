@@ -813,7 +813,11 @@ public class TaskbarManagerImpl {
 
             if (!isTaskbarEnabled || !isLargeScreenTaskbar || !displayExists) {
                 mSystemUiProxy.notifyTaskbarStatus(/* visible */ false, /* stashed */ false);
-                mSystemUiProxy.setHasBubbleBar(false);
+                // Do not update bubble bar unless it is the primary display
+                // As bubbles are only available on primary display
+                if (displayId == mPrimaryDisplayId) {
+                    mSystemUiProxy.setHasBubbleBar(false);
+                }
                 if (!isTaskbarEnabled || !displayExists) {
                     resource.debugMsg(
                             "recreateTaskbarForDisplay: exiting bc (!isTaskbarEnabled || "
