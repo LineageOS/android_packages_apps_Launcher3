@@ -39,6 +39,11 @@ import static com.android.launcher3.util.LauncherModelHelper.TEST_ACTIVITY;
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -59,11 +64,13 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherPrefs;
+import com.android.launcher3.backuprestore.LauncherRestoreEventLogger;
 import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.icons.LauncherIcons;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.util.Executors;
+import com.android.launcher3.util.IntSparseArrayMap;
 import com.android.launcher3.util.PackageManagerHelper;
 import com.android.launcher3.util.SandboxApplication;
 
@@ -311,6 +318,37 @@ public class LoaderCursorTest {
         itemInfo.runtimeStatusFlags |= FLAG_ARCHIVED;
         // Then
         assertFalse(mLoaderCursor.loadIconFromDb(itemInfo));
+    }
+
+    @Test
+    public void checkAndAddItem_overlappingItemWithNoId_isNotMarkedDeleted() {
+        // Arrange: Setup a mock logger to verify calls to markDeleted()
+        LauncherRestoreEventLogger mockRestoreLogger = mock(LauncherRestoreEventLogger.class);
+        LoaderCursor loaderCursor = mContext.getAppComponent().getLoaderCursorFactory()
+                .createLoaderCursor(
+                        mCursor,
+                        mContext.getAppComponent().getUserCache().getUserManagerState(),
+                        mockRestoreLogger);
+        mIDP.numRows = 4;
+        mIDP.numColumns = 4;
+        // Arrange: Add a row to cursor so that loaderCursor.id and other properties are valid.
+        initCursor(ITEM_TYPE_APPLICATION, "app");
+        loaderCursor.moveToNext();
+        IntSparseArrayMap<ItemInfo> loadedItems = new IntSparseArrayMap<>();
+        // Arrange: Add an item to occupy a space.
+        ItemInfo item1 = newItemInfo(0, 0, 1, 1, CONTAINER_DESKTOP, 1);
+        item1.id = 1;
+        loaderCursor.checkAndAddItem(item1, loadedItems, null);
+        // Arrange: Create an overlapping item with NO_ID.
+        ItemInfo overlappingItemWithNoId = newItemInfo(0, 0, 1, 1, CONTAINER_DESKTOP, 1);
+        overlappingItemWithNoId.id = ItemInfo.NO_ID;
+        overlappingItemWithNoId.itemType = ITEM_TYPE_APPLICATION;
+
+        // Act: Try to add the overlapping item.
+        loaderCursor.checkAndAddItem(overlappingItemWithNoId, loadedItems, null);
+
+        // Assert: Verify that it was not marked for deletion because its ID is NO_ID.
+        verify(mockRestoreLogger, never()).logSingleFavoritesItemRestoreFailed(anyInt(), any());
     }
 
 
