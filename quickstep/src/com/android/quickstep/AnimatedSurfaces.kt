@@ -21,7 +21,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
 import com.android.wm.shell.shared.compat.AnimatedSurface
-import com.android.wm.shell.shared.compat.AnimatedSurface.Mode
+import com.android.wm.shell.shared.compat.AnimatedSurfaceUtils
+import com.android.wm.shell.shared.compat.AnimatedSurfaceUtils.AnimatedSurfaceMode
 import java.io.PrintWriter
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -34,7 +35,7 @@ private constructor(
     @JvmField val wallpapers: Array<AnimatedSurface>?,
     @JvmField val nonApps: Array<AnimatedSurface>?,
     @JvmField val extras: Bundle?,
-    @JvmField val mode: Mode,
+    @JvmField @AnimatedSurfaceMode val mode: Int,
     @JvmField val hasRecents: Boolean,
 ) {
     private val releaseChecks = CopyOnWriteArrayList<SurfaceReleaseCheck>()
@@ -117,7 +118,7 @@ private constructor(
             apps: Array<AnimatedSurface>?,
             wallpapers: Array<AnimatedSurface>?,
             nonApps: Array<AnimatedSurface>?,
-            mode: Mode,
+            @AnimatedSurfaceMode mode: Int,
             extras: Bundle = Bundle(),
         ): AnimatedSurfaces {
             val filteredApps = mutableListOf<AnimatedSurface>()
@@ -145,12 +146,12 @@ private constructor(
         @JvmStatic
         fun from(targets: RemoteAnimationTargets): AnimatedSurfaces {
             return AnimatedSurfaces(
-                unfilteredApps = AnimatedSurface.mapFromTargets(targets.unfilteredApps),
-                apps = AnimatedSurface.mapFromTargets(targets.apps),
-                wallpapers = AnimatedSurface.mapFromTargets(targets.wallpapers),
-                nonApps = AnimatedSurface.mapFromTargets(targets.nonApps),
+                unfilteredApps = AnimatedSurfaceUtils.mapFromTargets(targets.unfilteredApps),
+                apps = AnimatedSurfaceUtils.mapFromTargets(targets.apps),
+                wallpapers = AnimatedSurfaceUtils.mapFromTargets(targets.wallpapers),
+                nonApps = AnimatedSurfaceUtils.mapFromTargets(targets.nonApps),
                 extras = targets.extras,
-                mode = AnimatedSurface.mappedModeFromTarget(targets.targetMode),
+                mode = AnimatedSurfaceUtils.mappedModeFromTarget(targets.targetMode),
                 hasRecents = targets.hasRecents,
             )
         }
