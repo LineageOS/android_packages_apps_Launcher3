@@ -118,26 +118,14 @@ constructor(
                         (currentAnimTargetRectF.width() / windowOriginalBounds.width())
                             .coerceAtMost(1f)
                     val unscaledHeight = currentAnimTargetRectF.height() / scale
-                    val croppedHeight = windowStartBounds.height() - unscaledHeight
-                    tmpRectF.set(
-                        0f,
-                        0f,
-                        windowOriginalBounds.width(),
-                        windowStartBounds.height() - croppedHeight,
-                    )
+                    tmpRectF.set(0f, 0f, windowOriginalBounds.width(), unscaledHeight)
                 } else {
                     scale =
                         (currentAnimTargetRectF.height() / windowOriginalBounds.height())
                             .coerceAtMost(1f)
 
-                    val unscaledWidth = currentAnimTargetRectF.width() * scale
-                    val croppedWidth = windowStartBounds.width() - unscaledWidth
-                    tmpRectF.set(
-                        0f,
-                        0f,
-                        windowStartBounds.width() - croppedWidth,
-                        windowOriginalBounds.height(),
-                    )
+                    val unscaledWidth = currentAnimTargetRectF.width() / scale
+                    tmpRectF.set(0f, 0f, unscaledWidth, windowOriginalBounds.height())
                 }
 
                 // Match size and position of currentRect.
