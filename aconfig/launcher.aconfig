@@ -454,16 +454,6 @@ flag {
 }
 
 flag {
-  name: "enable_app_widget_picker_refactor"
-  namespace: "launcher"
-  description: "Migrates the small widget pickers to compose"
-  bug: "436344835"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "enable_cursor_driven_workflows"
   namespace: "launcher"
   description: "Enables mouse based workflows for interacting with launcher"
