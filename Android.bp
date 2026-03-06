@@ -324,6 +324,7 @@ android_library {
         "androidx.compose.material3_material3",
         "androidx.compose.ui_ui-tooling-preview",
         "androidx.compose.ui_ui-tooling",
+        "androidx.navigation_navigation-compose",
         "cuebarlib",
     ],
     manifest: "AndroidManifest-common.xml",

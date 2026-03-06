@@ -52,9 +52,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.R
 import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutCompose
@@ -66,10 +63,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun ChooseLayout(
-    @PreviewParameter(CreatorViewModelProvider::class) viewModel: SpaceCreatorViewModel
-) {
+fun ChooseLayout(viewModel: SpaceCreatorViewModel, onBack: () -> Unit) {
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
@@ -88,7 +82,7 @@ fun ChooseLayout(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = {},
+                        onClick = onBack,
                         modifier =
                             Modifier.background(
                                 ChooseLayoutDimens.AndroidOnlySe1Se1,
@@ -256,21 +250,6 @@ fun AddButton() {
     ) {
         Text("Add", style = TextStyle(color = colorResource(R.color.materialColorOnSurface)))
     }
-}
-
-/** Used for development to preview ChooseLayout. */
-class CreatorViewModelProvider : PreviewParameterProvider<SpaceCreatorViewModel> {
-    val viewModel = SpaceCreatorViewModel()
-
-    init {
-        viewModel.updateTopics(
-            listOf("Most", "Games", "Health", "Productivity", "Travel", "Social", "Entertainment")
-        )
-        viewModel.updateLayouts(5)
-    }
-
-    override val values: Sequence<SpaceCreatorViewModel>
-        get() = listOf(viewModel).asSequence()
 }
 
 object ChooseLayoutDimens {
