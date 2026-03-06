@@ -556,9 +556,7 @@ class WorkspaceItemProcessor(
         val inflationResult = widgetInflater.inflateAppWidget(appWidgetInfo)
         var shouldUpdate = inflationResult.isUpdate
         val lapi = inflationResult.widgetInfo
-        if (Flags.enableWidgetResizeFrameAccessibilityLabel()) {
-            appWidgetInfo.contentDescription = lapi?.loadLabel(context.packageManager)
-        }
+        appWidgetInfo.contentDescription = lapi?.loadLabel(context.packageManager)
 
         FileLog.d(
             TAG,
