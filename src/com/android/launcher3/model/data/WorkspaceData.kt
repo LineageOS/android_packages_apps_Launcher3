@@ -20,7 +20,6 @@ import android.util.SparseArray
 import androidx.core.util.putAll
 import androidx.core.util.valueIterator
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
-import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.Workspace
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.util.IntSet
@@ -38,7 +37,7 @@ sealed class WorkspaceData : Iterable<ItemInfo> {
     fun collectWorkspaceScreens(): IntArray {
         val screenSet = IntSet()
         forEach { if (it.container == CONTAINER_DESKTOP) screenSet.add(it.screenId) }
-        if (qsbOnFirstScreen() || screenSet.isEmpty) {
+        if (screenSet.isEmpty) {
             screenSet.add(Workspace.FIRST_SCREEN_ID)
         }
         return screenSet.array

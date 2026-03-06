@@ -389,13 +389,6 @@ flag {
 }
 
 flag {
-    name: "injectable_model_items"
-    namespace: "launcher"
-    description: "Enable model items to be provided by dagger"
-    bug: "423957181"
-}
-
-flag {
   name: "enable_taskbar_drag_and_drop"
   namespace: "launcher"
   description: "Enable dragging and dropping app icons on the taskbar."

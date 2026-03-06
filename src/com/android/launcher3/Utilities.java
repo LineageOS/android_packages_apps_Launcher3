@@ -18,7 +18,6 @@ package com.android.launcher3;
 
 import static com.android.launcher3.Flags.enableCursorDrivenWorkflows;
 import static com.android.launcher3.Flags.enableMouseInteractionChanges;
-import static com.android.launcher3.Flags.injectableModelItems;
 import static com.android.launcher3.Flags.reduceWorkspaceBlurUsage;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.ICON_OVERLAP_FACTOR;
 import static com.android.launcher3.graphics.ShapeDelegate.DEFAULT_PATH_SIZE;
@@ -123,10 +122,6 @@ public final class Utilities {
      */
     @Deprecated
     public static final boolean IS_DEBUG_DEVICE = BuildConfig.IS_DEBUG_DEVICE;
-
-    public static boolean qsbOnFirstScreen() {
-        return !injectableModelItems() && BuildConfig.QSB_ON_FIRST_SCREEN;
-    }
 
     public static final int TRANSLATE_UP = 0;
     public static final int TRANSLATE_DOWN = 1;
