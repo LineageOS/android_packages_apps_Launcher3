@@ -92,9 +92,9 @@
     <string name="allset_title_expressive_fallback" msgid="2829102990606405239">"உங்கள் சாதனம் \nதயார்!"</string>
     <string name="allset_title_expressive_fixed" msgid="3564219469262883526">"சாதனத்தை இப்போது பயன்படுத்தலாம்!"</string>
     <string name="allset_subtitle_expressive" msgid="419688197551192358">"உங்கள் புதிய <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தைப் பயன்படுத்தி மகிழுங்கள்!"</string>
-    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தைப் பயன்படுத்தத் தொடங்க மேலே ஸ்வைப் செய்யுங்கள்"</string>
+    <string name="allset_subtitle_expressive_gesture_navigation" msgid="8931442349501593934">"<xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தைப் பயன்படுத்த மேலே ஸ்வைப் செய்யுங்கள்"</string>
     <string name="allset_subtitle_expressive_button_navigation" msgid="5219509605046028014">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தைப் பயன்படுத்தத் தொடங்க தட்டுங்கள்"</string>
-    <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"வழிசெலுத்துவதற்கான வழிமுறையைத் தேர்வுசெய்யுங்கள்"</annotation></string>
+    <string name="allset_navigation_settings_expressive" msgid="3745595273748356"><annotation id="link">"வழிசெலுத்துவதற்கான முறையைத் தேர்வுசெய்யுங்கள்"</annotation></string>
     <string name="allset_hint_expressive" msgid="756856423510976261">"மேல்நோக்கி ஸ்வைப் செய்யுங்கள்"</string>
     <string name="allset_button_hint_expressive" msgid="667643693410494225">"முகப்பு பட்டனைத் தட்டுங்கள்"</string>
     <string name="allset_device_type_tablet" msgid="2173392009787325894">"டேப்லெட்"</string>
