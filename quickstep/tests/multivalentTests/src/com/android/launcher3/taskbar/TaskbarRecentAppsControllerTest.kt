@@ -343,28 +343,28 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    fun getDesktopItemState_nullItemInfo_returnsNotRunning() {
+    fun getTaskbarItemState_nullItemInfo_returnsNotRunning() {
         setInDesktopMode(true)
-        val taskState = recentAppsController.getDesktopItemState(/* itemInfo= */ null)
+        val taskState = recentAppsController.getTaskbarItemState(/* itemInfo= */ null)
         assertThat(taskState).isEqualTo(TaskState(RunningAppState.NOT_RUNNING))
     }
 
     @Test
-    fun getDesktopItemState_noItemPackage_returnsNotRunning() {
+    fun getTaskbarItemState_noItemPackage_returnsNotRunning() {
         setInDesktopMode(true)
-        val taskState = recentAppsController.getDesktopItemState(ItemInfo())
+        val taskState = recentAppsController.getTaskbarItemState(ItemInfo())
         assertThat(taskState).isEqualTo(TaskState(RunningAppState.NOT_RUNNING))
     }
 
     @Test
-    fun getDesktopItemState_noMatchingTasks_returnsNotRunning() {
+    fun getTaskbarItemState_noMatchingTasks_returnsNotRunning() {
         setInDesktopMode(true)
-        val taskState = recentAppsController.getDesktopItemState(createItemInfo("package"))
+        val taskState = recentAppsController.getTaskbarItemState(createItemInfo("package"))
         assertThat(taskState).isEqualTo(TaskState(RunningAppState.NOT_RUNNING))
     }
 
     @Test
-    fun getDesktopItemState_matchingVisibleTask_returnsVisible() {
+    fun getTaskbarItemState_matchingVisibleTask_returnsVisible() {
         setInDesktopMode(true)
         val visibleTask =
             PerDisplayRunningApps(
@@ -373,13 +373,13 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             )
         updateRecentTasks(runningTasks = listOf(visibleTask), recentTaskPackages = emptyList())
 
-        val taskState = recentAppsController.getDesktopItemState(createItemInfo("visiblePackage"))
+        val taskState = recentAppsController.getTaskbarItemState(createItemInfo("visiblePackage"))
 
         assertThat(taskState).isEqualTo(TaskState(RunningAppState.RUNNING, taskId = 1))
     }
 
     @Test
-    fun getDesktopItemState_matchingVisibleTaskOnSecondaryDisplay_returnsVisible() {
+    fun getTaskbarItemState_matchingVisibleTaskOnSecondaryDisplay_returnsVisible() {
         setInDesktopMode(true)
         val visibleTask1 =
             PerDisplayRunningApps(
@@ -396,13 +396,13 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             recentTaskPackages = emptyList(),
         )
 
-        val taskState = recentAppsController.getDesktopItemState(createItemInfo("visiblePackage2"))
+        val taskState = recentAppsController.getTaskbarItemState(createItemInfo("visiblePackage2"))
 
         assertThat(taskState).isEqualTo(TaskState(RunningAppState.RUNNING, taskId = 2))
     }
 
     @Test
-    fun getDesktopItemState_matchingMinimizedTask_returnsMinimized() {
+    fun getTaskbarItemState_matchingMinimizedTask_returnsMinimized() {
         setInDesktopMode(true)
         val minimizedTask =
             PerDisplayRunningApps(
@@ -413,13 +413,13 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             )
         updateRecentTasks(runningTasks = listOf(minimizedTask), recentTaskPackages = emptyList())
 
-        val taskState = recentAppsController.getDesktopItemState(createItemInfo("minimizedPackage"))
+        val taskState = recentAppsController.getTaskbarItemState(createItemInfo("minimizedPackage"))
 
         assertThat(taskState).isEqualTo(TaskState(RunningAppState.MINIMIZED, taskId = 1))
     }
 
     @Test
-    fun getDesktopItemState_matchingMinimizedTaskOnSecondaryDisplay_returnsVisible() {
+    fun getTaskbarItemState_matchingMinimizedTaskOnSecondaryDisplay_returnsVisible() {
         setInDesktopMode(true)
         val visibleTask1 =
             PerDisplayRunningApps(
@@ -438,13 +438,13 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             recentTaskPackages = emptyList(),
         )
 
-        val taskState = recentAppsController.getDesktopItemState(createItemInfo("visiblePackage2"))
+        val taskState = recentAppsController.getTaskbarItemState(createItemInfo("visiblePackage2"))
 
         assertThat(taskState).isEqualTo(TaskState(RunningAppState.MINIMIZED, taskId = 2))
     }
 
     @Test
-    fun getDesktopItemState_matchingMinimizedAndRunningTask_returnsVisible() {
+    fun getTaskbarItemState_matchingMinimizedAndRunningTask_returnsVisible() {
         setInDesktopMode(true)
         updateRecentTasks(
             runningTasks =
@@ -460,12 +460,12 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
             recentTaskPackages = emptyList(),
         )
 
-        val taskState = recentAppsController.getDesktopItemState(createItemInfo("package"))
+        val taskState = recentAppsController.getTaskbarItemState(createItemInfo("package"))
         assertThat(taskState).isEqualTo(TaskState(RunningAppState.RUNNING, taskId = 2))
     }
 
     @Test
-    fun getDesktopItemState_noMatchingUserId_returnsNotRunning() {
+    fun getTaskbarItemState_noMatchingUserId_returnsNotRunning() {
         setInDesktopMode(true)
         updateRecentTasks(
             runningTasks =
@@ -482,8 +482,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         )
 
         val taskState =
-            recentAppsController.getDesktopItemState(createItemInfo("package", USER_HANDLE_2))
-
+            recentAppsController.getTaskbarItemState(createItemInfo("package", USER_HANDLE_2))
         assertThat(taskState).isEqualTo(TaskState(RunningAppState.NOT_RUNNING))
     }
 
@@ -899,7 +898,7 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
-    fun onRecentTasksChanged_inDesktopMode_getRunningApps_returnsAllDesktopTasks() {
+    fun onRecentTasksChanged_inDesktopMode_getRunningApps_returnsAllTaskbarRunningTasks() {
         setInDesktopMode(true)
         val task1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
         val task2 = createTask(id = 2, RUNNING_APP_PACKAGE_2)
