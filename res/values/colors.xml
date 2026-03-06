@@ -108,9 +108,6 @@
 
     <color name="widget_picker_secondary_surface_color_light">
         @color/system_surface_bright_light</color>
-    <color name="widget_picker_menu_options_color_light">
-        @color/system_on_surface_variant_light
-    </color>
 
     <color name="widget_picker_blur_fg_light">@color/blur_shade_panel_fg</color>
     <color name="widget_picker_blur_bg_light">@color/blur_shade_panel_bg</color>
@@ -204,7 +201,6 @@
     <color name="widget_picker_secondary_surface_color_dark">@color/system_surface_bright_dark</color>
     <color name="widget_picker_title_color_dark">@color/system_on_surface_dark</color>
     <color name="widget_picker_description_color_dark">@color/system_on_surface_variant_dark</color>
-    <color name="widget_picker_menu_options_color_dark">@color/system_on_surface_variant_dark</color>
     <color name="widget_picker_header_app_title_color_dark">@color/system_on_surface_dark</color>
     <color name="widget_picker_header_app_subtitle_color_dark">@color/system_on_surface_variant_dark</color>
     <color name="widget_picker_selected_header_app_title_color_dark">@color/system_on_secondary_container_dark</color>

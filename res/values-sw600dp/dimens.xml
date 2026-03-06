@@ -21,9 +21,6 @@
 <!-- DragController -->
     <dimen name="drag_flingToDeleteMinVelocity">-1000dp</dimen>
 
-<!-- Widgets pickers -->
-    <dimen name="widget_list_horizontal_margin">32dp</dimen>
-
 <!-- AllApps -->
     <dimen name="all_apps_search_bar_content_overlap">0dp</dimen>
 
