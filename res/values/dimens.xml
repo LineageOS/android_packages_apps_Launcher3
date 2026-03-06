@@ -194,8 +194,6 @@
     <dimen name="rounded_button_radius">200dp</dimen>
 
     <!-- Widget tray -->
-    <dimen name="widget_cell_vertical_padding">8dp</dimen>
-    <dimen name="widget_cell_horizontal_padding">4dp</dimen>
     <dimen name="widget_cell_title_font_size">14sp</dimen>
     <integer name="widget_cell_title_font_weight">500</integer>
     <dimen name="widget_cell_title_line_height">20sp</dimen>
@@ -205,17 +203,9 @@
     <dimen name="widget_cell_description_font_size">12sp</dimen>
     <integer name="widget_cell_description_font_weight">400</integer>
     <dimen name="widget_cell_description_line_height">16sp</dimen>
-    <dimen name="widget_cell_app_icon_size">24dp</dimen>
-    <dimen name="widget_cell_app_icon_padding">8dp</dimen>
-    <dimen name="widget_cell_add_button_height">48dp</dimen>
-    <dimen name="widget_cell_add_button_start_padding">8dp</dimen>
-    <dimen name="widget_cell_add_icon_button_start_padding">16dp</dimen>
-    <dimen name="widget_cell_add_button_end_padding">16dp</dimen>
-    <dimen name="widget_cell_add_button_scroll_padding">24dp</dimen>
     <dimen name="widget_cell_add_button_font_size">14sp</dimen>
     <integer name="widget_cell_add_button_font_weight">500</integer>
     <dimen name="widget_cell_add_button_line_height">20sp</dimen>
-    <dimen name="widget_cell_add_button_drawable_padding">8dp</dimen>
     <dimen name="widget_cell_add_button_drawable_width">19dp</dimen>
     <dimen name="widget_picker_toolbar_tab_label_font_size">14sp</dimen>
     <integer name="widget_picker_toolbar_tab_label_font_weight">500</integer>
@@ -226,9 +216,6 @@
     <integer name="widget_picker_error_text_label_font_weight">400</integer>
     <dimen name="widget_picker_error_text_label_line_height">24sp</dimen>
 
-    <dimen name="widget_tabs_button_horizontal_padding">4dp</dimen>
-    <dimen name="widget_tabs_horizontal_padding">16dp</dimen>
-    <dimen name="widget_apps_tabs_vertical_padding">6dp</dimen>
     <dimen name="widget_picker_landscape_tablet_left_right_margin">117dp</dimen>
     <dimen name="widget_picker_two_panels_left_right_margin">0dp</dimen>
     <dimen name="widget_picker_title_font_size">24sp</dimen>
@@ -247,20 +234,6 @@
     <!-- Bottom margin for the search and recommended widgets container with work profile -->
     <dimen name="search_and_recommended_widgets_container_small_bottom_margin">10dp</dimen>
 
-    <dimen name="widget_header_focus_ring_width">3dp</dimen>
-    <dimen name="widget_focus_ring_corner_radius">28dp</dimen>
-    <dimen name="widget_header_background_border">5dp</dimen>
-
-    <dimen name="widget_list_top_bottom_corner_radius">28dp</dimen>
-    <dimen name="widget_list_content_corner_radius">4dp</dimen>
-
-    <dimen name="widget_list_header_view_vertical_padding">20dp</dimen>
-    <dimen name="widget_list_entry_spacing">2dp</dimen>
-    <!-- Less margin on sides to let widgets table width be close to the workspace width. -->
-    <dimen name="widget_list_horizontal_margin">11dp</dimen>
-    <!-- Margin on sides of the widgets scrollview in widgets bottom sheet -->
-    <dimen name="widget_bottom_sheet_horizontal_margin">16dp</dimen>
-
     <dimen name="widget_preview_shadow_blur">0.5dp</dimen>
     <dimen name="widget_preview_key_shadow_distance">1dp</dimen>
     <dimen name="widget_preview_corner_radius">2dp</dimen>
@@ -271,9 +244,6 @@
     <dimen name="widget_section_icon_size">40dp</dimen>
     <dimen name="widget_section_vertical_padding">8dp</dimen>
     <dimen name="widget_section_horizontal_padding">16dp</dimen>
-
-    <dimen name="widget_row_padding">8dp</dimen>
-    <dimen name="widget_row_divider">2dp</dimen>
 
     <dimen name="widget_picker_education_tip_max_width">308dp</dimen>
     <dimen name="widget_picker_education_tip_min_margin">4dp</dimen>
@@ -546,7 +516,6 @@
     <dimen name="bottom_sheet_handle_width">32dp</dimen>
     <dimen name="bottom_sheet_handle_height">4dp</dimen>
     <dimen name="bottom_sheet_handle_margin">16dp</dimen>
-    <dimen name="widgets_bottom_sheet_handle_margin">24dp</dimen>
     <dimen name="bottom_sheet_handle_corner_radius">2dp</dimen>
 
     <!-- State transition -->
