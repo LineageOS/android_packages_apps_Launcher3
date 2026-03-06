@@ -25,6 +25,8 @@ import android.app.assist.ActivityId
 import android.graphics.Rect
 import android.os.Bundle
 import android.provider.Settings
+import android.service.personalcontext.PersonalContextManager
+import android.service.personalcontext.RenderToken
 import android.service.personalcontext.hint.BundleHint
 import android.service.personalcontext.hint.ContentCaptureConversationEvent.ConversationUpdateEvent
 import android.service.personalcontext.hint.ContentCaptureConversationHint
@@ -36,6 +38,8 @@ import android.service.personalcontext.insight.DisplayInsight
 import android.service.personalcontext.insight.InsightActionDetails
 import android.service.personalcontext.insight.InsightCollection
 import android.service.personalcontext.insight.InsightDisplayDetails
+import android.service.personalcontext.insight.PublishedContextInsight
+import android.service.personalcontext.insight.interaction.InsightEvent
 import android.util.Log
 import android.view.autofill.AutofillManager
 import androidx.annotation.VisibleForTesting
@@ -56,6 +60,7 @@ import com.android.systemui.shared.system.TaskStackChangeListeners
 import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
+import java.util.UUID
 import java.util.concurrent.Executor
 import javax.crypto.spec.SecretKeySpec
 import kotlinx.coroutines.CoroutineScope
@@ -132,6 +137,11 @@ constructor(
     private val backgroundScope = CoroutineScope(bgExecutor.asCoroutineDispatcher())
     private val autofillManager: AutofillManager? =
         taskbarActivityContext.getSystemService(AutofillManager::class.java)
+    private val personalContextManager: PersonalContextManager? =
+        taskbarActivityContext.getSystemService(PersonalContextManager::class.java)
+
+    private var lastPublishedInsight: PublishedContextInsight? = null
+    private var lastRenderToken: RenderToken? = null
 
     private val _actions = MutableListenableRef<List<ActionModel>>(emptyList())
     override val actions: MutableListenableRef<List<ActionModel>> = _actions
@@ -242,6 +252,8 @@ constructor(
         pw.println("$prefix globallyFocusedTaskId: ${globallyFocusedTaskId.value}")
         pw.println("$prefix debounceTaskJob active: ${debounceTaskJob?.isActive == true}")
         pw.println("$prefix frontTaskPackageName: ${frontTaskPackageName.value}")
+        pw.println("$prefix lastPublishedInsight: $lastPublishedInsight")
+        pw.println("$prefix lastRenderToken: $lastRenderToken")
     }
 
     private fun ContextInsight.flatten(): List<ContextInsight> {
@@ -252,13 +264,12 @@ constructor(
         }
     }
 
-    override fun onInsightReceived(insight: List<ContextInsight>) {
+    override fun onInsightReceived(insight: PublishedContextInsight, token: RenderToken) {
         uiExecutor.execute {
-            if (insight.isEmpty()) {
-                updateActions(emptyList())
-                return@execute
-            }
-            val actions = insight.flatMap { it.flatten() }.flatMap { mapInsightToActions(it) }
+            lastPublishedInsight = insight
+            lastRenderToken = token
+            val actions = mapInsightToActions(insight.getInsight())
+
             if (actions.isNotEmpty()) {
                 isDeactivated.dispatchValue(false)
             }
@@ -326,6 +337,7 @@ constructor(
                 extras = null
 
                 onPerformAction = {
+                    reportInsightEvent(InsightEvent.EVENT_USER_TAP)
                     if (
                         contextHint is BundleHint &&
                         contextHint.dataBundle.getBoolean(NEEDS_DATA_EGRESS, false)
@@ -363,6 +375,7 @@ constructor(
                         null
                     }
                 onPerformAction = {
+                    reportInsightEvent(InsightEvent.EVENT_USER_TAP)
                     val token = activityId?.token
                     if (token != null && autofillId != null) {
                         autofillManager?.autofillRemoteApp(
@@ -404,6 +417,7 @@ constructor(
                 onPerformAction = onPerformAction,
                 onPerformLongClick = {
                     Log.i(TAG, "AmbientCueRepositoryImpl: onPerformLongClick")
+                    reportInsightEvent(InsightEvent.EVENT_USER_LONG_PRESS)
                     // TODO: b/458508340 Proper design for attribution/feedback.
                     val pendingIntent =
                         extras?.getParcelable<PendingIntent>(
@@ -433,6 +447,14 @@ constructor(
         TaskStackChangeListeners.getInstance().registerTaskStackListener(taskStackListener)
     }
 
+    private fun reportInsightEvent(event: Int) {
+        val insight = lastPublishedInsight
+        val token = lastRenderToken
+        if (insight != null && token != null) {
+            personalContextManager?.reportInsightEvent(insight, event, token)
+        }
+    }
+
     override fun disconnectFromAce() {
         CueBarInsightRendererService.unregisterListener(this)
         backgroundScope.cancel()
@@ -457,7 +479,8 @@ constructor(
         val signedHint =
             PublishedContextHint.Builder(hint, SecretKeySpec(ByteArray(16), "HmacSHA256")).build()
         val mockInsight = mockInsightBuilder.addOriginHint(signedHint).build()
-        onInsightReceived(listOf(mockInsight))
+        val publishedInsight = PublishedContextInsight(mockInsight, UUID.randomUUID())
+        onInsightReceived(publishedInsight, RenderToken(UUID.randomUUID(), "test_tag"))
     }
 
     companion object {

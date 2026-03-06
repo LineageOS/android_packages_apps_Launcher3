@@ -492,4 +492,15 @@
             column="44"/>
     </issue>
 
+     <issue
+        id="NewApi"
+        message="`&lt;androidx.appfunctions.service.PlatformAppFunctionService>` requires API level 36 (current min is 31)"
+        errorLine1="        &lt;service"
+        errorLine2="        ^">
+        <location
+            file="./out/soong/.intermediates/packages/apps/Launcher3/Launcher3/android_common/manifest_merger/AndroidManifest.xml"
+            line="308"
+            column="9"/>
+    </issue>
+
 </issues>

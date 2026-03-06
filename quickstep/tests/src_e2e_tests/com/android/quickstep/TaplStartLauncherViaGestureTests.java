@@ -30,7 +30,6 @@ import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 @LargeTest
@@ -69,7 +68,7 @@ public class TaplStartLauncherViaGestureTests extends AbstractQuickStepTest {
 
     @Test
     @NavigationModeSwitch(mode = NavigationModeSwitchRule.Mode.THREE_BUTTON)
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486281085)
+    @DesktopStability(flavors = LOCAL, bug = 486281085)
     public void testStressPressOverview() {
         runTest(TestCase.TO_OVERVIEW);
     }

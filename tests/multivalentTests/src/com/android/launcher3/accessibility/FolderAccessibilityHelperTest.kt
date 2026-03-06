@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.accessibility // Use the original package
+package com.android.launcher3.accessibility
 
-// Imports
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.CellLayout
@@ -28,54 +27,43 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FolderAccessibilityHelperTest {
-
-    // Context
     @get:Rule val mContext = TestActivityContext()
-    // Mocks
-    @get:Rule val mockitoRule = MockitoJUnit.rule()
-    @Mock private lateinit var mockParent: FolderPagedView
-    @Mock private lateinit var mockLayout: CellLayout
+    private val countX = 4
+    private val countY = 3
+    private val index = 1
 
-    private var countX = 4
-    private var countY = 3
-    private var index = 1
+    private val mockParent: FolderPagedView = mock()
 
-    // System under test
+    private val mockLayout: CellLayout = mock {
+        on { parent } doReturn mockParent
+        on { context } doReturn mContext
+        on { countX } doReturn countX
+        on { countY } doReturn countY
+    }
+
     private lateinit var folderAccessibilityHelper: FolderAccessibilityHelper
 
     @Before
     fun setUp() {
-        `when`(mockLayout.parent).thenReturn(mockParent)
-        `when`(mockLayout.context).thenReturn(mContext)
-
-        // mStartPosition isn't recalculated after the constructor
-        // If you want to create new tests with different starting params,
-        // rebuild the folderAccessibilityHelper object
-        val countX = 4
-        val countY = 3
-        val index = 1
-        `when`(mockParent.indexOfChild(mockLayout)).thenReturn(index)
-        `when`(mockLayout.countX).thenReturn(countX)
-        `when`(mockLayout.countY).thenReturn(countY)
+        whenever(mockParent.indexOfChild(mockLayout)).thenReturn(index)
 
         folderAccessibilityHelper = FolderAccessibilityHelper(mockLayout)
     }
 
-    // Test for intersectsValidDropTarget()
     @Test
     fun testIntersectsValidDropTarget() {
         // Setup
         val id = 5
         val allocatedContentSize = 20
         // Make layout function public @VisibleForTesting
-        `when`(mockParent.allocatedContentSize).thenReturn(allocatedContentSize)
+        whenever(mockParent.allocatedContentSize).thenReturn(allocatedContentSize)
 
         // Execute
         val result = folderAccessibilityHelper.intersectsValidDropTarget(id)
@@ -85,7 +73,6 @@ class FolderAccessibilityHelperTest {
         assertEquals(expectedResult, result)
     }
 
-    // Test for getLocationDescriptionForIconDrop()
     @Test
     fun testGetLocationDescriptionForIconDrop() {
         // Setup

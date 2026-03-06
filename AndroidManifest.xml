@@ -113,5 +113,17 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name="androidx.appfunctions.service.ExtensionAppFunctionService"
+            android:permission="android.permission.BIND_APP_FUNCTION_SERVICE"
+            android:exported="true">
+            <property
+                android:name="android.app.appfunctions.app_metadata"
+                android:resource="@xml/app_metadata" />
+            <intent-filter>
+                <action android:name="android.app.appfunctions.AppFunctionService" />
+            </intent-filter>
+        </service>
+
     </application>
 </manifest>

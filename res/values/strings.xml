@@ -693,4 +693,9 @@
      home screen. [CHAR_LIMIT=300]-->
     <string name="organizer_choose_layout_title">Choose layout</string>
 
+
+    <!-- Strings for App Functions -->
+    <!-- Description for the App Functions app metadata. -->
+    <string name="workspace_functions_app_display_description" translatable="false">[PLACEHOLDER] A tool to manage the Workspace</string>
+
 </resources>

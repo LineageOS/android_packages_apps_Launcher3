@@ -318,11 +318,13 @@ android_library {
         "launcher-executors-module",
         "mediaprovider_exported_aconfig_flag_lib",
         "widget_picker_component",
+        "workspace-functions",
         // Compose dependencies
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",
         "androidx.compose.ui_ui-tooling-preview",
         "androidx.compose.ui_ui-tooling",
+        "cuebarlib",
     ],
     manifest: "AndroidManifest-common.xml",
     sdk_version: "current",

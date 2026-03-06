@@ -30,8 +30,8 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.launcher3.InsettableFrameLayout
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.ORDERED_BG_EXECUTOR
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.quickstep.cuebar.data.repository.AmbientCueRepositoryImpl
 import com.android.quickstep.cuebar.domain.interactor.AmbientCueInteractor
 import com.android.quickstep.cuebar.logger.AmbientCueLoggerImpl
@@ -54,13 +54,18 @@ class CueBarController(private val activity: TaskbarActivityContext) :
     private lateinit var taskbarControllers: TaskbarControllers
     private var pillBoundsInWindow: Rect? = null
     private var internalComposeView: ComposeView? = null
-    private val coroutineScope = CoroutineScope(MAIN_EXECUTOR.asCoroutineDispatcher())
+    private val coroutineScope = CoroutineScope(getTaskbarUiThread().asCoroutineDispatcher())
     private var mOverlayContext: TaskbarOverlayContext? = null
     private var cueBar: View? = null
     private var isHiding = false
     private val ambientCueLogger = AmbientCueLoggerImpl(activity.packageManager)
     val ambientCueRepository =
-        AmbientCueRepositoryImpl(activity, ambientCueLogger, ORDERED_BG_EXECUTOR, MAIN_EXECUTOR)
+        AmbientCueRepositoryImpl(
+            activity,
+            ambientCueLogger,
+            ORDERED_BG_EXECUTOR,
+            getTaskbarUiThread(),
+        )
     private val ambientCueInteractor = AmbientCueInteractor(ambientCueRepository)
     private val lp =
         InsettableFrameLayout.LayoutParams(
@@ -77,7 +82,7 @@ class CueBarController(private val activity: TaskbarActivityContext) :
             launcherPrefs = LauncherPrefs.get(activity),
             scope = coroutineScope,
             ambientCueLogger = ambientCueLogger,
-            uiExecutor = MAIN_EXECUTOR,
+            uiExecutor = getTaskbarUiThread(),
         )
             .apply {
                 onVisibilityChanged = { isCueBarVisible ->

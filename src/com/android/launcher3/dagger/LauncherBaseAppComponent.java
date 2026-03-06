@@ -46,6 +46,8 @@ import com.android.launcher3.model.LayoutParserFactory;
 import com.android.launcher3.model.LoaderCursor.LoaderCursorFactory;
 import com.android.launcher3.model.ModelProxyProvider;
 import com.android.launcher3.model.TestableModelState;
+import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions;
+import com.android.launcher3.model.data.WorkspaceData;
 import com.android.launcher3.model.repository.HomeScreenRepository;
 import com.android.launcher3.model.repository.StringCacheRepository;
 import com.android.launcher3.notification.NotificationRepository;
@@ -173,6 +175,9 @@ public interface LauncherBaseAppComponent {
 
     /** Repository for workspace data */
     HomeScreenRepository getHomeScreenRepository();
+
+    /** Returns the WorkspaceAppFunctions instance */
+    WorkspaceAppFunctions getWorkspaceAppFunctions();
 
     /** Builder for LauncherBaseAppComponent. */
     interface Builder {

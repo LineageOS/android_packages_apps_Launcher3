@@ -117,6 +117,17 @@ private constructor(
         }
     }
 
+    override fun handleClose(animate: Boolean) {
+        super.handleClose(animate)
+        if (hasFocus() && originalView.isAttachedToWindow()) {
+            originalView.requestFocus()
+        }
+    }
+
+    override fun requestFocusOnOpened(): Boolean {
+        return true
+    }
+
     /**
      * Populates and shows the popup container with only the provided system shortcuts.
      *
@@ -500,6 +511,7 @@ private constructor(
             val container =
                 PopupContainerWithArrow<T>(context, originalView, itemInfo, updateIconUi)
             container.id = R.id.popup_container
+            container.isFocusable = true
             container.clipChildren = false
             container.clipToPadding = false
             container.orientation = VERTICAL

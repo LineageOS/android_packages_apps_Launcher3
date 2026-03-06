@@ -448,7 +448,7 @@ public class SplitSelectStateController {
             return false;
         }
 
-        return resolvedTargetInfo.matchTaskKey(task.key.baseActivity, task.key.baseIntent,
+        return resolvedTargetInfo.matchTaskLaunchActivity(task.key.baseIntent,
                 UserHandle.of(task.key.userId));
     }
 
