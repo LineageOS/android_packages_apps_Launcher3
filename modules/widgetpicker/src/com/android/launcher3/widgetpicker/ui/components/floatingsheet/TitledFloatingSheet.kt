@@ -36,6 +36,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.dimensionResource
@@ -101,11 +110,24 @@ fun TitledFloatingSheet(
         }
     }
 
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
     Box(
         modifier =
-            modifier.fillMaxSize().pointerInput(Unit) {
-                detectTapGestures { scope.launch { sheetState.collapse() } }
-            },
+            modifier
+                .fillMaxSize()
+                .pointerInput(Unit) { detectTapGestures { scope.launch { sheetState.collapse() } } }
+                .focusRequester(focusRequester)
+                .focusTarget()
+                .onPreviewKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyUp && keyEvent.key == Key.Escape) {
+                        scope.launch { sheetState.collapse() }
+                        true
+                    } else {
+                        false
+                    }
+                },
         contentAlignment = Alignment.BottomCenter,
     ) {
         val sheetMaxWidth = dimensionResource(id = R.dimen.window_bottom_sheet_max_width)
