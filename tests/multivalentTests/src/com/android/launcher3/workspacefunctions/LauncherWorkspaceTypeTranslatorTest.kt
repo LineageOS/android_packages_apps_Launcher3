@@ -162,6 +162,34 @@ class LauncherWorkspaceTypeTranslatorTest {
         assertThat(folderSpec.items!![0].label).isEqualTo("In Folder")
     }
 
+    @Test
+    fun toSpec_correctlyIgnoresUnsupportedItemTypes() {
+        class TestUnsupportedItemInfo : ItemInfo()
+
+        val workspace = MutableWorkspaceData()
+        val item =
+            TestUnsupportedItemInfo().apply {
+                id = 1
+                container = CONTAINER_DESKTOP
+                screenId = 0
+                cellX = 0
+                cellY = 0
+            }
+        // use another item type to ensure that there is a screen
+        val item2 = createAppInfo(id = 2, container = CONTAINER_DESKTOP, screenId = 0, x = 0, y = 0)
+        workspace.replaceDataMap(
+            SparseArray<ItemInfo>().apply {
+                put(1, item)
+                put(2, item2)
+            }
+        )
+
+        val spec = translator.toSpec(workspace)
+
+        assertThat(spec.screens).hasSize(1)
+        assertThat(spec.screens[0].items).hasSize(1)
+    }
+
     private fun createAppInfo(id: Int, container: Int, screenId: Int, x: Int, y: Int) =
         WorkspaceItemInfo().apply {
             this.id = id
