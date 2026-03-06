@@ -1892,7 +1892,26 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         TestLogging.recordKeyEvent(TestProtocol.SEQUENCE_MAIN, "Key event", event);
-        return (event.getKeyCode() == KeyEvent.KEYCODE_HOME) || super.dispatchKeyEvent(event);
+        return (event.getKeyCode() == KeyEvent.KEYCODE_HOME) || tryHandleEscapeKey(event)
+                    || super.dispatchKeyEvent(event);
+    }
+
+    /**
+     * Intercepts a down ESCAPE key press for All Apps.
+     */
+    private boolean tryHandleEscapeKey(KeyEvent event) {
+        if (!isInState(ALL_APPS) || event.getAction() != KeyEvent.ACTION_DOWN
+                || event.getKeyCode() != KeyEvent.KEYCODE_ESCAPE || !event.hasNoModifiers()) {
+            return false;
+        }
+
+        // Close All Apps if there is no search query.
+        if (mAppsView.getSearchUiManager().isSearchQueryEmpty()) {
+            return onKeyDown(event.getKeyCode(), event);
+        }
+        // Otherwise, reset the search and go back to the All Apps grid.
+        mAppsView.getSearchUiManager().resetSearch();
+        return true;
     }
 
     @Override
