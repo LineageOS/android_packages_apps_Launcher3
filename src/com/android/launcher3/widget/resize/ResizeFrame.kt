@@ -55,6 +55,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -74,6 +75,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -88,6 +90,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.android.launcher3.R
@@ -122,24 +125,30 @@ import com.android.launcher3.widget.resize.ResizeFrameDimensions.resizeButtonSha
 fun ResizeFrame(viewModel: ResizeFrameViewModel, onInteraction: () -> Unit, onDismiss: () -> Unit) {
     val interactionCallback by rememberUpdatedState(onInteraction)
 
-    ResizeFrame(
-        handlesState = viewModel.handlesState,
-        resizeButtonState = viewModel.resizeButtonsState,
-        draggingHandles = viewModel.draggingHandles,
-        onShrink = viewModel::onShrink,
-        onExpand = viewModel::onExpand,
-        onDotHandleTapped = {
-            interactionCallback()
-            viewModel.onDotHandleTapped(it)
-        },
-        onDragStart = { handle, offset, size ->
-            onInteraction()
-            viewModel.onDragStart(handle, offset, size)
-        },
-        onDrag = viewModel::onDrag,
-        onDragEnd = viewModel::onDragEnd,
-        onDismiss = onDismiss,
-    )
+    // Strings used for accessibility adapt to the layout direction.
+    val accessibilityLayoutDirection = LocalLayoutDirection.current
+    // While, we use always use display direction as LTR for rendering the frame content.
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        ResizeFrame(
+            handlesState = viewModel.handlesState,
+            resizeButtonState = viewModel.resizeButtonsState,
+            draggingHandles = viewModel.draggingHandles,
+            accessibilityLayoutDirection = accessibilityLayoutDirection,
+            onShrink = viewModel::onShrink,
+            onExpand = viewModel::onExpand,
+            onDotHandleTapped = {
+                interactionCallback()
+                viewModel.onDotHandleTapped(it)
+            },
+            onDragStart = { handle, offset, size ->
+                onInteraction()
+                viewModel.onDragStart(handle, offset, size)
+            },
+            onDrag = viewModel::onDrag,
+            onDragEnd = viewModel::onDragEnd,
+            onDismiss = onDismiss,
+        )
+    }
 }
 
 /**
@@ -152,6 +161,7 @@ fun ResizeFrame(
     handlesState: HandlesState,
     resizeButtonState: ResizeButtonState?,
     draggingHandles: DraggingHandles?,
+    accessibilityLayoutDirection: LayoutDirection,
     borderColor: Color = colorResource(R.color.materialColorPrimary),
     borderRadius: Dp = dimensionResource(android.R.dimen.system_app_widget_background_radius),
     onDotHandleTapped: (Edge) -> Unit,
@@ -189,6 +199,7 @@ fun ResizeFrame(
                 handlesState = handlesState,
                 resizeButtonState = resizeButtonState,
                 draggingHandles = draggingHandles,
+                accessibilityLayoutDirection = accessibilityLayoutDirection,
                 onDotHandleTapped = onDotHandleTapped,
                 onShrink = onShrink,
                 onExpand = onExpand,
@@ -214,6 +225,7 @@ private fun BoxScope.DraggableEdges(
     handlesState: HandlesState,
     resizeButtonState: ResizeButtonState?,
     draggingHandles: DraggingHandles?,
+    accessibilityLayoutDirection: LayoutDirection,
     onDotHandleTapped: (Edge) -> Unit,
     onShrink: (Edge) -> Unit,
     onExpand: (Edge) -> Unit,
@@ -253,6 +265,7 @@ private fun BoxScope.DraggableEdges(
             DraggableEdge(
                 edge = edge,
                 buttonsState = resizeButtonState,
+                accessibilityLayoutDirection = accessibilityLayoutDirection,
                 onDotHandleTapped = onDotHandleTapped,
                 onShrink = onShrink,
                 onExpand = onExpand,
@@ -276,6 +289,7 @@ private fun BoxScope.DraggableEdges(
 private fun DraggableEdge(
     edge: Edge,
     buttonsState: ResizeButtonState?,
+    accessibilityLayoutDirection: LayoutDirection,
     onDotHandleTapped: (Edge) -> Unit,
     modifier: Modifier = Modifier,
     onShrink: (Edge) -> Unit,
@@ -315,7 +329,11 @@ private fun DraggableEdge(
                     )
                 }
 
-            else -> DotHandle(edge = edge, onHandleTapped = onDotHandleTapped)
+            else -> DotHandle(
+                edge = edge,
+                accessibilityLayoutDirection = accessibilityLayoutDirection,
+                onHandleTapped = onDotHandleTapped
+            )
         }
     }
 }
@@ -339,11 +357,20 @@ private fun Modifier.centerContentAndAllowOverflow() =
 @Composable
 private fun DotHandle(
     edge: Edge,
+    accessibilityLayoutDirection: LayoutDirection,
     backgroundColor: Color = colorResource(R.color.materialColorTertiaryContainer),
     borderColor: Color = colorResource(R.color.materialColorOnTertiaryContainer),
     onHandleTapped: (Edge) -> Unit,
 ) {
-    val description = stringResource(edge.accessibilityLabelResId)
+    val descriptionResId = remember(accessibilityLayoutDirection) {
+        if (accessibilityLayoutDirection == LayoutDirection.Ltr) {
+            edge.accessibilityLabelResId
+        } else {
+            edge.rtlAccessibilityLabelResId
+        }
+    }
+    val description = stringResource(descriptionResId)
+
     val clickLabel = stringResource(R.string.tap_to_show_resize_buttons)
     var show by remember { mutableStateOf(false) } // Hide by default
     LaunchedEffect(Unit) { show = true }
@@ -557,7 +584,9 @@ private fun ResizeButton(
  * @property expandButtonType describes visual properties of the expand button for the edge
  * @property shrinkButtonType describes the visual properties of the shrink button for the edge
  * @property accessibilityLabelResId resource id of the string to be used as content description for
- *   the resize handle.
+ *   the resize handle when in LTR mode.
+ * @property rtlAccessibilityLabelResId resource id of the string to be used as content description for
+ *  *   the resize handle when in RTL mode.
  * @property handleTestTag test tag representing the res id that will be used for looking up the
  *   handle in the TAPL tests.
  */
@@ -568,6 +597,7 @@ enum class Edge(
     val expandButtonType: ResizeButtonType,
     val shrinkButtonType: ResizeButtonType,
     val accessibilityLabelResId: Int,
+    val rtlAccessibilityLabelResId: Int,
     val handleTestTag: String,
     val alignment: Alignment,
 ) {
@@ -578,6 +608,7 @@ enum class Edge(
         shrinkButtonType = ResizeButtonType.ROUNDED_RIGHT,
         expandButtonType = ResizeButtonType.ROUNDED_LEFT,
         accessibilityLabelResId = R.string.resize_handle_start,
+        rtlAccessibilityLabelResId = R.string.resize_handle_end,
         handleTestTag = "widget_resize_left_handle",
         alignment = Alignment.CenterStart,
     ),
@@ -588,6 +619,7 @@ enum class Edge(
         shrinkButtonType = ResizeButtonType.ROUNDED_BOTTOM,
         expandButtonType = ResizeButtonType.ROUNDED_TOP,
         accessibilityLabelResId = R.string.resize_handle_top,
+        rtlAccessibilityLabelResId = R.string.resize_handle_top,
         handleTestTag = "widget_resize_top_handle",
         alignment = Alignment.TopCenter,
     ),
@@ -598,6 +630,7 @@ enum class Edge(
         shrinkButtonType = ResizeButtonType.ROUNDED_LEFT,
         expandButtonType = ResizeButtonType.ROUNDED_RIGHT,
         accessibilityLabelResId = R.string.resize_handle_end,
+        rtlAccessibilityLabelResId = R.string.resize_handle_start,
         handleTestTag = "widget_resize_right_handle",
         alignment = Alignment.CenterEnd,
     ),
@@ -608,6 +641,7 @@ enum class Edge(
         shrinkButtonType = ResizeButtonType.ROUNDED_TOP,
         expandButtonType = ResizeButtonType.ROUNDED_BOTTOM,
         accessibilityLabelResId = R.string.resize_handle_bottom,
+        rtlAccessibilityLabelResId = R.string.resize_handle_bottom,
         handleTestTag = "widget_resize_bottom_handle",
         alignment = Alignment.BottomCenter,
     );
