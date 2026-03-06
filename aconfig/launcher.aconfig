@@ -238,16 +238,6 @@ flag {
 }
 
 flag {
-   name: "use_system_radius_for_app_widgets"
-   namespace: "launcher"
-   description: "Use system radius for enforced widget corners instead of a separate 16.dp value"
-   bug: "373351337"
-   metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "enable_contrast_tiles"
     namespace: "launcher"
     description: "Enable launcher app contrast tiles."
