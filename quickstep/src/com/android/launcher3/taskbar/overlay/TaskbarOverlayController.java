@@ -59,6 +59,7 @@ import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarControllers;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter.Listener;
+import com.android.launcher3.util.SandboxContext;
 import com.android.systemui.shared.system.BlurUtils;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -165,7 +166,7 @@ public final class TaskbarOverlayController
     public void init(TaskbarControllers controllers) {
         mControllers = controllers;
 
-        if (Flags.enableTaskbarBehindShade()) {
+        if (supportsTaskbarBehindShade()) {
             // To avoid jank caused by creating the window, we request it early but keep it hidden.
             requestWindow();
             mOverlayContext.getDragLayer().setVisibility(View.GONE);
@@ -232,7 +233,7 @@ public final class TaskbarOverlayController
     void maybeCloseWindow() {
         if (!canCloseWindow()) return;
         mProxyView.close(false);
-        if (Flags.enableTaskbarBehindShade()) {
+        if (supportsTaskbarBehindShade()) {
             reset();
         } else {
             onDestroy();
@@ -439,7 +440,7 @@ public final class TaskbarOverlayController
             mTaskbarContext.getDragLayer().removeView(this);
             Optional.ofNullable(mOverlayContext).ifPresent(c -> {
                 if (canCloseWindow()) {
-                    if (Flags.enableTaskbarBehindShade()) {
+                    if (supportsTaskbarBehindShade()) {
                         reset(); // Window is already ready to be reset.
                     } else {
                         onDestroy(); // Window is already ready to be destroyed.
@@ -518,5 +519,10 @@ public final class TaskbarOverlayController
         insetsInfo.setTouchableInsets(touchableInsets);
         mDebugTouchableReason = reason;
         mDebugTouchableBounds.set(insetsInfo.touchableRegion.getBounds());
+    }
+
+    private boolean supportsTaskbarBehindShade() {
+        return Flags.enableTaskbarBehindShade()
+                && !(mTaskbarContext.getApplicationContext() instanceof SandboxContext);
     }
 }
