@@ -17,7 +17,6 @@
 package com.android.launcher3.touch
 
 import android.os.Handler
-import android.os.Looper
 import android.view.GestureDetector
 import android.view.InputDevice
 import android.view.MotionEvent
@@ -62,7 +61,7 @@ class CustomEventsTouchHandler(
     private var downY = 0f
 
     private val gestureDetector: GestureDetector =
-        GestureDetector(view.context, this, Handler(Looper.getMainLooper()))
+        GestureDetector(view.context, this, Handler(view.context.mainLooper))
 
     private var isRightClickActive = false
 
