@@ -52,6 +52,7 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
         TRANSIENT,
         PINNED,
         THREE_BUTTONS,
+        DESKTOP_TASKBAR,
     }
 
     /** Overrides Taskbar [mode] for a test. */
@@ -73,6 +74,7 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                                     Mode.TRANSIENT -> false
                                     Mode.PINNED -> true
                                     Mode.THREE_BUTTONS -> false
+                                    Mode.DESKTOP_TASKBAR -> true
                                 }
                             )
                             .whenever(it)
@@ -83,6 +85,7 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                                     Mode.TRANSIENT -> true
                                     Mode.PINNED -> false
                                     Mode.THREE_BUTTONS -> false
+                                    Mode.DESKTOP_TASKBAR -> false
                                 }
                             )
                             .whenever(it)
@@ -95,6 +98,7 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                                     Mode.TRANSIENT -> false
                                     Mode.PINNED -> true
                                     Mode.THREE_BUTTONS -> false
+                                    Mode.DESKTOP_TASKBAR -> true
                                 }
                             )
                             .whenever(it)
@@ -105,6 +109,7 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                                     Mode.TRANSIENT -> true
                                     Mode.PINNED -> false
                                     Mode.THREE_BUTTONS -> false
+                                    Mode.DESKTOP_TASKBAR -> false
                                 }
                             )
                             .whenever(it)
@@ -115,6 +120,7 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                                     Mode.TRANSIENT -> false
                                     Mode.PINNED -> true
                                     Mode.THREE_BUTTONS -> true
+                                    Mode.DESKTOP_TASKBAR -> true
                                 }
                             )
                             .whenever(it)
@@ -126,17 +132,25 @@ class TaskbarModeRule(private val context: TaskbarWindowSandboxContext) : TestRu
                     val navMode =
                         when (mode) {
                             Mode.TRANSIENT,
-                            Mode.PINNED -> NavigationMode.NO_BUTTON
+                            Mode.PINNED,
+                            Mode.DESKTOP_TASKBAR -> NavigationMode.NO_BUTTON
+
                             Mode.THREE_BUTTONS -> NavigationMode.THREE_BUTTONS
                         }
                     val wmProxy = context.appComponent.wmProxy
                     if (wmProxy is TestWindowManagerProxy) {
                         wmProxy.setNavigationMode(navMode)
+                        wmProxy.setShowDesktopTaskbarForFreeformDisplay(
+                            mode == Mode.DESKTOP_TASKBAR
+                        )
                     } else {
                         if (!mockingDetails(wmProxy).run { isMock || isSpy }) {
                             wmProxy.convertToSpy()
                         }
                         doReturn(navMode).whenever(wmProxy).getNavigationMode(any())
+                        doReturn(mode == Mode.DESKTOP_TASKBAR)
+                            .whenever(wmProxy)
+                            .showDesktopTaskbarForFreeformDisplay(any())
                     }
                     context.appComponent.displayController.notifyConfigChange(DEFAULT_DISPLAY)
                 }
