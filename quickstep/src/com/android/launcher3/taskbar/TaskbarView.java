@@ -442,6 +442,12 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         mMaxNumIcons = calculateMaxNumIcons();
 
         mDragDelegate = new PinnedAppsDragHelper(getContext(), this, mIconTouchSize) {
+            @Nullable
+            @Override
+            public BubbleTextView createViewForItem(@NonNull ItemInfo item) {
+                return createIconViewForItem(item, getChildCount());
+            }
+
             @Override
             public int calculateGhostViewIndex(int onScreenLocationX) {
                 getHitRectForPinRelativeToDragLayer(sTmpRect);
@@ -473,8 +479,20 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 int dropSpotOffset =
                         mActivityContext.getDeviceProfile().getHotseatProfile().isQsbInline()
                                 ? 2 : 1;
-                int targetIndex = Math.min(dropIndex, indexOfChild(mTaskbarPinnedOverflowView) - 1)
-                        + dropSpotOffset;
+                int dividerIndex = indexOfChild(mTaskbarDividerContainer);
+
+                int maxIndex = indexOfChild(mTaskbarPinnedOverflowView);
+                if (maxIndex < 0 && dividerIndex > dropSpotOffset) {
+                    maxIndex =  dividerIndex;
+                } else if (maxIndex < 0) {
+                    maxIndex = getChildCount();
+                }
+
+                if (dividerIndex == dropSpotOffset) {
+                    dropSpotOffset++;
+                }
+
+                int targetIndex = Math.min(dropIndex, maxIndex - 1) + dropSpotOffset;
                 if (hiddenChildIndex > -1 && hiddenChildIndex < targetIndex) {
                     targetIndex++;
                 }
@@ -510,6 +528,23 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         };
     }
 
+    private BubbleTextView createIconViewForItem(@NonNull ItemInfo item, int index) {
+        View icon = mItemViewFactory.getView(item, index);
+        if (icon instanceof BubbleTextView btv) {
+            if (item instanceof WorkspaceItemInfo wii) {
+                btv.applyFromWorkspaceItem(wii);
+            }
+
+            // Move the first icon in the overflow icon to the end of the pinned section.
+            icon.setLayoutParams(new TaskbarLayoutParams(mIconTouchSize, mIconTouchSize));
+            icon.setPadding(mItemPadding, mItemPadding, mItemPadding, mItemPadding);
+            setClickAndLongClickListenersForIcon(icon);
+            setHoverListenerForIcon(icon);
+            return btv;
+        }
+        return null;
+    }
+
     protected void rearrangeItemsForDrag() {
         if (mHotseatIconsContainer != null) {
             mHotseatIconsContainer.rearrangeItemsForDrag();
@@ -540,42 +575,34 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                 }
             }
 
-            List<ItemInfo> newOverflowItems = new ArrayList<>(overflowView.getOverflowInfoList());
-            if (viewToMove != null && viewToMove.getTag() instanceof ItemInfo) {
-                newOverflowItems.addFirst((ItemInfo) viewToMove.getTag());
+            if (viewToMove != null && viewToMove.getTag() instanceof ItemInfo itemToMove) {
+                overflowView.prependItem(new ItemInfoWrapper(itemToMove, mActivityContext));
                 removeAndRecycle(viewToMove);
             }
-            overflowView.setItems(newOverflowItems.stream().map(
-                    item -> new ItemInfoWrapper(item, mActivityContext)).toList());
         } else {
             TaskbarOverflowView overflowView = getTaskbarPinnedOverflowView();
             if (overflowView == null || !isOverflowViewShowing()) {
                 return;
             }
-
-            List<ItemInfo> overflowItems = overflowView.getOverflowInfoList();
-            if (overflowItems.isEmpty()) {
+            TaskbarOverflowItem movedItemWrapper = overflowView.removeFirstVisibleItem();
+            if (movedItemWrapper == null) {
                 return;
             }
 
-            // Update the Taskbar pinned overflow view.
-            List<ItemInfo> newOverflowItems = new ArrayList<>(overflowItems);
-            ItemInfo itemToMove = newOverflowItems.removeFirst();
-            overflowView.setItems(newOverflowItems.stream().map(
-                    item -> new ItemInfoWrapper(item, mActivityContext)).toList());
+            ItemInfo movedItem = null;
+            if (movedItemWrapper instanceof ItemInfoWrapper itemInfoWrapper) {
+                movedItem = itemInfoWrapper.getItemInfo();
+            }
+            if (movedItem == null) {
+                return;
+            }
 
             // Create the view for the item to move.
             int index = indexOfChild(overflowView);
-            View newView = mItemViewFactory.getView(itemToMove, index);
-            if (newView instanceof BubbleTextView btv
-                    && itemToMove instanceof WorkspaceItemInfo wii) {
-                btv.applyFromWorkspaceItem(wii);
+            View newView = createIconViewForItem(movedItem, getChildCount());
+            if (newView != null) {
+                addView(newView, index);
             }
-
-            // Move the first icon in the overflow icon to the end of the pinned section.
-            TaskbarLayoutParams lp = new TaskbarLayoutParams(mIconTouchSize, mIconTouchSize);
-            newView.setPadding(mItemPadding, mItemPadding, mItemPadding, mItemPadding);
-            addView(newView, index, lp);
         }
     }
 
@@ -1877,7 +1904,15 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         if (mHotseatIconsContainer != null) {
             return mHotseatIconsContainer.updateItemViewVisibilityForDragState(itemView, isDragged);
         }
-        return mDragDelegate.updateItemViewVisibilityForDragState(itemView, isDragged);
+        boolean needsToRearrangeItems = !isDragged && mDragDelegate.hasHiddenChild();
+        if (mDragDelegate.updateItemViewVisibilityForDragState(itemView, isDragged)) {
+            if (needsToRearrangeItems) {
+                rearrangeItemsForDrag();
+            }
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -1980,6 +2015,14 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             return;
         }
         overflowIcon.onItemDragEnded(itemDropped);
+    }
+
+    @Override
+    public boolean updateForDroppedItem(@NonNull ItemInfo item) {
+        if (mHotseatIconsContainer != null) {
+            return mHotseatIconsContainer.updateForDroppedItem(item);
+        }
+        return mDragDelegate.updateForDroppedItem(item);
     }
 
     public static class TaskbarLayoutParams extends FrameLayout.LayoutParams {
