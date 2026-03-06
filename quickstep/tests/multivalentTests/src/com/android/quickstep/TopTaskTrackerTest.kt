@@ -36,7 +36,6 @@ import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.quickstep.TopTaskTracker.HISTORY_SIZE
 import com.android.quickstep.util.FakeTaskFactory
 import com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING
-import com.android.wm.shell.Flags.FLAG_SEND_BUBBLE_ROOT_TASK_ID_TO_LAUNCHER
 import com.android.wm.shell.shared.GroupedTaskInfo
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_DESK
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FULLSCREEN
@@ -288,7 +287,6 @@ class TopTaskTrackerTest {
     }
 
     @Test
-    @EnableFlags(FLAG_SEND_BUBBLE_ROOT_TASK_ID_TO_LAUNCHER)
     @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     fun getCachedTopTask_filtersOutBubbleTask() {
         BubbleHelper.updateBubbleRootTaskId(5)
@@ -307,7 +305,6 @@ class TopTaskTrackerTest {
     }
 
     @Test
-    @EnableFlags(FLAG_SEND_BUBBLE_ROOT_TASK_ID_TO_LAUNCHER)
     @DisableFlags(FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     fun getCachedTopTask_allBubbles_noTopTask() {
         BubbleHelper.updateBubbleRootTaskId(5)
