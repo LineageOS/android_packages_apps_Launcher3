@@ -16,6 +16,8 @@
 
 package com.android.launcher3.taskbar.customization.containers
 
+import android.animation.LayoutTransition.APPEARING
+import android.animation.LayoutTransition.DISAPPEARING
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
@@ -143,6 +145,16 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         }
     }
 
+    private fun setItemViewListeners(itemView: View) {
+        setClickAndLongClickListenersForIcon(itemView)
+        if (itemView.getTag(R.id.taskbar_icon_has_hover_listener) == true) {
+            // Creating hover listener is expensive due to view inflation, so reuse if possible.
+            return
+        }
+        itemView.setOnHoverListener(taskbarViewCallbacks.getIconOnHoverListener(itemView))
+        itemView.setTag(R.id.taskbar_icon_has_hover_listener, true)
+    }
+
     private fun updateIconsInternal(itemInfos: List<ItemInfo>, forceUpdate: Boolean) {
         var numViewsAnimated = 0
         val itemCount = itemInfos.size
@@ -199,14 +211,9 @@ class TaskbarPinnedAppIconContainer(context: Context) :
                 }
             }
 
-            setClickAndLongClickListenersForIcon(itemView)
-            if (itemView.getTag(R.id.taskbar_icon_has_hover_listener) == true) {
-                // Creating hover listener is expensive due to view inflation, so reuse if possible.
-                return@forEachIcon
-            }
-            itemView.setOnHoverListener(taskbarViewCallbacks.getIconOnHoverListener(itemView))
-            itemView.setTag(R.id.taskbar_icon_has_hover_listener, true)
+            setItemViewListeners(itemView)
         }
+
         // Recycle the remaining view if view count is more than items to show
         while (childCount > taskbarContainerIconsBySection.nonOverflownItems.size) {
             itemViewFactory.removeAndRecycle(this[childCount - 1])
@@ -316,9 +323,80 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             indexOfChildHiddenForDrag = -1
             return false
         }
+
+        // Making drag view visible again takes up an extra space in taskbar, so any items moved
+        // from overflow during the drag may need to be moved back.
+        val needsToRearrangeItems = !isDragged && indexOfChildHiddenForDrag >= 0
         indexOfChildHiddenForDrag = if (isDragged) indexOfDraggedView else -1
         itemView.visibility = if (isDragged) GONE else VISIBLE
+
+        if (needsToRearrangeItems) {
+            rearrangeItemsForDrag()
+        }
+
         return true
+    }
+
+    fun updateForDroppedItem(item: ItemInfo): Boolean {
+        val dropIndex = dropSpotIndex
+        releaseDropSlot()
+        if (dropIndex < 0) {
+            return false
+        }
+
+        val draggedView =
+            if (indexOfChildHiddenForDrag >= 0) getChildAt(indexOfChildHiddenForDrag) else null
+        if (draggedView != null) {
+            removeView(draggedView)
+            // Cancel any pending drag view disappearing animation - the dragged view is not visible
+            // at this time and will be readded to the container immediately.
+            layoutTransition?.cancel(DISAPPEARING)
+            // Keep drag view invisible, but make it take up space during layout - it will be
+            // changed to visible when resetting the drag state.
+            draggedView.visibility = INVISIBLE
+        }
+
+        val itemView =
+            draggedView
+                ?: itemViewFactory.getView(item, childCount).also {
+                    if (item is WorkspaceItemInfo) {
+                        (it as? BubbleTextView)?.applyFromWorkspaceItem(item)
+                    }
+                    setItemViewListeners(it)
+                }
+
+        setCellBindingInfo(itemView, item)
+        itemView.layoutParams = getLayoutParams(dropIndex, childCount + 1)
+        indexOfChildHiddenForDrag = -1
+
+        addView(itemView, dropIndex)
+        layoutTransition?.cancel(APPEARING)
+
+        // Adding item view may trigger layout animations. Given that the item view is replacing
+        // drop ghost item, the position of non-dragged views should not change, but the added
+        // dragged view may end up animating from its current location if it's reused (either as
+        // an original drag view, or as a recycled item view) - cancel changing animation, and
+        // appearing animation when they get started on next layout to avoid unwanted motion.
+        addOnLayoutChangeListener(
+            object : OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    view: View?,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int,
+                ) {
+                    view?.removeOnLayoutChangeListener(this)
+                    layoutTransition?.endChangingAnimations()
+                    layoutTransition?.cancel(APPEARING)
+                }
+            }
+        )
+        return itemView != draggedView
     }
 
     /** Removes the ghost view and restores the original item if it was hidden. */
@@ -332,8 +410,8 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             return
         }
         removeViewAt(indexOfChildHiddenForDrag)
+        layoutTransition?.cancel(DISAPPEARING)
         indexOfChildHiddenForDrag = -1
-        clearDisappearingChildren()
     }
 
     /** Applies and traces [body] for each [icons] instance. */
@@ -420,9 +498,7 @@ class TaskbarPinnedAppIconContainer(context: Context) :
                     it.isVisible && it !is TaskbarDropTargetGhostView && it != overflowView
                 } ?: return
 
-            val newOverflowItems = overflowView.overflowInfoList.toMutableList()
-            newOverflowItems.add(0, viewToMove.tag as ItemInfo)
-            overflowView.setItems(newOverflowItems.map { ItemInfoWrapper(it, activityContext) })
+            overflowView.prependItem(ItemInfoWrapper(viewToMove.tag as ItemInfo, activityContext))
             itemViewFactory.removeAndRecycle(viewToMove)
             return
         }
@@ -432,15 +508,8 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             return
         }
 
-        val overflowItems = overflowView.overflowInfoList
-        if (overflowItems.isEmpty()) {
-            return
-        }
-
-        // Update the Taskbar pinned overflow view.
-        val newOverflowItems = overflowItems.toMutableList()
-        val itemToMove = newOverflowItems.removeFirst()
-        overflowView.setItems(newOverflowItems.map { ItemInfoWrapper(it, activityContext) })
+        val itemToMoveWrapper = overflowView.removeFirstVisibleItem() ?: return
+        val itemToMove = (itemToMoveWrapper as? ItemInfoWrapper)?.itemInfo ?: return
 
         // Create the view for the item to move.
         val index = indexOfChild(overflowView)
@@ -448,6 +517,8 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         if (newView is BubbleTextView && itemToMove is WorkspaceItemInfo) {
             newView.applyFromWorkspaceItem(itemToMove)
         }
+        setCellBindingInfo(newView, itemToMove)
+        setItemViewListeners(newView)
 
         // Move the first icon in the overflow icon to the end of the pinned section.
         val lp = getLayoutParams(index, getVisibleChildCount())

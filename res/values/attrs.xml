@@ -80,26 +80,9 @@
     <attr name="dropTargetHoverButtonColor" format="color" />
     <attr name="preloadIconAccentColor" format="color" />
     <attr name="preloadIconBackgroundColor" format="color" />
-    <attr name="widgetPickerTitleColor" format="color"/>
-    <attr name="widgetPickerDescriptionColor" format="color"/>
-    <attr name="widgetPickerWidgetOptionsMenuColor" format="color"/>
-    <attr name="widgetPickerPrimarySurfaceColor" format="color"/>
-    <attr name="widgetPickerSecondarySurfaceColor" format="color"/>
     <attr name="widgetPickerHeaderAppTitleColor" format="color"/>
     <attr name="widgetPickerHeaderAppSubtitleColor" format="color"/>
-    <attr name="widgetPickerHeaderBackgroundColor" format="color"/>
-    <attr name="widgetPickerSuggestionsIconBackgroundColor" format="color"/>
-    <attr name="widgetPickerSuggestionsIconColor" format="color"/>
-    <attr name="widgetPickerTabBackgroundSelected" format="color"/>
-    <attr name="widgetPickerTabBackgroundUnselected" format="color"/>
     <attr name="widgetPickerSearchTextColor" format="color"/>
-    <attr name="widgetPickerSelectedTabTextColor" format="color"/>
-    <attr name="widgetPickerUnselectedTabTextColor" format="color"/>
-    <attr name="widgetPickerCollapseHandleColor" format="color"/>
-    <attr name="widgetPickerAddButtonBackgroundColor" format="color"/>
-    <attr name="widgetPickerAddButtonTextColor" format="color"/>
-    <attr name="widgetPickerExpandButtonBackgroundColor" format="color"/>
-    <attr name="widgetPickerExpandButtonTextColor" format="color"/>
     <attr name="widgetCellTitleColor" format="color" />
     <attr name="widgetCellSubtitleColor" format="color" />
 

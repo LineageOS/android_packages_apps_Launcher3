@@ -27,7 +27,9 @@ import android.os.Bundle
 import android.provider.Settings
 import android.service.personalcontext.PersonalContextManager
 import android.service.personalcontext.RenderToken
+import android.service.personalcontext.hint.AutofillInlineRequestHint
 import android.service.personalcontext.hint.BundleHint
+import android.service.personalcontext.hint.ContentCaptureConversationEvent.ConversationExitEvent
 import android.service.personalcontext.hint.ContentCaptureConversationEvent.ConversationUpdateEvent
 import android.service.personalcontext.hint.ContentCaptureConversationHint
 import android.service.personalcontext.hint.ContextHint
@@ -268,27 +270,47 @@ constructor(
         uiExecutor.execute {
             lastPublishedInsight = insight
             lastRenderToken = token
+
+            if (!insightEligibleForCueBar(insight.getInsight())) {
+                return@execute
+            }
+
             val actions = mapInsightToActions(insight.getInsight())
 
             if (actions.isNotEmpty()) {
                 isDeactivated.dispatchValue(false)
+            } else {
+                Log.i(TAG, "No actions, clear cuebar")
             }
             updateActions(actions)
         }
     }
 
+    private fun hintEligibleForCueBar(contextHint: ContextHint): Boolean {
+        return when (contextHint) {
+            is BundleHint -> contextHint.dataBundle.getBoolean(RENDER_IN_CUE_BAR, false)
+            is ContentCaptureConversationHint ->
+                contextHint.conversationEvent is ConversationUpdateEvent ||
+                    contextHint.conversationEvent is ConversationExitEvent
+            else -> false
+        }
+    }
+
+    private fun insightEligibleForCueBar(insight: ContextInsight): Boolean {
+        if (insight.originHints.any { it.contextHint is AutofillInlineRequestHint }) {
+            // Always ignore the insight together with AutofillInlineRequestHint.
+            return false
+        }
+
+        return insight.originHints.any { hintEligibleForCueBar(it.contextHint) }
+    }
+
     @VisibleForTesting
     fun mapInsightToActions(insight: ContextInsight): List<ActionModel> {
-        Log.i(TAG, "insight: $insight")
+        Log.d(TAG, "cuebar eligible insight: $insight")
         val hintToMap =
-            insight.originHints.firstOrNull { hint ->
-                when (val contextHint = hint.contextHint) {
-                    is BundleHint -> contextHint.dataBundle.getBoolean(RENDER_IN_CUE_BAR, false)
-                    is ContentCaptureConversationHint ->
-                        true // ContentCaptureConversationHint always renders
-                    else -> false
-                }
-            } ?: return emptyList()
+            insight.originHints.firstOrNull { hintEligibleForCueBar(it.contextHint) }
+                ?: return emptyList()
         return mapContextInsightToAction(insight, hintToMap.contextHint)
     }
 
@@ -340,7 +362,7 @@ constructor(
                     reportInsightEvent(InsightEvent.EVENT_USER_TAP)
                     if (
                         contextHint is BundleHint &&
-                        contextHint.dataBundle.getBoolean(NEEDS_DATA_EGRESS, false)
+                            contextHint.dataBundle.getBoolean(NEEDS_DATA_EGRESS, false)
                     ) {
                         insightHandler.egress(insight)
                     } else {

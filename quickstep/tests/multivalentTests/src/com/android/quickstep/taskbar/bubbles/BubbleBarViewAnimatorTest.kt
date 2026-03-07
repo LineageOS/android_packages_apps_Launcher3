@@ -21,6 +21,9 @@ import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.platform.test.rule.LimitDevicesRule
 import android.platform.test.rule.SkipOnDeviceless
 import android.view.LayoutInflater
@@ -57,6 +60,7 @@ import com.android.launcher3.taskbar.bubbles.model.BubbleIcon
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController.BubbleLauncherState
 import com.android.users.UserType
+import com.android.wm.shell.Flags
 import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
@@ -74,6 +78,7 @@ import org.junit.runner.RunWith
 @SkipOnDeviceless
 class BubbleBarViewAnimatorTest {
 
+    @get:Rule val setFlagsRule = SetFlagsRule()
     @get:Rule val animatorTestRule = AnimatorTestRule()
     @get:Rule var limitDevicesRule: LimitDevicesRule = LimitDevicesRule()
 
@@ -1536,6 +1541,102 @@ class BubbleBarViewAnimatorTest {
         assertThat(bubbleBarExpanded).isFalse()
         assertThat(bubbleBarView.isExpanded).isFalse()
         assertThat(animationEnded).isTrue()
+    }
+
+    @DisableFlags(Flags.FLAG_FIX_BUBBLE_BAR_NOT_COLLAPSED_IF_ANIMATING_BUBBLE)
+    @Test
+    fun collapseWhileAnimating_onHomeWhenFullin_barNotCollapsed() {
+        setUpBubbleBar()
+        bubbleStashController.launcherState = BubbleLauncherState.HOME
+        val barAnimator = PhysicsAnimator.getInstance(bubbleBarView)
+
+        val animator =
+            BubbleBarViewAnimator(
+                bubbleBarView,
+                bubbleStashController,
+                flyoutController,
+                bubbleBarParentViewController,
+                onExpanded = {},
+                onBubbleBarVisible = emptyRunnable,
+                onAnimationEnded = onAnimationEnded,
+                animatorScheduler,
+            )
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            animator.animateToInitialState(bubble, isInApp = false, isExpanding = false)
+            bubbleBarView.isExpanded = true
+        }
+        assertThat(bubbleBarView.isExpanded).isTrue()
+
+        PhysicsAnimatorTestUtils.blockUntilFirstAnimationFrameWhereTrue(barAnimator) { true }
+        barAnimator.assertIsRunning()
+        assertThat(animator.isAnimating).isTrue()
+        // wait until spring animation is completed.
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Y)
+        // wait until flyout view is set up
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            animatorTestRule.advanceTimeBy(450)
+        }
+        // now the bubble bar view animator should be in the "full in" state
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // send signal to collapse the bubble bar
+            animator.collapsedWhileAnimating()
+            // wait for bubble bar collapse animation to finish
+            animatorTestRule.advanceTimeBy(250)
+        }
+        // verify bubble bar was not collapsed
+        assertThat(bubbleBarView.isExpanded).isTrue()
+    }
+
+    @EnableFlags(Flags.FLAG_FIX_BUBBLE_BAR_NOT_COLLAPSED_IF_ANIMATING_BUBBLE)
+    @Test
+    fun collapseWhileAnimating_onHomeWhenFullin_barCollapsed() {
+        setUpBubbleBar()
+        bubbleStashController.launcherState = BubbleLauncherState.HOME
+        val barAnimator = PhysicsAnimator.getInstance(bubbleBarView)
+
+        val animator =
+            BubbleBarViewAnimator(
+                bubbleBarView,
+                bubbleStashController,
+                flyoutController,
+                bubbleBarParentViewController,
+                onExpanded = {},
+                onBubbleBarVisible = emptyRunnable,
+                onAnimationEnded = onAnimationEnded,
+                animatorScheduler,
+            )
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            animator.animateToInitialState(bubble, isInApp = false, isExpanding = false)
+            bubbleBarView.isExpanded = true
+        }
+        assertThat(bubbleBarView.isExpanded).isTrue()
+        PhysicsAnimatorTestUtils.blockUntilFirstAnimationFrameWhereTrue(barAnimator) { true }
+        barAnimator.assertIsRunning()
+        assertThat(animator.isAnimating).isTrue()
+        // verify the hide bubble animation is pending
+        assertThat(animatorScheduler.delayedBlock).isNotNull()
+        // wait until spring animation is completed.
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Y)
+        // wait until flyout view is set up
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            animatorTestRule.advanceTimeBy(450)
+        }
+        // now the bubble bar view animator should be in the "full in" state
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // send signal to collapse the bubble bar
+            animator.collapsedWhileAnimating()
+            // wait for bubble bar collapse animation to finish and flyout to hide
+            animatorTestRule.advanceTimeBy(250)
+        }
+        // verify bubble bar was collapsed
+        assertThat(bubbleBarView.isExpanded).isFalse()
+        // verify the hide bubble animation was canceled
+        assertThat(animatorScheduler.delayedBlock).isNull()
+        // verify flyout is hidden
+        waitForFlyoutToHide()
     }
 
     @Test

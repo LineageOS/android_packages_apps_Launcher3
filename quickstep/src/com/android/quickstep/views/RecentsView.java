@@ -29,6 +29,7 @@ import static com.android.app.animation.Interpolators.DECELERATE_2;
 import static com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.app.animation.Interpolators.clampToProgress;
+import static com.android.internal.jank.Cuj.CUJ_LAUNCHER_RECENTS_TO_HOME;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.BaseActivity.STATE_HANDLER_INVISIBILITY_FLAGS;
 import static com.android.launcher3.Flags.enableLowResThumbnailPreloading;
@@ -2469,7 +2470,13 @@ public abstract class RecentsView<
                 }
             }
 
-            mContainer.startHome(animated, onHomeAnimationComplete);
+            InteractionJankMonitorWrapper.begin(this, CUJ_LAUNCHER_RECENTS_TO_HOME);
+            mContainer.startHome(animated, () -> {
+                InteractionJankMonitorWrapper.end(CUJ_LAUNCHER_RECENTS_TO_HOME);
+                if (onHomeAnimationComplete != null) {
+                    onHomeAnimationComplete.run();
+                }
+            });
         } finally {
             AbstractFloatingView.closeAllOpenViews(mContainer, mContainer.isStarted());
         }

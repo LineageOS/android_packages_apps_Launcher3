@@ -99,4 +99,106 @@ class BubbleBarViewControllerTest {
         assertThat(controller.isBubbleBarVisible).isFalse()
         assertThat(controller.isBubbleBarContainerVisible).isTrue()
     }
+
+    @Test
+    fun setHiddenForBubbles_false_showsContainer() {
+        runOnTaskbarUiThreadSync {
+            // GIVEN the bubble bar is hidden because there are no bubbles
+            controller.setHiddenForBubbles(false)
+            controller.setHiddenForBubbles(true)
+            animatorTestRule.advanceTimeBy(
+                BubbleBarViewController.TASKBAR_FADE_OUT_DURATION_MS + 100L
+            )
+
+            // WHEN bubbles are added (i.e. it's no longer hidden for no bubbles)
+            controller.setHiddenForBubbles(false)
+        }
+
+        // THEN the bubble bar and container are visible
+        assertThat(controller.isBubbleBarVisible).isTrue()
+        assertThat(controller.isBubbleBarContainerVisible).isTrue()
+    }
+
+    @Test
+    fun setHiddenForStashed_false_showsBubbleBar() {
+        runOnTaskbarUiThreadSync {
+            controller.setHiddenForBubbles(false)
+            controller.setHiddenForSysui(false)
+
+            // GIVEN the bubble bar is hidden for being stashed
+            controller.setHiddenForStashed(true)
+            animatorTestRule.advanceTimeBy(
+                BubbleBarViewController.TASKBAR_FADE_OUT_DURATION_MS + 100L
+            )
+
+            // WHEN it's no longer hidden for being stashed
+            controller.setHiddenForStashed(false)
+        }
+
+        // THEN the bubble bar is visible
+        assertThat(controller.isBubbleBarVisible).isTrue()
+        assertThat(controller.isBubbleBarContainerVisible).isTrue()
+    }
+
+    @Test
+    fun setHiddenForSysuiAndBubbles_unhidingForSysui_keepsContainerHidden() {
+        runOnTaskbarUiThreadSync {
+            // GIVEN bubble bar is hidden for sysui and for no bubbles
+            controller.setHiddenForBubbles(false) // to make sure next call is not a no-op
+            controller.setHiddenForSysui(true)
+            controller.setHiddenForBubbles(true)
+            animatorTestRule.advanceTimeBy(
+                BubbleBarViewController.TASKBAR_FADE_OUT_DURATION_MS + 100L
+            )
+
+            // WHEN we un-hide for sysui
+            controller.setHiddenForSysui(false)
+        }
+
+        // THEN it remains hidden because there are no bubbles
+        assertThat(controller.isBubbleBarVisible).isFalse()
+        assertThat(controller.isBubbleBarContainerVisible).isFalse()
+    }
+
+    @Test
+    fun setHiddenForSysuiAndBubbles_unhidingForBubbles_keepsContainerHidden() {
+        runOnTaskbarUiThreadSync {
+            // GIVEN bubble bar is hidden for sysui and for no bubbles
+            controller.setHiddenForBubbles(false) // to make sure next call is not a no-op
+            controller.setHiddenForSysui(true)
+            controller.setHiddenForBubbles(true)
+            animatorTestRule.advanceTimeBy(
+                BubbleBarViewController.TASKBAR_FADE_OUT_DURATION_MS + 100L
+            )
+
+            // WHEN we un-hide for no bubbles
+            controller.setHiddenForBubbles(false)
+        }
+
+        // THEN it remains hidden because of sysui
+        assertThat(controller.isBubbleBarVisible).isFalse()
+        assertThat(controller.isBubbleBarContainerVisible).isFalse()
+    }
+
+    @Test
+    fun setHiddenForStashedAndSysui_unhidingForStashed_keepsContainerHidden() {
+        runOnTaskbarUiThreadSync {
+            controller.setHiddenForBubbles(false)
+            controller.setHiddenForSysui(false)
+
+            // GIVEN bubble bar is hidden for being stashed and for sysui
+            controller.setHiddenForStashed(true)
+            controller.setHiddenForSysui(true)
+            animatorTestRule.advanceTimeBy(
+                BubbleBarViewController.TASKBAR_FADE_OUT_DURATION_MS + 100L
+            )
+
+            // WHEN it's no longer hidden for being stashed
+            controller.setHiddenForStashed(false)
+        }
+
+        // THEN it remains hidden because of sysui
+        assertThat(controller.isBubbleBarVisible).isFalse()
+        assertThat(controller.isBubbleBarContainerVisible).isFalse()
+    }
 }

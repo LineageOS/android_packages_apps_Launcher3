@@ -23,9 +23,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
-import com.android.launcher3.Utilities.qsbOnFirstScreen
 import com.android.launcher3.Workspace
-import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.logging.StatsLogManager
@@ -201,25 +199,7 @@ constructor(
             return
         }
 
-        val knownItems =
-            ArrayList<ItemInfo>().apply {
-                // NOTE: If necessary, reserve layout space for the search container. This is not
-                // required when [Flags.FLAG_INJECTABLE_MODEL_ITEMS] is enabled as injected items
-                // will already be accounted for in the [BgDataModel].
-                if (qsbOnFirstScreen()) {
-                    add(
-                        WorkspaceItemInfo().apply {
-                            cellX = 0
-                            cellY = 0
-                            container = CONTAINER_DESKTOP
-                            screenId = WorkspaceLayoutManager.FIRST_SCREEN_ID
-                            spanX = idp.numSearchContainerColumns
-                            spanY = 1
-                        }
-                    )
-                }
-            }
-
+        val knownItems = ArrayList<ItemInfo>()
         addedItems
             .map { file ->
                 WorkspaceItemInfo()

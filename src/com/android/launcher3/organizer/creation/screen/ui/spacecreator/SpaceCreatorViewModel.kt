@@ -19,41 +19,61 @@ package com.android.launcher3.organizer.creation.screen.ui.spacecreator
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.android.launcher3.LauncherApplication
+import com.android.launcher3.concurrent.annotations.LightweightBackgroundContext
+import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout.ChooseLayoutState
+import com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerViewModel
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-enum class ScreenCreationStates {
-    CHOOSE_LAYOUT,
-    SCREEN_CREATION,
-}
-
-/** View model used for [SpaceCreatorActivity] and all it's composables. */
-class SpaceCreatorViewModel {
-
-    var createScreenState: CreateScreenState by mutableStateOf(CreateScreenState())
-        private set
-
-    var state: ScreenCreationStates by mutableStateOf(ScreenCreationStates.SCREEN_CREATION)
-        private set
-
+class SpaceCreatorViewModel
+@Inject
+constructor(
+    @LightweightBackgroundContext(priority = UI)
+    private val lightweightBackgroundContext: CoroutineContext
+) : ViewModel() {
     var chooseLayoutState: ChooseLayoutState by mutableStateOf(ChooseLayoutState())
         private set
+
+    private val _createScreenState = MutableStateFlow(CreateScreenState())
+    val createScreenState: StateFlow<CreateScreenState> = _createScreenState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            updateTopics(
+                listOf(
+                    "Most used",
+                    "Games",
+                    "Health & Fitness",
+                    "Productivity",
+                    "Travel",
+                    "Social",
+                    "Entertainment",
+                )
+            )
+        }
+    }
 
     /**
      * Update the topics list.
      *
      * @param topics The new list of topics.
      */
-    fun updateTopics(topics: List<String>) {
-        createScreenState = createScreenState.copy(topics = topics)
-    }
-
-    /**
-     * Go to a new state.
-     *
-     * @param toState The new state. See [ScreenCreationStates] for all the available states.
-     */
-    fun goToState(toState: ScreenCreationStates) {
-        state = toState
+    private suspend fun updateTopics(topics: List<String>) {
+        withContext(lightweightBackgroundContext) {
+            _createScreenState.value = _createScreenState.value.copy(topics = topics)
+        }
     }
 
     /**
@@ -69,5 +89,21 @@ class SpaceCreatorViewModel {
     fun updateLayouts(n: Int) {
         chooseLayoutState =
             chooseLayoutState.copy(layouts = (0 until n).toList(), selectedLayout = 0)
+    }
+
+    companion object {
+        /** Returns a [ViewModelProvider.Factory] for [WorkspaceOrganizerViewModel]. */
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application =
+                    this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+                        as LauncherApplication
+                val appComponent = application.appComponent
+                SpaceCreatorViewModel(
+                    lightweightBackgroundContext =
+                        appComponent.productionDispatchers.lightweightBackgroundUiDispatcher,
+                )
+            }
+        }
     }
 }
