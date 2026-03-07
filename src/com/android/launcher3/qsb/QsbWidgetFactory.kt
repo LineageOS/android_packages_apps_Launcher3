@@ -19,7 +19,6 @@ package com.android.launcher3.qsb
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.android.launcher3.Flags
 import com.android.launcher3.R
 import javax.inject.Inject
 
@@ -27,12 +26,7 @@ import javax.inject.Inject
 open class QsbWidgetFactory @Inject constructor() {
 
     open fun createView(container: ViewGroup): View {
-        if (Flags.enableQsbOnHotseat()) {
-            return LayoutInflater.from(container.context)
-                .inflate(R.layout.qsb_container_hotseat, container, false)
-        } else {
-            return LayoutInflater.from(container.context)
-                .inflate(R.layout.search_container_hotseat, container, false)
-        }
+        return LayoutInflater.from(container.context)
+            .inflate(R.layout.qsb_container_hotseat, container, false)
     }
 }
