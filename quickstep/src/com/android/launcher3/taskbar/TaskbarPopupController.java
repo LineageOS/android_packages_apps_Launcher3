@@ -509,7 +509,7 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     @VisibleForTesting
     SystemShortcut.Factory<BaseTaskbarContext> createCloseAppTaskbarShortcutFactory() {
         return (context, itemInfo, originalView) -> {
-            if (mControllers.taskbarRecentAppsController.getDesktopItemState(
+            if (mControllers.taskbarRecentAppsController.getTaskbarItemState(
                     itemInfo).getRunningAppState() == BubbleTextView.RunningAppState.NOT_RUNNING) {
                 return null;
             }
