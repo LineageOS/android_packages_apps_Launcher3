@@ -186,16 +186,20 @@ public class TestUtil {
      * Utility method to run a task synchronously which converts any exceptions to RuntimeException
      */
     public static void runOnExecutorSync(ExecutorService executor, UncheckedRunnable task) {
+        var error = new Exception[1];
         try {
             executor.submit(() -> {
                 try {
                     task.run();
                 } catch (Exception e) {
-                    convertAndThrowRuntimeException(e);
+                    error[0] = e;
                 }
             }).get();
         } catch (Exception e) {
             convertAndThrowRuntimeException(e);
+        }
+        if (error[0] != null) {
+            convertAndThrowRuntimeException(error[0]);
         }
     }
 

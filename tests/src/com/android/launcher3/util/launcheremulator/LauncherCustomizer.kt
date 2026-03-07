@@ -22,7 +22,6 @@ import android.content.Context
 import android.net.Uri.Builder
 import android.os.RemoteException
 import android.os.UserHandle
-import android.platform.uiautomatorhelpers.DeviceHelpers
 import android.platform.uiautomatorhelpers.DeviceHelpers.context
 import android.platform.uiautomatorhelpers.DeviceHelpers.uiDevice
 import android.provider.Settings.Global
@@ -32,13 +31,10 @@ import android.view.Display
 import android.view.IWindowManager
 import android.view.Surface
 import android.view.WindowManagerGlobal
-import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.launcher3.Flags.enableTaskbarUiThread
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.InvariantDeviceProfile.OnIDPChangeListener
-import com.android.launcher3.LauncherAppState
 import com.android.launcher3.LauncherPrefs
-import com.android.launcher3.LauncherPrefs.Companion.get
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
@@ -47,6 +43,7 @@ import com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR
 import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.ModelTestExtensions.clearModelDb
 import com.android.launcher3.util.NavigationMode
+import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.launcheremulator.DensityPicker.Density
@@ -60,12 +57,8 @@ import com.android.launcher3.util.launcheremulator.models.LauncherOrientation.SE
 import com.android.launcher3.util.window.WindowManagerProxy
 import java.util.concurrent.CountDownLatch
 import org.junit.Assert
-import org.mockito.Mockito.doAnswer
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mockingDetails
 import org.mockito.kotlin.reset
-import org.mockito.kotlin.whenever
-import org.mockito.stubbing.Answer
 
 object LauncherCustomizer {
     private const val TAG = "LauncherCustomizer"
@@ -79,7 +72,7 @@ object LauncherCustomizer {
     /** Apply all non null customizations starting from device, then grid, font scale and theme */
     @Throws(Exception::class)
     fun applyAll(context: Context, params: EmulationParams) {
-        LauncherAppState.getInstance(DeviceHelpers.context).model.clearModelDb()
+        context.appComponent.testableModelState.model.clearModelDb()
 
         System.putFloat(context.contentResolver, System.FONT_SCALE, params.fontScale.value)
 
@@ -92,8 +85,7 @@ object LauncherCustomizer {
 
         emulate(context, params.device, params.density, params.navigationMode)
 
-        applyFixedLandscape(params.isFixedLandscape)
-
+        applyFixedLandscape(context, params.isFixedLandscape)
         applyGridOption(context, params.grid)
 
         context
@@ -114,7 +106,7 @@ object LauncherCustomizer {
         }
     }
 
-    private fun applyFixedLandscape(isFixedLandscape: Boolean) {
+    private fun applyFixedLandscape(context: Context, isFixedLandscape: Boolean) {
         val idp = InvariantDeviceProfile.INSTANCE[context]
         if (idp.isFixedLandscape == isFixedLandscape) return
         val latch = CountDownLatch(1)
@@ -122,7 +114,7 @@ object LauncherCustomizer {
             if (idp.isFixedLandscape == isFixedLandscape) latch.countDown()
         }
         idp.addOnChangeListener(listener)
-        get(context).put(LauncherPrefs.FIXED_LANDSCAPE_MODE, isFixedLandscape)
+        LauncherPrefs.get(context).put(LauncherPrefs.FIXED_LANDSCAPE_MODE, isFixedLandscape)
         latch.await()
         idp.removeOnChangeListener(listener)
     }
@@ -201,30 +193,15 @@ object LauncherCustomizer {
             // Avoid aggressive resets if possible, or wrap them tightly
             if (mockingDetails(wmp).isSpy) reset(wmp)
 
-            spyOn(wmp)
-
-            val wmpOverride = TestWindowManagerProxy(device)
-            wmpOverride.setNavigationMode(navigationMode ?: wmp.getNavigationMode(context))
-
-            val answer = Answer {
-                wmpOverride::class
+            val wmpOverride =
+                TestWindowManagerProxy(device).apply { setNavigationMode(navigationMode) }
+            wmp.convertToSpy {
+                WindowManagerProxy::class
                     .java
-                    .getMethod(it.method.name, *it.method.parameterTypes)
+                    .getDeclaredMethod(it.method.name, *it.method.parameterTypes)
+                    .apply { isAccessible = true }
                     .invoke(wmpOverride, *it.arguments)
             }
-
-            // ensure getDisplayInfo is stubbed earlier
-            doAnswer(answer).whenever(wmp).getDisplayInfo(any())
-            doAnswer(answer).whenever(wmp).isTaskbarDrawnInProcess
-            doAnswer(answer).whenever(wmp).getRealBounds(any(), any())
-            doAnswer(answer).whenever(wmp).getNavigationMode(any())
-            doAnswer(answer).whenever(wmp).getRotation(any())
-
-            // Stub remaining methods...
-            doAnswer(answer).whenever(wmp).estimateInternalDisplayBounds(any())
-            doAnswer(answer).whenever(wmp).isInDesktopMode(any())
-            doAnswer(answer).whenever(wmp).normalizeWindowInsets(any(), any(), any())
-            doAnswer(answer).whenever(wmp).getCurrentBounds(any())
         }
 
         WindowManagerGlobal.getWindowManagerService()!!.apply {
@@ -274,7 +251,7 @@ object LauncherCustomizer {
         sendGridRequest(context, "icon_themed", COL_ICON_THEMED_VALUE, false)
         System.putFloat(context.contentResolver, System.FONT_SCALE, DEFAULT.value)
         Global.putInt(context.contentResolver, Global.DEVELOPMENT_FORCE_RTL, RTL_OFF)
-        applyFixedLandscape(false)
+        applyFixedLandscape(context, false)
 
         // IMPORTANT: Wait for the main thread and taskbar ui thread to settle after those settings
         // changes. This ensures the Taskbar thread has finished reacting to the new config
@@ -282,9 +259,8 @@ object LauncherCustomizer {
         syncUiState()
 
         TestUtil.runOnExecutorSync(MAIN_EXECUTOR) {
-            WindowManagerProxy.INSTANCE[context].let { wmp ->
-                if (mockingDetails(wmp).isSpy) reset(wmp)
-            }
+            val wmp = WindowManagerProxy.INSTANCE[context]
+            if (mockingDetails(wmp).isSpy) reset(wmp)
         }
 
         WindowManagerGlobal.getWindowManagerService()!!.apply {

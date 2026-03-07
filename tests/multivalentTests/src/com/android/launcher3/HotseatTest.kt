@@ -27,7 +27,7 @@ import com.android.launcher3.dragndrop.SystemDragItemInfo
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
-import com.android.launcher3.testutil.rule.ApplicationOverrideRule
+import com.android.launcher3.testutil.rule.TestRules.overrideApplicationInActivity
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.launcher3.util.SandboxApplication
@@ -47,7 +47,7 @@ class HotseatTest {
 
     @get:Rule val mockito = MockitoJUnit.rule()
     @get:Rule val app = SandboxApplication().withModelDependency()
-    @get:Rule val appOverride = ApplicationOverrideRule(app, mockito)
+    @get:Rule val appOverride = overrideApplicationInActivity(app, mockito)
     @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     @Test
