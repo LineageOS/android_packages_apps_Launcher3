@@ -169,7 +169,6 @@ class TaskbarPinningController(private val context: TaskbarActivityContext) :
 
     @VisibleForTesting
     fun recreateTaskbarAndUpdatePinningValue() {
-        updateIsAnimatingTaskbarPinningAndNotifyTaskbarDragLayer(false)
         if (
             controllers.taskbarDesktopModeController.isInDesktopModeAndNotInOverview(
                 context.displayId
