@@ -52,6 +52,7 @@ import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext.Companion.getDeviceParams
+import com.android.launcher3.testutil.Wait
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.launcher3.util.rule.TestStabilityRule
 import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
@@ -1274,7 +1275,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
     fun testUpdateItems_withPinnedOverflow_addsOverflowIconAndReturnsAllTaskIds() {
-
         val numShownHotseat = activityContext.taskbarSpecsEvaluator.numShownHotseatIcons
         val numItemsToAdd = numShownHotseat + 1
         val hotseatItems = createHotseatItems(numItemsToAdd)
@@ -1296,6 +1296,41 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
             assertThat(shownTaskIds).contains(123)
         } else {
             assertThat(shownTaskIds).doesNotContain(123)
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
+    fun testGetShownTaskIds_withPinnedOverflowOpen_returnsAllTaskIds() {
+        val numShownHotseat = activityContext.taskbarSpecsEvaluator.numShownHotseatIcons
+        val numItemsToAdd = numShownHotseat + 1
+        val hotseatItems = createHotseatItems(numItemsToAdd)
+
+        // Wrap the last item in a TaskItemInfo to simulate it's running.
+        val taskItem = TaskItemInfo(123, hotseatItems.last())
+        val finalHotseatItems: Array<ItemInfo> =
+            Array(numItemsToAdd) { i -> if (i == numItemsToAdd - 1) taskItem else hotseatItems[i] }
+
+        runOnTaskbarUiThreadSync {
+            taskbarView.updateItems(finalHotseatItems, emptyList(), emptyList())
+            // Open the overflow container
+            val overflowView = taskbarView.taskbarPinnedOverflowView
+            if (overflowView != null) {
+                viewController.overflownAppsContainerController.openOverflownAppsView(overflowView)
+            }
+        }
+        val isOverflowShowing = getOnTaskbarUiThread { taskbarView.isOverflowViewShowing }
+        if (isOverflowShowing) {
+            // Wait for the overflown apps UI to be populated.
+            // Without this wait the test assertions execute before overflow UI shows up
+            Wait.atMost("Overflown apps not populated") {
+                getOnTaskbarUiThread {
+                    viewController.overflownAppsContainerController.overflownApps.isNotEmpty()
+                }
+            }
+            assertThat(viewController.shownTaskIds).contains(123)
+        } else {
+            assertThat(viewController.shownTaskIds).doesNotContain(123)
         }
     }
 
