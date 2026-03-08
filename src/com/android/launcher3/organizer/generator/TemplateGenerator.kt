@@ -32,10 +32,23 @@ data class TemplateItem(val cellAndSpan: CellAndSpan, val itemTypeId: Int)
 /**
  * Defines a layout specification for a single container (like a home screen page).
  *
- * It specifies the overall grid dimensions and a collection of [TemplateItem]s that act as
- * prioritized slots to be filled by a [Placer].
+ * A collection of [TemplateItem]s that act as prioritized slots to be filled by a [Placer].
  *
- * @property gridSize The dimensions (columns x rows) of the container's grid.
  * @property items The list of predefined slots available in this template.
  */
-data class Template(val gridSize: Point, val items: List<TemplateItem>)
+data class Template(val items: List<TemplateItem>)
+
+/** Generates templates for screens */
+interface TemplateGenerator {
+    /**
+     * Defines a layout specification for a single container (like a home screen page).
+     *
+     * It specifies the overall grid dimensions and a collection of [TemplateItem]s that act as
+     * prioritized slots to be filled by a [Placer].
+     *
+     * @param n The number of templates to generate
+     * @param gridSize The dimensions (columns x rows) of the container's grid.
+     * @return A list of templates.
+     */
+    suspend fun generateTemplates(n: Int, gridSize: Point): List<Template>
+}
