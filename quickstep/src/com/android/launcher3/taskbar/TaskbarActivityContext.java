@@ -1817,7 +1817,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             }
         } else if (tag instanceof TaskItemInfo info) {
             if (recents != null && recents.isSplitSelectionActive()
-                    && (getControllers().taskbarRecentAppsController.getDesktopTaskWithId(
+                    && (getControllers().taskbarRecentAppsController.getRunningTaskWithId(
                                 info.getTaskId())) != null) {
                 taskbarUIController.triggerSecondAppForSplit(info, info.intent, view, EMPTY_FILTER);
             } else {
@@ -2231,7 +2231,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     private void launchDesktopApp(Intent intent, ItemInfo info) {
         TaskbarRecentAppsController.TaskState taskState =
-                mControllers.taskbarRecentAppsController.getDesktopItemState(info);
+                mControllers.taskbarRecentAppsController.getTaskbarItemState(info);
         RunningAppState appState = taskState.getRunningAppState();
         if (appState == RunningAppState.RUNNING || appState == RunningAppState.MINIMIZED) {
             // We only need a custom animation (a RemoteTransition) if the task is minimized - if
