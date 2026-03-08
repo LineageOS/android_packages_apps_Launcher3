@@ -238,6 +238,13 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
                 R.drawable.ic_apps,
                 LAUNCHER_ALL_APPS_TAP_OR_LONGPRESS,
                 OptionsPopupView::enterAllApps));
+        if (Flags.kondoPlanner()) {
+            options.add(new OptionItem(launcher,
+                    R.string.settings_home_organizer,
+                    R.drawable.kondo_planner_icon,
+                    LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
+                    OptionsPopupView::startScreenCreation));
+        }
         options.add(new OptionItem(launcher,
                 R.string.settings_button_text,
                 R.drawable.ic_setting,
@@ -251,13 +258,6 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
                     OptionsPopupView::createNewFolder));
         }
 
-        if (Flags.kondoPlanner()) {
-            options.add(new OptionItem(launcher,
-                    R.string.settings_home_organizer,
-                    R.drawable.ic_setting,
-                    LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
-                    OptionsPopupView::startScreenCreation));
-        }
         return options;
     }
 
