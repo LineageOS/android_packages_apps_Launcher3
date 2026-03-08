@@ -92,17 +92,31 @@ public class TaskbarOverlayDragLayer extends
                 topView.onBackInvoked();
                 return true;
             }
-        } else if (event.getAction() == KeyEvent.ACTION_DOWN
-                && event.getKeyCode() == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers()) {
-            // Ignore escape if pressed in conjunction with any modifier keys. Close each
-            // floating view one at a time for each key press.
-            AbstractFloatingView topView = AbstractFloatingView.getTopOpenView(mContainer);
-            if (topView != null) {
-                topView.close(/* animate= */ true);
-                return true;
-            }
         }
-        return super.dispatchKeyEvent(event);
+        return tryHandleEscapeKey(event) || super.dispatchKeyEvent(event);
+    }
+
+    private boolean tryHandleEscapeKey(KeyEvent event) {
+        // Ignore escape if pressed in conjunction with any modifier keys.
+        if (event.getAction() != KeyEvent.ACTION_DOWN
+                || event.getKeyCode() != KeyEvent.KEYCODE_ESCAPE || !event.hasNoModifiers()) {
+            return false;
+        }
+
+        // Reset the search and go back to the All Apps grid.
+        if (!mContainer.getAppsView().getSearchUiManager().isSearchQueryEmpty()) {
+            mContainer.getAppsView().getSearchUiManager().resetSearch();
+            return true;
+        }
+
+        AbstractFloatingView topView = AbstractFloatingView.getTopOpenView(mContainer);
+        if (topView == null) {
+            return false;
+        }
+
+        // Otherwise, close each floating view (i.e. All Apps) one at a time for each key press.
+        topView.close(/* animate= */ true);
+        return true;
     }
 
     private void onComputeTaskbarInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {

@@ -44,7 +44,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -332,20 +331,21 @@ public class DragView extends FrameLayout {
                 }
                 mFgSpringDrawable.setBounds(bounds);
 
-                new Handler(Looper.getMainLooper()).post(() -> mOnDragStartCallback.add(() -> {
-                    // TODO: Consider fade-in animation
-                    // Assign the variable on the UI thread to avoid race conditions.
-                    mScaledMaskPath = mask;
-                    // Avoid relayout as we do not care about children affecting layout
-                    removeAllViewsInLayout();
+                new Handler(mActivity.asContext().getMainLooper()).post(() ->
+                        mOnDragStartCallback.add(() -> {
+                            // TODO: Consider fade-in animation
+                            // Assign the variable on the UI thread to avoid race conditions.
+                            mScaledMaskPath = mask;
+                            // Avoid relayout as we do not care about children affecting layout
+                            removeAllViewsInLayout();
 
-                    if (info.isDisabled()) {
-                        ColorFilter filter = getDisabledColorFilter();
-                        mBgSpringDrawable.setColorFilter(filter);
-                        mFgSpringDrawable.setColorFilter(filter);
-                        mBadge.setColorFilter(filter);
-                    }
-                    invalidate();
+                            if (info.isDisabled()) {
+                                ColorFilter filter = getDisabledColorFilter();
+                                mBgSpringDrawable.setColorFilter(filter);
+                                mFgSpringDrawable.setColorFilter(filter);
+                                mBadge.setColorFilter(filter);
+                            }
+                            invalidate();
                 }));
             }
         });

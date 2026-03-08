@@ -23,7 +23,7 @@ import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
 import com.android.launcher3.Flags.enableSystemDrag
 import com.android.launcher3.Launcher
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
-import com.android.launcher3.testutil.rule.ApplicationOverrideRule
+import com.android.launcher3.testutil.rule.TestRules.overrideApplicationInActivity
 import com.android.launcher3.util.SandboxApplication
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -48,7 +48,7 @@ class SystemDragControllerTest(flag: FlagsParameterization) {
     @get:Rule val flags: SetFlagsRule = SetFlagsRule(flag)
     @get:Rule val mockito = MockitoJUnit.rule()
     @get:Rule val app = SandboxApplication().withModelDependency()
-    @get:Rule val appOverride = ApplicationOverrideRule(app, mockito)
+    @get:Rule val appOverride = overrideApplicationInActivity(app, mockito)
     @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     private lateinit var controller: SystemDragController

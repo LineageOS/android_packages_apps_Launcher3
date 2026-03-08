@@ -20,6 +20,7 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
+import android.view.KeyEvent
 import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
@@ -37,6 +38,7 @@ import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.TRANSIENT
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.TaskbarMode
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
+import com.android.launcher3.util.TestUtil.createKeyEvent
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint
@@ -55,6 +57,7 @@ class TaskbarOverlayControllerTest {
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
 
     private val overlayController by taskbarUnitTestRule.delegate { it.taskbarOverlayController }
+    private val allAppsController by taskbarUnitTestRule.delegate { it.taskbarAllAppsController }
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext
@@ -179,6 +182,44 @@ class TaskbarOverlayControllerTest {
             overlayController.hideWindow()
             assertThat(dragLayer.isAttachedToWindow).isTrue()
         }
+    }
+
+    @Test
+    fun testDispatchKeyEvent_pressEscapeWithSearch_resetsAllAppsSearch() {
+        val context = getOnTaskbarUiThread { overlayController.requestWindow() }
+        val dragLayer = getOnTaskbarUiThread { context.dragLayer }
+        val downEscapeKeyEvent = createKeyEvent(KeyEvent.KEYCODE_ESCAPE, 0, true)
+
+        runOnTaskbarUiThreadSync {
+            allAppsController.toggle()
+            context.appsView.searchUiManager.editText?.setText("test")
+        }
+
+        val (isKeyEventHandled, searchText) =
+            getOnTaskbarUiThread {
+                Pair(
+                    dragLayer.dispatchKeyEvent(downEscapeKeyEvent),
+                    context.appsView.searchUiManager.editText?.getText(),
+                )
+            }
+        assertThat(isKeyEventHandled).isTrue()
+        assertThat(searchText?.isEmpty()).isTrue()
+        assertThat(allAppsController.isOpen).isTrue()
+    }
+
+    @Test
+    fun testDispatchKeyEvent_pressEscapeWithNoSearch_closesAllApps() {
+        val context = getOnTaskbarUiThread { overlayController.requestWindow() }
+        val dragLayer = getOnTaskbarUiThread { context.dragLayer }
+        val downEscapeKeyEvent = createKeyEvent(KeyEvent.KEYCODE_ESCAPE, 0, true)
+
+        runOnTaskbarUiThreadSync { allAppsController.toggle() }
+
+        val isKeyEventHandled = getOnTaskbarUiThread {
+            dragLayer.dispatchKeyEvent(downEscapeKeyEvent)
+        }
+        assertThat(isKeyEventHandled).isTrue()
+        assertThat(allAppsController.isOpen).isFalse()
     }
 
     @Test
