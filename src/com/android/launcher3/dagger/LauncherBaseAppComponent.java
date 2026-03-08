@@ -47,9 +47,11 @@ import com.android.launcher3.model.LayoutParserFactory;
 import com.android.launcher3.model.LoaderCursor.LoaderCursorFactory;
 import com.android.launcher3.model.ModelProxyProvider;
 import com.android.launcher3.model.TestableModelState;
+import com.android.launcher3.model.repository.AppsListRepository;
 import com.android.launcher3.model.repository.HomeScreenRepository;
 import com.android.launcher3.model.repository.StringCacheRepository;
 import com.android.launcher3.notification.NotificationRepository;
+import com.android.launcher3.organizer.generator.CreationSession;
 import com.android.launcher3.pm.InstallSessionHelper;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.popup.PopupDataRepository;
@@ -176,6 +178,12 @@ public interface LauncherBaseAppComponent {
 
     /** Returns the WorkspaceAppFunctions instance */
     WorkspaceAppFunctions getWorkspaceAppFunctions();
+
+    /** Returns the Apps List Repository */
+    AppsListRepository getAppsListRepository();
+
+    /** Returns the CreationSession Factory */
+    CreationSession.Factory getCreationSessionFactory();
 
     /** Provider for default values */
     DefaultsValueProvider getDefaultsValueProvider();

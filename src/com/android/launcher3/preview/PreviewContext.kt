@@ -43,6 +43,7 @@ import com.android.launcher3.dagger.WindowManagerProxyModule
 import com.android.launcher3.graphics.theme.ThemePreference
 import com.android.launcher3.model.ModelInitializer
 import com.android.launcher3.model.data.LoaderParams
+import com.android.launcher3.organizer.generator.GeneratorModule
 import com.android.launcher3.provider.LauncherDbUtils.selectionForWorkspaceScreen
 import com.android.launcher3.qsb.OseWidgetManager
 import com.android.launcher3.util.SandboxContext
@@ -210,6 +211,7 @@ constructor(
                 AutomationModule::class,
                 TaskOverlayModule::class,
                 WorkspaceFunctionsModule::class,
+                GeneratorModule::class,
             ]
     )
     interface PreviewAppComponent : LauncherAppComponent {

@@ -19,18 +19,14 @@ package com.android.launcher3.organizer.generator
 import com.android.launcher3.model.data.ItemInfo
 
 /**
- * Interface for generating structured content containers (e.g., screens or folders) based on
- * specific topics.
+ * A [ItemInfoClassifier] that delegates to multiple other classifiers and aggregates their results.
  */
-interface Generator {
-    /**
-     * Generates a list of content containers based on groups of topics.
-     *
-     * @param topicGroups A list where each element is a set of strings representing the desired
-     *   themes for a single container. The number of generated containers will match the size of
-     *   this list.
-     * @return A list of containers, where each container is represented as a [List] of [ItemInfo]s
-     *   ready to be persisted or displayed.
-     */
-    suspend fun generate(topicGroups: List<Set<String>>): List<List<ItemInfo>>
+class CompositeClassifier(private val classifiers: List<ItemInfoClassifier>) : ItemInfoClassifier {
+
+    override suspend fun classify(
+        items: List<ItemInfo>,
+        topics: List<String>,
+    ): List<TopicClassifiedItem> {
+        return classifiers.flatMap { it.classify(items, topics) }
+    }
 }

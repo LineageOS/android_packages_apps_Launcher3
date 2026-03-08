@@ -17,6 +17,8 @@
 package com.android.launcher3.organizer.generator
 
 import com.android.launcher3.model.data.ItemInfo
+import javax.inject.Inject
+import javax.inject.Provider
 
 /** A session to handle all aspects of space/folder creation from classification to generation. */
 interface CreationSession {
@@ -37,4 +39,26 @@ interface CreationSession {
 
     /** Cancels a creation session. */
     suspend fun cancelSession()
+
+    /** Session types supported. */
+    enum class SessionType {
+        SCREEN,
+        FOLDER,
+    }
+
+    /** Factory for creating [CreationSession]s. */
+    class Factory
+    @Inject
+    constructor(
+        private val screenSessionProvider: Provider<ScreenCreationSession>,
+        private val folderSessionProvider: Provider<FolderCreationSession>,
+    ) {
+        /** Creates a session based on the [type]. */
+        fun createSession(type: SessionType): CreationSession {
+            return when (type) {
+                SessionType.SCREEN -> screenSessionProvider.get()
+                SessionType.FOLDER -> folderSessionProvider.get()
+            }
+        }
+    }
 }

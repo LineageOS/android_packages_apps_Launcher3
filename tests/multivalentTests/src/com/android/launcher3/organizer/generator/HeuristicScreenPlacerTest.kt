@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 class HeuristicScreenPlacerTest {
 
     private val gridSize = Point(4, 5)
-    private val placer = HeuristicScreenPlacer(gridSize)
+    private val placer = HeuristicScreenPlacer()
 
     @Test
     fun placeItemsIntoMatchingSlots() {
@@ -43,7 +43,6 @@ class HeuristicScreenPlacerTest {
 
         val template =
             Template(
-                gridSize,
                 listOf(
                     TemplateItem(
                         CellAndSpan(0, 0, 1, 1),
@@ -57,10 +56,10 @@ class HeuristicScreenPlacerTest {
                         CellAndSpan(0, 1, 2, 2),
                         LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET,
                     ),
-                ),
+                )
             )
 
-        val screens = placer.place(listOf(items), listOf(template))
+        val screens = placer.place(items, listOf(template))
 
         assertEquals(1, screens.size)
         val expected =
@@ -73,47 +72,22 @@ class HeuristicScreenPlacerTest {
     }
 
     @Test
-    fun ignoreTemplatesWithMismatchedGridSize() {
-        val item = createClassifiedItem(1, LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)
-        val items = listOf(item)
-
-        val wrongSizeTemplate =
-            Template(
-                Point(5, 5),
-                listOf(
-                    TemplateItem(
-                        CellAndSpan(0, 0, 1, 1),
-                        LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
-                    )
-                ),
-            )
-
-        val screens = placer.place(listOf(items), listOf(wrongSizeTemplate))
-
-        assertTrue(
-            "Should not place items if no matching grid size templates found",
-            screens.isEmpty(),
-        )
-    }
-
-    @Test
     fun reuseItemsAcrossMultipleScreens() {
         val item = createClassifiedItem(1, LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)
         val items = listOf(item)
 
         val template =
             Template(
-                gridSize,
                 listOf(
                     TemplateItem(
                         CellAndSpan(0, 0, 1, 1),
                         LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
                     )
-                ),
+                )
             )
 
         // Provide two templates to allow two screens to be generated
-        val screens = placer.place(listOf(items, items), listOf(template, template))
+        val screens = placer.place(items, listOf(template, template))
 
         assertEquals(2, screens.size)
         assertEquals(1, screens[0].size)
@@ -132,7 +106,6 @@ class HeuristicScreenPlacerTest {
 
         val template =
             Template(
-                gridSize,
                 listOf(
                     TemplateItem(
                         CellAndSpan(0, 0, 1, 1),
@@ -142,10 +115,10 @@ class HeuristicScreenPlacerTest {
                         CellAndSpan(1, 0, 1, 1),
                         LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
                     ),
-                ),
+                )
             )
 
-        val screens = placer.place(listOf(items), listOf(template))
+        val screens = placer.place(items, listOf(template))
 
         assertEquals(1, screens.size)
         assertEquals(
@@ -160,17 +133,15 @@ class HeuristicScreenPlacerTest {
         val item = createClassifiedItem(1, LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)
         val template =
             Template(
-                gridSize,
                 listOf(
                     TemplateItem(
                         CellAndSpan(0, 0, 1, 1),
                         LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
                     )
-                ),
+                )
             )
 
-        // Request 10 containers but only provide 1 template. Should get 1 screen.
-        val screens = placer.place(List(10) { listOf(item) }, listOf(template))
+        val screens = placer.place(listOf(item), listOf(template))
 
         assertEquals(1, screens.size)
     }
@@ -178,25 +149,24 @@ class HeuristicScreenPlacerTest {
     @Test
     fun handleEmptyInputs() {
         val item = createClassifiedItem(1, LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)
-        val template = Template(gridSize, emptyList())
+        val template = Template(emptyList())
 
         assertTrue(placer.place(emptyList(), listOf(template)).isEmpty())
-        assertTrue(placer.place(listOf(listOf(item)), emptyList()).isEmpty())
+        assertTrue(placer.place(listOf(item), emptyList()).isEmpty())
         assertTrue(placer.place(emptyList(), listOf(template)).isEmpty())
     }
 
     @Test
     fun placeFolder_withMultipleTopics_picksFirstTopicWithEnoughItems() {
         // Setup: 1 Social app, 2 Games apps, 3 News apps
-        // The placer iterates through items in the order they are provided in itemsToPlace.
-        // If we provide News items first, and they meet the MIN_FOLDER_ITEMS requirement, News
-        // should be picked.
+        // We use scores to ensure order.
         val newsItems =
             (1..3).map {
                 createClassifiedItem(
                     it,
                     LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
                     topic = "News",
+                    score = 0.9f,
                 )
             }
         val gamesItems =
@@ -205,6 +175,7 @@ class HeuristicScreenPlacerTest {
                     it,
                     LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
                     topic = "Games",
+                    score = 0.8f,
                 )
             }
         val socialItems =
@@ -213,6 +184,7 @@ class HeuristicScreenPlacerTest {
                     6,
                     LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
                     topic = "Social",
+                    score = 0.7f,
                 )
             )
 
@@ -222,9 +194,9 @@ class HeuristicScreenPlacerTest {
             listOf(
                 TemplateItem(CellAndSpan(0, 0, 1, 1), LauncherSettings.Favorites.ITEM_TYPE_FOLDER)
             )
-        val templates = listOf(Template(gridSize, templateItems))
+        val templates = listOf(Template(templateItems))
 
-        val result = placer.place(listOf(itemsToPlace), templates)
+        val result = placer.place(itemsToPlace, templates)
 
         assertEquals(1, result.size)
         val screen = result[0]
@@ -257,9 +229,9 @@ class HeuristicScreenPlacerTest {
             listOf(
                 TemplateItem(CellAndSpan(0, 0, 1, 1), LauncherSettings.Favorites.ITEM_TYPE_FOLDER)
             )
-        val templates = listOf(Template(gridSize, templateItems))
+        val templates = listOf(Template(templateItems))
 
-        val result = placer.place(listOf(itemsToPlace), templates)
+        val result = placer.place(itemsToPlace, templates)
 
         assertEquals(1, result.size)
         val screen = result[0]
@@ -288,9 +260,9 @@ class HeuristicScreenPlacerTest {
                     LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
                 ),
             )
-        val templates = listOf(Template(gridSize, templateItems))
+        val templates = listOf(Template(templateItems))
 
-        val result = placer.place(listOf(gamesItems), templates)
+        val result = placer.place(gamesItems, templates)
 
         assertEquals(1, result.size)
         val screen = result[0]
@@ -304,7 +276,7 @@ class HeuristicScreenPlacerTest {
 
         assertEquals("Folder should max out at 4 items", 4, folder?.getContents()?.size)
 
-        // Items 1, 2, 3, 4 should be in the folder (picked first)
+        // Items 1, 2, 3, 4 should be in the folder (picked first as they have same score 1.0)
         val folderIds = folder?.getContents()?.map { it.id }?.toSet()
         assertEquals(setOf(1, 2, 3, 4), folderIds)
 
@@ -313,9 +285,10 @@ class HeuristicScreenPlacerTest {
     }
 
     @Test
-    fun placeFolder_withMultipleTopics_picksTopicWithHighestScore() {
+    fun placeFolder_withMultipleTopics_picksTopicWithHighestScoreItems() {
         // Setup: 3 News apps (low score), 2 Games apps (high score)
-        // Both meet MIN_FOLDER_ITEMS (2). Games should be picked because total score is higher.
+        // Both meet MIN_FOLDER_ITEMS (2). Games should be picked if its items are higher in the
+        // sorted list.
         val newsItems =
             (1..3).map {
                 createClassifiedItem(
@@ -341,9 +314,9 @@ class HeuristicScreenPlacerTest {
             listOf(
                 TemplateItem(CellAndSpan(0, 0, 1, 1), LauncherSettings.Favorites.ITEM_TYPE_FOLDER)
             )
-        val templates = listOf(Template(gridSize, templateItems))
+        val templates = listOf(Template(templateItems))
 
-        val result = placer.place(listOf(itemsToPlace), templates)
+        val result = placer.place(itemsToPlace, templates)
 
         assertEquals(1, result.size)
         val screen = result[0]
@@ -363,16 +336,15 @@ class HeuristicScreenPlacerTest {
 
         val template =
             Template(
-                gridSize,
                 listOf(
                     TemplateItem(
                         CellAndSpan(0, 0, 1, 1),
                         LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
                     )
-                ),
+                )
             )
 
-        val screens = placer.place(listOf(items), listOf(template))
+        val screens = placer.place(items, listOf(template))
 
         assertEquals(1, screens.size)
         assertEquals(1, screens[0].size)
