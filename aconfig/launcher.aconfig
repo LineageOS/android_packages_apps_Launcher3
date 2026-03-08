@@ -707,3 +707,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "enable_kqs_force_take_running_task_thumbnail"
+  namespace: "launcher"
+  description: "Enables taking a new snapshot for the running task when invoking KQS"
+  bug: "490433482"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
