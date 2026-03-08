@@ -16,9 +16,19 @@
 
 package com.android.launcher3.organizer.creation.screen.ui.spacecreator
 
+import android.graphics.Bitmap
+
+/**
+ * Data class for topic information.
+ *
+ * @param topic the name of the topic.
+ * @param icons list of icons associated with the topic.
+ */
+data class TopicData(val topic: String, val icons: List<Bitmap> = emptyList())
+
 /**
  * State for [CreateScreen] and all it's composables.
  *
- * @param topics list of topics to classify the applications.
+ * @param topics list of topic data.
  */
-data class CreateScreenState(val topics: List<String> = listOf())
+data class CreateScreenState(val topics: List<TopicData> = emptyList())

@@ -15,6 +15,8 @@
  */
 package com.android.launcher3.organizer.creation.screen.ui.spacecreator
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -106,12 +110,12 @@ fun CreateScreen(
 @Composable
 fun CreateScreenContent(
     padding: PaddingValues,
-    topics: List<String>,
+    topics: List<TopicData>,
     onTopicClick: (topic: String) -> Unit,
 ) {
     if (topics.isEmpty()) return
-    val mainTopic = topics[0]
-    val otherTopics = topics.drop(1)
+    val mainTopicData = topics[0]
+    val otherTopicsData = topics.drop(1)
     Column(
         modifier =
             Modifier.padding(padding)
@@ -133,22 +137,26 @@ fun CreateScreenContent(
             textAlign = TextAlign.Center,
             color = CreateScreenDimens.textColor,
         )
-        TopicPreview(
-            modifier = Modifier.weight(1f),
-            previewTitle = mainTopic,
-            topic = mainTopic,
-            onTopicClick = onTopicClick,
-            numberOfIcons = 5,
-        )
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(CreateScreenDimens.topicSpacing),
         ) {
-            items(otherTopics.size) { i ->
+            item(span = { GridItemSpan(this.maxLineSpan) }) {
                 TopicPreview(
-                    modifier = Modifier.weight(1f),
-                    previewTitle = otherTopics[i],
-                    topic = otherTopics[i],
+                    previewTitle = mainTopicData.topic,
+                    topic = mainTopicData.topic,
+                    icons = mainTopicData.icons,
+                    onTopicClick = onTopicClick,
+                    numberOfIconsToShow = 5,
+                )
+            }
+
+            items(otherTopicsData.size) { i ->
+                val topicData = otherTopicsData[i]
+                TopicPreview(
+                    previewTitle = topicData.topic,
+                    topic = topicData.topic,
+                    icons = topicData.icons,
                     onTopicClick = onTopicClick,
                 )
             }
@@ -160,11 +168,11 @@ fun CreateScreenContent(
 fun TopicPreview(
     previewTitle: String,
     topic: String,
+    icons: List<Bitmap>,
     onTopicClick: (topic: String) -> Unit,
     modifier: Modifier = Modifier,
-    numberOfIcons: Int = 3,
+    numberOfIconsToShow: Int = 3,
 ) {
-    // Placeholder code
     Column(
         modifier = modifier.height(CreateScreenDimens.topicHeight),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -178,14 +186,23 @@ fun TopicPreview(
                         color = CreateScreenDimens.topicPreviewBackgroundColor,
                         RoundedCornerShape(CreateScreenDimens.topicRadius),
                     )
-                    .padding(CreateScreenDimens.topicPadding)
+                    .padding(CreateScreenDimens.topicPadding),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            repeat(numberOfIcons) {
-                Box(
-                    modifier =
-                        Modifier.size(CreateScreenDimens.iconSize)
-                            .background(Color.Blue, CircleShape)
-                )
+            repeat(numberOfIconsToShow) { index ->
+                if (index < icons.size) {
+                    Image(
+                        bitmap = icons[index].asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.size(CreateScreenDimens.iconSize).clip(CircleShape),
+                    )
+                } else {
+                    Box(
+                        modifier =
+                            Modifier.size(CreateScreenDimens.iconSize)
+                                .background(Color.Gray.copy(alpha = 0.3f), CircleShape)
+                    )
+                }
             }
         }
         Text(text = previewTitle, color = CreateScreenDimens.textColor)
