@@ -16,10 +16,12 @@
 
 package com.android.quickstep.util
 
+import android.content.Context
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.app.tracing.TraceStateLogger
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.statemanager.StateManager
@@ -32,23 +34,32 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class TraceStateLoggerHelperTest {
     private val traceStateLogger: TraceStateLogger = mock()
     private val stateManager: StateManager<TestState, StatefulContainer<TestState>> = mock()
     private val lifecycle: Lifecycle = mock()
+    private val context: Context =
+        spy(getInstrumentation().targetContext).apply {
+            whenever(displayId).thenReturn(DEFAULT_DISPLAY)
+        }
     private val statefulContainer: StatefulContainer<TestState> = mock {
+        on { it.asContext() } doReturn context
         on { it.stateManager } doReturn stateManager
         on { it.lifecycle } doReturn lifecycle
     }
 
     @Test
     fun onStateTransitionStart_loggerLogs() {
-        val systemUnderTest = createTraceStateLoggerHelper(DEFAULT_DISPLAY)
+        val systemUnderTest = createTraceStateLoggerHelper()
         val listenerCaptor = argumentCaptor<StateListener<TestState>>()
-        systemUnderTest.startTraceStateLogger(statefulContainer)
+        systemUnderTest.startTraceStateLogger()
+        getInstrumentation().waitForIdleSync()
+
         verify(stateManager).addStateListener(listenerCaptor.capture())
         val capturedListener = listenerCaptor.firstValue
 
@@ -59,10 +70,12 @@ class TraceStateLoggerHelperTest {
 
     @Test
     fun onContainerDestroy_loggerRemoves() {
-        val systemUnderTest = createTraceStateLoggerHelper(DEFAULT_DISPLAY)
+        val systemUnderTest = createTraceStateLoggerHelper()
         val listenerCaptor = argumentCaptor<StateListener<TestState>>()
         val observerCaptor = argumentCaptor<DefaultLifecycleObserver>()
-        systemUnderTest.startTraceStateLogger(statefulContainer)
+        systemUnderTest.startTraceStateLogger()
+        getInstrumentation().waitForIdleSync()
+
         verify(stateManager).addStateListener(listenerCaptor.capture())
         verify(lifecycle).addObserver(observerCaptor.capture())
 
@@ -73,10 +86,13 @@ class TraceStateLoggerHelperTest {
 
     @Test
     fun onContainerDestroy_logsDestroyed() {
-        val systemUnderTest = createTraceStateLoggerHelper(EXTERNAL_DISPLAY)
+        whenever(context.displayId).thenReturn(EXTERNAL_DISPLAY)
+        val systemUnderTest = createTraceStateLoggerHelper()
         val listenerCaptor = argumentCaptor<StateListener<TestState>>()
         val observerCaptor = argumentCaptor<DefaultLifecycleObserver>()
-        systemUnderTest.startTraceStateLogger(statefulContainer)
+        systemUnderTest.startTraceStateLogger()
+        getInstrumentation().waitForIdleSync()
+
         verify(stateManager).addStateListener(listenerCaptor.capture())
         verify(lifecycle).addObserver(observerCaptor.capture())
 
@@ -85,8 +101,8 @@ class TraceStateLoggerHelperTest {
         verify(traceStateLogger).log(DESTROYED_STATE)
     }
 
-    private fun createTraceStateLoggerHelper(displayId: Int) =
-        TraceStateLoggerHelper(displayId, traceStateLogger)
+    private fun createTraceStateLoggerHelper() =
+        TraceStateLoggerHelper(statefulContainer, traceStateLogger)
 
     private class TestState(private val name: String = TEST_STATE_NAME) : BaseState<TestState> {
         override fun toString() = name

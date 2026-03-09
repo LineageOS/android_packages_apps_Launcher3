@@ -429,7 +429,7 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
         setTitle(R.string.accessibility_recent_apps);
 
         restoreState(savedInstanceState);
-        new TraceStateLoggerHelper(getDisplayId()).startTraceStateLogger(this);
+        new TraceStateLoggerHelper(this).startTraceStateLogger();
     }
 
     @Override

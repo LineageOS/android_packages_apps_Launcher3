@@ -23,14 +23,17 @@ import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.statemanager.StateManager.StateListener
 import com.android.launcher3.statemanager.StatefulContainer
 
-class TraceStateLoggerHelper
+class TraceStateLoggerHelper<T : BaseState<T>>
 @JvmOverloads
 constructor(
-    val displayId: Int,
-    val traceStateLogger: TraceStateLogger =
-        TraceStateLogger("Current state display $displayId", logcat = true),
+    private val statefulContainer: StatefulContainer<T>,
+    private val traceStateLogger: TraceStateLogger =
+        TraceStateLogger(
+            "Current state display ${statefulContainer.asContext().displayId}",
+            logcat = true,
+        ),
 ) {
-    fun <T : BaseState<T>> startTraceStateLogger(statefulContainer: StatefulContainer<T>) {
+    fun startTraceStateLogger() {
         val stateListener =
             object : StateListener<T> {
                 override fun onStateTransitionStart(toState: T) {
@@ -39,15 +42,18 @@ constructor(
                 }
             }
         statefulContainer.stateManager.addStateListener(stateListener)
-        statefulContainer.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: LifecycleOwner) {
-                    super.onDestroy(owner)
-                    traceStateLogger.log(DESTROYED_STATE)
-                    statefulContainer.stateManager.removeStateListener(stateListener)
+        // addObserver needs to be called from the UI thread and this method is not always on main
+        statefulContainer.asContext().mainExecutor.execute {
+            statefulContainer.lifecycle.addObserver(
+                object : DefaultLifecycleObserver {
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        super.onDestroy(owner)
+                        traceStateLogger.log(DESTROYED_STATE)
+                        statefulContainer.stateManager.removeStateListener(stateListener)
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     companion object {

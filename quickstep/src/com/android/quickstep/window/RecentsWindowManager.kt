@@ -350,7 +350,7 @@ constructor(
         lifeCycle.addTask { destroy() }
         propertyHolder.value = this
 
-        TraceStateLoggerHelper(displayId).startTraceStateLogger(this)
+        TraceStateLoggerHelper(this).startTraceStateLogger()
     }
 
     @SuppressLint("InflateParams")
@@ -460,22 +460,26 @@ constructor(
         val recentsWindowSurface: SurfaceControl
         val surfaceControlViewHost: SurfaceControlViewHost
         if (Flags.updateRecentsWmWwmConfiguration()) {
-            recentsWindowSurface = SurfaceControl.Builder()
-                .setContainerLayer()
-                .setName(TAG)
-                .setCallsite(TAG)
-                .build()
-                .also { this.recentsWindowSurface = it }
+            recentsWindowSurface =
+                SurfaceControl.Builder()
+                    .setContainerLayer()
+                    .setName(TAG)
+                    .setCallsite(TAG)
+                    .build()
+                    .also { this.recentsWindowSurface = it }
 
-            val windowlessWindowManager = WindowlessWindowManager(
-                windowContext.resources.configuration,
-                recentsWindowSurface,
-                windowRootView.viewRootImpl?.inputToken?.let { InputTransferToken(it) }
-            ).also { this.windowlessWindowManager = it }
+            val windowlessWindowManager =
+                WindowlessWindowManager(
+                        windowContext.resources.configuration,
+                        recentsWindowSurface,
+                        windowRootView.viewRootImpl?.inputToken?.let { InputTransferToken(it) },
+                    )
+                    .also { this.windowlessWindowManager = it }
 
             surfaceControlViewHost =
-                SurfaceControlViewHost(this, display, windowlessWindowManager, TAG)
-                    .also { this.surfaceControlViewHost = it }
+                SurfaceControlViewHost(this, display, windowlessWindowManager, TAG).also {
+                    this.surfaceControlViewHost = it
+                }
         } else {
             surfaceControlViewHost =
                 SurfaceControlViewHost(this, display, windowRootView.viewRootImpl?.inputToken)
@@ -498,14 +502,7 @@ constructor(
                 }
 
                 transaction.apply(true)
-            }
-                ?: run {
-                    Log.e(
-                        TAG,
-                        "OverviewOverlay is null, can't reparent surface",
-                        Exception()
-                    )
-                }
+            } ?: run { Log.e(TAG, "OverviewOverlay is null, can't reparent surface", Exception()) }
         }
     }
 
