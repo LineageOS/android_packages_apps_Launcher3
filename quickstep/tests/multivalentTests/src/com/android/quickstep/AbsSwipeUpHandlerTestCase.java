@@ -59,8 +59,6 @@ import android.content.res.Configuration;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.RemoteAnimationTarget;
@@ -732,7 +730,7 @@ public abstract class AbsSwipeUpHandlerTestCase<
         when(mGestureState.getEndTarget()).thenReturn(endTarget);
         when(mGestureState.isRecentsAnimationRunning()).thenReturn(isQuickSwitch);
 
-        SWIPE_HANDLER swipeHandler = createSwipeHandler(SystemClock.uptimeMillis(), isQuickSwitch);
+        SWIPE_HANDLER swipeHandler = createSwipeHandler(isQuickSwitch);
 
         if (triggerOnActivityInit) {
             swipeHandler.onActivityInit(/* alreadyOnHome= */ false);
@@ -785,22 +783,20 @@ public abstract class AbsSwipeUpHandlerTestCase<
 
     @NonNull
     private SWIPE_HANDLER createSwipeHandler() {
-        return createSwipeHandler(SystemClock.uptimeMillis(), false);
+        return createSwipeHandler(false);
     }
 
     @NonNull
-    private SWIPE_HANDLER createSwipeHandler(
-            long touchTimeMs, boolean continuingLastGesture) {
+    private SWIPE_HANDLER createSwipeHandler(boolean continuingLastGesture) {
         try {
             return Executors.MAIN_EXECUTOR.submit(
-                    () -> createSwipeHandlerInternal(touchTimeMs, continuingLastGesture)).get();
+                    () -> createSwipeHandlerInternal(continuingLastGesture)).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
     @NonNull
-    protected abstract SWIPE_HANDLER createSwipeHandlerInternal(
-            long touchTimeMs, boolean continuingLastGesture);
+    protected abstract SWIPE_HANDLER createSwipeHandlerInternal(boolean continuingLastGesture);
 
     @NonNull
     protected abstract RECENTS_CONTAINER getRecentsContainer();

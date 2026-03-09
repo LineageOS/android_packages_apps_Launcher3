@@ -41,15 +41,13 @@ public class FallbackSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase<
 
     @NonNull
     @Override
-    protected FallbackSwipeHandler createSwipeHandlerInternal(
-            long touchTimeMs, boolean continuingLastGesture) {
+    protected FallbackSwipeHandler createSwipeHandlerInternal(boolean continuingLastGesture) {
         return new FallbackSwipeHandler(
                 mContext,
                 mTaskAnimationManager,
                 mDeviceState,
                 mRotationTouchHelper,
                 mGestureState,
-                touchTimeMs,
                 continuingLastGesture,
                 mInputConsumerController,
                 mMSDLPlayerWrapper,

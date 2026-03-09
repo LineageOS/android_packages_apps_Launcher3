@@ -126,13 +126,25 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
 
     private boolean mAppCanEnterPip;
 
-    public RecentsWindowSwipeHandler(Context context, TaskAnimationManager taskAnimationManager,
-            RecentsAnimationDeviceState deviceState, RotationTouchHelper rotationTouchHelper,
-            RecentsWindowManager recentsWindowManager, GestureState gestureState, long touchTimeMs,
-            boolean continuingLastGesture,  InputConsumerController inputConsumer,
-            MSDLPlayerWrapper msdlPlayerWrapper, int displayId) {
-        super(context, taskAnimationManager, deviceState, rotationTouchHelper, gestureState,
-                touchTimeMs, continuingLastGesture, inputConsumer, msdlPlayerWrapper, displayId);
+    public RecentsWindowSwipeHandler(Context context,
+            TaskAnimationManager taskAnimationManager,
+            RecentsAnimationDeviceState deviceState,
+            RotationTouchHelper rotationTouchHelper,
+            RecentsWindowManager recentsWindowManager,
+            GestureState gestureState,
+            boolean continuingLastGesture,
+            InputConsumerController inputConsumer,
+            MSDLPlayerWrapper msdlPlayerWrapper,
+            int displayId) {
+        super(context,
+                taskAnimationManager,
+                deviceState,
+                rotationTouchHelper,
+                gestureState,
+                continuingLastGesture,
+                inputConsumer,
+                msdlPlayerWrapper,
+                displayId);
 
         mRecentsWindowManager = recentsWindowManager;
         mRunningOverHome = mGestureState.getRunningTask() != null
