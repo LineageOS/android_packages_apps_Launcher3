@@ -414,6 +414,7 @@ android_library {
         "com.android.window.flags.window-aconfig-java",
         "uilatencystats_flags_core_java_lib",
         "com.android.extensions.computercontrol",
+        "personalcontext_ace_common",
         // Compose dependencies
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",
