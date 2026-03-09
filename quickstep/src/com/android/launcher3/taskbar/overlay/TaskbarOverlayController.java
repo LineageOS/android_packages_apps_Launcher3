@@ -56,10 +56,10 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
+import com.android.launcher3.taskbar.TaskbarBootAppContext;
 import com.android.launcher3.taskbar.TaskbarControllers;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter;
 import com.android.launcher3.taskbar.bubbles.BubbleActivityStarter.Listener;
-import com.android.launcher3.util.SandboxContext;
 import com.android.systemui.shared.system.BlurUtils;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -523,6 +523,6 @@ public final class TaskbarOverlayController
 
     private boolean supportsTaskbarBehindShade() {
         return Flags.enableTaskbarBehindShade()
-                && !(mTaskbarContext.getApplicationContext() instanceof SandboxContext);
+                && !(mTaskbarContext.getApplicationContext() instanceof TaskbarBootAppContext);
     }
 }
