@@ -23,7 +23,7 @@ import static android.window.DesktopModeFlags.ENABLE_TASKBAR_OVERFLOW;
 import static com.android.launcher3.BubbleTextView.DISPLAY_TASKBAR;
 import static com.android.launcher3.Flags.enableCursorDrivenWorkflows;
 import static com.android.launcher3.Flags.enableLauncherIconShapes;
-import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
+import static com.android.launcher3.LauncherAnimUtils.getScaleProperty;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER;
 import static com.android.launcher3.Utilities.dpToPx;
@@ -1229,7 +1229,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                         PointF overlayOffsets =
                                 mTaskbarRecentsOverflowView.getOverlayOffsetsForFirstItem(
                                         /* isMovingAway= */ false, indexOfIconInOverfow);
-                        Animator scaleAnim = ObjectAnimator.ofFloat(ghostIcon, SCALE_PROPERTY, 1f,
+                        Animator scaleAnim = ObjectAnimator.ofFloat(
+                                ghostIcon, getScaleProperty(), 1f,
                                 TaskbarOverflowView.TWO_ITEM_ICONS_BOX_ASPECT_RATIO);
                         Runnable onEnd = () ->
                                 mTaskbarRecentsOverflowView.setFirstItemHiddenForAnimation(false);
@@ -1278,7 +1279,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                                 TaskbarOverflowView.TWO_ITEM_ICONS_BOX_ASPECT_RATIO);
 
                         // Animate the overlay icon to the final position.
-                        Animator scaleAnim = ObjectAnimator.ofFloat(ghostIcon, SCALE_PROPERTY,
+                        Animator scaleAnim = ObjectAnimator.ofFloat(ghostIcon, getScaleProperty(),
                                 TaskbarOverflowView.TWO_ITEM_ICONS_BOX_ASPECT_RATIO, 1f);
                         Runnable onEnd = () -> actualIcon.setAlpha(1f);
                         startGhostIconAnimation(ghostIcon, actualIcon.getX(), actualIcon.getY(),

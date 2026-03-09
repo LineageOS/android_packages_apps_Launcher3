@@ -22,10 +22,10 @@ import static com.android.app.animation.Interpolators.EMPHASIZED;
 import static com.android.app.animation.Interpolators.FINAL_FRAME;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.Flags.enableTaskbarDragAndDrop;
-import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_Y;
+import static com.android.launcher3.LauncherAnimUtils.getScaleProperty;
 import static com.android.launcher3.LauncherModel.useModelRepositoryBinding;
 import static com.android.launcher3.Utilities.dpToPx;
 import static com.android.launcher3.Utilities.mapRange;
@@ -1235,7 +1235,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                                 / 2f;
                 float scale = ((float) taskbarDp.getTaskbarProfile().getIconSize())
                         / launcherDp.getHotseatProfile().getQsbVisualHeight();
-                setter.addFloat(child, SCALE_PROPERTY, scale, 1f, interpolator);
+                setter.addFloat(child, getScaleProperty(), scale, 1f, interpolator);
 
                 float fromX = isRtl ? -halfQsbIconWidthDiff : halfQsbIconWidthDiff;
                 float toX = hotseatIconCenter - childCenter;
@@ -1309,7 +1309,7 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 setter.setFloat(child, VIEW_TRANSLATE_X, toX, interpolator);
                 setter.setFloat(child, VIEW_TRANSLATE_Y, mTaskbarBottomMargin, interpolator);
             }
-            setter.setFloat(child, SCALE_PROPERTY, scaleUp, interpolator);
+            setter.setFloat(child, getScaleProperty(), scaleUp, interpolator);
         }
     }
 

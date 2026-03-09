@@ -30,12 +30,11 @@ import android.util.Property
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
-import androidx.core.view.get
 import com.android.app.animation.Interpolators
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.app.animation.Interpolators.LINEAR
 import com.android.internal.jank.Cuj
-import com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY
+import com.android.launcher3.LauncherAnimUtils.getScaleProperty
 import com.android.launcher3.Reorderable
 import com.android.launcher3.Utilities
 import com.android.launcher3.taskbar.customization.containers.TaskbarPinnedAppIconContainer
@@ -59,7 +58,7 @@ class TaskbarLayoutTransitionFactory(private vararg val transitionListeners: Tra
                 ObjectAnimator.ofFloat(null, "alpha", 0f, 1f).apply {
                     interpolator = APPEARING_ALPHA_INTERPOLATOR
                 },
-                ObjectAnimator.ofFloat(null, SCALE_PROPERTY, 0f, 1f).apply {
+                ObjectAnimator.ofFloat(null, getScaleProperty(), 0f, 1f).apply {
                     interpolator = EMPHASIZED
                 },
             )
@@ -71,7 +70,7 @@ class TaskbarLayoutTransitionFactory(private vararg val transitionListeners: Tra
                 ObjectAnimator.ofFloat(null, "alpha", 1f, 0f).apply {
                     interpolator = DISAPPEARING_ALPHA_INTERPOLATOR
                 },
-                ObjectAnimator.ofFloat(null, SCALE_PROPERTY, 1f, 0f).apply {
+                ObjectAnimator.ofFloat(null, getScaleProperty(), 1f, 0f).apply {
                     interpolator = EMPHASIZED
                 },
             )

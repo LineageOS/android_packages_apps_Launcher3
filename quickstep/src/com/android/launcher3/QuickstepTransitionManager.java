@@ -45,6 +45,7 @@ import static com.android.launcher3.BaseActivity.INVISIBLE_BY_PENDING_FLAGS;
 import static com.android.launcher3.BaseActivity.PENDING_INVISIBLE_BY_WALLPAPER_ANIMATION;
 import static com.android.launcher3.Flags.appLaunchBlur;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
+import static com.android.launcher3.LauncherAnimUtils.getScaleProperty;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.BACKGROUND_APP;
@@ -91,6 +92,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
@@ -728,9 +730,11 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 }
             });
 
+            FloatProperty<View> scaleProperty = getScaleProperty();
+
             if (!skipAllAppsScale) {
-                SCALE_PROPERTY.set(appsView, scales[0]);
-                ObjectAnimator scale = ObjectAnimator.ofFloat(appsView, SCALE_PROPERTY, scales);
+                scaleProperty.set(appsView, scales[0]);
+                ObjectAnimator scale = ObjectAnimator.ofFloat(appsView, scaleProperty, scales);
                 scale.setInterpolator(AGGRESSIVE_EASE);
                 scale.setDuration(CONTENT_SCALE_DURATION);
                 launcherAnimator.play(scale);
@@ -740,7 +744,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
             endListener = () -> {
                 appsView.setAlpha(startAlpha);
-                SCALE_PROPERTY.set(appsView, startScale);
+                scaleProperty.set(appsView, startScale);
                 appsView.setLayerType(View.LAYER_TYPE_NONE, null);
                 mLauncher.resumeExpensiveViewUpdates();
             };
@@ -818,14 +822,15 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         anim.play(alpha);
         overview.setFreezeViewVisibility(true);
 
-        ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(overview, SCALE_PROPERTY, scales);
+        FloatProperty<View> scaleProperty = getScaleProperty();
+        ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(overview, scaleProperty, scales);
         scaleAnim.setInterpolator(AGGRESSIVE_EASE);
         scaleAnim.setDuration(CONTENT_SCALE_DURATION);
         anim.play(scaleAnim);
 
         return () -> {
             overview.setFreezeViewVisibility(false);
-            SCALE_PROPERTY.set(overview, 1f);
+            scaleProperty.set(overview, 1f);
             mLauncher.getStateManager().reapplyState();
             mLauncher.resumeExpensiveViewUpdates();
         };

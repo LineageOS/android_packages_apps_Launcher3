@@ -18,7 +18,7 @@ package com.android.launcher3.folder;
 
 import static android.view.View.ALPHA;
 
-import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
+import static com.android.launcher3.LauncherAnimUtils.getScaleProperty;
 import static com.android.launcher3.folder.ClippedFolderIconLayoutRule.MAX_NUM_ITEMS_IN_PREVIEW;
 import static com.android.launcher3.folder.FolderGridOrganizer.createFolderGridOrganizer;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
@@ -224,8 +224,8 @@ public class FolderAnimationManager implements FolderAnimationCreator {
         play(a, mBgColorAnimator);
         play(a, getAnimator(mFolder, View.TRANSLATION_X, xDistance, 0f));
         play(a, getAnimator(mFolder, View.TRANSLATION_Y, yDistance, 0f));
-        play(a, getAnimator(mFolder.mContent, SCALE_PROPERTY, initialScale, finalScale));
-        play(a, getAnimator(mFolder.mFooter, SCALE_PROPERTY, initialScale, finalScale));
+        play(a, getAnimator(mFolder.mContent, getScaleProperty(), initialScale, finalScale));
+        play(a, getAnimator(mFolder.mFooter, getScaleProperty(), initialScale, finalScale));
 
         final int footerAlphaDuration;
         final int footerStartDelay;
@@ -428,7 +428,7 @@ public class FolderAnimationManager implements FolderAnimationCreator {
             translationY.setInterpolator(previewItemInterpolator);
             play(animatorSet, translationY);
 
-            Animator scaleAnimator = getAnimator(v, SCALE_PROPERTY, initialScale, finalScale);
+            Animator scaleAnimator = getAnimator(v, getScaleProperty(), initialScale, finalScale);
             scaleAnimator.setInterpolator(previewItemInterpolator);
             play(animatorSet, scaleAnimator);
 
