@@ -1128,8 +1128,14 @@ public class BubbleBarView extends FrameLayout {
         getBoundsOnScreen(boundsOnScreen);
 
         if (boundsOnScreen.height() == 0 || boundsOnScreen.width() == 0) {
-            // if the bubble bar needs to do some measuring return the default margin
-            return mDefaultMargin;
+            if (com.android.wm.shell.Flags.fixBubbleBarFlickOnPinningAnimation()) {
+                // if the bubble bar is not yet measured, set its bounds to be the same as the
+                // fullscreen to calculate both vertical margins correctly.
+                boundsOnScreen.set(windowBounds);
+            } else {
+                // if the bubble bar needs to do some measuring return the default margin
+                return mDefaultMargin;
+            }
         }
 
         // The opposite margin avoids the cutout during a preview of changing the bubble bar
