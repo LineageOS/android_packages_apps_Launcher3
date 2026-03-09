@@ -24,10 +24,6 @@ import com.android.launcher3.popup.ArrowPopup.OPEN_DURATION_U
 import com.android.launcher3.taskbar.TaskbarControllerTestUtil.runOnTaskbarUiThreadSync
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatItems
 import com.android.launcher3.taskbar.customization.TaskbarDividerContainer
-import com.android.launcher3.util.rule.TestStabilityRule
-import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
-import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
-import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
@@ -42,7 +38,6 @@ class TaskbarPinningControllerTest {
     @get:Rule(order = 0) val context = TaskbarWindowSandboxContext.create()
     @get:Rule(order = 1) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
     @get:Rule(order = 2) val animatorTestRule = TaskbarAnimatorTestRule(this)
-    @get:Rule val testStabilityRule = TestStabilityRule()
 
     private val pinningController by taskbarUnitTestRule.delegate { it.taskbarPinningController }
 
@@ -66,7 +61,6 @@ class TaskbarPinningControllerTest {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486279323)
     fun showPinningView() {
         assertThat(hasPinningPopUp).isFalse()
         runOnTaskbarUiThreadSync { pinningController.showPinningView(dividerIcon) }
