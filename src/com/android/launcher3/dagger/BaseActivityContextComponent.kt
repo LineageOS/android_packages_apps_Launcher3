@@ -20,7 +20,7 @@ import com.android.launcher3.UndoDeleteController
 import com.android.launcher3.WorkspaceSelectionManager
 import com.android.launcher3.allapps.AllAppsStore
 import com.android.launcher3.dragndrop.SystemDragController
-import com.android.launcher3.folder.FolderBlurBackgroundHelper
+import com.android.launcher3.util.BlurBackgroundHelper
 import com.android.launcher3.graphics.IconLoader
 import com.android.launcher3.keyboard.KeyboardStateManager
 import com.android.launcher3.popup.PopupDataProvider
@@ -41,7 +41,7 @@ interface BaseActivityContextComponent {
 
     fun getUndoDeleteController(): UndoDeleteController
 
-    fun getFolderBlurBackgroundHelper(): FolderBlurBackgroundHelper
+    fun getBlurBackgroundHelper(): BlurBackgroundHelper
 
     @DisplayId fun getDisplayId(): Int
 
