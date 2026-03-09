@@ -36,7 +36,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
@@ -306,7 +305,8 @@ private fun NavBarAmbientCue(
         visible = visible,
         expanded = expanded,
         showEducation = viewModel.showFirstTimeEducation,
-        modifier = modifier.onGloballyPositioned { touchableRegion = it.boundsInWindow() },
+        modifier = modifier,
+        onInteractiveBoundsMeasured = { bounds -> touchableRegion = bounds },
         onClick = {
             if (actions.size == 1 && actions[0].oneTapEnabled) {
                 scope.launch {
@@ -321,11 +321,6 @@ private fun NavBarAmbientCue(
         onCloseEducation = { viewModel.disableFirstTimeHint() },
         onAnimationStateChange = onAnimationStateChange,
     )
-}
-
-private fun LayoutCoordinates.boundsInWindow(): Rect {
-    val positionInWindow = localToWindow(Offset.Zero)
-    return Rect(offset = positionInWindow, size = size.toSize())
 }
 
 private const val NAV_BAR_WIDTH_DP = 108 // R.dimen.taskbar_stashed_small_screen from Launcher
