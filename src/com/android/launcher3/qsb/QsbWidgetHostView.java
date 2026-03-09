@@ -91,9 +91,4 @@ public class QsbWidgetHostView extends NavigableAppWidgetHostView {
                 Launcher.getLauncher(v2.getContext()).startSearch("", false, null, true));
         return v;
     }
-
-    @Override
-    protected boolean shouldAllowDirectClick() {
-        return true;
-    }
 }

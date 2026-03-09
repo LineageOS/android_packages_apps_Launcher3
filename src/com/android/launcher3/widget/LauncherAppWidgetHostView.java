@@ -43,7 +43,6 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.CheckLongPressHelper;
 import com.android.launcher3.Flags;
 import com.android.launcher3.R;
-import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.PopupController;
@@ -386,14 +385,6 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
             target.advance();
         }
         scheduleNextAdvance();
-    }
-
-    @Override
-    protected boolean shouldAllowDirectClick() {
-        if (getTag() instanceof ItemInfo item) {
-            return item.spanX == 1 && item.spanY == 1;
-        }
-        return false;
     }
 
     @NonNull
