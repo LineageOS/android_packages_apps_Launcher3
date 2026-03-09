@@ -24,6 +24,7 @@ import android.os.UserManager;
 import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
+import android.view.ViewRootImpl;
 
 import com.android.launcher3.BuildConfig;
 import com.android.launcher3.MainProcessInitializer;
@@ -104,6 +105,7 @@ public class QuickstepProcessInitializer extends MainProcessInitializer {
 
         QuickstepProtoLogGroup.initProtoLog();
         SurfaceControl.setDebugUsageAfterRelease(true);
+        ViewRootImpl.setDebugWrongThreadInit(true);
 
         setupImageDecoder(context);
     }
