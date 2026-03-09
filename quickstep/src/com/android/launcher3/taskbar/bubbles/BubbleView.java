@@ -58,6 +58,7 @@ public class BubbleView extends ConstraintLayout {
     private float mDragTranslationX;
     private float mOffsetX;
 
+    @Nullable
     private DotRenderer mDotRenderer;
     private final DotRenderer.DrawParams mDrawParams;
     private int mDotColor;
@@ -181,7 +182,9 @@ public class BubbleView extends ConstraintLayout {
         mDrawParams.iconBounds = mTempBounds;
         mDrawParams.scale = mDotScale;
 
-        mDotRenderer.draw(canvas, mDrawParams);
+        if (mDotRenderer != null) {
+            mDotRenderer.draw(canvas, mDrawParams);
+        }
     }
 
     @Override
