@@ -2986,8 +2986,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             setDragMode(DRAG_MODE_CREATE_FOLDER);
 
             if (dragObject.stateAnnouncer != null) {
+                ItemInfo dropOverInfo = (ItemInfo) mDragOverView.getTag();
+                String pageDescription = getPageDescription(dropOverInfo.screenId);
                 dragObject.stateAnnouncer.announce(WorkspaceAccessibilityHelper
-                        .getDescriptionForDropOver(mDragOverView, getContext()));
+                        .getDescriptionForDropOver(mDragOverView, getContext(), pageDescription));
             }
             return;
         }
@@ -3012,8 +3014,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             setDragMode(DRAG_MODE_ADD_TO_FOLDER);
 
             if (dragObject.stateAnnouncer != null) {
+                ItemInfo dropOverInfo = (ItemInfo) mDragOverView.getTag();
+                String pageDescription = getPageDescription(dropOverInfo.screenId);
                 dragObject.stateAnnouncer.announce(WorkspaceAccessibilityHelper
-                        .getDescriptionForDropOver(mDragOverView, getContext()));
+                        .getDescriptionForDropOver(mDragOverView, getContext(), pageDescription));
             }
             return;
         }

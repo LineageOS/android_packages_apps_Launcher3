@@ -1234,6 +1234,11 @@ public class CellLayout extends ViewGroup {
         }
     }
 
+    public String getContainerPageDescription() {
+        int pageIndex = mCellLayoutContainer.getCellLayoutIndex(this);
+        return mCellLayoutContainer.getPageDescription(pageIndex);
+    }
+
     public void clearDragOutlines() {
         final int oldIndex = mDragOutlineCurrent;
         mDragOutlineAnims[oldIndex].animateOut();
