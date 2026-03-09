@@ -1545,7 +1545,7 @@ public class CellLayout extends ViewGroup {
     /**
      * Clear state variables to be ready for a new reorder.
      */
-    public void revertTempState() {
+    protected void revertTempState() {
         completeAndClearReorderPreviewAnimations();
         if (isItemPlacementDirty() && !DESTRUCTIVE_REORDER) {
             final int count = mShortcutsAndWidgets.getChildCount();
