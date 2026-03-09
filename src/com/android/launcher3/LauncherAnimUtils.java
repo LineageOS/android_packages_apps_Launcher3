@@ -58,27 +58,57 @@ public class LauncherAnimUtils {
                 }
             };
 
-    public static final FloatProperty<View> SCALE_PROPERTY =
-            new FloatProperty<View>("scale") {
-                @Override
-                public Float get(View view) {
-                    return view.getScaleX();
-                }
+    public static final FloatProperty<View> SCALE_PROPERTY = getScaleProperty();
 
-                @Override
-                public void setValue(View view, float scale) {
-                    if (view.getHandler() != null
-                            && view.getHandler().getLooper() != android.os.Looper.myLooper()) {
-                        view.post(() -> {
-                            view.setScaleX(scale);
-                            view.setScaleY(scale);
-                        });
-                    } else {
+    /** Used to debug b/489475544, after the crash is fixed, caller can just use SCALE_PROPERTY t*/
+    public static FloatProperty<View> getScaleProperty() {
+        return new ScaleProperty();
+    }
+
+    /**
+     * FloatProperty that saves the creation call stacktrace, so that during animation frame if
+     * {@link android.view.ViewRootImpl$CalledFromWrongThreadException} is detected, the crash
+     * will contain creation call stacktrace.
+     */
+    private static class ScaleProperty extends FloatProperty<View> {
+
+        private final Exception mException;
+
+        ScaleProperty() {
+            super("scale");
+            mException = new Exception();
+        }
+
+        @Override
+        public Float get(View view) {
+            return view.getScaleX();
+        }
+
+        @Override
+        public void setValue(View view, float scale) {
+            try {
+                if (view.getHandler() != null
+                        && view.getHandler().getLooper() != android.os.Looper.myLooper()) {
+                    view.post(() -> {
                         view.setScaleX(scale);
                         view.setScaleY(scale);
-                    }
+                    });
+                } else {
+                    view.setScaleX(scale);
+                    view.setScaleY(scale);
                 }
-            };
+            } catch (RuntimeException e) {
+                // Check if the class name matches the hidden Android exception
+                if (e.getClass().getName().contains("CalledFromWrongThreadException")) {
+                    RuntimeException diagnostic = new RuntimeException(
+                            "Thread Mismatch! Creator trace attached as cause.", e);
+                    diagnostic.initCause(mException);
+                    throw diagnostic;
+                }
+                throw e;
+            }
+        }
+    }
 
     /**
      * Property to set the scale of workspace. The value is based on a combination

@@ -38,9 +38,9 @@ import androidx.core.animation.addListener
 import androidx.core.view.updateLayoutParams
 import com.android.app.animation.Interpolators
 import com.android.launcher3.Flags
-import com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY
 import com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X
 import com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_Y
+import com.android.launcher3.LauncherAnimUtils.getScaleProperty
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.util.MSDLPlayerWrapper
@@ -483,7 +483,7 @@ constructor(
             animator!!.playTogether(
                 expandedTextClipAnim,
                 backgroundAnimator,
-                ObjectAnimator.ofFloat(iconView, SCALE_PROPERTY, 1f),
+                ObjectAnimator.ofFloat(iconView, getScaleProperty(), 1f),
                 ObjectAnimator.ofFloat(appTitle, TRANSLATION_X, 0f),
                 ObjectAnimator.ofFloat(iconArrowView, TRANSLATION_X, 0f),
                 ObjectAnimator.ofFloat(iconArrowView, SCALE_Y, 1f),
