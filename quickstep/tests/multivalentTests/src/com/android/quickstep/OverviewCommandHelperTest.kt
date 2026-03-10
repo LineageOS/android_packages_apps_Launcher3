@@ -26,6 +26,7 @@ import androidx.test.annotation.UiThreadTest
 import androidx.test.filters.SmallTest
 import com.android.app.displaylib.DisplayRepository
 import com.android.app.displaylib.fakes.FakePerDisplayRepository
+import com.android.internal.util.LatencyTracker
 import com.android.launcher3.LauncherState
 import com.android.launcher3.LauncherState.OVERVIEW
 import com.android.launcher3.LauncherState.OVERVIEW_MODAL_TASK
@@ -70,9 +71,12 @@ import org.mockito.Mockito.spy
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
 @SmallTest
@@ -104,6 +108,7 @@ class OverviewCommandHelperTest {
     private var elapsedRealtime = 100L
     private val systemUiProxy: SystemUiProxy = mock()
     private val overviewComponentObserver = mock<OverviewComponentObserver>()
+    private val latencyTracker: LatencyTracker = mock()
 
     private fun setupDefaultDisplay() {
         whenever(displayRepository.displayIds).thenReturn(MutableStateFlow(setOf(DEFAULT_DISPLAY)))
@@ -145,6 +150,7 @@ class OverviewCommandHelperTest {
                         FakePerDisplayRepository { _ -> taskAnimationManager },
                     elapsedRealtime = ::elapsedRealtime,
                     systemUiProxy = systemUiProxy,
+                    latencyTracker = latencyTracker,
                 )
             )
     }
@@ -753,6 +759,61 @@ class OverviewCommandHelperTest {
             animationEndCallbackCaptor.firstValue.onAnimationEnd(AnimatorSet())
             runCurrent()
             assertThat(commandInfo.status).isEqualTo(CommandStatus.COMPLETED)
+        }
+
+    @Test
+    fun homeCommand_neverCallsLatencyTracker() =
+        testScope.runTest {
+            whenever(latencyTracker.isEnabled(anyInt())).thenReturn(true)
+
+            mockExecuteCommand()
+            addCallbackDelay(100)
+            sut.addCommand(CommandType.HOME)
+
+            runCurrent()
+            advanceTimeBy(101L)
+            verifyNoInteractions(latencyTracker)
+        }
+
+    @Test
+    fun toggleCommand_startsAndFinishesLatencyTracker_whenCommandCompletes() =
+        testScope.runTest {
+            whenever(latencyTracker.isEnabled(anyInt())).thenReturn(true)
+
+            mockExecuteCommand()
+            addCallbackDelay(100)
+            sut.addCommand(CommandType.TOGGLE)
+
+            runCurrent()
+            verify(latencyTracker, times(1)).onActionStart(eq(LatencyTracker.ACTION_TOGGLE_RECENTS))
+            verify(latencyTracker, never()).onActionEnd(any())
+            verify(latencyTracker, never()).onActionCancel(any())
+
+            advanceTimeBy(101L)
+            verify(latencyTracker, times(1)).onActionStart(eq(LatencyTracker.ACTION_TOGGLE_RECENTS))
+            verify(latencyTracker, times(1)).onActionEnd(eq(LatencyTracker.ACTION_TOGGLE_RECENTS))
+            verify(latencyTracker, never()).onActionCancel(any())
+        }
+
+    @Test
+    fun toggleCommand_startsAndCancelsLatencyTracker_whenCommandCancels() =
+        testScope.runTest {
+            whenever(latencyTracker.isEnabled(anyInt())).thenReturn(true)
+
+            mockExecuteCommand()
+            addCallbackDelay(QUEUE_TIMEOUT)
+            sut.addCommand(CommandType.TOGGLE)
+
+            runCurrent()
+            verify(latencyTracker, times(1)).onActionStart(eq(LatencyTracker.ACTION_TOGGLE_RECENTS))
+            verify(latencyTracker, never()).onActionEnd(any())
+            verify(latencyTracker, never()).onActionCancel(any())
+
+            advanceTimeBy(QUEUE_TIMEOUT)
+            verify(latencyTracker, times(1)).onActionStart(eq(LatencyTracker.ACTION_TOGGLE_RECENTS))
+            verify(latencyTracker, never()).onActionEnd(any())
+            verify(latencyTracker, times(1))
+                .onActionCancel(eq(LatencyTracker.ACTION_TOGGLE_RECENTS))
         }
 
     private fun setupGestureDependencies(): Pair<AbsSwipeUpHandler<*, *, *>, GestureState> {

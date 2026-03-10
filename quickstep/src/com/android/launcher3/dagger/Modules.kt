@@ -27,6 +27,7 @@ import com.android.app.displaylib.PerDisplayRepository
 import com.android.extensions.computercontrol.ComputerControlExtensions
 import com.android.internal.R
 import com.android.internal.policy.DesktopModeCompatPolicy
+import com.android.internal.util.LatencyTracker
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.Flags.enableSystemDrag
 import com.android.launcher3.InvariantDeviceProfile
@@ -244,14 +245,16 @@ object StaticObjectModule {
     ): ComputerControlExtensions? = ComputerControlExtensions.getInstance(context)
 
     @Provides
-    fun provideUiLatencyStatsManager(
-        @ApplicationContext context: Context
-    ): UiLatencyStatsManager? =
+    fun provideUiLatencyStatsManager(@ApplicationContext context: Context): UiLatencyStatsManager? =
         if (com.android.server.ui_latency_stats.Flags.uiLatencyStatsService()) {
             context.getSystemService(UiLatencyStatsManager::class.java)
         } else {
             null
         }
+
+    @Provides
+    fun provideLatencyTracker(@ApplicationContext context: Context): LatencyTracker =
+        LatencyTracker.getInstance(context)
 }
 
 @Module
