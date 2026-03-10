@@ -28,6 +28,7 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_MULTI_INSTANCE_MENU_OPEN
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext
+import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.TouchController
 import com.android.launcher3.views.ActivityContext
 import com.android.quickstep.RecentsModel
@@ -95,7 +96,6 @@ class ManageWindowsTaskbarShortcut<T>(
      */
     private fun createAndShowTaskShortcutView(tasks: List<Task>, pendingTaskIds: MutableSet<Int>) {
         val taskList = arrayListOf<Pair<Int, Bitmap?>>()
-
         tasks.forEach { task ->
             recentsModel.thumbnailCache.getThumbnailInBackground(task) {
                 thumbnailData: ThumbnailData ->
@@ -106,7 +106,7 @@ class ManageWindowsTaskbarShortcut<T>(
                 }
                 // If the set is empty, all thumbnails have been fetched
                 if (pendingTaskIds.isEmpty() && taskList.isNotEmpty()) {
-                    createAndPositionTaskbarShortcut(taskList)
+                    getTaskbarUiThread().execute { createAndPositionTaskbarShortcut(taskList) }
                 }
             }
         }
