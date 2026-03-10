@@ -112,6 +112,7 @@ import com.android.launcher3.pageindicators.PaginationArrow;
 import com.android.launcher3.touch.CustomActionsListener;
 import com.android.launcher3.touch.CustomEventsTouchHandler;
 import com.android.launcher3.touch.CustomTouchDelegate;
+import com.android.launcher3.util.BlurBackgroundHelper;
 import com.android.launcher3.util.LauncherBindableItemsContainer;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.views.ActivityContext;
@@ -272,7 +273,7 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
 
     private final @NonNull GradientDrawable mBackground;
     private final BoxSelectionHelper mBoxSelectionHelper;
-    private final FolderBlurBackgroundHelper mFolderBlurBackgroundHelper;
+    private final BlurBackgroundHelper mBlurBackgroundHelper;
 
     private CustomEventsTouchHandler mCustomEventsTouchHandler;
 
@@ -310,8 +311,8 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
             return super.onTouchEvent(event);
         }, (event) -> false);
 
-        mFolderBlurBackgroundHelper =
-                mActivityContext.getActivityComponent().getFolderBlurBackgroundHelper();
+        mBlurBackgroundHelper =
+                mActivityContext.getActivityComponent().getBlurBackgroundHelper();
     }
 
     @Override
@@ -755,7 +756,7 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
         closeOpenFolder(openFolder);
 
         if (blurOnMoreSurfaces()) {
-            mFolderBlurBackgroundHelper.prepareToOpen(this);
+            mBlurBackgroundHelper.prepareToOpenFolder(this);
         }
 
         mContent.bindItems(items);
@@ -1016,7 +1017,7 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
 
     private void closeComplete(boolean wasAnimated) {
         mIsOpen = false;
-        mFolderBlurBackgroundHelper.folderCloseComplete();
+        mBlurBackgroundHelper.folderCloseComplete();
 
         // TODO: Clear all active animations.
         BaseDragLayer parent = (BaseDragLayer) getParent();
@@ -1908,7 +1909,7 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
             int count = canvas.save();
             canvas.clipPath(mClipPath.getPath());
 
-            mFolderBlurBackgroundHelper.drawBlur(canvas, mClipPath, this);
+            mBlurBackgroundHelper.drawFolderBlur(canvas, mClipPath, this);
             mBackground.draw(canvas);
 
             if (!mIsAnimatingClosed) {
@@ -1921,7 +1922,7 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
                 super.dispatchDraw(canvas);
             }
         } else {
-            mFolderBlurBackgroundHelper.drawBlur(canvas, null, this);
+            mBlurBackgroundHelper.drawFolderBlur(canvas, null, this);
             mBackground.draw(canvas);
 
             super.dispatchDraw(canvas);
