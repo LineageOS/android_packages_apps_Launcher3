@@ -206,12 +206,10 @@ public class AppInfo extends ItemInfoWithIcon implements WorkspaceItemFactory {
 
         info.runtimeStatusFlags |= appInfo.isSystem() ? FLAG_SYSTEM_YES : FLAG_SYSTEM_NO;
 
-        if (Flags.privateSpaceRestrictAccessibilityDrag()) {
-            if (userIconInfo.isPrivate()) {
-                info.runtimeStatusFlags |= FLAG_NOT_PINNABLE;
-            } else {
-                info.runtimeStatusFlags &= ~FLAG_NOT_PINNABLE;
-            }
+        if (userIconInfo.isPrivate()) {
+            info.runtimeStatusFlags |= FLAG_NOT_PINNABLE;
+        } else {
+            info.runtimeStatusFlags &= ~FLAG_NOT_PINNABLE;
         }
 
         if (android.security.Flags.appLockApis()) {
