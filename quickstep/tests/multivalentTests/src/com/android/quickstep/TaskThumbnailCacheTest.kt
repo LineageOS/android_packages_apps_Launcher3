@@ -139,6 +139,7 @@ class TaskThumbnailCacheTest {
         MAIN_EXECUTOR.execute(cancellableTask!!)
 
         verify(activityManagerWrapper).getTaskThumbnail(TASK_ID, true)
+        verify(activityManagerWrapper, never()).takeTaskThumbnail(anyInt())
     }
 
     @Test
@@ -153,6 +154,7 @@ class TaskThumbnailCacheTest {
         systemUnderTest.getThumbnailInBackground(task) { actualTaskThumbnail = it }
 
         verify(activityManagerWrapper, never()).getTaskThumbnail(eq(TASK_ID), any())
+        verify(activityManagerWrapper, never()).takeTaskThumbnail(anyInt())
         assertThat(actualTaskThumbnail).isEqualTo(expectedTaskThumbnail)
     }
 
