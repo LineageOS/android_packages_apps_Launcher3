@@ -38,6 +38,10 @@ android_library {
         "androidx.appfunctions_appfunctions-service",
         "androidx.appcompat_appcompat",
     ],
+    libs: [
+        // Only needed at link time to resolve optional deps from the support library.
+        "com.android.extensions.appfunctions.stubs",
+    ],
     plugins: ["androidx.appfunctions_appfunctions-compiler-plugin"],
     kotlincflags: ["-Xjvm-default=all"],
     enable_ksp: true, // required for appfunctions
