@@ -26,4 +26,6 @@ sealed class PillStyleViewModel {
     class ShortPillStyle(val position: Rect?) : PillStyleViewModel()
 
     object NoPillStyle : PillStyleViewModel()
+
+    object DesktopPillStyle : PillStyleViewModel()
 }
