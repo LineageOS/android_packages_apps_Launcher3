@@ -33,6 +33,7 @@ import com.android.app.displaylib.DisplayRepository
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.app.tracing.traceSection
 import com.android.internal.jank.Cuj
+import com.android.internal.util.LatencyTracker
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.anim.AnimatorListeners
 import com.android.launcher3.logger.LauncherAtom
@@ -44,6 +45,7 @@ import com.android.launcher3.taskbar.TaskbarInteractor
 import com.android.launcher3.taskbar.TaskbarManager
 import com.android.launcher3.util.OverviewCommandHelperProtoLogProxy
 import com.android.launcher3.util.RunnableList
+import com.android.launcher3.util.TraceHelper
 import com.android.launcher3.util.coroutines.DispatcherProvider
 import com.android.quickstep.GestureState.GestureEndTarget
 import com.android.quickstep.GestureState.displaySupportsHomeGesture
@@ -238,22 +240,56 @@ constructor(
      */
     private suspend fun executeCommandSuspended(command: CommandInfo) =
         suspendCancellableCoroutine { continuation ->
+            fun onCommandBreakpoint(breakpoint: CommandBreakpoint) {
+                when (command.type) {
+                    TOGGLE,
+                    TOGGLE_OVERVIEW_PREVIOUS,
+                    TOGGLE_WITH_FOCUS -> {
+                        val context =
+                            getContainerInterface(command.displayId)
+                                ?.getCreatedContainer()
+                                ?.asContext() ?: return
+
+                        if (!LatencyTracker.isEnabled(context)) return
+
+                        LatencyTracker.getInstance(context)?.let {
+                            TraceHelper.INSTANCE.allowIpcs("logToggleRecents").use { _ ->
+                                when (breakpoint) {
+                                    CommandBreakpoint.START ->
+                                        it.onActionStart(LatencyTracker.ACTION_TOGGLE_RECENTS)
+                                    CommandBreakpoint.END ->
+                                        it.onActionEnd(LatencyTracker.ACTION_TOGGLE_RECENTS)
+                                    CommandBreakpoint.CANCEL ->
+                                        it.onActionCancel(LatencyTracker.ACTION_TOGGLE_RECENTS)
+                                }
+                            }
+                        }
+                    }
+                    else -> {}
+                }
+            }
+
             fun processResult(isCompleted: Boolean) {
                 OverviewCommandHelperProtoLogProxy.logExecutedCommandWithResult(
                     command,
                     isCompleted,
                 )
                 if (isCompleted) {
+                    onCommandBreakpoint(CommandBreakpoint.END)
                     continuation.resume(Unit)
                 } else {
                     OverviewCommandHelperProtoLogProxy.logWaitingForCommandCallback(command)
                 }
             }
 
+            onCommandBreakpoint(CommandBreakpoint.START)
             val result = executeCommand(command, onCallbackResult = { processResult(true) })
             processResult(result)
 
-            continuation.invokeOnCancellation { cancelCommand(command, it) }
+            continuation.invokeOnCancellation {
+                onCommandBreakpoint(CommandBreakpoint.CANCEL)
+                cancelCommand(command, it)
+            }
         }
 
     private fun executeWhenRecentsIsVisible(
@@ -835,6 +871,12 @@ constructor(
 
         /** Toggle between Overview and the keyboard-focused Overview task. */
         TOGGLE_WITH_FOCUS,
+    }
+
+    private enum class CommandBreakpoint {
+        START,
+        END,
+        CANCEL,
     }
 
     data class ToggleInfo(val createTime: Long, val taskIds: Set<Int>)

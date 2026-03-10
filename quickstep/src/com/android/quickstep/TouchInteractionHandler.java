@@ -919,10 +919,16 @@ public class TouchInteractionHandler extends ContextWrapper {
             Log.d(TAG, "displayId " + displayId + " not valid");
             return null;
         }
-        return new LauncherSwipeHandlerV2(this, taskAnimationManager, deviceState,
-                rotationTouchHelper, gestureState, touchTimeMs,
+        return new LauncherSwipeHandlerV2(
+                /*context= */ this,
+                taskAnimationManager,
+                deviceState,
+                rotationTouchHelper,
+                gestureState,
                 taskAnimationManager.isRecentsAnimationRunning(),
-                mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this), displayId);
+                mInputConsumer,
+                MSDLPlayerWrapper.INSTANCE.get(this),
+                displayId);
     }
 
     private @Nullable AbsSwipeUpHandler<?, ?, ?> createFallbackSwipeHandler(
@@ -935,10 +941,16 @@ public class TouchInteractionHandler extends ContextWrapper {
             Log.d(TAG, "displayId " + displayId + " not valid");
             return null;
         }
-        return new FallbackSwipeHandler(this, taskAnimationManager, deviceState,
-                rotationTouchHelper, gestureState, touchTimeMs,
+        return new FallbackSwipeHandler(
+                /* context= */ this,
+                taskAnimationManager,
+                deviceState,
+                rotationTouchHelper,
+                gestureState,
                 taskAnimationManager.isRecentsAnimationRunning(),
-                mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this), displayId);
+                mInputConsumer,
+                MSDLPlayerWrapper.INSTANCE.get(this),
+                displayId);
     }
 
     private @Nullable AbsSwipeUpHandler<?, ?, ?> createRecentsWindowSwipeHandler(
@@ -954,10 +966,15 @@ public class TouchInteractionHandler extends ContextWrapper {
             return null;
         }
         return new RecentsWindowSwipeHandler(recentsWindowManager,
-                taskAnimationManager, deviceState,
-                rotationTouchHelper, recentsWindowManager, gestureState, touchTimeMs,
+                taskAnimationManager,
+                deviceState,
+                rotationTouchHelper,
+                recentsWindowManager,
+                gestureState,
                 taskAnimationManager.isRecentsAnimationRunning(),
-                mInputConsumer, MSDLPlayerWrapper.INSTANCE.get(this), displayId);
+                mInputConsumer,
+                MSDLPlayerWrapper.INSTANCE.get(this),
+                displayId);
     }
 
     public class InputResource implements DisplayModel.DisplayResource {
