@@ -54,10 +54,6 @@ import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext.Companion.getDeviceParams
 import com.android.launcher3.testutil.Wait
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
-import com.android.launcher3.util.rule.TestStabilityRule
-import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
-import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
-import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import com.android.window.flags.Flags.FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS
 import com.android.window.flags.Flags.FLAG_ENABLE_TASKBAR_OVERFLOW
 import com.google.common.truth.Truth
@@ -94,7 +90,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @get:Rule(order = 1) val context = TaskbarWindowSandboxContext.create(deviceName)
     @get:Rule(order = 2) val setFlagsRule = SetFlagsRule(flags)
     @get:Rule(order = 3) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
-    @get:Rule val testStabilityRule = TestStabilityRule()
 
     private val activityContext by taskbarUnitTestRule::activityContext
 
@@ -128,7 +123,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_hotseatItems_hasDividerBetweenAllAppsAndHotseat() {
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList())
@@ -138,7 +132,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     @ForceRtl
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_rtlWithHotseatItems_hasDividerBetweenHotseatAndAllApps() {
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList())
@@ -147,7 +140,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_withNullHotseatItem_filtersNullItem() {
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(arrayOf(*createHotseatItems(2), null), emptyList(), emptyList())
@@ -157,7 +149,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     @ForceRtl
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_rtlWithNullHotseatItem_filtersNullItem() {
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(arrayOf(*createHotseatItems(2), null), emptyList(), emptyList())
@@ -288,7 +279,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     @ForceRtl
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_rtl_hotseatItems_hasDividerBetweenHotseatAndAllApps() {
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(createHotseatItems(2), emptyList(), emptyList())
@@ -325,7 +315,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     @ForceRtl
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_rtl_addHotseatItemWithoutRecents_updatesHotseat() {
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(createHotseatItems(1), emptyList(), emptyList())
@@ -375,7 +364,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_addFirstHotseatItem_addsDivider() {
         // GIVEN no items are present, so there is no divider
         runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
@@ -391,7 +379,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_removeLastHotseatItem_removesDivider() {
         // GIVEN a hotseat item is present, so there is a divider
         runOnTaskbarUiThreadSync {
@@ -408,7 +395,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     @ForceRtl
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_rtl_addFirstHotseatItem_addsDivider() {
         // GIVEN no items are present, so there is no divider
         runOnTaskbarUiThreadSync { taskbarView.updateItems(emptyArray(), emptyList(), emptyList()) }
@@ -425,7 +411,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     @ForceRtl
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_rtl_removeLastHotseatItem_removesDivider() {
         // GIVEN a hotseat item is present, so there is a divider
         runOnTaskbarUiThreadSync {
@@ -773,7 +758,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_qsbInline_removesDividerWhenOnlyStaticViewsRemain() {
         // This test runs only on devices with an inline QSB, like tablets.
         assume().that(activityContext.deviceProfile.hotseatProfile.isQsbInline).isTrue()
@@ -820,7 +804,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
 
     @Test
     @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_hotseatOverflow_noRecents() {
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(
@@ -836,7 +819,6 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
     @Test
     @EnableFlags(FLAG_ENABLE_OVERFLOW_BUTTON_FOR_TASKBAR_PINNED_ITEMS)
     @ForceRtl
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280120)
     fun testUpdateItems_rtl_hotseatOverflow_noRecents() {
         runOnTaskbarUiThreadSync {
             taskbarView.updateItems(
