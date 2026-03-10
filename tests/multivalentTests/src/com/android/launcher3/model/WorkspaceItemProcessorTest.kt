@@ -152,7 +152,7 @@ class WorkspaceItemProcessorTest {
                 `package` = "pkg"
                 putExtra(ShortcutKey.EXTRA_SHORTCUT_ID, "")
             }
-        whenever(mockIconCache.getShortcutIcon(any(), any(), any())).then {}
+        whenever(mockIconCache.getShortcutIcon(any(), any(), any(), any())).then {}
         whenever(mockPmHelper.getAppLaunchIntent(mComponentName.packageName, mUserHandle))
             .thenReturn(mIntent)
 
@@ -376,9 +376,11 @@ class WorkspaceItemProcessorTest {
             whenever(isPackageEnabled("package", mUserHandle)).thenReturn(true)
             whenever(isActivityEnabled(mComponentName, mUserHandle)).thenReturn(false)
         }
-        mockPmHelper = mock<PackageManagerHelper>().apply {
-            whenever(getAppLaunchIntent(mComponentName.packageName, mUserHandle)).thenReturn(null)
-        }
+        mockPmHelper =
+            mock<PackageManagerHelper>().apply {
+                whenever(getAppLaunchIntent(mComponentName.packageName, mUserHandle))
+                    .thenReturn(null)
+            }
         val packageUserKey = PackageUserKey("package", mUserHandle)
         mInstallingPkgs[packageUserKey] = mock<PackageInstaller.SessionInfo>()
 
