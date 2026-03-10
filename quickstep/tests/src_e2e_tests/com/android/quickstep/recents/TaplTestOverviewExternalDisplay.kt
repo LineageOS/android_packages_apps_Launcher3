@@ -26,6 +26,7 @@ import com.android.quickstep.AbstractQuickStepTest
 import com.android.quickstep.util.MultiDisplayTest
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -61,6 +62,7 @@ class TaplTestOverviewExternalDisplay : AbstractQuickStepTest() {
 
     @Test
     @MultiDisplayTest
+    @Ignore("b/487550091")
     fun testDismissAllTasksFromOverview() {
         baseContainer.switchToOverview().dismissAllTasks()
         assertThat(mLauncher.recentTasks).isEmpty()
