@@ -21,7 +21,6 @@ import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
 import static android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE;
 
-import static com.android.launcher3.Flags.enableReplaceSharesheetAndEmptyMessageRo;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
@@ -148,49 +147,37 @@ public class ImageActionUtils {
                 Log.e(tag, "No snapshot available, not starting share.");
                 return;
             }
-            if (enableReplaceSharesheetAndEmptyMessageRo()) {
-                startShareActivity(context, bitmapSupplier, crop, intent, tag,
-                        /* sharedElement= */ null, /* copyIntentAction= */ null,
-                        /* copyCropRectKey= */ null);
-            } else {
-                persistBitmapAndStartActivity(context, bitmap, crop, intent,
-                        ImageActionUtils::getShareIntentForImageUri, tag);
-            }
+            startShareActivity(context, bitmapSupplier, crop, intent, tag,
+                    /* copyIntentAction= */ null, /* copyCropRectKey= */ null);
         });
     }
 
     /**
-     * Launch the activity to share image with shared element transition.
+     * Launch the activity to share image with custom copy action.
      */
     public static void startShareActivity(Context context, Supplier<Bitmap> bitmapSupplier,
-            Rect crop, Intent intent, String tag, View sharedElement, String copyIntentAction,
-            String copyCropRectKey) {
+            Rect crop, Intent intent, String tag, String copyIntentAction, String copyCropRectKey) {
         UI_HELPER_EXECUTOR.execute(() -> {
             Bitmap bitmap = bitmapSupplier.get();
             if (bitmap == null) {
                 Log.e(tag, "No snapshot available, not starting share.");
                 return;
             }
-            if (enableReplaceSharesheetAndEmptyMessageRo()) {
-                Intent copyIntent = new Intent(copyIntentAction)
-                        .setPackage(context.getPackageName())
-                        .putExtra(copyCropRectKey, crop);
-                PendingIntent copyPendingIntent = PendingIntent.getBroadcast(context,
-                        COPY_REQUEST_CODE,
-                        copyIntent,
-                        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-                ChooserAction[] customActions = new ChooserAction[]{
-                        new ChooserAction.Builder(Icon.createWithResource(context,
-                                R.drawable.ic_content_copy_vd_theme_24),
-                                context.getString(R.string.action_image_copy),
-                                copyPendingIntent).build()
-                };
-                persistBitmapAndStartActivity(context, bitmap, crop, intent,
-                        (uri, i) -> getShareIntentForImageUri(uri, i, customActions), tag);
-            } else {
-                persistBitmapAndStartActivity(context, bitmap, crop, intent,
-                        ImageActionUtils::getShareIntentForImageUri, tag, sharedElement);
-            }
+            Intent copyIntent = new Intent(copyIntentAction)
+                    .setPackage(context.getPackageName())
+                    .putExtra(copyCropRectKey, crop);
+            PendingIntent copyPendingIntent = PendingIntent.getBroadcast(context,
+                    COPY_REQUEST_CODE,
+                    copyIntent,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            ChooserAction[] customActions = new ChooserAction[]{
+                    new ChooserAction.Builder(Icon.createWithResource(context,
+                            R.drawable.ic_content_copy_vd_theme_24),
+                            context.getString(R.string.action_image_copy),
+                            copyPendingIntent).build()
+            };
+            persistBitmapAndStartActivity(context, bitmap, crop, intent,
+                    (uri, i) -> getShareIntentForImageUri(uri, i, customActions), tag);
         });
     }
 
@@ -229,27 +216,7 @@ public class ImageActionUtils {
         }
     }
 
-    /**
-     * Starts activity based on given intent created from image uri with shared element transition.
-     */
-    @WorkerThread
-    public static void persistBitmapAndStartActivity(Context context, Bitmap bitmap, Rect crop,
-            Intent intent, BiFunction<Uri, Intent, Intent[]> uriToIntentMap, String tag,
-            View scaledImage) {
-        Intent[] intents = uriToIntentMap.apply(getImageUri(bitmap, crop, context, tag), intent);
 
-        // Work around b/159412574
-        if (intents.length == 1) {
-            MAIN_EXECUTOR.execute(() -> context.startActivity(intents[0],
-                    ActivityOptions.makeSceneTransitionAnimation((Activity) context, scaledImage,
-                            ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle()));
-
-        } else {
-            MAIN_EXECUTOR.execute(() -> context.startActivities(intents,
-                    ActivityOptions.makeSceneTransitionAnimation((Activity) context, scaledImage,
-                            ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle()));
-        }
-    }
 
 
 
