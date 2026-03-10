@@ -58,6 +58,9 @@ import com.android.quickstep.cuebar.data.IconModel
 import com.android.quickstep.cuebar.data.InsightListener
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.system.TaskStackChangeListener
+import com.android.personalcontext.ace.common.FlatIndexUtils.flatIndexOf
+import com.android.personalcontext.ace.common.PackedIntUtils.packValue
+import com.android.personalcontext.ace.common.wrappers.wrap
 import com.android.systemui.shared.system.TaskStackChangeListeners
 import dagger.assisted.AssistedInject
 import java.io.PrintWriter
@@ -359,7 +362,7 @@ constructor(
                 extras = null
 
                 onPerformAction = {
-                    reportInsightEvent(InsightEvent.EVENT_USER_TAP)
+                    reportInsightEvent(insight, InsightEvent.EVENT_USER_TAP)
                     if (
                         contextHint is BundleHint &&
                             contextHint.dataBundle.getBoolean(NEEDS_DATA_EGRESS, false)
@@ -397,7 +400,7 @@ constructor(
                         null
                     }
                 onPerformAction = {
-                    reportInsightEvent(InsightEvent.EVENT_USER_TAP)
+                    reportInsightEvent(insight, InsightEvent.EVENT_USER_TAP)
                     val token = activityId?.token
                     if (token != null && autofillId != null) {
                         autofillManager?.autofillRemoteApp(
@@ -439,7 +442,7 @@ constructor(
                 onPerformAction = onPerformAction,
                 onPerformLongClick = {
                     Log.i(TAG, "AmbientCueRepositoryImpl: onPerformLongClick")
-                    reportInsightEvent(InsightEvent.EVENT_USER_LONG_PRESS)
+                    reportInsightEvent(insight, InsightEvent.EVENT_USER_LONG_PRESS)
                     // TODO: b/458508340 Proper design for attribution/feedback.
                     val pendingIntent =
                         extras?.getParcelable<PendingIntent>(
@@ -469,11 +472,13 @@ constructor(
         TaskStackChangeListeners.getInstance().registerTaskStackListener(taskStackListener)
     }
 
-    private fun reportInsightEvent(event: Int) {
-        val insight = lastPublishedInsight
+    private fun reportInsightEvent(childInsight: ContextInsight, event: Int) {
+        val publishedInsight = lastPublishedInsight
         val token = lastRenderToken
-        if (insight != null && token != null) {
-            personalContextManager?.reportInsightEvent(insight, event, token)
+        if (publishedInsight != null && token != null) {
+            val flatIndex = publishedInsight.wrap().flatIndexOf(childInsight)
+            val packedEvent = event.packValue(flatIndex)
+            personalContextManager?.reportInsightEvent(publishedInsight, packedEvent, token)
         }
     }
 
