@@ -78,6 +78,7 @@ fun Modifier.dismissibleSheet(
     onDismissSheet: () -> Unit,
     maxHeight: Float,
     enableNestedScrolling: Boolean = true,
+    enableDragOnScrollToEnd: Boolean = true,
 ): Modifier = composed {
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
@@ -104,6 +105,7 @@ fun Modifier.dismissibleSheet(
                     sheetState = sheetState,
                     flingBehavior = flingBehavior,
                     enabled = enableNestedScrolling,
+                    enableDragOnScrollToEnd = enableDragOnScrollToEnd,
                 )
             )
 
