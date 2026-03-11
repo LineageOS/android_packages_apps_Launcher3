@@ -255,26 +255,24 @@ object InputConsumerUtils {
                     tac.addInputConsumerToCleanUp(base)
                 }
             }
-            if (Flags.fixBubblesLongPressNavHandle()) {
-                // Create bubbles input consumer before NavHandleLongPressInputConsumer.
-                // This allows for nav handle to fall back to bubbles.
-                if (deviceState.isBubblesExpanded) {
-                    reasonString =
-                        newCompoundString(reasonPrefix)
-                            .append(
-                                "%sbubbles expanded, trying to use default input consumer",
-                                SUBSTRING_PREFIX,
-                            )
-                    // Bubbles can handle home gesture itself.
-                    base =
-                        getDefaultInputConsumer(
-                            gestureState.displayId,
-                            userUnlocked,
-                            taskAnimationManager,
-                            taskbarManager,
-                            reasonString,
+            // Create bubbles input consumer before NavHandleLongPressInputConsumer.
+            // This allows for nav handle to fall back to bubbles.
+            if (deviceState.isBubblesExpanded) {
+                reasonString =
+                    newCompoundString(reasonPrefix)
+                        .append(
+                            "%sbubbles expanded, trying to use default input consumer",
+                            SUBSTRING_PREFIX,
                         )
-                }
+                // Bubbles can handle home gesture itself.
+                base =
+                    getDefaultInputConsumer(
+                        gestureState.displayId,
+                        userUnlocked,
+                        taskAnimationManager,
+                        taskbarManager,
+                        reasonString,
+                    )
             }
 
             val navHandle = tac?.navHandle ?: SystemUiProxy.INSTANCE[context]
@@ -304,27 +302,6 @@ object InputConsumerUtils {
                         gestureState,
                     )
                 tac?.addInputConsumerToCleanUp(base)
-            }
-
-            if (!Flags.fixBubblesLongPressNavHandle()) {
-                // Continue overriding nav handle input consumer with bubbles
-                if (deviceState.isBubblesExpanded) {
-                    reasonString =
-                        newCompoundString(reasonPrefix)
-                            .append(
-                                "%sbubbles expanded, trying to use default input consumer",
-                                SUBSTRING_PREFIX,
-                            )
-                    // Bubbles can handle home gesture itself.
-                    base =
-                        getDefaultInputConsumer(
-                            gestureState.displayId,
-                            userUnlocked,
-                            taskAnimationManager,
-                            taskbarManager,
-                            reasonString,
-                        )
-                }
             }
 
             if (deviceState.isSystemUiDialogShowing) {
