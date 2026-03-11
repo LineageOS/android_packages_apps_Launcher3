@@ -235,6 +235,12 @@ public class TaskbarUIController implements BubbleBarController.BubbleBarLocatio
 
 
     /**
+     * Closes any open floating views in the Launcher activity.
+     */
+    protected void closeOpenLauncherViews() {
+    }
+
+    /**
      * Toggles all apps UI. Default implementation opens Taskbar All Apps, but may be overridden to
      * open different Alls Apps variant depending on the context.
      * @param focusSearch indicates whether All Apps should be opened with search input focused.
