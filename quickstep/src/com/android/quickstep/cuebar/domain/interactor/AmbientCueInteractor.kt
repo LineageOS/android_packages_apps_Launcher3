@@ -73,8 +73,4 @@ constructor(
     val globallyFocusedTaskId: ListenableRef<Int> = ambientCueRepository.globallyFocusedTaskId
 
     val frontTaskPackageName: ListenableRef<String> = ambientCueRepository.frontTaskPackageName
-
-    fun reportCloseEvent() {
-        ambientCueRepository.reportCloseEvent()
-    }
 }
