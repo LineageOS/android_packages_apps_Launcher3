@@ -1132,6 +1132,7 @@ public class BubbleBarView extends FrameLayout {
                 // if the bubble bar is not yet measured, set its bounds to be the same as the
                 // fullscreen to calculate both vertical margins correctly.
                 boundsOnScreen.set(windowBounds);
+                boundsOnScreen.top = windowBounds.bottom / 2;
             } else {
                 // if the bubble bar needs to do some measuring return the default margin
                 return mDefaultMargin;
