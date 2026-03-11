@@ -16,8 +16,6 @@
 
 package com.android.launcher3.taskbar
 
-import android.animation.LayoutTransition.APPEARING
-import android.animation.LayoutTransition.DISAPPEARING
 import android.content.Context
 import android.view.View
 import android.view.View.OnLayoutChangeListener
@@ -92,7 +90,7 @@ abstract class PinnedAppsDragHelper(
             container.removeView(it)
             // Cancel any pending drag view disappearing animation - the dragged view is not visible
             // at this time and will be readded to the container immediately.
-            container.layoutTransition?.cancel(DISAPPEARING)
+            container.layoutTransition?.cancel()
             // Keep drag view invisible, but make it take up space during layout - it will be
             // changed to visible when resetting the drag state.
             it.visibility = INVISIBLE
@@ -101,7 +99,7 @@ abstract class PinnedAppsDragHelper(
         val itemView = draggedView ?: createViewForItem(item)
         if (itemView != null) {
             container.addView(itemView, calculateDropIndexInContainer(dropSpotIndex, -1))
-            container.layoutTransition?.cancel(APPEARING)
+            container.layoutTransition?.cancel()
         }
         indexOfChildHiddenForDrag = -1
         dropSpotIndex = -1
@@ -125,8 +123,8 @@ abstract class PinnedAppsDragHelper(
                     oldBottom: Int,
                 ) {
                     view?.removeOnLayoutChangeListener(this)
+                    container.layoutTransition?.cancel()
                     container.layoutTransition?.endChangingAnimations()
-                    container.layoutTransition?.cancel(APPEARING)
                 }
             }
         )
@@ -149,7 +147,7 @@ abstract class PinnedAppsDragHelper(
             return
         }
         container.removeViewAt(indexOfChildHiddenForDrag)
-        container.layoutTransition?.cancel(DISAPPEARING)
+        container.clearDisappearingChildren()
         indexOfChildHiddenForDrag = -1
     }
 
