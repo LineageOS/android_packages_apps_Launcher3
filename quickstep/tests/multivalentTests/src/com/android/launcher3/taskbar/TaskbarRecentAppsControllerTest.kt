@@ -1508,6 +1508,45 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
+    fun getDesktopTaskInstanceCount_noMatchingTask_returnsZero() {
+        setInDesktopMode(true)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = emptyList(),
+            recentTaskPackages = emptyList(),
+        )
+        assertThat(recentAppsController.getDesktopTaskInstanceCount(1)).isEqualTo(0)
+    }
+
+    @Test
+    fun getDesktopTaskInstanceCount_singleInstance_returnsOne() {
+        setInDesktopMode(true)
+        val task = createTask(id = 1, packageName = RUNNING_APP_PACKAGE_1)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = listOf(task),
+            recentTaskPackages = emptyList(),
+        )
+        assertThat(recentAppsController.getDesktopTaskInstanceCount(1)).isEqualTo(1)
+    }
+
+    @Test
+    fun getDesktopTaskInstanceCount_multipleInstances_returnsCount() {
+        setInDesktopMode(true)
+        val task1 = createTask(id = 1, packageName = RUNNING_APP_PACKAGE_1)
+        val task2 = createTask(id = 2, packageName = RUNNING_APP_PACKAGE_1)
+        val task3 = createTask(id = 3, RUNNING_APP_PACKAGE_1, isVisible = false, isMinimized = true)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = listOf(task1, task2, task3),
+            recentTaskPackages = emptyList(),
+        )
+        assertThat(recentAppsController.getDesktopTaskInstanceCount(1)).isEqualTo(3)
+        assertThat(recentAppsController.getDesktopTaskInstanceCount(2)).isEqualTo(3)
+        assertThat(recentAppsController.getDesktopTaskInstanceCount(3)).isEqualTo(3)
+    }
+
+    @Test
     fun hasSingleTask_noTargetPackage_returnsFalse() {
         prepareHotseatAndRunningAndRecentApps(
             hotseatPackages = emptyList(),

@@ -58,6 +58,13 @@ flag {
 }
 
 flag {
+  name: "enable_taskbar_icon_desktop_experience"
+  namespace: "lse_desktop_experience"
+  description: "Enables desktop style tasakbar icon behavior."
+  bug: "433770976"
+}
+
+flag {
   name: "enable_taskbar_icon_container"
   namespace: "launcher"
   description: "Enables code path that uses TaskbarIconsContainer"
