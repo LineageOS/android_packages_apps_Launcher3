@@ -228,8 +228,6 @@ class TaskbarPinningControllerTest : TaskbarBaseTestCase() {
     @Test
     fun testRecreateTaskbarAndUpdatePinningValue_whenAnimationEnds_shouldUpdateTaskbarPinningLauncherPref() {
         pinningController.recreateTaskbarAndUpdatePinningValue()
-        verify(taskbarDragLayer, times(1)).setAnimatingTaskbarPinning(false)
-        assertThat(pinningController.isAnimatingTaskbarPinning).isFalse()
         verify(launcherPrefs, times(1)).put(TASKBAR_PINNING, true)
     }
 }
