@@ -45,6 +45,7 @@ import static com.android.launcher3.BaseActivity.INVISIBLE_BY_PENDING_FLAGS;
 import static com.android.launcher3.BaseActivity.PENDING_INVISIBLE_BY_WALLPAPER_ANIMATION;
 import static com.android.launcher3.Flags.appLaunchBlur;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
+import static com.android.launcher3.LauncherAnimUtils.getScaleProperty;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.BACKGROUND_APP;
@@ -91,6 +92,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
@@ -172,6 +174,7 @@ import com.android.systemui.shared.system.BlurUtils;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.wm.shell.shared.compat.AnimatedSurface;
+import com.android.wm.shell.shared.compat.AnimatedSurfaceUtils;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 import java.io.PrintWriter;
@@ -586,7 +589,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         boolean isAllOpeningTargetTrs = true;
         for (int i = 0; i < surfaces.length; i++) {
             AnimatedSurface surface = surfaces[i];
-            if (surface.isOpening()) {
+            if (AnimatedSurfaceUtils.isOpening(surface)) {
                 isAllOpeningTargetTrs &= surface.isTranslucent;
             }
             if (!isAllOpeningTargetTrs) break;
@@ -652,7 +655,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             int rotationChange) {
         AnimatedSurface surface = null;
         for (AnimatedSurface s : appSurfaces) {
-            if (!s.isOpening()) continue;
+            if (!AnimatedSurfaceUtils.isOpening(s)) continue;
             surface = s;
             break;
         }
@@ -728,9 +731,11 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 }
             });
 
+            FloatProperty<View> scaleProperty = getScaleProperty();
+
             if (!skipAllAppsScale) {
-                SCALE_PROPERTY.set(appsView, scales[0]);
-                ObjectAnimator scale = ObjectAnimator.ofFloat(appsView, SCALE_PROPERTY, scales);
+                scaleProperty.set(appsView, scales[0]);
+                ObjectAnimator scale = ObjectAnimator.ofFloat(appsView, scaleProperty, scales);
                 scale.setInterpolator(AGGRESSIVE_EASE);
                 scale.setDuration(CONTENT_SCALE_DURATION);
                 launcherAnimator.play(scale);
@@ -740,7 +745,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
             endListener = () -> {
                 appsView.setAlpha(startAlpha);
-                SCALE_PROPERTY.set(appsView, startScale);
+                scaleProperty.set(appsView, startScale);
                 appsView.setLayerType(View.LAYER_TYPE_NONE, null);
                 mLauncher.resumeExpensiveViewUpdates();
             };
@@ -818,14 +823,15 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         anim.play(alpha);
         overview.setFreezeViewVisibility(true);
 
-        ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(overview, SCALE_PROPERTY, scales);
+        FloatProperty<View> scaleProperty = getScaleProperty();
+        ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(overview, scaleProperty, scales);
         scaleAnim.setInterpolator(AGGRESSIVE_EASE);
         scaleAnim.setDuration(CONTENT_SCALE_DURATION);
         anim.play(scaleAnim);
 
         return () -> {
             overview.setFreezeViewVisibility(false);
-            SCALE_PROPERTY.set(overview, 1f);
+            scaleProperty.set(overview, 1f);
             mLauncher.getStateManager().reapplyState();
             mLauncher.resumeExpensiveViewUpdates();
         };
@@ -1061,7 +1067,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     AnimatedSurface surface = appSurfaces[i];
                     SurfaceProperties builder = transaction.forSurface(surface.leash);
 
-                    if (surface.isOpening()) {
+                    if (AnimatedSurfaceUtils.isOpening(surface)) {
                         matrix.setScale(scale, scale);
                         if (rotationChange == 1) {
                             matrix.postTranslate(windowTransY0,
@@ -1085,7 +1091,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                                 .setAlpha(1f - mIconAlpha.value)
                                 .setCornerRadius(mWindowRadius.value)
                                 .setShadowRadius(mShadowRadius.value);
-                    } else if (surface.isClosing()) {
+                    } else if (AnimatedSurfaceUtils.isClosing(surface)) {
                         if (surface.localBounds != null) {
                             tmpPos.set(surface.localBounds.left, surface.localBounds.top);
                         } else {
@@ -1257,7 +1263,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 for (int i = appSurfaces.length - 1; i >= 0; i--) {
                     AnimatedSurface surface = appSurfaces[i];
                     SurfaceProperties builder = transaction.forSurface(surface.leash);
-                    if (surface.isOpening()) {
+                    if (AnimatedSurfaceUtils.isOpening(surface)) {
                         floatingView.update(widgetBackgroundBounds, floatingViewAlpha,
                                 mWidgetForegroundAlpha.value, mWidgetFallbackBackgroundAlpha.value,
                                 mCornerRadiusProgress.value);
@@ -1308,7 +1314,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         AnimatedSurface launcherSurface = null;
         if (surfaces.unfilteredApps != null) {
             for (final AnimatedSurface surface : surfaces.unfilteredApps) {
-                if (surface.isClosing()) {
+                if (AnimatedSurfaceUtils.isClosing(surface)) {
                     launcherSurface = surface;
                     break;
                 }
@@ -1572,7 +1578,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     }
 
     private boolean launcherIsASurfaceWithMode(AnimatedSurface[] surfaces,
-            AnimatedSurface.Mode mode) {
+            @AnimatedSurfaceUtils.AnimatedSurfaceMode int mode) {
         for (final AnimatedSurface surface : surfaces) {
             if (surface.mode == mode && surface.taskInfo != null
                     // Compare component name instead of task-id because transitions will promote
@@ -1703,7 +1709,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     mDeviceProfile.getDeviceProperties().getHeightPx());
             int fallbackBackgroundColor =
                     FloatingWidgetView.getDefaultBackgroundColor(mLauncher,
-                            AnimatedSurface.from(runningTaskTarget));
+                            AnimatedSurfaceUtils.from(runningTaskTarget));
             floatingWidget = FloatingWidgetView.getFloatingWidgetView(mLauncher,
                     (LauncherAppWidgetHostView) launcherView, targetRect, windowSize,
                     getWindowCornerRadius(mLauncher), isTransluscent, fallbackBackgroundColor);
@@ -1799,7 +1805,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
      * Closing window animator that moves the window down and offscreen.
      */
     private Animator getFallbackClosingWindowAnimators(RemoteAnimationTarget[] appTargets) {
-        AnimatedSurface[] appSurfaces = AnimatedSurface.mapFromTargets(appTargets);
+        AnimatedSurface[] appSurfaces = AnimatedSurfaceUtils.mapFromTargets(appTargets);
         final int rotationChange = getRotationChange(appSurfaces);
         SurfaceTransactionApplier surfaceApplier = new SurfaceTransactionApplier(mDragLayer);
         Matrix matrix = new Matrix();
@@ -1972,7 +1978,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         RectFSpringAnim rectFSpringAnim = null;
 
         final boolean launcherIsForceInvisibleOrOpening = mLauncher.isForceInvisible()
-                || launcherIsASurfaceWithMode(AnimatedSurface.mapFromTargets(appTargets),
+                || launcherIsASurfaceWithMode(AnimatedSurfaceUtils.mapFromTargets(appTargets),
                 AnimatedSurface.Mode.OPENING);
 
         boolean playFallBackAnimation = (launcherView == null
@@ -2125,7 +2131,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 mLauncher.getStateManager().moveToRestState();
             }
 
-            AnimatedSurface[] appSurfaces = AnimatedSurface.mapFromTargets(appTargets);
+            AnimatedSurface[] appSurfaces = AnimatedSurfaceUtils.mapFromTargets(appTargets);
 
             RectF windowTargetBounds =
                     new RectF(getWindowTargetBounds(appSurfaces, getRotationChange(appSurfaces)));
@@ -2171,9 +2177,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 RemoteAnimationTarget[] wallpaperTargets,
                 RemoteAnimationTarget[] nonAppTargets,
                 LauncherAnimationRunner.AnimationResult result) {
-            AnimatedSurface[] appSurfaces = AnimatedSurface.mapFromTargets(appTargets);
-            AnimatedSurface[] wallpaperSurfaces = AnimatedSurface.mapFromTargets(wallpaperTargets);
-            AnimatedSurface[] nonAppSurfaces = AnimatedSurface.mapFromTargets(nonAppTargets);
+            AnimatedSurface[] appSurfaces = AnimatedSurfaceUtils.mapFromTargets(appTargets);
+            AnimatedSurface[] wallpaperSurfaces =
+                    AnimatedSurfaceUtils.mapFromTargets(wallpaperTargets);
+            AnimatedSurface[] nonAppSurfaces = AnimatedSurfaceUtils.mapFromTargets(nonAppTargets);
 
             AnimatorSet anim = new AnimatorSet();
             boolean launcherClosing =

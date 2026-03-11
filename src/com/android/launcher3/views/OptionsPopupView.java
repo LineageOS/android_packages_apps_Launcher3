@@ -153,6 +153,11 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
     @Override
     public void assignMarginsAndBackgrounds(ViewGroup viewGroup) {
         assignMarginsAndBackgrounds(viewGroup, mColors[0]);
+    }
+
+    @Override
+    protected void assignMarginsAndBackgrounds(ViewGroup viewGroup, int backgroundColor) {
+        super.assignMarginsAndBackgrounds(viewGroup, backgroundColor);
         // last shortcut doesn't need bottom margin
         final int count = viewGroup.getChildCount() - 1;
         for (int i = 0; i < count; i++) {
@@ -238,6 +243,13 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
                 R.drawable.ic_apps,
                 LAUNCHER_ALL_APPS_TAP_OR_LONGPRESS,
                 OptionsPopupView::enterAllApps));
+        if (Flags.kondoPlanner()) {
+            options.add(new OptionItem(launcher,
+                    R.string.settings_home_organizer,
+                    R.drawable.kondo_planner_icon,
+                    LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
+                    OptionsPopupView::startScreenCreation));
+        }
         options.add(new OptionItem(launcher,
                 R.string.settings_button_text,
                 R.drawable.ic_setting,
@@ -251,13 +263,6 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
                     OptionsPopupView::createNewFolder));
         }
 
-        if (Flags.kondoPlanner()) {
-            options.add(new OptionItem(launcher,
-                    R.string.settings_home_organizer,
-                    R.drawable.ic_setting,
-                    LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
-                    OptionsPopupView::startScreenCreation));
-        }
         return options;
     }
 

@@ -18,15 +18,15 @@ package com.android.launcher3.accessibility;
 
 import static com.android.launcher3.Flags.enableFileSystemFoldersAsDropTargets;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER;
-
 import static java.util.Objects.requireNonNull;
 
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
-
 import com.android.launcher3.CellLayout;
+import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
+import com.android.launcher3.Workspace;
 import com.android.launcher3.accessibility.BaseAccessibilityDelegate.DragType;
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtilsKt;
 import com.android.launcher3.model.data.AppInfo;
@@ -124,20 +124,26 @@ public class WorkspaceAccessibilityHelper extends DragAndDropAccessibilityDelega
         if (child == null || child == dragInfo.item) {
             return mView.getItemMoveDescription(x, y);
         } else {
-            return getDescriptionForDropOver(child, mContext);
+            String pageDescription = mView.getContainerPageDescription();
+            return getDescriptionForDropOver(child, mContext, pageDescription);
         }
     }
 
-    public static String getDescriptionForDropOver(View overChild, Context context) {
+    public static String getDescriptionForDropOver(View overChild, Context context,
+        String pageDescription) {
         ItemInfo info = (ItemInfo) overChild.getTag();
+        int row = info.cellY + 1;
+        int col = info.cellX + 1;
+
         if (enableFileSystemFoldersAsDropTargets()
                 && info.itemType == ITEM_TYPE_FILE_SYSTEM_FOLDER) {
             return context.getString(
-                    R.string.add_to_folder,
-                    requireNonNull(HomeScreenFilesUtilsKt.getHomeScreenFile(info))
-                            .getDisplayName());
+                        R.string.add_to_folder_with_position,
+                        requireNonNull(HomeScreenFilesUtilsKt.getHomeScreenFile(info))
+                                .getDisplayName(), row, col, pageDescription);
         } else if (info instanceof WorkspaceItemInfo) {
-            return context.getString(R.string.create_folder_with, info.title);
+            return context.getString(R.string.create_folder_with_position, info.title,
+                        row, col, pageDescription);
         } else if (info instanceof FolderInfo) {
             if (TextUtils.isEmpty(info.title)) {
                 // Find the first item in the folder.
@@ -150,10 +156,12 @@ public class WorkspaceAccessibilityHelper extends DragAndDropAccessibilityDelega
                 }
 
                 if (firstItem != null) {
-                    return context.getString(R.string.add_to_folder_with_app, firstItem.title);
+                    return context.getString(R.string.add_to_folder_with_app_with_position,
+                                firstItem.title, row, col, pageDescription);
                 }
             }
-            return context.getString(R.string.add_to_folder, info.title);
+            return context.getString(R.string.add_to_folder_with_position, info.title,
+                        row, col, pageDescription);
         }
         return "";
     }

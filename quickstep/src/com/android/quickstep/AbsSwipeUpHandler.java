@@ -83,7 +83,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.util.Log;
 import android.util.Pair;
 import android.util.TimeUtils;
@@ -112,7 +111,6 @@ import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.jank.Cuj;
-import com.android.internal.util.LatencyTracker;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Flags;
@@ -363,9 +361,6 @@ public abstract class AbsSwipeUpHandler<
     private boolean mLogDirectionUpOrLeft = true;
     private boolean mIsLikelyToStartNewTask;
 
-    private final long mTouchTimeMs;
-    private long mLauncherFrameDrawnTime;
-
     private final int mSplashMainWindowShiftLength;
 
     private final Runnable mOnDeferredActivityLaunch = this::onDeferredActivityLaunch;
@@ -409,11 +404,14 @@ public abstract class AbsSwipeUpHandler<
     private float mMagneticEffectShiftValue;
 
     public AbsSwipeUpHandler(Context context,
-            TaskAnimationManager taskAnimationManager, RecentsAnimationDeviceState deviceState,
-            RotationTouchHelper rotationTouchHelper, GestureState gestureState,
-            long touchTimeMs, boolean continuingLastGesture,
+            TaskAnimationManager taskAnimationManager,
+            RecentsAnimationDeviceState deviceState,
+            RotationTouchHelper rotationTouchHelper,
+            GestureState gestureState,
+            boolean continuingLastGesture,
             InputConsumerController inputConsumer,
-            MSDLPlayerWrapper msdlPlayerWrapper, int displayId) {
+            MSDLPlayerWrapper msdlPlayerWrapper,
+            int displayId) {
         super(context, gestureState, rotationTouchHelper);
         mContainerInterface = gestureState.getContainerInterface();
         mContextInitListener =
@@ -441,7 +439,6 @@ public abstract class AbsSwipeUpHandler<
                 }, new InputProxyHandlerFactory(mContainerInterface, mGestureState));
         mTaskAnimationManager = taskAnimationManager;
         mDeviceState = deviceState;
-        mTouchTimeMs = touchTimeMs;
         mContinuingLastGesture = continuingLastGesture;
         mRotationTouchHelper = rotationTouchHelper;
 
@@ -528,9 +525,6 @@ public abstract class AbsSwipeUpHandler<
 
         mStateCallback.runOnceAtState(STATE_LAUNCHER_DRAWN | STATE_GESTURE_STARTED,
                 this::initializeLauncherAnimationController);
-
-        mStateCallback.runOnceAtState(STATE_LAUNCHER_PRESENT | STATE_LAUNCHER_DRAWN,
-                this::launcherFrameDrawn);
 
         mStateCallback.runOnceAtState(STATE_LAUNCHER_PRESENT | STATE_LAUNCHER_STARTED
                         | STATE_GESTURE_CANCELLED,
@@ -804,17 +798,8 @@ public abstract class AbsSwipeUpHandler<
         }
     }
 
-    private void launcherFrameDrawn() {
-        mLauncherFrameDrawnTime = SystemClock.uptimeMillis();
-    }
-
     private void initializeLauncherAnimationController() {
         buildAnimationController();
-
-        try (SafeCloseable c = TraceHelper.INSTANCE.allowIpcs("logToggleRecents")) {
-            LatencyTracker.getInstance(mContext).logAction(LatencyTracker.ACTION_TOGGLE_RECENTS,
-                    (int) (mLauncherFrameDrawnTime - mTouchTimeMs));
-        }
 
         // This method is only called when STATE_GESTURE_STARTED is set, so we can enable the
         // high-res thumbnail loader here once we are sure that we will end up in an overview state

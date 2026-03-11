@@ -153,14 +153,10 @@
     <string name="folder_renamed" msgid="1794088362165669656">"Nome della cartella sostituito con <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="folder_type_name" msgid="506043307348675355">"Cartella"</string>
     <string name="app_folder_type_name" msgid="149643408248060284">"Cartella app"</string>
-    <!-- no translation found for apps_folder_name_format_exact (891345161390366700) -->
-    <skip />
-    <!-- no translation found for apps_folder_name_format_exact_with_dot (7729062268048931718) -->
-    <skip />
-    <!-- no translation found for apps_folder_name_format_overflow (4614729357510054194) -->
-    <skip />
-    <!-- no translation found for apps_folder_name_format_overflow_with_dot (4738681518782744688) -->
-    <skip />
+    <string name="apps_folder_name_format_exact" msgid="891345161390366700">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> elementi"</string>
+    <string name="apps_folder_name_format_exact_with_dot" msgid="7729062268048931718">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> elementi, ha notifiche"</string>
+    <string name="apps_folder_name_format_overflow" msgid="4614729357510054194">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> o più elementi"</string>
+    <string name="apps_folder_name_format_overflow_with_dot" msgid="4738681518782744688">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> o più elementi, ha notifiche"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"Cartella senza nome"</string>
     <string name="files_folder_name" msgid="7712191128817533622">"Cartella di file: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"Coppia di app: <xliff:g id="APP1">%1$s</xliff:g> and <xliff:g id="APP2">%2$s</xliff:g>"</string>
@@ -168,8 +164,7 @@
     <string name="edit_home_screen" msgid="8947858375782098427">"Modifica schermata Home"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"Impostazioni Home"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Disattivata dall\'amministratore"</string>
-    <!-- no translation found for settings_home_organizer (5184766349407080054) -->
-    <skip />
+    <string name="settings_home_organizer" msgid="5184766349407080054">"Organizzatore per la casa"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Con il telefono ruotato"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Abilita il tracciamento della composizione"</string>
@@ -270,22 +265,9 @@
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"Nuova cartella"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"Nuova cartella"</string>
     <string name="something_went_wrong" msgid="1492883246069060632">"Si è verificato un problema"</string>
-    <!-- no translation found for organizer_create_screen (284001317063451431) -->
+    <!-- no translation found for organizer_create_screen_title (1052454457895703433) -->
     <skip />
-    <!-- no translation found for organizer_create_screen_description (3224132391919219061) -->
-    <skip />
-    <!-- no translation found for organizer_topic_0 (2289302981298465926) -->
-    <skip />
-    <!-- no translation found for organizer_topic_1 (9139266779598899604) -->
-    <skip />
-    <!-- no translation found for organizer_topic_2 (2890586328846836407) -->
-    <skip />
-    <!-- no translation found for organizer_topic_3 (4708170964708215008) -->
-    <skip />
-    <!-- no translation found for organizer_topic_4 (7852628756329993717) -->
-    <skip />
-    <!-- no translation found for organizer_topic_5 (3391565770865209078) -->
-    <skip />
-    <!-- no translation found for organizer_topic_6 (5372680031834537103) -->
+    <string name="organizer_create_screen_description" msgid="3224132391919219061">"Scegli una categoria per aggiungere app e widget dallo smartphone"</string>
+    <!-- no translation found for organizer_choose_layout_title (127228966942084947) -->
     <skip />
 </resources>

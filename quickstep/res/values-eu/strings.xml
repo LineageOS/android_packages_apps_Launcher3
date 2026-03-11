@@ -73,7 +73,7 @@
     <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"Ikasi duzu aplikazioz aldatzeko keinua"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"Pasatu hatza aplikazioa aldatzeko"</string>
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"Aplikazio batetik bestera joateko, pasatu hatza pantailaren behealdetik gora, eduki pantaila sakatuta eta altxatu hatza."</string>
-    <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"Aldatu aplikazioa"</string>
+    <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"Aldatu aplikazioz"</string>
     <string name="overview_gesture_tutorial_subtitle" msgid="5253549754058973071">"Pasatu hatza pantailaren behealdetik gora, eduki sakatuta une batez, eta jaso hatza"</string>
     <string name="overview_gesture_tutorial_success" msgid="1910267697807973076">"Oso ongi!"</string>
     <string name="gesture_tutorial_confirm_title" msgid="6201516182040074092">"Dena prest"</string>

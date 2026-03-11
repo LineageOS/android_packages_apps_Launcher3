@@ -15,7 +15,7 @@
  */
 package com.android.launcher3.hybridhotseat;
 
-import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
+import static com.android.launcher3.LauncherAnimUtils.getScaleProperty;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_HOTSEAT_PREDICTION_PINNED;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_HOTSEAT_RANKED;
 import static com.android.launcher3.util.OnboardingPrefs.HOTSEAT_LONGPRESS_TIP_SEEN;
@@ -132,7 +132,7 @@ public class HotseatPredictionController implements
         mLauncher.getModelWriter().addItemToDatabase(workspaceItemInfo,
                 LauncherSettings.Favorites.CONTAINER_HOTSEAT, workspaceItemInfo.screenId,
                 workspaceItemInfo.cellX, workspaceItemInfo.cellY);
-        ObjectAnimator.ofFloat(icon, SCALE_PROPERTY, 1, 0.8f, 1).start();
+        ObjectAnimator.ofFloat(icon, getScaleProperty(), 1, 0.8f, 1).start();
         icon.pin(workspaceItemInfo);
         mLauncher.getStatsLogManager().logger()
                 .withItemInfo(workspaceItemInfo)

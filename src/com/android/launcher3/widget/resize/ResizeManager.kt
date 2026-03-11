@@ -280,7 +280,7 @@ class ResizeManager(
 
         // Reset the two-panel drag effect.
         if (workspace != null && pairedCellLayout != null) {
-            updateInvalidResizeEffect(
+            updateTwoPanelCellLayoutResizeEffect(
                 alpha = 1f,
                 springLoadedProgress = 0f,
                 cellLayout = cellLayout,
@@ -318,7 +318,7 @@ class ResizeManager(
         val alpha = max(CELL_LAYOUT_INVALID_RESIZE_MAX_ALPHA, progress)
         val springLoadedProgress =
             min(SPRING_LOADED_PROGRESS_MAX, (SPRING_LOADED_PROGRESS_MAX - progress))
-        updateInvalidResizeEffect(
+        updateTwoPanelCellLayoutResizeEffect(
             cellLayout = cellLayout,
             pairedCellLayout = pairedCellLayout,
             alpha = alpha,
@@ -326,7 +326,7 @@ class ResizeManager(
         )
     }
 
-    private fun updateInvalidResizeEffect(
+    private fun updateTwoPanelCellLayoutResizeEffect(
         cellLayout: CellLayout,
         pairedCellLayout: CellLayout,
         alpha: Float,
@@ -340,7 +340,6 @@ class ResizeManager(
         val shouldShowCellLayoutBorder = springLoadedProgress > SPRING_LOADED_PROGRESS_MIN
         cellLayout.isDragOverlapping = shouldShowCellLayoutBorder
         pairedCellLayout.isDragOverlapping = shouldShowCellLayoutBorder
-        cellLayout.revertTempState()
     }
 
     /** To be called before destroying the resize manager. */

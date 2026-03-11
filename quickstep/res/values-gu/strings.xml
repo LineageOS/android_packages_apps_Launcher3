@@ -70,7 +70,7 @@
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"તમારી આંગળી ઊંચકતા પહેલાં તેને વિન્ડો પર થોડી વધારે વાર માટે દબાવી રાખવાનો પ્રયાસ કરો"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"ખાતરી કરો કે તમે સીધું ઉપર સ્વાઇપ કરો છો, પછી થોભી જાઓ છો"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"સંકેતોનો ઉપયોગ કરવાની રીત વિશે તમે જાણ્યું. સંકેતો બંધ કરવા, સેટિંગમાં જાઓ."</string>
-    <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"તમે ઍપ સ્વિચ કરવાનો સંકેત પૂર્ણ કર્યો."</string>
+    <string name="overview_gesture_feedback_complete_without_follow_up" msgid="2903050864432331629">"તમે ઍપ સ્વિચ કરવાનો સંકેત પૂર્ણ કર્યો"</string>
     <string name="overview_gesture_intro_title" msgid="2902054412868489378">"ઍપ સ્વિચ કરવા સ્વાઇપ કરો"</string>
     <string name="overview_gesture_intro_subtitle" msgid="4968091015637850859">"એક ઍપ પરથી બીજી ઍપ પર સ્વિચ કરવા માટે, તમારી સ્ક્રીનના નીચેના ભાગથી ઉપરની તરફ સ્વાઇપ કરીને, થોડીવાર દબાવી રાખો, પછી છોડી દો."</string>
     <string name="overview_gesture_tutorial_title" msgid="4125835002668708720">"ઍપ સ્વિચ કરો"</string>

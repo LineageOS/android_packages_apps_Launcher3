@@ -27,7 +27,7 @@
     <string name="safemode_widget_error" msgid="4863470563535682004">"Widgetak desgaitu egin dira modu seguruan"</string>
     <string name="shortcut_not_available" msgid="2536503539825726397">"Lasterbideak ez daude erabilgarri"</string>
     <string name="home_screen" msgid="5629429142036709174">"Orri nagusia"</string>
-    <string name="set_default_home_app" msgid="5808906607627586381">"Ezarri <xliff:g id="LAUNCHER_NAME">%1$s</xliff:g> hasierako aplikazio lehenetsi gisa ezarpenetan"</string>
+    <string name="set_default_home_app" msgid="5808906607627586381">"Ezarri <xliff:g id="LAUNCHER_NAME">%1$s</xliff:g> hasierako aplikazio lehenetsi gisa Ezarpenak atalean"</string>
     <string name="recent_task_option_split_screen" msgid="6690461455618725183">"Pantaila zatitzea"</string>
     <string name="recent_task_option_aspect_ratio" msgid="7008605516391096989">"Aldatu aspektu-erlazioa"</string>
     <string name="split_app_info_accessibility" msgid="5475288491241414932">"%1$s aplikazioari buruzko informazioa"</string>
@@ -153,14 +153,10 @@
     <string name="folder_renamed" msgid="1794088362165669656">"Karpetari <xliff:g id="NAME">%1$s</xliff:g> izena eman zaio"</string>
     <string name="folder_type_name" msgid="506043307348675355">"Karpeta"</string>
     <string name="app_folder_type_name" msgid="149643408248060284">"Aplikazioen karpeta"</string>
-    <!-- no translation found for apps_folder_name_format_exact (891345161390366700) -->
-    <skip />
-    <!-- no translation found for apps_folder_name_format_exact_with_dot (7729062268048931718) -->
-    <skip />
-    <!-- no translation found for apps_folder_name_format_overflow (4614729357510054194) -->
-    <skip />
-    <!-- no translation found for apps_folder_name_format_overflow_with_dot (4738681518782744688) -->
-    <skip />
+    <string name="apps_folder_name_format_exact" msgid="891345161390366700">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> elementu"</string>
+    <string name="apps_folder_name_format_exact_with_dot" msgid="7729062268048931718">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> elementu, jakinarazpenak ditu"</string>
+    <string name="apps_folder_name_format_overflow" msgid="4614729357510054194">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> elementu edo gehiago"</string>
+    <string name="apps_folder_name_format_overflow_with_dot" msgid="4738681518782744688">"<xliff:g id="TYPE">%1$s</xliff:g>: <xliff:g id="NAME">%2$s</xliff:g>, <xliff:g id="SIZE">%3$d</xliff:g> elementu edo gehiago, jakinarazpenak ditu"</string>
     <string name="unnamed_folder" msgid="2420192029474044442">"Izenik gabeko karpeta"</string>
     <string name="files_folder_name" msgid="7712191128817533622">"Fitxategien karpeta: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="app_pair_name_format" msgid="8134106404716224054">"Aplikazio parea: <xliff:g id="APP1">%1$s</xliff:g> eta <xliff:g id="APP2">%2$s</xliff:g>"</string>
@@ -168,8 +164,7 @@
     <string name="edit_home_screen" msgid="8947858375782098427">"Editatu orri nagusia"</string>
     <string name="settings_button_text" msgid="8873672322605444408">"Orri nag. ezarpenak"</string>
     <string name="msg_disabled_by_admin" msgid="6898038085516271325">"Administratzaileak desgaitu du"</string>
-    <!-- no translation found for settings_home_organizer (5184766349407080054) -->
-    <skip />
+    <string name="settings_home_organizer" msgid="5184766349407080054">"Etxeko antolatzailea"</string>
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Telefonoa biratzean"</string>
     <string name="compose_developer_options_section" msgid="8211460486549952595">"Jetpack Compose"</string>
     <string name="enable_composition_tracing_title" msgid="8989606591739368424">"Gaitu konposizioaren jarraipena"</string>
@@ -270,22 +265,9 @@
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"Karpeta berria"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"Karpeta berria"</string>
     <string name="something_went_wrong" msgid="1492883246069060632">"Arazoren bat izan da"</string>
-    <!-- no translation found for organizer_create_screen (284001317063451431) -->
+    <!-- no translation found for organizer_create_screen_title (1052454457895703433) -->
     <skip />
-    <!-- no translation found for organizer_create_screen_description (3224132391919219061) -->
-    <skip />
-    <!-- no translation found for organizer_topic_0 (2289302981298465926) -->
-    <skip />
-    <!-- no translation found for organizer_topic_1 (9139266779598899604) -->
-    <skip />
-    <!-- no translation found for organizer_topic_2 (2890586328846836407) -->
-    <skip />
-    <!-- no translation found for organizer_topic_3 (4708170964708215008) -->
-    <skip />
-    <!-- no translation found for organizer_topic_4 (7852628756329993717) -->
-    <skip />
-    <!-- no translation found for organizer_topic_5 (3391565770865209078) -->
-    <skip />
-    <!-- no translation found for organizer_topic_6 (5372680031834537103) -->
+    <string name="organizer_create_screen_description" msgid="3224132391919219061">"Aukeratu kategoria bat telefonoko aplikazioak eta widgetak gehitzeko"</string>
+    <!-- no translation found for organizer_choose_layout_title (127228966942084947) -->
     <skip />
 </resources>

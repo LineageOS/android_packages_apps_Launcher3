@@ -32,8 +32,8 @@ import com.android.launcher3.BubbleTextView
 import com.android.launcher3.LauncherAnimUtils
 import com.android.launcher3.LauncherAnimUtils.HOTSEAT_SCALE_PROPERTY_FACTORY
 import com.android.launcher3.LauncherAnimUtils.SCALE_INDEX_FOLDER_ANIM
-import com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY
 import com.android.launcher3.LauncherAnimUtils.WORKSPACE_SCALE_PROPERTY_FACTORY
+import com.android.launcher3.LauncherAnimUtils.getScaleProperty
 import com.android.launcher3.R
 import com.android.launcher3.Utilities.isDarkTheme
 import com.android.launcher3.anim.SpringAnimationBuilder
@@ -179,7 +179,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                 startValue = animationData.initialFolderScale,
                 endValue = 1f,
                 minVisibleChange = MIN_VISIBLE_CHANGE_SCALE,
-                property = SCALE_PROPERTY,
+                property = getScaleProperty(),
                 view = folder.content,
             )
             playSpringAnimation(
@@ -192,7 +192,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                 startValue = animationData.initialFolderScale,
                 endValue = 1f,
                 minVisibleChange = MIN_VISIBLE_CHANGE_SCALE,
-                property = SCALE_PROPERTY,
+                property = getScaleProperty(),
                 view = folder.mFooter,
             )
             // Translate the footer so that it tracks the bottom of the content.
@@ -490,7 +490,7 @@ class FolderSpringAnimatorSet(val animatorSet: AnimatorSet) {
                     startValue = initialIconScale,
                     endValue = 1f,
                     minVisibleChange = MIN_VISIBLE_CHANGE_SCALE,
-                    property = SCALE_PROPERTY,
+                    property = getScaleProperty(),
                     view = icon,
                 )
                 animatorSet.addListener(

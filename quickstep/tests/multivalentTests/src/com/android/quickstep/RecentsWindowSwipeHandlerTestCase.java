@@ -42,8 +42,7 @@ public class RecentsWindowSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase
 
     @NonNull
     @Override
-    protected RecentsWindowSwipeHandler createSwipeHandlerInternal(long touchTimeMs,
-            boolean continuingLastGesture) {
+    protected RecentsWindowSwipeHandler createSwipeHandlerInternal(boolean continuingLastGesture) {
         return new RecentsWindowSwipeHandler(
                 mContext,
                 mTaskAnimationManager,
@@ -51,7 +50,6 @@ public class RecentsWindowSwipeHandlerTestCase extends AbsSwipeUpHandlerTestCase
                 mRotationTouchHelper,
                 mRecentsWindowManager,
                 mGestureState,
-                touchTimeMs,
                 continuingLastGesture,
                 mInputConsumerController,
                 mMSDLPlayerWrapper,

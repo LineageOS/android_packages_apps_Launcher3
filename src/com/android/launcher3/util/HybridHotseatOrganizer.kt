@@ -25,7 +25,7 @@ import android.view.View
 import android.view.ViewGroup.OnHierarchyChangeListener
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget.DragObject
-import com.android.launcher3.LauncherAnimUtils
+import com.android.launcher3.LauncherAnimUtils.getScaleProperty
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.WorkspaceLayoutManager
 import com.android.launcher3.anim.AnimationSuccessListener
@@ -165,9 +165,7 @@ class HybridHotseatOrganizer(
             workspace.addInScreenFromBind(icon, item)
             finishBinding(icon)
             if (animate) {
-                animationSet.play(
-                    ObjectAnimator.ofFloat(icon, LauncherAnimUtils.SCALE_PROPERTY, 0.2f, 1f)
-                )
+                animationSet.play(ObjectAnimator.ofFloat(icon, getScaleProperty(), 0.2f, 1f))
             }
         }
         if (animate) {
@@ -236,7 +234,7 @@ class HybridHotseatOrganizer(
                 )
             )
             icon.isEnabled = false
-            val animator = ObjectAnimator.ofFloat(icon, LauncherAnimUtils.SCALE_PROPERTY, 0f)
+            val animator = ObjectAnimator.ofFloat(icon, getScaleProperty(), 0f)
             animator.addListener(
                 object : AnimationSuccessListener() {
                     override fun onAnimationSuccess(animator: Animator) {

@@ -28,6 +28,7 @@ import com.android.launcher3.Flags.FLAG_ENABLE_FILE_SYSTEM_FOLDERS_AS_DROP_TARGE
 import com.android.launcher3.R
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
+import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.util.TestActivityContext
 import org.junit.Assert.assertEquals
@@ -64,14 +65,91 @@ class WorkspaceAccessibilityHelperTest {
                             intent = HomeScreenFilesUtils.buildLaunchIntent(folder.uri, folder)
                             itemType = HomeScreenFilesUtils.buildItemType(folder)
                             title = folder.displayName
+                            cellX = 1
+                            cellY = 2
+                            screenId = 0
                         }
                     )
                     .whenever(this@apply)
                     .tag
             }
 
-        val actual = WorkspaceAccessibilityHelper.getDescriptionForDropOver(overChild, context)
-        val expected = context.getString(R.string.add_to_folder, folder.displayName)
+        val actual = WorkspaceAccessibilityHelper.getDescriptionForDropOver(overChild, context, "Page 1")
+        val expected =
+            context.getString(
+                R.string.add_to_folder_with_position,
+                folder.displayName,
+                3,
+                2,
+                "Page 1",
+            )
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testGetDescriptionForDropOverWorkspaceItem() {
+        val info = WorkspaceItemInfo().apply {
+            title = "Gmail"
+            cellX = 1
+            cellY = 2
+            screenId = 0
+        }
+        val overChild = mock<View>().apply { whenever(tag).thenReturn(info) }
+
+        val actual = WorkspaceAccessibilityHelper.getDescriptionForDropOver(overChild, context, "Page 1")
+        val expected =
+            context.getString(
+                R.string.create_folder_with_position,
+                "Gmail",
+                3,
+                2,
+                "Page 1",
+            )
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testGetDescriptionForDropOverFolder() {
+        val info = FolderInfo().apply {
+            title = "Games"
+            cellX = 1
+            cellY = 2
+            screenId = 0
+        }
+        val overChild = mock<View>().apply { whenever(tag).thenReturn(info) }
+
+        val actual = WorkspaceAccessibilityHelper.getDescriptionForDropOver(overChild, context, "Page 1")
+        val expected =
+            context.getString(
+                R.string.add_to_folder_with_position,
+                "Games",
+                3,
+                2,
+                "Page 1",
+            )
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testGetDescriptionForDropOverFolder_unnamed_withContent() {
+        val info = FolderInfo().apply {
+            title = ""
+            cellX = 1
+            cellY = 2
+            screenId = 0
+            add(WorkspaceItemInfo().apply { title = "Gmail"; rank = 0 })
+        }
+        val overChild = mock<View>().apply { whenever(tag).thenReturn(info) }
+
+        val actual = WorkspaceAccessibilityHelper.getDescriptionForDropOver(overChild, context, "Page 1")
+        val expected =
+            context.getString(
+                R.string.add_to_folder_with_app_with_position,
+                "Gmail",
+                3,
+                2,
+                "Page 1",
+            )
         assertEquals(expected, actual)
     }
 }

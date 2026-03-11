@@ -134,11 +134,9 @@ public class WorkspaceItemInfo extends ItemInfoWithIcon {
     public WorkspaceItemInfo(ShortcutInfo shortcutInfo, Context context) {
         user = shortcutInfo.getUserHandle();
         itemType = Favorites.ITEM_TYPE_DEEP_SHORTCUT;
-        if (Flags.privateSpaceRestrictAccessibilityDrag()) {
-            if (UserCache.INSTANCE.get(context).getUserInfo(user).isPrivate()) {
-                runtimeStatusFlags |= FLAG_NOT_PINNABLE;
-            }
-        }
+        if (UserCache.INSTANCE.get(context).getUserInfo(user).isPrivate()) {
+            runtimeStatusFlags |= FLAG_NOT_PINNABLE;
+         }
         updateFromDeepShortcutInfo(shortcutInfo, context);
     }
 

@@ -1234,6 +1234,11 @@ public class CellLayout extends ViewGroup {
         }
     }
 
+    public String getContainerPageDescription() {
+        int pageIndex = mCellLayoutContainer.getCellLayoutIndex(this);
+        return mCellLayoutContainer.getPageDescription(pageIndex);
+    }
+
     public void clearDragOutlines() {
         final int oldIndex = mDragOutlineCurrent;
         mDragOutlineAnims[oldIndex].animateOut();
@@ -1545,7 +1550,7 @@ public class CellLayout extends ViewGroup {
     /**
      * Clear state variables to be ready for a new reorder.
      */
-    public void revertTempState() {
+    protected void revertTempState() {
         completeAndClearReorderPreviewAnimations();
         if (isItemPlacementDirty() && !DESTRUCTIVE_REORDER) {
             final int count = mShortcutsAndWidgets.getChildCount();

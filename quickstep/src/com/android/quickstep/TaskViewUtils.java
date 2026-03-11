@@ -97,6 +97,7 @@ import com.android.systemui.animation.RemoteAnimationTargetCompat;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.wm.shell.shared.compat.AnimatedSurface;
+import com.android.wm.shell.shared.compat.AnimatedSurfaceUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -152,7 +153,7 @@ public final class TaskViewUtils {
         // Resolve the opening task id
         int openingTaskId = -1;
         for (AnimatedSurface surface : surfaces) {
-            if (surface.isOpening()) {
+            if (AnimatedSurfaceUtils.isOpening(surface)) {
                 openingTaskId = surface.taskId;
                 break;
             }
@@ -656,7 +657,7 @@ public final class TaskViewUtils {
         boolean skipLauncherChanges = !launcherClosing;
 
         TaskView taskView = findTaskViewToLaunch(recentsView, v,
-                AnimatedSurface.mapFromTargets(appTargets));
+                AnimatedSurfaceUtils.mapFromTargets(appTargets));
         if (taskView == null) {
             Log.w(TAG, "composeRecentsLaunchAnimator - no TaskView to launch");
             return;

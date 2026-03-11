@@ -118,7 +118,6 @@ class LauncherSwipeHandlerV2Test {
                             deviceState,
                             rotationTouchHelper,
                             gestureState,
-                            0,
                             false,
                             inputConsumerController,
                             msdlPlayerWrapper,
