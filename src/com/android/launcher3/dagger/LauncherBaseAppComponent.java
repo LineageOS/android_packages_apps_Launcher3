@@ -59,6 +59,7 @@ import com.android.launcher3.qsb.QsbWidgetFactory;
 import com.android.launcher3.testing.TestInformationHandler;
 import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.DaggerSingletonTracker;
+import com.android.launcher3.util.DefaultsValueProvider;
 import com.android.launcher3.util.DynamicResource;
 import com.android.launcher3.util.InstantAppResolver;
 import com.android.launcher3.util.LayoutImportExportHelper;
@@ -175,6 +176,9 @@ public interface LauncherBaseAppComponent {
 
     /** Returns the WorkspaceAppFunctions instance */
     WorkspaceAppFunctions getWorkspaceAppFunctions();
+
+    /** Provider for default values */
+    DefaultsValueProvider getDefaultsValueProvider();
 
     /** Builder for LauncherBaseAppComponent. */
     interface Builder {

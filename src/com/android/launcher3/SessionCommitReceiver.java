@@ -32,6 +32,7 @@ import com.android.launcher3.model.ItemInstallQueue;
 import com.android.launcher3.model.SerializedItemItem;
 import com.android.launcher3.pm.InstallSessionHelper;
 import com.android.launcher3.pm.UserCache;
+import com.android.launcher3.util.DefaultsValueProvider;
 import com.android.launcher3.util.Executors;
 
 import java.util.Locale;
@@ -110,6 +111,7 @@ public class SessionCommitReceiver extends BroadcastReceiver {
         if (user != null && UserCache.getInstance(context).getUserInfo(user).isPrivate()) {
             return false;
         }
-        return LauncherPrefs.getPrefs(context).getBoolean(ADD_ICON_PREFERENCE_KEY, true);
+        return LauncherPrefs.getPrefs(context).getBoolean(ADD_ICON_PREFERENCE_KEY,
+                DefaultsValueProvider.get(context).getAddIconToHome());
     }
 }
