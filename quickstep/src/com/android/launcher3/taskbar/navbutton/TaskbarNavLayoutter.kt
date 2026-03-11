@@ -107,9 +107,7 @@ class TaskbarNavLayoutter(
         navButtonContainer.orientation = LinearLayout.HORIZONTAL
         navButtonContainer.layoutParams = navButtonParams
 
-        if (android.view.accessibility.Flags.navbarFlipOrderOption()) {
-            addThreeButtons()
-        }
+        addThreeButtons()
     }
 
     private fun calculateNavMarginEnd(

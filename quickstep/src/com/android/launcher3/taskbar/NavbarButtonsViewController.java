@@ -501,9 +501,9 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         if (!mContext.isPhoneMode()) {
             mPropertyHolders.add(new StatePropertyHolder(
                     mBackButton, flags -> mContext.isUserSetupComplete()
-                        && ((flags & FLAG_ONLY_BACK_FOR_BOUNCER_VISIBLE) != 0
-                            || (flags & FLAG_KEYGUARD_VISIBLE) != 0)
-                        && (!shouldShowHomeButtonInLockscreen(flags)),
+                    && ((flags & FLAG_ONLY_BACK_FOR_BOUNCER_VISIBLE) != 0
+                    || (flags & FLAG_KEYGUARD_VISIBLE) != 0)
+                    && (!shouldShowHomeButtonInLockscreen(flags)),
                     VIEW_TRANSLATE_X, navButtonSize * (isRtl ? -2 : 2), 0));
         }
 
@@ -561,18 +561,16 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         mSpace.setOnLongClickListener(view ->
                 navButtonController.onButtonLongClick(BUTTON_SPACE, view));
 
-        if (android.view.accessibility.Flags.navbarFlipOrderOption()) {
-            mSettingCacheSafeCloseable = SettingsCache.INSTANCE.get(mContext)
-                    .getListenableRef(mButtonOrderChangedUri).forEach(
-                            getTaskbarUiThread(), (isEnabled) -> {
-                                getLayoutterForCurrentState().layoutButtons(
-                                        mContext,
-                                        isA11yButtonPersistent(),
-                                        isA11yButtonVisible(),
-                                        isMoreOptionsButtonVisible());
-                                return null;
-                            });
-        }
+        mSettingCacheSafeCloseable = SettingsCache.INSTANCE.get(mContext)
+                .getListenableRef(mButtonOrderChangedUri).forEach(
+                        getTaskbarUiThread(), (isEnabled) -> {
+                            getLayoutterForCurrentState().layoutButtons(
+                                    mContext,
+                                    isA11yButtonPersistent(),
+                                    isA11yButtonVisible(),
+                                    isMoreOptionsButtonVisible());
+                            return null;
+                        });
     }
 
     private void notifyRecentsButtonPosition() {
