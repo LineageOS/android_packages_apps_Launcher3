@@ -121,7 +121,6 @@ constructor(
         isExpanded = false
         disableFirstTimeHint()
         ambientCueLogger.setClickedCloseButtonStatus()
-        ambientCueInteractor.reportCloseEvent()
     }
 
     private val listeners = mutableListOf<SafeCloseable>()
