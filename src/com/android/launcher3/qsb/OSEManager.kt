@@ -36,6 +36,7 @@ import androidx.annotation.WorkerThread
 import com.android.launcher3.R
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.pm.InstallSessionHelper
 import com.android.launcher3.pm.InstallSessionTracker
 import com.android.launcher3.pm.PackageInstallInfo
@@ -57,7 +58,7 @@ import javax.inject.Inject
  */
 @LauncherAppSingleton
 class OSEManager(
-    val context: Context,
+    private val context: Context,
     private val settingsObserver: SecureStringObserver,
     private val installhelper: InstallSessionHelper,
     private val executor: LooperExecutor = OSE_LOOPER,
@@ -164,11 +165,11 @@ class OSEManager(
         val oldOseInfo = mutableOSEInfoRef.value
         val newOseInfo =
             OSEInfo(
-                osePkg,
-                overlayTarget,
-                oseApkInstallPending,
-                oseConfigured,
-                supportsSearchIntent,
+                pkg = osePkg,
+                overlayTarget = overlayTarget,
+                installPending = oseApkInstallPending,
+                isOseConfigured = oseConfigured,
+                supportsSearchIntent = supportsSearchIntent,
             )
         Log.i(TAG, "reloadOse oldOseInfo= " + oldOseInfo + "\nnewOseInfo= " + newOseInfo)
         if (osePkg == null && oldOseInfo.pkg == newOseInfo.pkg) {
@@ -294,6 +295,8 @@ class OSEManager(
         val OSE_LOOPER = LooperExecutor("OSEManager")
 
         const val OVERLAY_ACTION = "com.android.launcher3.WINDOW_OVERLAY"
+
+        @JvmStatic fun get(context: Context): OSEManager = context.appComponent.getOseManager()
     }
 
     inner class SessionTrackerCallback(val osePackage: String) : InstallSessionTracker.Callback {
