@@ -1310,12 +1310,6 @@ constructor(
             desktopMode?.showDesktopApp(taskId, transition, toFrontReason)
         }
 
-    /** If task with the given id is on the desktop, minimize it */
-    fun minimizeDesktopApp(taskId: Int) =
-        executeWithErrorLog({ "Failed call minimizeDesktopApp" }) {
-            desktopMode?.minimizeDesktopApp(taskId)
-        }
-
     /** Call shell to move to an existing fullscreen task (given by [taskId]) from desktop. */
     @JvmOverloads
     fun moveToFullscreen(
