@@ -179,7 +179,7 @@ public class TaskbarDragLayer extends BaseDragLayer<TaskbarActivityContext> {
     protected void dispatchDraw(Canvas canvas) {
         if (mContainer.isDestroyed()) return;
         float backgroundHeight = mControllerCallbacks.getTaskbarBackgroundHeight()
-                * (1f - mTaskbarBackgroundOffset);
+                * Math.max(1f - mTaskbarBackgroundOffset, 0f);
         mBackgroundRenderer.setBackgroundHeight(backgroundHeight);
         mBackgroundRenderer.setBackgroundProgress(mTaskbarBackgroundProgress);
         mBackgroundRenderer.draw(canvas);

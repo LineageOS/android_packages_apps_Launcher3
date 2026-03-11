@@ -71,6 +71,7 @@ public class TaskbarDragLayerController implements TaskbarControllers.LoggableTa
 
     // Translation property for taskbar background.
     private final AnimatedFloat mBgOffset = new AnimatedFloat(this::updateBackgroundOffset);
+    private final AnimatedFloat mBgOffsetForHome = new AnimatedFloat(this::updateBackgroundOffset);
 
     // Used to fade in/out the entirety of the taskbar, for a smooth transition before/after sysui
     // changes the inset visibility.
@@ -206,6 +207,10 @@ public class TaskbarDragLayerController implements TaskbarControllers.LoggableTa
         return mBgOffset;
     }
 
+    public AnimatedFloat getTaskbarBackgroundOffsetForHome() {
+        return mBgOffsetForHome;
+    }
+
     // AnimatedFloat is for animating between pinned and transient taskbar
     public AnimatedFloat getTaskbarBackgroundProgress() {
         return mTaskbarBackgroundProgress;
@@ -263,7 +268,9 @@ public class TaskbarDragLayerController implements TaskbarControllers.LoggableTa
     }
 
     private void updateBackgroundOffset() {
-        mTaskbarDragLayer.setTaskbarBackgroundOffset(mBgOffset.value);
+        // Note: Adding different bg offsets to better align with how `TaskbarViewController`
+        // combines different `taskbarIconTranslationY` values.
+        mTaskbarDragLayer.setTaskbarBackgroundOffset(mBgOffset.value + mBgOffsetForHome.value);
         updateOnBackgroundNavButtonColorIntensity();
     }
 
