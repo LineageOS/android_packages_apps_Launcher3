@@ -208,5 +208,10 @@ class LauncherInteractor(private val launcher: QuickstepLauncher) : ActivityInte
         }
     }
 
+    @AnyThread
+    fun closeOpenViews() {
+        executor.execute { launcher.closeOpenViews() }
+    }
+
     @AnyThread fun isSplitSelectActive() = launcher.isSplitSelectionActive
 }
