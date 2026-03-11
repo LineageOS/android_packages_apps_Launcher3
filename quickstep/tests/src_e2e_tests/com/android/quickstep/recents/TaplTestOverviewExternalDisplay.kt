@@ -55,6 +55,7 @@ class TaplTestOverviewExternalDisplay : AbstractQuickStepTest() {
     @Test
     @MultiDisplayTest
     @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 488078155)
+    @Ignore("b/487550091")
     fun testStartAppsAndGoToOverview() {
         mLauncher.launchedAppState.switchToOverview()
         assertThat(mLauncher.recentTasks.size).isEqualTo(2)

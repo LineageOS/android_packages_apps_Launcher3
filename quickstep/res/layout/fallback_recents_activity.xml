@@ -53,7 +53,6 @@
             layout="@layout/overview_actions_container" />
 
         <include
-            android:featureFlag="com.android.launcher3.enable_replace_sharesheet_and_empty_message_ro"
             android:id="@+id/empty_recents_message_view"
             layout="@layout/overview_empty_recents_message"
             android:visibility="gone"/>

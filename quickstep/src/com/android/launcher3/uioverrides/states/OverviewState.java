@@ -16,7 +16,6 @@
 package com.android.launcher3.uioverrides.states;
 
 import static com.android.app.animation.Interpolators.DECELERATE_2;
-import static com.android.launcher3.Flags.enableReplaceSharesheetAndEmptyMessageRo;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_OVERVIEW;
 import static com.android.launcher3.util.OverviewReleaseFlags.enablePredictiveBackInOverview;
 
@@ -168,17 +167,9 @@ public class OverviewState extends LauncherState {
 
     @Override
     public ScrimColors getWorkspaceScrimColor(Launcher launcher) {
-        if (enableReplaceSharesheetAndEmptyMessageRo()) {
-            return new ScrimColors(
-                    /* backgroundColor= */ Themes.getAttrColor(launcher, R.attr.overviewScrimColor),
-                    /* foregroundColor= */ Color.TRANSPARENT);
-        } else {
-            return new ScrimColors(
-                    /* backgroundColor= */ Themes.getAttrColor(launcher, R.attr.overviewScrimColor),
-                    /* foregroundColor= */ ColorUtils.compositeColors(
-                            Themes.getAttrColor(launcher, R.attr.overviewScrimForegroundPrimary),
-                    Themes.getAttrColor(launcher, R.attr.overviewScrimForegroundSecondary)));
-        }
+        return new ScrimColors(
+                /* backgroundColor= */ Themes.getAttrColor(launcher, R.attr.overviewScrimColor),
+                /* foregroundColor= */ Color.TRANSPARENT);
     }
 
     @Override

@@ -1926,6 +1926,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mControllers.taskbarPopupController.maybeCloseMultiInstanceMenu();
         if (shouldCloseAllOpenViews) {
             AbstractFloatingView.closeAllOpenViews(this);
+            taskbarUIController.closeOpenLauncherViews();
         }
     }
 

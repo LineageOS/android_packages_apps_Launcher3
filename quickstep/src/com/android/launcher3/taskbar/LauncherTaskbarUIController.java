@@ -293,6 +293,15 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         });
         as.play(autoPlayAnimator);
     }
+
+    /**
+     * Closes any open floating views in the Launcher activity.
+     */
+    @Override
+    protected void closeOpenLauncherViews() {
+        mLauncher.closeOpenViews();
+    }
+
     /**
      * Should be called from onResume() and onPause(), and animates the Taskbar accordingly.
      */
