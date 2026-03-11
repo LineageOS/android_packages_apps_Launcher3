@@ -58,7 +58,6 @@ import static java.lang.invoke.MethodHandles.Lookup.PROTECTED;
 
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
@@ -203,8 +202,6 @@ import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
-import com.android.systemui.shared.system.TaskStackChangeListener;
-import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.unfold.updates.RotationChangeProvider;
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider;
 import com.android.wm.shell.shared.bubbles.BubbleFeatureConfig;
@@ -1766,26 +1763,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     protected void onTaskbarIconClicked(View view) {
-        if (Flags.enableTaskbarIconDesktopExperience()) {
-            final int topTaskIdAtClick = mControllers.taskbarDesktopModeController.getTopTaskId();
-            TaskStackChangeListener transientListener = new TaskStackChangeListener() {
-                @Override
-                public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
-                        boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-                    if (wasVisible && task.taskId == topTaskIdAtClick
-                            && shouldMinimizeDesktopTask(task.taskId)) {
-                        UI_HELPER_EXECUTOR.execute(() ->
-                                SystemUiProxy.INSTANCE.get(TaskbarActivityContext.this)
-                                        .minimizeDesktopApp(task.taskId));
-                    }
-                    TaskStackChangeListeners.getInstance().unregisterTaskStackListener(this);
-                }
-            };
-            TaskStackChangeListeners.getInstance().registerTaskStackListener(transientListener);
-            view.postDelayed(() -> TaskStackChangeListeners.getInstance()
-                    .unregisterTaskStackListener(transientListener), 1000);
-        }
-
         TaskbarUIController taskbarUIController = mControllers.uiController;
         RecentsViewInteractor recents = taskbarUIController.getRecentsViewInteractor();
         boolean shouldCloseAllOpenViews = true;
@@ -1848,18 +1825,11 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                         ? createDesktopAppLaunchRemoteTransition(
                                 AppLaunchType.UNMINIMIZE, Cuj.CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_ICON)
                         : null;
-                boolean shouldShowDesktopApp = Flags.enableTaskbarIconDesktopExperience()
-                        && canUnminimizeDesktopTask(info.getTaskId());
-                Runnable launchTask = shouldShowDesktopApp
-                        ? () -> SystemUiProxy.INSTANCE.get(this).showDesktopApp(
+
+                Runnable launchTask = () ->
+                        SystemUiProxy.INSTANCE.get(this).showDesktopApp(
                                 info.getTaskId(), remoteTransition,
-                                DesktopTaskToFrontReason.TASKBAR_TAP)
-                        : () -> {
-                            ActivityOptions activityOptions = makeDefaultActivityOptions(
-                                    SPLASH_SCREEN_STYLE_UNDEFINED).options;
-                            ActivityManagerWrapper.getInstance().startActivityFromRecents(
-                                    info.getTaskId(), activityOptions);
-                        };
+                                DesktopTaskToFrontReason.TASKBAR_TAP);
                 runAfterReturningToDesktopIfInOverview(recents, launchTask, UI_HELPER_EXECUTOR);
             }
             mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(
@@ -2038,21 +2008,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 mControllers.taskbarRecentAppsController.getRunningAppState(taskId);
         Log.d(TAG, "Task id=" + taskId + ", Running app state=" + runningAppState);
         return runningAppState == RunningAppState.MINIMIZED;
-    }
-
-    /** Returns whether the given task is running and can be minimized. */
-    public boolean shouldMinimizeDesktopTask(int taskId) {
-        // Only active, focused app window can be minimized.
-        if (taskId != mControllers.taskbarDesktopModeController.getTopTaskId()) {
-            return false;
-        }
-        // Only single-instance apps can be minimized.
-        if (mControllers.taskbarRecentAppsController.getDesktopTaskInstanceCount(taskId) > 1) {
-            return false;
-        }
-        BubbleTextView.RunningAppState runningAppState =
-                mControllers.taskbarRecentAppsController.getRunningAppState(taskId);
-        return runningAppState == RunningAppState.RUNNING;
     }
 
     private RemoteTransition createDesktopAppLaunchRemoteTransition(
@@ -2278,7 +2233,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         TaskbarRecentAppsController.TaskState taskState =
                 mControllers.taskbarRecentAppsController.getTaskbarItemState(info);
         RunningAppState appState = taskState.getRunningAppState();
-
         if (appState == RunningAppState.RUNNING || appState == RunningAppState.MINIMIZED) {
             // We only need a custom animation (a RemoteTransition) if the task is minimized - if
             // it's already visible it will just be brought forward.

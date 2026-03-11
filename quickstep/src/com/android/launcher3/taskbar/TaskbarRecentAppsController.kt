@@ -179,17 +179,6 @@ class TaskbarRecentAppsController(
         }
     }
 
-    /** Returns the number of desktop instances for the given taskId. */
-    fun getDesktopTaskInstanceCount(taskId: Int): Int {
-        val task = taskbarRunningTasks.find { it.key.id == taskId } ?: return 0
-        return taskbarRunningTasks.count {
-            it.key.packageName == task.key.packageName &&
-                it.key.userId == task.key.userId &&
-                (getRunningAppState(it.key.id) == RunningAppState.RUNNING ||
-                    getRunningAppState(it.key.id) == RunningAppState.MINIMIZED)
-        }
-    }
-
     /** Returns the single task (i.e., fullscreen) represented by the given [itemInfo]. */
     fun getSingleTask(itemInfo: ItemInfo?): SingleTask? {
         val packageName = itemInfo?.targetPackage ?: return null
