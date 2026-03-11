@@ -19,8 +19,8 @@ package com.android.launcher3.dagger
 import android.annotation.ElapsedRealtimeLong
 import android.content.Context
 import android.net.Uri
-import android.uilatencystats.UiLatencyStatsManager
 import android.os.SystemClock
+import android.uilatencystats.UiLatencyStatsManager
 import android.view.CrossWindowBlurListeners
 import android.widget.ImageView
 import com.android.app.displaylib.PerDisplayRepository
@@ -50,9 +50,9 @@ import com.android.launcher3.icons.LauncherIconProvider
 import com.android.launcher3.icons.LauncherIconProviderImpl
 import com.android.launcher3.logging.StatsLogManager.StatsLogManagerFactory
 import com.android.launcher3.model.WellbeingModel
+import com.android.launcher3.qsb.QsbAppWidgetHost
+import com.android.launcher3.qsb.QuickstepQsbHostImpl
 import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
-import com.android.launcher3.util.BlurBackgroundHelper
-import com.android.launcher3.util.QuickstepBackgroundBlurHelper
 import com.android.launcher3.secondarydisplay.SecondaryDisplayQuickstepDelegateImpl
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.testing.TestInformationHandler
@@ -60,12 +60,14 @@ import com.android.launcher3.uioverrides.QuickstepWidgetHolder.QuickstepWidgetHo
 import com.android.launcher3.uioverrides.SystemApiWrapper
 import com.android.launcher3.uioverrides.plugins.PluginManagerWrapperImpl
 import com.android.launcher3.util.ApiWrapper
+import com.android.launcher3.util.BlurBackgroundHelper
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
 import com.android.launcher3.util.InstantAppResolver
 import com.android.launcher3.util.ListenableRef
 import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.PluginManagerWrapper
+import com.android.launcher3.util.QuickstepBackgroundBlurHelper
 import com.android.launcher3.util.WindowBlurState.WINDOW_BLUR_STATE
 import com.android.launcher3.util.window.RefreshRateTracker
 import com.android.launcher3.util.window.WindowManagerProxy
@@ -253,6 +255,8 @@ object StaticObjectModule {
     @Provides
     fun provideLatencyTracker(@ApplicationContext context: Context): LatencyTracker =
         LatencyTracker.getInstance(context)
+
+    @Provides fun provideQsbAppWidgetHost(): QsbAppWidgetHost = QuickstepQsbHostImpl.instance
 }
 
 @Module

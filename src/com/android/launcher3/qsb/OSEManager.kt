@@ -37,6 +37,8 @@ import com.android.launcher3.R
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
+import com.android.launcher3.logging.DumpManager
+import com.android.launcher3.logging.DumpManager.LauncherDumpable
 import com.android.launcher3.pm.InstallSessionHelper
 import com.android.launcher3.pm.InstallSessionTracker
 import com.android.launcher3.pm.PackageInstallInfo
@@ -49,6 +51,7 @@ import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.SecureStringObserver
 import com.android.launcher3.util.SimpleBroadcastReceiver
 import com.android.launcher3.util.SimpleBroadcastReceiver.Companion.packageFilter
+import java.io.PrintWriter
 import javax.inject.Inject
 
 /**
@@ -60,29 +63,35 @@ import javax.inject.Inject
 class OSEManager(
     private val context: Context,
     private val settingsObserver: SecureStringObserver,
-    private val installhelper: InstallSessionHelper,
+    private val installHelper: InstallSessionHelper,
     private val executor: LooperExecutor = OSE_LOOPER,
-) {
+) : LauncherDumpable {
 
     private val packageAvailableReceiver =
         SimpleBroadcastReceiver(context, executor) { reloadOse() }
     @VisibleForTesting var tracker: InstallSessionTracker? = null
-    private val mutableOSEInfoRef = MutableListenableRef(OSEInfo())
+
+    private val defaultSearchPackage =
+        (context.getSystemService(SearchManager::class.java)?.globalSearchActivity?.packageName
+                ?: context.resources.getString(R.string.fallback_search_package_name))
+            .ifEmpty { null }
+
+    /** Initialize with the current value to that there is no jump on reboot */
+    private val mutableOSEInfoRef =
+        MutableListenableRef(OSEInfo(pkg = settingsObserver.getValue() ?: defaultSearchPackage))
 
     /**
      * Represents the current OSE Info and this should be used by consumers and listen to the value
      * changes
      */
     val oseInfo = mutableOSEInfoRef.asListenable()
-    private val defaultSearchPackage =
-        context.getSystemService(SearchManager::class.java)?.globalSearchActivity?.packageName
-            ?: context.resources.getString(R.string.fallback_search_package_name)
 
     @Inject
     constructor(
         @ApplicationContext context: Context,
         tracker: DaggerSingletonTracker,
         installhelper: InstallSessionHelper,
+        dumpManager: DumpManager,
     ) : this(
         context,
         SecureStringObserver(context, OSE_LOOPER.handler, SEARCH_ENGINE_SETTINGS_KEY),
@@ -91,6 +100,7 @@ class OSEManager(
         settingsObserver.callback = Runnable { reloadOse() }
         executor.execute { reloadOse() }
         tracker.addCloseable(this::close)
+        tracker.addCloseable(dumpManager.register(this))
     }
 
     @WorkerThread
@@ -103,7 +113,7 @@ class OSEManager(
         val oseApkInstalled = appInfoWrapper?.run { isInstalled() && !isArchived() } ?: false
         val activeInstallSession =
             oseSettingsValue?.let {
-                installhelper.getActiveSessionInfo(myUserHandle(), oseSettingsValue) != null
+                installHelper.getActiveSessionInfo(myUserHandle(), oseSettingsValue) != null
             } ?: false
 
         // Check if package is being installed or is already installed
@@ -131,7 +141,7 @@ class OSEManager(
             // Continue tracking in case the user manually installs again.
             tracker =
                 oseSettingsValue?.let {
-                    installhelper.registerInstallTracker(SessionTrackerCallback(it))
+                    installHelper.registerInstallTracker(SessionTrackerCallback(it))
                 }
         }
 
@@ -171,72 +181,39 @@ class OSEManager(
                 isOseConfigured = oseConfigured,
                 supportsSearchIntent = supportsSearchIntent,
             )
-        Log.i(TAG, "reloadOse oldOseInfo= " + oldOseInfo + "\nnewOseInfo= " + newOseInfo)
-        if (osePkg == null && oldOseInfo.pkg == newOseInfo.pkg) {
-            // osePkg can be null only when defaultSearchPackage is disabled.
-            // So register to defaultSearchPackage changes.
-            // This condition can only happen with launcher force-stop or reboot of the device when
-            // defaultSearchPackage is disabled
-            packageAvailableReceiver.register(
-                packageFilter(
-                    defaultSearchPackage,
-                    ACTION_PACKAGE_ADDED,
-                    ACTION_PACKAGE_CHANGED,
-                    ACTION_PACKAGE_REMOVED,
-                )
-            )
-        }
+        Log.i(TAG, "reloadOse oldOseInfo= $oldOseInfo\nnewOseInfo= $newOseInfo")
 
+        // Register for package changes for the target package
+        packageAvailableReceiver.close()
+        val targetPackage = osePkg ?: defaultSearchPackage
+        targetPackage?.listenForPackageChanges()
+
+        // Listen to the OseSettingValue package as well if it's installed little later or
+        // if the app gets archived/restored.
+        if (oseSettingsValue != targetPackage) oseSettingsValue?.listenForPackageChanges()
         if (
             oldOseInfo.pkg != newOseInfo.pkg ||
                 oldOseInfo.overlayPackage != newOseInfo.overlayPackage ||
                 oldOseInfo.installPending != newOseInfo.installPending ||
                 oldOseInfo.isOseConfigured != newOseInfo.isOseConfigured
         ) {
-            packageAvailableReceiver.close()
-            // Listen for ose changes
-            if (osePkg != null) {
-                packageAvailableReceiver.register(
-                    packageFilter(
-                        osePkg,
-                        ACTION_PACKAGE_ADDED,
-                        ACTION_PACKAGE_CHANGED,
-                        ACTION_PACKAGE_REMOVED,
-                    )
-                )
-                // Listen to the OseSettingValue package as well if it's installed little later or
-                // if the app gets archived/restored.
-                if (oseSettingsValue != null && oseSettingsValue != osePkg) {
-                    packageAvailableReceiver.register(
-                        packageFilter(
-                            oseSettingsValue,
-                            ACTION_PACKAGE_ADDED,
-                            ACTION_PACKAGE_CHANGED,
-                            ACTION_PACKAGE_REMOVED,
-                        )
-                    )
-                }
-            }
-
-            // Listen for overlay changes
-            if (overlayPkg != null && osePkg != overlayPkg) {
-                packageAvailableReceiver.register(
-                    packageFilter(
-                        overlayPkg,
-                        ACTION_PACKAGE_ADDED,
-                        ACTION_PACKAGE_CHANGED,
-                        ACTION_PACKAGE_REMOVED,
-                    )
-                )
-            }
-
             mutableOSEInfoRef.dispatchValue(newOseInfo)
         }
     }
 
+    private fun String.listenForPackageChanges() =
+        packageAvailableReceiver.register(
+            packageFilter(
+                this,
+                ACTION_PACKAGE_ADDED,
+                ACTION_PACKAGE_CHANGED,
+                ACTION_PACKAGE_REMOVED,
+            )
+        )
+
     private fun isDefaultSearchPackageEnabled(): Boolean {
-        try {
-            return defaultSearchPackage?.let {
+        return try {
+            defaultSearchPackage?.let {
                 context
                     .getSystemService(LauncherApps::class.java)
                     ?.getApplicationInfo(
@@ -247,7 +224,7 @@ class OSEManager(
                     ?.enabled
             } ?: false
         } catch (e: NameNotFoundException) {
-            return false
+            false
         }
     }
 
@@ -259,13 +236,20 @@ class OSEManager(
     @VisibleForTesting
     fun close() {
         settingsObserver.close()
-        packageAvailableReceiver.close()
-        executor.execute { unregisterInstallSessionTracker() }
+        executor.execute {
+            packageAvailableReceiver.close()
+            unregisterInstallSessionTracker()
+        }
+    }
+
+    override fun dump(prefix: String, writer: PrintWriter, args: Array<String>?) {
+        writer.println("$prefix OSEManager:")
+        writer.println("$prefix   oseInfo: ${oseInfo.value}")
     }
 
     /** Object representing properties of the on-device search engine */
     class OSEInfo(
-        val pkg: String? = null,
+        val pkg: String?,
         val overlayTarget: ActivityInfo? = null,
         val installPending: Boolean = false,
         val isOseConfigured: Boolean = false,
