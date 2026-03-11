@@ -25,6 +25,8 @@ import com.android.launcher3.graphics.theme.IconThemeFactory
 import com.android.launcher3.graphics.theme.MonoIconThemeFactory
 import com.android.launcher3.graphics.theme.MonoIconThemeFactory.MONO_FACTORY_ID
 import com.android.launcher3.graphics.theme.ThemePreference.Companion.THEME_OVERRIDES_DAGGER_KEY
+import com.android.launcher3.model.IModelWriter
+import com.android.launcher3.model.ModelTaskController
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.popup.PopupDataRepository
 import com.android.launcher3.popup.PopupDataRepositoryImpl
@@ -61,6 +63,13 @@ abstract class LauncherModelModule {
         @JvmStatic
         fun provideModelReloader(model: LauncherModel): ModelReloader {
             return ModelReloader { model.reloadIfActive("ModelReloader") }
+        }
+
+        @Provides
+        @LauncherAppSingleton
+        @JvmStatic
+        fun provideModelWriter(taskController: ModelTaskController): IModelWriter {
+            return taskController.getModelWriter()
         }
     }
 }
