@@ -137,6 +137,7 @@ import com.android.launcher3.remoteanimations.ContainerAnimationRunner;
 import com.android.launcher3.remoteanimations.RemoteAnimationCoordinateTransfer;
 import com.android.launcher3.remoteanimations.SpringAnimRunner;
 import com.android.launcher3.remoteanimations.StartingWindowListener;
+import com.android.launcher3.remotetransitions.IRemoteTransitionEx;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.touch.PagedOrientationHandler;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
@@ -261,6 +262,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     // Strong refs to runners which are cleared when the launcher activity is destroyed
     private RemoteAnimationFactory mWallpaperOpenRunner;
     private RemoteAnimationFactory mAppLaunchRunner;
+    private IRemoteTransition mAppLaunchTransition;
 
     private RemoteAnimationFactory mWallpaperOpenTransitionRunner;
     private RemoteTransition mLauncherOpenTransition;
@@ -533,7 +535,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         }
 
         IRemoteTransition crossDisplayMoveTransition = new MoveDisplayChangeRunner(this);
-        return new RemoteTransitionPickerDelegate(
+        mAppLaunchTransition = new RemoteTransitionPickerDelegate(
                 (info) -> {
                     if (CrossDisplayMoveTransition.isCrossDisplayMove(info)) {
                         Log.d(TAG, "Handling launch as a cross display move transition");
@@ -549,6 +551,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                         return defaultAppLaunchTransition;
                     }
                 });
+        return IRemoteTransitionEx.toWeakRef(mAppLaunchTransition);
     }
 
     /**
@@ -1553,6 +1556,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         // definition so we don't have to wait for the system gc
         mWallpaperOpenRunner = null;
         mAppLaunchRunner = null;
+        mAppLaunchTransition = null;
     }
 
     protected void unregisterRemoteTransitions() {
