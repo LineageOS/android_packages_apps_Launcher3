@@ -24,8 +24,6 @@ import com.android.launcher3.dagger.DaggerLauncherAppComponent;
 import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherBaseAppComponent;
 import com.android.launcher3.dagger.LauncherComponentProvider;
-import com.android.launcher3.workspacefunctions.LauncherWorkspaceProvider;
-import com.android.launcher3.workspacefunctions.LauncherWorkspaceTypeTranslator;
 import com.android.launcher3.util.TraceHelper;
 
 import kotlin.jvm.functions.Function1;

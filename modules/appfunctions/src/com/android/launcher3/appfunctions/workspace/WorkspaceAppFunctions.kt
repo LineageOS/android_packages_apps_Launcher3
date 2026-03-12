@@ -1,15 +1,17 @@
-/**
+/*
  * Copyright (C) 2026 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.android.launcher3.appfunctions.workspace
 
@@ -24,7 +26,9 @@ import androidx.appfunctions.service.AppFunction
  *
  * @property repository The repository for querying and modifying the workspace.
  */
-class WorkspaceAppFunctions(private val repository: WorkspaceRepository) {
+class WorkspaceAppFunctions(
+    private val repository: WorkspaceRepository
+) {
 
     /// Query functions
     /// These are exposed [AppFunction]s that can be called by any client
@@ -42,6 +46,26 @@ class WorkspaceAppFunctions(private val repository: WorkspaceRepository) {
         return WorkspaceResponse(workspaceSpec, Proof.GET_CURRENT_WORKSPACE_PROOF)
     }
 
+    /**
+     * Lists installed apps. May be truncated; if so, `isTruncated` is true.
+     *
+     * @param appFunctionContext App function context.
+     * @param orderByUsageStats If true, orders apps by usage; otherwise uses default order for
+     *   personalization.
+     * @return [GetInstalledAppsResponse] with apps list and proof.
+     */
+    @AppFunction(isDescribedByKDoc = true)
+    suspend fun getInstalledApps(
+        appFunctionContext: AppFunctionContext,
+        orderByUsageStats: Boolean,
+    ): GetInstalledAppsResponse {
+        val allAppItems = repository.getInstalledApps(orderByUsageStats)
+        return GetInstalledAppsResponse(
+            apps = allAppItems,
+            proof = Proof.GET_INSTALLED_APPS_PROOF
+        )
+    }
+
     /// Decorated responses to the AppFunction agents, the kdoc for these is used
     // as the raw documentation ingested by the agents.
 
@@ -53,6 +77,20 @@ class WorkspaceAppFunctions(private val repository: WorkspaceRepository) {
      */
     @AppFunctionSerializable(isDescribedByKDoc = true)
     data class WorkspaceResponse(val workspace: WorkspaceSpec, val proof: Proof)
+
+    /**
+     * Response from [getInstalledApps].
+     *
+     * @property apps List of [UnplacedAppSpec]; truncated if `isTruncated`=true.
+     * @property proof Proof token.
+     * @property isTruncated True if list was truncated.
+     * @property truncationDetails Why list was truncated.
+     */
+    @AppFunctionSerializable(isDescribedByKDoc = true)
+    data class GetInstalledAppsResponse(
+        val apps: List<UnplacedAppSpec>,
+        val proof: Proof
+    )
 
     /**
      * Verifies function calls are correctly chained.
