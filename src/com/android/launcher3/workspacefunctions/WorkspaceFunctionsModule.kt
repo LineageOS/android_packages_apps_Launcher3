@@ -15,15 +15,39 @@
  */
 package com.android.launcher3.workspacefunctions
 
+import android.content.pm.LauncherActivityInfo
+import android.util.Log
 import com.android.launcher3.Flags
 import com.android.launcher3.appfunctions.workspace.HotseatSpec
+import com.android.launcher3.appfunctions.workspace.UnplacedAppSpec
+import com.android.launcher3.appfunctions.workspace.UnplacedAppTypeTranslator
 import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions
 import com.android.launcher3.appfunctions.workspace.WorkspaceRepository
 import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceTransaction
+import com.android.launcher3.appfunctions.workspace.WorkspaceTypeTranslator
+import com.android.launcher3.appfunctions.workspace.provider.InstalledItemsProvider
+import com.android.launcher3.model.data.FolderInfo
+import com.android.launcher3.model.data.LauncherAppWidgetInfo
+import com.android.launcher3.model.data.WorkspaceData
+import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.workspacefunctions.translators.AppInFolderTranslator
+import com.android.launcher3.workspacefunctions.translators.FolderInfoHotseatTranslator
+import com.android.launcher3.workspacefunctions.translators.FolderInfoWorkspaceTranslator
+import com.android.launcher3.workspacefunctions.translators.HotseatItemTranslator
+import com.android.launcher3.workspacefunctions.translators.LauncherAppWidgetInfoWorkspaceTranslator
+import com.android.launcher3.workspacefunctions.translators.LauncherUnplacedAppTranslator
+import com.android.launcher3.workspacefunctions.translators.LauncherWorkspaceTypeTranslator
+import com.android.launcher3.workspacefunctions.translators.WorkspaceItemInfoAppInFolderTranslator
+import com.android.launcher3.workspacefunctions.translators.WorkspaceItemInfoHotseatTranslator
+import com.android.launcher3.workspacefunctions.translators.WorkspaceItemInfoWorkspaceTranslator
+import com.android.launcher3.workspacefunctions.translators.WorkspaceItemTranslator
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
+import javax.inject.Provider
 
 /** Dagger module for binding workspace functions interfaces. */
 @Module
@@ -31,6 +55,67 @@ abstract class WorkspaceFunctionsModule {
 
     /** Binds the concrete implementation of the repository to its interface. */
     @Binds abstract fun bindWorkspaceRepository(impl: WorkspaceRepositoryImpl): WorkspaceRepository
+
+    @Binds
+    abstract fun bindInstalledAppsProvider(
+        impl: LauncherInstalledAppsProvider
+    ): InstalledItemsProvider<LauncherActivityInfo>
+
+    @Binds
+    @IntoMap
+    @ClassKey(WorkspaceData::class)
+    abstract fun bindLauncherWorkspaceTypeTranslator(
+        impl: LauncherWorkspaceTypeTranslator
+    ): @JvmSuppressWildcards WorkspaceTypeTranslator<*>
+
+    @Binds
+    @IntoMap
+    @ClassKey(LauncherActivityInfo::class)
+    abstract fun bindLauncherUnplacedAppTranslator(
+        impl: LauncherUnplacedAppTranslator
+    ): @JvmSuppressWildcards UnplacedAppTypeTranslator<*>
+
+    @Binds
+    @IntoMap
+    @ClassKey(WorkspaceItemInfo::class)
+    abstract fun bindWorkspaceItemInfoWorkspaceTranslator(
+        impl: WorkspaceItemInfoWorkspaceTranslator
+    ): @JvmSuppressWildcards WorkspaceItemTranslator<*>
+
+    @Binds
+    @IntoMap
+    @ClassKey(WorkspaceItemInfo::class)
+    abstract fun bindWorkspaceItemInfoHotseatTranslator(
+        impl: WorkspaceItemInfoHotseatTranslator
+    ): @JvmSuppressWildcards HotseatItemTranslator<*>
+
+    @Binds
+    @IntoMap
+    @ClassKey(WorkspaceItemInfo::class)
+    abstract fun bindWorkspaceItemInfoFolderTranslator(
+        impl: WorkspaceItemInfoAppInFolderTranslator
+    ): @JvmSuppressWildcards AppInFolderTranslator<*>
+
+    @Binds
+    @IntoMap
+    @ClassKey(FolderInfo::class)
+    abstract fun bindFolderInfoWorkspaceTranslator(
+        impl: FolderInfoWorkspaceTranslator
+    ): @JvmSuppressWildcards WorkspaceItemTranslator<*>
+
+    @Binds
+    @IntoMap
+    @ClassKey(FolderInfo::class)
+    abstract fun bindFolderInfoHotseatTranslator(
+        impl: FolderInfoHotseatTranslator
+    ): @JvmSuppressWildcards HotseatItemTranslator<*>
+
+    @Binds
+    @IntoMap
+    @ClassKey(LauncherAppWidgetInfo::class)
+    abstract fun bindLauncherAppWidgetInfoWorkspaceTranslator(
+        impl: LauncherAppWidgetInfoWorkspaceTranslator
+    ): @JvmSuppressWildcards WorkspaceItemTranslator<*>
 
     /**
      * A dummy implementation of [WorkspaceRepository] that returns an empty workspace and throws
@@ -48,6 +133,10 @@ abstract class WorkspaceFunctionsModule {
             )
         }
 
+        override suspend fun getInstalledApps(orderByUsageStats: Boolean): List<UnplacedAppSpec> {
+            return emptyList()
+        }
+
         override fun newTransaction(): WorkspaceTransaction {
             throw UnsupportedOperationException("Not implemented")
         }
@@ -56,10 +145,29 @@ abstract class WorkspaceFunctionsModule {
     companion object {
 
         @Provides
-        fun provideWorkspaceAppFunctions(repository: WorkspaceRepository): WorkspaceAppFunctions {
+        fun provideWorkspaceAppFunctions(
+            repositoryProvider: Provider<WorkspaceRepository>
+        ): WorkspaceAppFunctions {
             val kondoPlannerEnabled = Flags.kondoPlanner()
+            Log.d("WorkspaceFunctionsModule", "Executing factory. Flag: $kondoPlannerEnabled")
+
             return WorkspaceAppFunctions(
-                if (kondoPlannerEnabled) repository else DummyWorkspaceRepository()
+                if (kondoPlannerEnabled) {
+                    try {
+                        repositoryProvider.get().also {
+                            Log.d("WorkspaceFunctionsModule", "Successfully hydrated repository!")
+                        }
+                    } catch (e: Exception) {
+                        Log.e(
+                            "WorkspaceFunctionsModule",
+                            "Crash during repositoryProvider.get()",
+                            e,
+                        )
+                        DummyWorkspaceRepository()
+                    }
+                } else {
+                    DummyWorkspaceRepository()
+                }
             )
         }
     }

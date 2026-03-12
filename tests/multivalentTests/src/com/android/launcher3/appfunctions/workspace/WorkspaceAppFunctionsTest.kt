@@ -19,11 +19,7 @@ import android.content.Context
 import androidx.appfunctions.AppFunctionContext
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.launcher3.appfunctions.workspace.HotseatSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions.Proof
-import com.android.launcher3.appfunctions.workspace.WorkspaceRepository
-import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
-import com.android.launcher3.appfunctions.workspace.WorkspaceTransaction
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -32,16 +28,13 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class WorkspaceAppFunctionsTest {
     private val fakeWorkspaceRepository = FakeWorkspaceRepository()
-    private val workspaceAppFunctions =
-        WorkspaceAppFunctions(fakeWorkspaceRepository)
+    private val workspaceAppFunctions = WorkspaceAppFunctions(fakeWorkspaceRepository)
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
     fun getCurrentWorkspace_returnsWorkspaceSpec(): Unit = runBlocking {
         val workspaceResponse =
-            workspaceAppFunctions.getCurrentWorkspace(
-              FakeAppFunctionContext(context)
-            )
+            workspaceAppFunctions.getCurrentWorkspace(FakeAppFunctionContext(context))
         assertThat(workspaceResponse.workspace).isEqualTo(fakeWorkspaceRepository.getWorkspace())
         assertThat(workspaceResponse.proof).isEqualTo(Proof.GET_CURRENT_WORKSPACE_PROOF)
     }
@@ -59,6 +52,10 @@ class WorkspaceAppFunctionsTest {
         override fun newTransaction(): WorkspaceTransaction {
             return FakeWorkspaceTransaction()
         }
+
+        override suspend fun getInstalledApps(orderByUsageStats: Boolean): List<UnplacedAppSpec> {
+            return emptyList()
+        }
     }
 
     private class FakeWorkspaceTransaction : WorkspaceTransaction {
@@ -67,7 +64,5 @@ class WorkspaceAppFunctionsTest {
         }
     }
 
-    private class FakeAppFunctionContext(
-        override val context: Context,
-    ) : AppFunctionContext
+    private class FakeAppFunctionContext(override val context: Context) : AppFunctionContext
 }

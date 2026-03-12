@@ -16,11 +16,13 @@
 package com.android.launcher3.workspacefunctions
 
 import com.android.launcher3.appfunctions.workspace.provider.WorkspaceProvider
+import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.model.data.WorkspaceData
 import com.android.launcher3.model.repository.HomeScreenRepository
 import javax.inject.Inject
 
 /** A provider that manages the [WorkspaceData] for AppFunctions. */
+@LauncherAppSingleton
 class LauncherWorkspaceProvider
 @Inject
 constructor(private val homeScreenRepository: HomeScreenRepository) :

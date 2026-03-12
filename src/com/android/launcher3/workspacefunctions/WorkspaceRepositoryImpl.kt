@@ -15,9 +15,15 @@
  */
 package com.android.launcher3.workspacefunctions
 
+import android.content.pm.LauncherActivityInfo
+import com.android.launcher3.appfunctions.workspace.HotseatSpec
+import com.android.launcher3.appfunctions.workspace.UnplacedAppSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceRepository
 import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceTransaction
+import com.android.launcher3.appfunctions.workspace.provider.InstalledItemsProvider
+import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.workspacefunctions.translators.TranslatorRegistry
 import javax.inject.Inject
 
 /**
@@ -27,16 +33,23 @@ import javax.inject.Inject
  * model. It will use the [LauncherWorkspaceProvider] to read data and the `IModelWriter` (not yet
  * injected) to handle transactions.
  */
+@LauncherAppSingleton
 class WorkspaceRepositoryImpl
 @Inject
 constructor(
-    private val provider: LauncherWorkspaceProvider,
-    private val translator: LauncherWorkspaceTypeTranslator,
+    private val workspaceProvider: LauncherWorkspaceProvider,
+    private val installedAppsProvider: InstalledItemsProvider<LauncherActivityInfo>,
+    private val translators: TranslatorRegistry,
 ) : WorkspaceRepository {
 
     override suspend fun getWorkspace(): WorkspaceSpec {
-        val workspace = provider.getWorkspace()
-        return translator.toSpec(workspace)
+        val workspace = workspaceProvider.getWorkspace()
+        return translators.translate(workspace)
+    }
+
+    override suspend fun getInstalledApps(orderByUsageStats: Boolean): List<UnplacedAppSpec> {
+        val apps = installedAppsProvider.getInstalledItems(orderByUsageStats)
+        return apps.map { translators.translate(it) }
     }
 
     override fun newTransaction(): WorkspaceTransaction {
