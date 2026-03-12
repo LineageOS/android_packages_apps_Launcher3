@@ -214,6 +214,7 @@ import com.android.quickstep.util.AnimUtils;
 import com.android.quickstep.util.AsyncClockEventDelegate;
 import com.android.quickstep.util.LauncherUnfoldAnimationController;
 import com.android.quickstep.util.QuickstepOnboardingPrefs;
+import com.android.quickstep.util.ScalingWorkspaceRevealAnim;
 import com.android.quickstep.util.SplitTask;
 import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.quickstep.util.TraceStateLoggerHelper;
@@ -793,7 +794,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         View.setTracedRequestLayoutClassClass(TRACE_RELAYOUT_CLASS);
         OverviewComponentObserver.INSTANCE.get(this)
                 .addOverviewChangeListener(mOverviewChangeListener);
-        new TraceStateLoggerHelper(getDisplayId()).startTraceStateLogger(this);
+        new TraceStateLoggerHelper(this).startTraceStateLogger();
     }
 
     @Override
@@ -984,6 +985,12 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     protected void handleGestureContract(Intent intent) {
         if (GestureNavContract.isContractEnabled(intent)) {
             super.handleGestureContract(intent);
+            new ScalingWorkspaceRevealAnim(
+                    /* launcher= */ this,
+                    /* siblingAnimation= */ null,
+                    /* windowTargetRect= */ null,
+                    /* playAlphaReveal= */ true,
+                    /* playBlur= */ true).start();
         }
     }
 

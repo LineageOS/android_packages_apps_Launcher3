@@ -16,8 +16,6 @@
 
 package com.android.launcher3.taskbar.customization.containers
 
-import android.animation.LayoutTransition.APPEARING
-import android.animation.LayoutTransition.DISAPPEARING
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
@@ -350,7 +348,7 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             removeView(draggedView)
             // Cancel any pending drag view disappearing animation - the dragged view is not visible
             // at this time and will be readded to the container immediately.
-            layoutTransition?.cancel(DISAPPEARING)
+            layoutTransition?.cancel()
             // Keep drag view invisible, but make it take up space during layout - it will be
             // changed to visible when resetting the drag state.
             draggedView.visibility = INVISIBLE
@@ -370,7 +368,7 @@ class TaskbarPinnedAppIconContainer(context: Context) :
         indexOfChildHiddenForDrag = -1
 
         addView(itemView, dropIndex)
-        layoutTransition?.cancel(APPEARING)
+        layoutTransition?.cancel()
 
         // Adding item view may trigger layout animations. Given that the item view is replacing
         // drop ghost item, the position of non-dragged views should not change, but the added
@@ -391,11 +389,12 @@ class TaskbarPinnedAppIconContainer(context: Context) :
                     oldBottom: Int,
                 ) {
                     view?.removeOnLayoutChangeListener(this)
+                    layoutTransition?.cancel()
                     layoutTransition?.endChangingAnimations()
-                    layoutTransition?.cancel(APPEARING)
                 }
             }
         )
+
         return itemView != draggedView
     }
 
@@ -410,7 +409,7 @@ class TaskbarPinnedAppIconContainer(context: Context) :
             return
         }
         removeViewAt(indexOfChildHiddenForDrag)
-        layoutTransition?.cancel(DISAPPEARING)
+        clearDisappearingChildren()
         indexOfChildHiddenForDrag = -1
     }
 

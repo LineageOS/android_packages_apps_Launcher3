@@ -21,6 +21,7 @@ import static android.content.Intent.ACTION_PACKAGE_CHANGED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.launcher3.GestureNavContract.EXTRA_GESTURE_CONTRACT;
 import static com.android.launcher3.config.FeatureFlags.SEPARATE_RECENTS_ACTIVITY;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.SimpleBroadcastReceiver.actionsFilter;
@@ -419,6 +420,10 @@ public final class OverviewComponentObserver {
     public static void startHomeIntentSafely(@NonNull Context context, @Nullable Bundle options,
             @NonNull String reason, int displayId) {
         Intent intent = OverviewComponentObserver.INSTANCE.get(context).getHomeIntent(displayId);
+
+        // Include a GestureNavContract to signal that the workspace reveal animation should play
+        intent.putExtra(EXTRA_GESTURE_CONTRACT, new Bundle());
+
         startHomeIntentSafely(context, intent, options, reason);
     }
 

@@ -25,11 +25,13 @@ import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
-import com.android.launcher3.model.ModelDbController
 import com.android.launcher3.model.SerializedItemItem
 import com.android.launcher3.model.WorkspaceItemSerializer
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.tasks.BrowserIconMigrator.Companion.PREF_MIGRATION_PENDING
+import com.android.launcher3.model.testing.FakeModelWriter
+import com.android.launcher3.model.testing.WriterAction
 import com.android.launcher3.util.AllModulesForTest
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.FakePrefsModule
@@ -75,13 +77,14 @@ class BrowserIconMigratorTest {
     private val prefs: LauncherPrefs
         get() = appComponent.prefs
 
-    private lateinit var itemIdMap: IntSparseArrayMap<ItemInfo>
+    private lateinit var fakeModelWriter: FakeModelWriter
 
     @Before
     fun setUp() {
         context.initDaggerComponent(
             DaggerBrowserIconMigratorTest_TestComponent.builder().bindEvaluator(evaluator)
         )
+        fakeModelWriter = FakeModelWriter()
     }
 
     @Test
@@ -132,26 +135,21 @@ class BrowserIconMigratorTest {
         // Set the pending flag to true
         prefs.put(PREF_MIGRATION_PENDING, true)
 
-        val changes = performMigration()
+        performMigration()
         verify(evaluator).notifyMigrationComplete(true)
 
-        // Target moved to bottom-right corner and browser moved to browser's location
-        assertThat(changes).isEqualTo(2)
-        itemIdMap
-            .first { it.targetPackage == targetPkg }
-            .apply {
-                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-                assertThat(screenId).isEqualTo(0)
-                assertThat(cellX).isEqualTo(idp.numColumns - 1)
-                assertThat(cellY).isEqualTo(idp.numRows - 1)
-            }
-        itemIdMap
-            .first { it.targetPackage == browserPkg }
-            .apply {
-                assertThat(container).isEqualTo(CONTAINER_HOTSEAT)
-                assertThat(screenId).isEqualTo(3)
-            }
-        // Verify the pending flag is cleared
+        // Target moved to bottom-right corner
+        val targetAppInfo = getUpdatedItem(targetPkg)
+        assertThat(targetAppInfo.container).isEqualTo(CONTAINER_DESKTOP)
+        assertThat(targetAppInfo.screenId).isEqualTo(0)
+        assertThat(targetAppInfo.cellX).isEqualTo(idp.numColumns - 1)
+        assertThat(targetAppInfo.cellY).isEqualTo(idp.numRows - 1)
+
+        // Browser moved to hotseat
+        val browserInfo = getUpdatedItem(browserPkg)
+        assertThat(browserInfo.container).isEqualTo(CONTAINER_HOTSEAT)
+        assertThat(browserInfo.screenId).isEqualTo(3)
+
         assertThat(prefs.get(PREF_MIGRATION_PENDING)).isFalse()
     }
 
@@ -170,20 +168,15 @@ class BrowserIconMigratorTest {
 
         // Target moved to bottom-right corner and browser moved to browser's location
         assertThat(changes).isEqualTo(2)
-        itemIdMap
-            .first { it.targetPackage == targetPkg }
-            .apply {
-                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-                assertThat(screenId).isEqualTo(0)
-                assertThat(cellX).isEqualTo(idp.numColumns - 1)
-                assertThat(cellY).isEqualTo(idp.numRows - 1)
-            }
-        itemIdMap
-            .first { it.targetPackage == browserPkg }
-            .apply {
-                assertThat(container).isEqualTo(CONTAINER_HOTSEAT)
-                assertThat(screenId).isEqualTo(3)
-            }
+        val targetAppInfo = getUpdatedItem(targetPkg)
+        assertThat(targetAppInfo.container).isEqualTo(CONTAINER_DESKTOP)
+        assertThat(targetAppInfo.screenId).isEqualTo(0)
+        assertThat(targetAppInfo.cellX).isEqualTo(idp.numColumns - 1)
+        assertThat(targetAppInfo.cellY).isEqualTo(idp.numRows - 1)
+
+        val browserInfo = getUpdatedItem(browserPkg)
+        assertThat(browserInfo.container).isEqualTo(CONTAINER_HOTSEAT)
+        assertThat(browserInfo.screenId).isEqualTo(3)
     }
 
     @Test
@@ -243,22 +236,17 @@ class BrowserIconMigratorTest {
 
         // Browser is added at target location and target is moved to bottom-left corner
         assertThat(changes).isEqualTo(2)
-        itemIdMap
-            .first { it.targetPackage == targetPkg }
-            .apply {
-                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-                assertThat(screenId).isEqualTo(0)
-                assertThat(cellX).isEqualTo(idp.numColumns - 1)
-                assertThat(cellY).isEqualTo(idp.numRows - 1)
-            }
-        itemIdMap
-            .first { it.targetPackage == browserPkg }
-            .apply {
-                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-                assertThat(screenId).isEqualTo(0)
-                assertThat(cellX).isEqualTo(0)
-                assertThat(cellY).isEqualTo(1)
-            }
+        val targetAppInfo = getUpdatedItem(targetPkg)
+        assertThat(targetAppInfo.container).isEqualTo(CONTAINER_DESKTOP)
+        assertThat(targetAppInfo.screenId).isEqualTo(0)
+        assertThat(targetAppInfo.cellX).isEqualTo(idp.numColumns - 1)
+        assertThat(targetAppInfo.cellY).isEqualTo(idp.numRows - 1)
+
+        val browserInfo = getAddedItem(browserPkg)
+        assertThat(browserInfo.container).isEqualTo(CONTAINER_DESKTOP)
+        assertThat(browserInfo.screenId).isEqualTo(0)
+        assertThat(browserInfo.cellX).isEqualTo(0)
+        assertThat(browserInfo.cellY).isEqualTo(1)
     }
 
     @Test
@@ -270,20 +258,16 @@ class BrowserIconMigratorTest {
 
         // Browser is added at target location and target is moved to bottom-left corner
         assertThat(changes).isEqualTo(2)
-        itemIdMap
-            .first { it.targetPackage == targetPkg }
-            .apply {
-                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-                assertThat(screenId).isEqualTo(0)
-                assertThat(cellX).isEqualTo(idp.numColumns - 1)
-                assertThat(cellY).isEqualTo(idp.numRows - 1)
-            }
-        itemIdMap
-            .first { it.targetPackage == browserPkg }
-            .apply {
-                assertThat(container).isEqualTo(CONTAINER_HOTSEAT)
-                assertThat(screenId).isEqualTo(1)
-            }
+
+        val targetAppInfo = getUpdatedItem(targetPkg)
+        assertThat(targetAppInfo.container).isEqualTo(CONTAINER_DESKTOP)
+        assertThat(targetAppInfo.screenId).isEqualTo(0)
+        assertThat(targetAppInfo.cellX).isEqualTo(idp.numColumns - 1)
+        assertThat(targetAppInfo.cellY).isEqualTo(idp.numRows - 1)
+
+        val browserInfo = getAddedItem(browserPkg)
+        assertThat(browserInfo.container).isEqualTo(CONTAINER_HOTSEAT)
+        assertThat(browserInfo.screenId).isEqualTo(1)
     }
 
     @Test
@@ -295,12 +279,9 @@ class BrowserIconMigratorTest {
 
         // Browser is added at second page, target is unchanged
         assertThat(changes).isEqualTo(1)
-        itemIdMap
-            .first { it.targetPackage == browserPkg }
-            .apply {
-                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-                assertThat(screenId).isEqualTo(1)
-            }
+        val browserInfo = getAddedItem(browserPkg)
+        assertThat(browserInfo.container).isEqualTo(CONTAINER_DESKTOP)
+        assertThat(browserInfo.screenId).isEqualTo(1)
     }
 
     @Test
@@ -312,12 +293,9 @@ class BrowserIconMigratorTest {
 
         // Browser is added at second page, target is unchanged
         assertThat(changes).isEqualTo(1)
-        itemIdMap
-            .first { it.targetPackage == browserPkg }
-            .apply {
-                assertThat(container).isEqualTo(CONTAINER_DESKTOP)
-                assertThat(screenId).isEqualTo(1)
-            }
+        val browserInfo = getAddedItem(browserPkg)
+        assertThat(browserInfo.container).isEqualTo(CONTAINER_DESKTOP)
+        assertThat(browserInfo.screenId).isEqualTo(1)
     }
 
     private fun performMigration(mockEval: Boolean = true): Int {
@@ -340,19 +318,35 @@ class BrowserIconMigratorTest {
                 .evaluateSourceAndTarget()
         }
 
-        itemIdMap = IntSparseArrayMap()
+        val itemIdMap = IntSparseArrayMap<ItemInfo>()
         context.appComponent.testableModelState.dataModel.itemsIdMap.forEach {
             itemIdMap[it.id] = it
         }
 
-        appComponent.dbController.newTransaction().use {
-            val initialChangeCount = it.db.totalChangedRowCount
-            appComponent.migratorFactory.createBrowserIconMigrator(itemIdMap).performMigration()
-            return (it.db.totalChangedRowCount - initialChangeCount).toInt()
-        }
+        appComponent.migratorFactory
+            .createBrowserIconMigrator(itemIdMap, fakeModelWriter)
+            .performMigration()
+
+        return fakeModelWriter.actions.size
     }
 
-    fun countDbChanges() = appComponent.dbController.db.totalChangedRowCount
+    private fun getUpdatedItem(pkg: String): WorkspaceItemInfo {
+        val action =
+            fakeModelWriter.actions.filterIsInstance<WriterAction.UpdateItem>().first {
+                a: WriterAction.UpdateItem ->
+                (a.item as? WorkspaceItemInfo)?.targetPackage == pkg
+            }
+        return action.item as WorkspaceItemInfo
+    }
+
+    private fun getAddedItem(pkg: String): WorkspaceItemInfo {
+        val action =
+            fakeModelWriter.actions.filterIsInstance<WriterAction.AddItem>().first {
+                a: WriterAction.AddItem ->
+                (a.item as? WorkspaceItemInfo)?.targetPackage == pkg
+            }
+        return action.item as WorkspaceItemInfo
+    }
 
     @LauncherAppSingleton
     @Component(modules = [AllModulesForTest::class, FakePrefsModule::class])
@@ -360,7 +354,6 @@ class BrowserIconMigratorTest {
 
         val migratorFactory: BrowserIconMigratorFactory
         val serializer: WorkspaceItemSerializer
-        val dbController: ModelDbController
         val prefs: LauncherPrefs
 
         @Component.Builder

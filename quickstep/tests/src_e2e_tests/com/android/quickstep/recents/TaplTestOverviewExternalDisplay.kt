@@ -25,8 +25,8 @@ import com.android.launcher3.util.ui.BaseLauncherTaplTest.AllowInRecentsWindowTe
 import com.android.quickstep.AbstractQuickStepTest
 import com.android.quickstep.util.MultiDisplayTest
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -55,7 +55,6 @@ class TaplTestOverviewExternalDisplay : AbstractQuickStepTest() {
     @Test
     @MultiDisplayTest
     @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 488078155)
-    @Ignore("b/487550091")
     fun testStartAppsAndGoToOverview() {
         mLauncher.launchedAppState.switchToOverview()
         assertThat(mLauncher.recentTasks.size).isEqualTo(2)
@@ -63,9 +62,19 @@ class TaplTestOverviewExternalDisplay : AbstractQuickStepTest() {
 
     @Test
     @MultiDisplayTest
-    @Ignore("b/487550091")
     fun testDismissAllTasksFromOverview() {
         baseContainer.switchToOverview().dismissAllTasks()
         assertThat(mLauncher.recentTasks).isEmpty()
+    }
+
+    /**
+     * This is a workaround to avoid memory leak causing our test to fail.
+     *
+     * TODO(b/492105996): Remove this after this bug is fixed.
+     */
+    @After
+    fun tearDown() {
+        clearAllRecentTasks()
+        startTestActivity(2)
     }
 }
