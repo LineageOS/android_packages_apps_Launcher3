@@ -21,7 +21,6 @@ import static com.android.launcher3.util.TestConstants.AppNames.PHOTOS_APP_NAME;
 import static com.android.launcher3.util.TestConstants.AppNames.STORE_APP_NAME;
 import static com.android.launcher3.util.TestConstants.AppNames.TEST_APP_NAME;
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 
 import static org.junit.Assert.assertEquals;
@@ -121,7 +120,7 @@ public class TaplDragTest extends AbstractLauncherUiTest<Launcher, View> {
     @Test
     @PortraitLandscape
     @PlatinumTest(focusArea = "launcher")
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 488076832)
+    @DesktopStability(flavors = LOCAL, bug = 488076832)
     public void testDragShortcut() {
 
         final HomeAllApps allApps = mLauncher
@@ -201,7 +200,7 @@ public class TaplDragTest extends AbstractLauncherUiTest<Launcher, View> {
     @PlatinumTest(focusArea = "launcher")
     @Test
     @PortraitLandscape
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 488076832)
+    @DesktopStability(flavors = LOCAL, bug = 488076832)
     public void testDragAppIcon() {
 
         final HomeAllApps allApps = mLauncher.getWorkspace().switchToAllApps();

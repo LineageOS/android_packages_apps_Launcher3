@@ -35,7 +35,6 @@ import com.android.launcher3.util.TestUtil
 import com.android.launcher3.util.rule.TestStabilityRule
 import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
 import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
-import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import com.android.tools.dagger.mutation.annotations.BindValue
 import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
@@ -92,7 +91,7 @@ class SettingsChangeLoggerTest {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280752)
+    @DesktopStability(flavors = LOCAL, bug = 486280752)
     fun logSnapshot_defaultValue() {
         SettingsChangeLogger.INSTANCE.get(context).apply {
             // Wait for all the states in SettingsChangeLogger to get initialized

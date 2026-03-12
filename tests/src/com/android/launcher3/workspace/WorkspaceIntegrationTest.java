@@ -18,7 +18,6 @@ package com.android.launcher3.workspace;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT;
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -163,7 +162,7 @@ public class WorkspaceIntegrationTest extends BaseLauncherActivityTest<Launcher>
      * delete the pages.
      */
     @Test
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280737)
+    @DesktopStability(flavors = LOCAL, bug = 486280737)
     public void testAddAndDeletePageAndFling() {
         WorkspaceDragHelper workspaceDragHelper = new WorkspaceDragHelper(getLauncherActivity());
         // Add one page by dragging app to page 1.
@@ -191,7 +190,7 @@ public class WorkspaceIntegrationTest extends BaseLauncherActivityTest<Launcher>
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280737)
+    @DesktopStability(flavors = LOCAL, bug = 486280737)
     public void testDragToAndFromHotseat() {
         WorkspaceDragHelper workspaceDragHelper = new WorkspaceDragHelper(getLauncherActivity());
 

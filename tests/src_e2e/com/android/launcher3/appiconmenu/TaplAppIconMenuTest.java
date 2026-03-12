@@ -17,7 +17,6 @@ package com.android.launcher3.appiconmenu;
 
 import static com.android.launcher3.util.TestConstants.AppNames.TEST_APP_NAME;
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 
 import static org.junit.Assert.assertEquals;
@@ -57,7 +56,7 @@ public class TaplAppIconMenuTest extends AbstractLauncherUiTest<Launcher, View> 
     @Test
     @PortraitLandscape
     @PlatinumTest(focusArea = "launcher")
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 488075943)
+    @DesktopStability(flavors = LOCAL, bug = 488075943)
     public void testLaunchMenuItem() {
         final AllApps allApps = mLauncher.getWorkspace().switchToAllApps();
         allApps.freeze();
@@ -82,7 +81,7 @@ public class TaplAppIconMenuTest extends AbstractLauncherUiTest<Launcher, View> 
      */
     @PlatinumTest(focusArea = "launcher")
     @Test
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 488075943)
+    @DesktopStability(flavors = LOCAL, bug = 488075943)
     public void testLaunchHomeScreenMenuItem() {
         // Drag the test app icon to home screen and open short cut menu from the icon
         final HomeAllApps allApps = mLauncher.getWorkspace().switchToAllApps();

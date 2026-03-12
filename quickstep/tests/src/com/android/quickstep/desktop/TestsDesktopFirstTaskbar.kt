@@ -30,7 +30,6 @@ import com.android.launcher3.util.rule.SetPropRule
 import com.android.launcher3.util.rule.TestStabilityRule
 import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
 import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
-import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import com.android.quickstep.integration.BaseTaskbarIntegrationTest
 import com.android.quickstep.taskbar.util.IntegrationNavigationModeSwitchRule
 import com.android.quickstep.taskbar.util.IntegrationNavigationModeSwitchRule.NavigationModeSwitch
@@ -100,7 +99,7 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
 
     @Test
     @NavigationModeSwitch
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486279458)
+    @DesktopStability(flavors = LOCAL, bug = 486279458)
     fun testTaskbarOnHome() {
         // Go home - taskbar should be visible in desktop-first display context.
         uiDevice.pressHome()
@@ -126,7 +125,7 @@ class TestsDesktopFirstTaskbar : BaseTaskbarIntegrationTest() {
 
     @Test
     @NavigationModeSwitch(mode = IntegrationNavigationModeSwitchRule.Mode.THREE_BUTTON)
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486279458)
+    @DesktopStability(flavors = LOCAL, bug = 486279458)
     fun testTaskbarOnHome_three_buttons() {
         testTaskbarOnHome()
     }

@@ -46,7 +46,6 @@ import com.android.launcher3.util.WindowBounds
 import com.android.launcher3.util.rule.TestStabilityRule
 import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
 import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
-import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import com.android.quickstep.TaskViewTestDIHelpers.mockRecentsModel
 import com.android.quickstep.orientation.LandscapePagedViewHandler
 import com.android.quickstep.task.thumbnail.TaskContentView
@@ -148,7 +147,7 @@ class AspectRatioSystemShortcutTest {
      * option to open aspect ratio settings.
      */
     @Test
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486280489)
+    @DesktopStability(flavors = LOCAL, bug = 486280489)
     fun createShortcut_sw599dp_notCreated() {
         val task = createTask()
         val taskContainer = createTaskContainer(task)
