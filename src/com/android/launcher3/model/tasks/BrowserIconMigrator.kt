@@ -17,7 +17,6 @@
 package com.android.launcher3.model.tasks
 
 import android.content.Context
-import android.provider.BaseColumns._ID
 import com.android.launcher3.EncryptionType
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherPrefs
@@ -26,13 +25,12 @@ import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.dagger.ApplicationContext
-import com.android.launcher3.model.ModelDbController
+import com.android.launcher3.model.IModelWriter
+import com.android.launcher3.model.TransactionContext
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfo.NO_ID
 import com.android.launcher3.model.data.WorkspaceItemCoordinates
 import com.android.launcher3.model.data.WorkspaceItemInfo
-import com.android.launcher3.util.ContentWriter
-import com.android.launcher3.util.ContentWriter.CommitParams
 import com.android.launcher3.util.GridOccupancy
 import com.android.launcher3.util.IntSparseArrayMap
 import dagger.assisted.Assisted
@@ -45,10 +43,10 @@ class BrowserIconMigrator
 @AssistedInject
 constructor(
     @Assisted private val allModelItems: IntSparseArrayMap<ItemInfo>,
+    @Assisted private val modelWriter: IModelWriter,
     @ApplicationContext private val context: Context,
     private val idp: InvariantDeviceProfile,
     private val evaluator: BrowserMigrationConditionEvaluator,
-    private val dbController: ModelDbController,
     private val prefs: LauncherPrefs,
 ) {
 
@@ -56,12 +54,20 @@ constructor(
 
     /** Performs the data migration, and updates the pending flag */
     fun performMigration() {
-        val migrationDone = processItems()
-        prefs.put(PREF_MIGRATION_PENDING, false)
-        if (migrationDone) evaluator.notifyMigrationComplete(itemsModified)
+        var migrationDone = false
+        modelWriter.scheduleTransaction(
+            onComplete = { success ->
+                if (success) {
+                    prefs.put(PREF_MIGRATION_PENDING, false)
+                    if (migrationDone) evaluator.notifyMigrationComplete(itemsModified)
+                }
+            }
+        ) { txContext ->
+            migrationDone = processItems(txContext)
+        }
     }
 
-    private fun processItems(): Boolean {
+    private fun processItems(txContext: TransactionContext): Boolean {
         val (srcBrowser, targetAppIcon) = evaluator.evaluateSourceAndTarget() ?: return false
         val targetPkg = targetAppIcon.targetPackage ?: return false
 
@@ -80,21 +86,21 @@ constructor(
             browserIcon != null && appIcon != null -> {
                 val newBrowserLocation = getFirstPageEmptyLocation() ?: findNextAvailableSpace()
                 val oldBrowserLocation = browserIcon.getLocation()
-                browserIcon.addOrMoveTo(newBrowserLocation)
-                appIcon.addOrMoveTo(oldBrowserLocation)
+                browserIcon.addOrMoveTo(txContext, newBrowserLocation)
+                appIcon.addOrMoveTo(txContext, oldBrowserLocation)
             }
 
             // Add app icon to browser location and browser to some location starting at page 0
             browserIcon != null && appIcon == null -> {
                 val newBrowserLocation = getFirstPageEmptyLocation() ?: findNextAvailableSpace()
                 val oldBrowserLocation = browserIcon.getLocation()
-                browserIcon.addOrMoveTo(newBrowserLocation)
-                targetAppIcon.addOrMoveTo(oldBrowserLocation)
+                browserIcon.addOrMoveTo(txContext, newBrowserLocation)
+                targetAppIcon.addOrMoveTo(txContext, oldBrowserLocation)
             }
 
             // Add app to some location starting at page 1
             browserIcon == null && appIcon == null ->
-                targetAppIcon.addOrMoveTo(findNextAvailableSpace())
+                targetAppIcon.addOrMoveTo(txContext, findNextAvailableSpace())
 
             // App icon already exists at some location, ignore
             // browserIcon == null && appIcon != null
@@ -104,25 +110,17 @@ constructor(
         return true
     }
 
-    private fun ItemInfo.addOrMoveTo(location: WorkspaceItemCoordinates) {
+    private fun ItemInfo.addOrMoveTo(
+        txContext: TransactionContext,
+        location: WorkspaceItemCoordinates,
+    ) {
         location.applyTo(this)
 
         if (id == NO_ID) {
-            id = dbController.generateNewItemId()
-
-            val writer = ContentWriter(context)
-            onAddToDatabase(writer)
-            writer.put(_ID, id)
-            dbController.insert(writer.getValues(context))
+            txContext.addItemToDatabase(this)
             allModelItems.put(id, this)
         } else {
-            val writer =
-                ContentWriter(
-                    context,
-                    CommitParams(dbController, "$_ID= ?", arrayOf(id.toString())),
-                )
-            onAddToDatabase(writer)
-            writer.commit()
+            txContext.updateItemInDatabase(this)
         }
 
         itemsModified = true
@@ -204,7 +202,8 @@ constructor(
 interface BrowserIconMigratorFactory {
 
     fun createBrowserIconMigrator(
-        @Assisted allModelItems: IntSparseArrayMap<ItemInfo>
+        @Assisted allModelItems: IntSparseArrayMap<ItemInfo>,
+        @Assisted modelWriter: IModelWriter,
     ): BrowserIconMigrator
 }
 
