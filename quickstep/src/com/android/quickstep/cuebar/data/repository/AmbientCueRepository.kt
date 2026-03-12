@@ -56,6 +56,7 @@ import com.android.launcher3.util.MutableListenableRef
 import com.android.quickstep.cuebar.data.ActionModel
 import com.android.quickstep.cuebar.data.IconModel
 import com.android.quickstep.cuebar.data.InsightListener
+import com.android.quickstep.cuebar.logger.AmbientCueAceLogger
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.system.TaskStackChangeListener
 import com.android.systemui.shared.system.TaskStackChangeListeners
@@ -117,6 +118,8 @@ interface AmbientCueRepository {
 
     fun dump(pw: PrintWriter, prefix: String)
 
+    fun reportCloseEvent()
+
     /** Triggers a dummy insight for TAPL/Scenario testing. */
     @VisibleForTesting fun injectTestInsightForCueBar()
 }
@@ -141,9 +144,7 @@ constructor(
         taskbarActivityContext.getSystemService(AutofillManager::class.java)
     private val personalContextManager: PersonalContextManager? =
         taskbarActivityContext.getSystemService(PersonalContextManager::class.java)
-
-    private var lastPublishedInsight: PublishedContextInsight? = null
-    private var lastRenderToken: RenderToken? = null
+    private val ambientCueAceLogger = AmbientCueAceLogger(personalContextManager)
 
     private val _actions = MutableListenableRef<List<ActionModel>>(emptyList())
     override val actions: MutableListenableRef<List<ActionModel>> = _actions
@@ -254,8 +255,8 @@ constructor(
         pw.println("$prefix globallyFocusedTaskId: ${globallyFocusedTaskId.value}")
         pw.println("$prefix debounceTaskJob active: ${debounceTaskJob?.isActive == true}")
         pw.println("$prefix frontTaskPackageName: ${frontTaskPackageName.value}")
-        pw.println("$prefix lastPublishedInsight: $lastPublishedInsight")
-        pw.println("$prefix lastRenderToken: $lastRenderToken")
+        pw.println("$prefix lastPublishedInsight: ${ambientCueAceLogger.lastPublishedInsight}")
+        pw.println("$prefix lastRenderToken: ${ambientCueAceLogger.lastRenderToken}")
     }
 
     private fun ContextInsight.flatten(): List<ContextInsight> {
@@ -268,8 +269,7 @@ constructor(
 
     override fun onInsightReceived(insight: PublishedContextInsight, token: RenderToken) {
         uiExecutor.execute {
-            lastPublishedInsight = insight
-            lastRenderToken = token
+            ambientCueAceLogger.onInsightReceived(insight, token)
 
             if (!insightEligibleForCueBar(insight.getInsight())) {
                 return@execute
@@ -347,6 +347,12 @@ constructor(
                 .firstOrNull { it.hintTypeName == IME_VISIBILITY_HINT_TYPE }
                 ?.dataBundle
                 ?.getBoolean(EXTRA_ENABLED_WITH_IME_VISIBLE, false) ?: false
+        val attributionDialogPendingIntent: PendingIntent? =
+            insight.originHints
+                .mapNotNull { it.contextHint as? BundleHint }
+                .firstOrNull { it.hintTypeName == ATTRIBUTION_INTENT_HINT_TYPE }
+                ?.dataBundle
+                ?.getParcelable(EXTRA_ATTRIBUTION_DIALOG_PENDING_INTENT)
         val onPerformAction: () -> Unit
         val extras: Bundle? // Only ActionableInsight has action/extras
         val title = display.title.toString()
@@ -359,7 +365,7 @@ constructor(
                 extras = null
 
                 onPerformAction = {
-                    reportInsightEvent(InsightEvent.EVENT_USER_TAP)
+                    reportInsightEvent(insight, InsightEvent.EVENT_USER_TAP)
                     if (
                         contextHint is BundleHint &&
                             contextHint.dataBundle.getBoolean(NEEDS_DATA_EGRESS, false)
@@ -397,7 +403,7 @@ constructor(
                         null
                     }
                 onPerformAction = {
-                    reportInsightEvent(InsightEvent.EVENT_USER_TAP)
+                    reportInsightEvent(insight, InsightEvent.EVENT_USER_TAP)
                     val token = activityId?.token
                     if (token != null && autofillId != null) {
                         autofillManager?.autofillRemoteApp(
@@ -439,12 +445,8 @@ constructor(
                 onPerformAction = onPerformAction,
                 onPerformLongClick = {
                     Log.i(TAG, "AmbientCueRepositoryImpl: onPerformLongClick")
-                    reportInsightEvent(InsightEvent.EVENT_USER_LONG_PRESS)
-                    // TODO: b/458508340 Proper design for attribution/feedback.
-                    val pendingIntent =
-                        extras?.getParcelable<PendingIntent>(
-                            EXTRA_ATTRIBUTION_DIALOG_PENDING_INTENT
-                        )
+                    reportInsightEvent(insight, InsightEvent.EVENT_USER_LONG_PRESS)
+                    val pendingIntent = attributionDialogPendingIntent
                     if (pendingIntent != null) {
                         Log.i(TAG, "Performing long click: $pendingIntent")
                         launchPendingIntent(pendingIntent)
@@ -459,6 +461,10 @@ constructor(
         )
     }
 
+    override fun reportCloseEvent() {
+        ambientCueAceLogger.reportCloseEvent()
+    }
+
     override fun connectToAce() {
         if (!isAmbientCueEnabled.value) {
             Log.d(TAG, "Ace listener register skipped: Ambient Cue setting is disabled.")
@@ -469,12 +475,8 @@ constructor(
         TaskStackChangeListeners.getInstance().registerTaskStackListener(taskStackListener)
     }
 
-    private fun reportInsightEvent(event: Int) {
-        val insight = lastPublishedInsight
-        val token = lastRenderToken
-        if (insight != null && token != null) {
-            personalContextManager?.reportInsightEvent(insight, event, token)
-        }
+    private fun reportInsightEvent(childInsight: ContextInsight, event: Int) {
+        ambientCueAceLogger.reportInsightEvent(childInsight, event)
     }
 
     override fun disconnectFromAce() {
@@ -532,6 +534,8 @@ constructor(
         private const val AMBIENT_CUE_DEFAULT_TIMEOUT_MS = 30_000
         @VisibleForTesting const val MA_ACTION_TYPE_NAME = "ma"
         @VisibleForTesting const val MR_ACTION_TYPE_NAME = "mr"
+
+        private const val ATTRIBUTION_INTENT_HINT_TYPE = "attributionIntentHint"
     }
 }
 
