@@ -1392,6 +1392,7 @@ public class TaskbarStashController implements TaskbarControllers.LoggableTaskba
      */
     public void onImeInsetChanged() {
         setStashedImeState();
+        mControllers.bubbleControllers.ifPresent(c -> c.bubbleBarController.onImeInsetChanged());
     }
 
     /**

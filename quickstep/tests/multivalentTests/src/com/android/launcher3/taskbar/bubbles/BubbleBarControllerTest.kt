@@ -76,4 +76,24 @@ class BubbleBarControllerTest {
 
         assertThat(bubbleBarViewController.isHiddenForSysui).isFalse()
     }
+
+    @Test
+    @EnableFlags(FLAG_FIX_BUBBLE_BAR_STASHING_WITH_HARDWARE_KEYBOARD)
+    fun testOnImeInsetChanged_imeDocked_doesStash() {
+        activityContext.setImeDockedOverrideForTest(true)
+
+        runOnTaskbarUiThreadSync { bubbleBarController.onImeInsetChanged() }
+
+        assertThat(bubbleBarViewController.isHiddenForSysui).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_FIX_BUBBLE_BAR_STASHING_WITH_HARDWARE_KEYBOARD)
+    fun testOnImeInsetChanged_imeNotDocked_doesNotStash() {
+        activityContext.setImeDockedOverrideForTest(false)
+
+        runOnTaskbarUiThreadSync { bubbleBarController.onImeInsetChanged() }
+
+        assertThat(bubbleBarViewController.isHiddenForSysui).isFalse()
+    }
 }
