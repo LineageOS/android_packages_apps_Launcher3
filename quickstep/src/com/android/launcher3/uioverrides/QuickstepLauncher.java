@@ -793,7 +793,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         View.setTracedRequestLayoutClassClass(TRACE_RELAYOUT_CLASS);
         OverviewComponentObserver.INSTANCE.get(this)
                 .addOverviewChangeListener(mOverviewChangeListener);
-        new TraceStateLoggerHelper(getDisplayId()).startTraceStateLogger(this);
+        new TraceStateLoggerHelper(this).startTraceStateLogger();
     }
 
     @Override
