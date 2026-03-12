@@ -95,19 +95,6 @@ constructor(
 
     // accessibility system action properties
     private var isBubbleBarSystemActionRegistered = false
-    private val bubbleBarShowRemoteAction =
-        RemoteAction(
-            Icon.createWithResource(context, R.drawable.ic_unstash_no_shadow),
-            context.getString(R.string.bubble_bar_a11y_title),
-            context.getString(R.string.bubble_bar_a11y_title),
-            PendingIntent.getBroadcast(
-                context,
-                SYSTEM_ACTION_ID_BUBBLE_BAR,
-                Intent(SystemActionConstants.ACTION_SHOW_BUBBLE_BAR)
-                    .setPackage(context.packageName),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            ),
-        )
 
     @VisibleForTesting
     val showBubbleBarReceiver =
@@ -762,7 +749,18 @@ constructor(
     private fun registerBubbleBarSystemAction() {
         if (!isBubbleBarSystemActionRegistered) {
             accessibilityManager.registerSystemAction(
-                bubbleBarShowRemoteAction,
+                RemoteAction(
+                    Icon.createWithResource(context, R.drawable.ic_unstash_no_shadow),
+                    context.getString(R.string.bubble_bar_a11y_title),
+                    context.getString(R.string.bubble_bar_a11y_title),
+                    PendingIntent.getBroadcast(
+                        context,
+                        SYSTEM_ACTION_ID_BUBBLE_BAR,
+                        Intent(SystemActionConstants.ACTION_SHOW_BUBBLE_BAR)
+                            .setPackage(context.packageName),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                    ),
+                ),
                 SYSTEM_ACTION_ID_BUBBLE_BAR,
             )
             isBubbleBarSystemActionRegistered = true
