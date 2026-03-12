@@ -29,7 +29,6 @@ import android.view.View.MeasureSpec.makeMeasureSpec
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.Lifecycle
-import com.android.launcher3.DropTarget.DragObject
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.views.ActivityContext
@@ -59,7 +58,7 @@ class SystemDragListener(
         /*previewBitmapWidth=*/ 0,
         /*previewViewWidth*/ 0,
     ),
-    DragController.DragListener {
+    DragController.DragSessionListener {
 
     private var cleanupCallback: Runnable? = null
     private var dragImage: ImageView? = null
@@ -69,7 +68,7 @@ class SystemDragListener(
         val closeAllOpenViews = params?.closeAllOpenViews ?: true
         val isStarted = context.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
         initInternal(context, isStarted, closeAllOpenViews)
-        context.dragController.addDragListener(this)
+        context.dragController.addDragSessionListener(this)
     }
 
     /**
@@ -141,13 +140,9 @@ class SystemDragListener(
         return super.onDrag(event)
     }
 
-    override fun onDragEnd() {
-        mContext.dragController.removeDragListener(this)
+    override fun onDragSessionEnd() {
+        mContext.dragController.removeDragSessionListener(this)
         postCleanup()
-    }
-
-    override fun onDragStart(dragObject: DragObject, options: DragOptions) {
-        // No-op
     }
 
     override fun startDrag(

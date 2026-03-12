@@ -161,15 +161,15 @@ object AllAppsItemCustomActionsListener : BaseItemCustomActionsListener() {
         if (!ItemLongClickListener.canStartAllAppsItemDrag(launcher)) return
 
         val dragController: DragController = launcher.dragController
-        dragController.addDragListener(
-            object : DragController.DragListener {
-                override fun onDragStart(dragObject: DragObject, options: DragOptions) {
+        dragController.addDragSessionListener(
+            object : DragController.DragSessionListener {
+                override fun onDragSessionStart(dragObject: DragObject, options: DragOptions) {
                     btv.visibility = View.INVISIBLE
                 }
 
-                override fun onDragEnd() {
+                override fun onDragSessionEnd() {
                     btv.visibility = View.VISIBLE
-                    dragController.removeDragListener(this)
+                    dragController.removeDragSessionListener(this)
                 }
             }
         )
