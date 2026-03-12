@@ -108,6 +108,7 @@ private constructor(
                 !desktopState.isDesktopModeSupportedOnDisplay(context.display) -> null
                 desktopModeCompatPolicy.shouldDisableDesktopEntryPoints(
                     taskKey.baseActivity?.packageName,
+                    taskKey.baseActivity?.className,
                     taskKey.numActivities,
                     taskKey.isTopActivityNoDisplay,
                     taskKey.isActivityStackTransparent,
