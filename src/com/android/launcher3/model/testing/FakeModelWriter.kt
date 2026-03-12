@@ -40,15 +40,16 @@ class FakeModelWriter : IModelWriter {
     /** A mutable list to store the [WriterAction] objects recorded during a transaction. */
     val actions = mutableListOf<WriterAction>()
 
+    private interface QueuedTransaction {
+        fun execute()
+    }
+
     private var isSuspended = false
-    private val transactionQueue =
-        mutableListOf<Pair<((Boolean) -> Unit)?, Consumer<TransactionContext>>>()
+    private val transactionQueue = mutableListOf<QueuedTransaction>()
 
     private val fakeTransactionContext =
         object : TransactionContext {
-            override fun addItemToDatabase(
-                item: ItemInfo,
-            ) {
+            override fun addItemToDatabase(item: ItemInfo) {
                 actions.add(WriterAction.AddItem(item, item.container))
             }
 
@@ -130,16 +131,22 @@ class FakeModelWriter : IModelWriter {
      * This allows tests to directly inspect the [actions] list after calling a client method that
      * uses [scheduleTransaction].
      */
-    override fun scheduleTransaction(
-        onComplete: ((success: Boolean) -> Unit)?,
-        block: Consumer<TransactionContext>,
+    override fun <T> scheduleTransaction(
+        onComplete: ((success: Boolean, result: T?) -> Unit)?,
+        block: (TransactionContext) -> T,
     ) {
         if (isSuspended) {
-            transactionQueue.add(onComplete to block)
+            transactionQueue.add(
+                object : QueuedTransaction {
+                    override fun execute() {
+                        scheduleTransaction(onComplete, block)
+                    }
+                }
+            )
             return
         }
-        block.accept(fakeTransactionContext)
-        onComplete?.invoke(true)
+        val result = block(fakeTransactionContext)
+        onComplete?.invoke(true, result)
     }
 
     override fun suspendWrites() {
@@ -152,13 +159,13 @@ class FakeModelWriter : IModelWriter {
     ) {
         isSuspended = false
         if (pendingTransaction != null) {
-            scheduleTransaction(null, pendingTransaction)
+            scheduleTransaction(null) { pendingTransaction.accept(it) }
         }
         val queue = transactionQueue.toList()
         transactionQueue.clear()
 
         if (!discardPending) {
-            queue.forEach { (onComplete, block) -> scheduleTransaction(onComplete, block) }
+            queue.forEach { it.execute() }
         }
     }
 
@@ -269,7 +276,6 @@ class FakeModelWriter : IModelWriter {
     }
 
     private fun execute(block: (TransactionContext) -> Unit) {
-        scheduleTransaction(block = Consumer { block(it) })
+        scheduleTransaction(block = block)
     }
-
 }
