@@ -111,9 +111,22 @@ class DesktopAppLaunchTransitionManager(
                     mModes = DesktopAppLaunchTransition.LAUNCH_CHANGE_MODES
                     mMustBeTask = true
                 }
+
+            val requirements =
+                if (Flags.crossDisplayTransition()) {
+                    val notCrossDisplayRequirement =
+                        TransitionFilter.Requirement().apply {
+                            mNot = true
+                            mIsCrossDisplayMove = true
+                        }
+                    arrayOf(openRequirement, notCrossDisplayRequirement)
+                } else {
+                    arrayOf(openRequirement)
+                }
+
             return TransitionFilter().apply {
                 mTypeSet = DesktopAppLaunchTransition.LAUNCH_CHANGE_MODES
-                mRequirements = arrayOf(openRequirement)
+                mRequirements = requirements
             }
         }
     }
