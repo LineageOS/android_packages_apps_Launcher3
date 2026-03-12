@@ -213,6 +213,10 @@ fun ActionList(
             smartScrimAlphaBoost = 0f
         }
     }
+    val isValidHeight = containerHeightPx > 0
+    var previousIsValidHeight by remember { mutableStateOf(isValidHeight) }
+    val justBecameValid = isValidHeight && !previousIsValidHeight
+    previousIsValidHeight = isValidHeight
 
     val scrimOffsetY by
         animateFloatAsState(
@@ -220,12 +224,16 @@ fun ActionList(
                 if (!expanded) containerHeightPx - scrimVerticalPaddingPx
                 else containerHeightPx - radius,
             animationSpec =
-                if (expanded || wasEverExpanded) {
-                    // Enable animation only when user expands/collapses the action list.
+                if (justBecameValid) {
+                    // If the height JUST became valid, snap to the target value
+                    // to avoid animating from an invalid height.
+                    snap<Float>()
+                } else if (isValidHeight && (expanded || wasEverExpanded)) {
+                    // Enable animation only when user expands/collapses the action list
                     tween(250, delayMillis = 200)
                 } else {
                     // Disable animation during Compose initialization.
-                    snap()
+                    snap<Float>()
                 },
             label = "scrimOffsetY",
         )
