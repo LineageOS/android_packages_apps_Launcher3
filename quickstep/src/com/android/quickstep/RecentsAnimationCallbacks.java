@@ -49,6 +49,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -203,7 +204,7 @@ public class RecentsAnimationCallbacks implements
     }
 
     private Iterable<RecentsAnimationListener> getListeners() {
-        return enableTaskbarUiThread() ? mListeners : new ArrayList<>(mListeners);
+        return enableTaskbarUiThread() ? List.copyOf(mListeners) : new ArrayList<>(mListeners);
     }
 
     /**
