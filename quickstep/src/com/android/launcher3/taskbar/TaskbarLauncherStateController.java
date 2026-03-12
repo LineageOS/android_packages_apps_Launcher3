@@ -369,9 +369,8 @@ public class TaskbarLauncherStateController {
 
         mIconAlignment.finishAnimation();
 
-        if (shouldShowTransientTaskbarAnimation()) {
-            mLauncher.setHotseatIconsAlpha(1f, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
-        }
+        mLauncher.setHotseatIconsAlpha(1f, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
+
         if (mStateListenerClosable != null) {
             mStateListenerClosable.close();
         }
@@ -1166,6 +1165,8 @@ public class TaskbarLauncherStateController {
     private void updateIconAlphaForHome(float taskbarAlpha,
             @HotseatQsbAlphaId int alphaChannel,
             boolean updateTaskbarAlpha) {
+
+        // TODO : return early when icon alignment animation is removed.
         if (mIsDestroyed) {
             return;
         }
