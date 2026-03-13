@@ -223,7 +223,6 @@ public class FloatingWidgetView extends FrameLayout implements AnimatorListener,
      */
     public void update(float linearProgress, float widgetAlphaLowerBound, RectF backgroundPosition,
             float floatingWidgetAlpha,  float cornerRadiusProgress) {
-
         update(backgroundPosition, floatingWidgetAlpha,
                 Utilities.mapBoundToRange(linearProgress, 0.5f, 1f, 0f, 1f, LINEAR),
                 Utilities.mapBoundToRange(linearProgress,
