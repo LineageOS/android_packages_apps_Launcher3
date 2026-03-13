@@ -63,8 +63,6 @@
     <string name="shortcuts_count" msgid="8471715556199592381">"{count,plural, =1{# atallo}other{# atallos}}"</string>
     <string name="widgets_and_shortcuts_count" msgid="7209136747878365116">"<xliff:g id="WIDGETS_COUNT">%1$s</xliff:g>, <xliff:g id="SHORTCUTS_COUNT">%2$s</xliff:g>"</string>
     <string name="widget_button_text" msgid="2880537293434387943">"Widgets"</string>
-    <string name="widgets_full_sheet_search_bar_hint" msgid="8484659090860596457">"Busca widgets"</string>
-    <string name="widgets_full_sheet_cancel_button_description" msgid="5766167035728653605">"Borrar texto da caixa de busca"</string>
     <string name="no_widgets_available" msgid="4337693382501046170">"Non hai widgets nin atallos dispoñibles"</string>
     <string name="no_search_results" msgid="3787956167293097509">"Non se atoparon widgets nin atallos"</string>
     <string name="widgets_full_sheet_personal_tab" msgid="2743540105607120182">"Persoal"</string>
@@ -207,9 +205,15 @@
     <string name="move_to_hotseat_position" msgid="6295412897075147808">"Mover á posición dos favoritos <xliff:g id="NUMBER">%1$s</xliff:g>"</string>
     <string name="item_moved" msgid="4606538322571412879">"Moveuse o elemento"</string>
     <string name="add_to_folder" msgid="9040534766770853243">"Engadir ao cartafol: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for add_to_folder_with_position (4457486890869662) -->
+    <skip />
     <string name="add_to_folder_with_app" msgid="4534929978967147231">"Engadir ao cartafol con <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for add_to_folder_with_app_with_position (6670979489897093325) -->
+    <skip />
     <string name="added_to_folder" msgid="4793259502305558003">"Engadiuse o elemento ao cartafol"</string>
     <string name="create_folder_with" msgid="4050141361160214248">"Crear cartafol con: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for create_folder_with_position (3093164349445159115) -->
+    <skip />
     <string name="folder_created" msgid="6409794597405184510">"Creouse o cartafol"</string>
     <string name="action_move_to_workspace" msgid="39528912300293768">"Mover á pantalla de inicio"</string>
     <string name="action_resize" msgid="1802976324781771067">"Cambiar tamaño"</string>
@@ -265,9 +269,7 @@
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"Novo cartafol"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"Novo cartafol"</string>
     <string name="something_went_wrong" msgid="1492883246069060632">"Produciuse un erro"</string>
-    <!-- no translation found for organizer_create_screen_title (1052454457895703433) -->
-    <skip />
+    <string name="organizer_create_screen_title" msgid="1052454457895703433">"Crear pantalla"</string>
     <string name="organizer_create_screen_description" msgid="3224132391919219061">"Escolle unha categoría para engadir aplicacións e widgets do teu teléfono"</string>
-    <!-- no translation found for organizer_choose_layout_title (127228966942084947) -->
-    <skip />
+    <string name="organizer_choose_layout_title" msgid="127228966942084947">"Seleccionar o deseño"</string>
 </resources>

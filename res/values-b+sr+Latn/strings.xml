@@ -63,8 +63,6 @@
     <string name="shortcuts_count" msgid="8471715556199592381">"{count,plural, =1{# prečica}one{# prečica}few{# prečice}other{# prečica}}"</string>
     <string name="widgets_and_shortcuts_count" msgid="7209136747878365116">"<xliff:g id="WIDGETS_COUNT">%1$s</xliff:g>, <xliff:g id="SHORTCUTS_COUNT">%2$s</xliff:g>"</string>
     <string name="widget_button_text" msgid="2880537293434387943">"Vidžeti"</string>
-    <string name="widgets_full_sheet_search_bar_hint" msgid="8484659090860596457">"Pretražite"</string>
-    <string name="widgets_full_sheet_cancel_button_description" msgid="5766167035728653605">"Obrišite tekst iz okvira za pretragu"</string>
     <string name="no_widgets_available" msgid="4337693382501046170">"Vidžeti i prečice nisu dostupni"</string>
     <string name="no_search_results" msgid="3787956167293097509">"Nije pronađen nijedan vidžet ni prečica"</string>
     <string name="widgets_full_sheet_personal_tab" msgid="2743540105607120182">"Lično"</string>
@@ -207,9 +205,12 @@
     <string name="move_to_hotseat_position" msgid="6295412897075147808">"Premesti na <xliff:g id="NUMBER">%1$s</xliff:g>. poziciju u omiljenim"</string>
     <string name="item_moved" msgid="4606538322571412879">"Stavka je premeštena"</string>
     <string name="add_to_folder" msgid="9040534766770853243">"Dodaj u folder: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="add_to_folder_with_position" msgid="4457486890869662">"Dodaj u folder <xliff:g id="NAME">%1$s</xliff:g>. <xliff:g id="NUMBER_0">%2$s</xliff:g>. red, <xliff:g id="NUMBER_1">%3$s</xliff:g>. kolona u: <xliff:g id="STRING">%4$s</xliff:g>"</string>
     <string name="add_to_folder_with_app" msgid="4534929978967147231">"Dodaj u folder u kome je <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="add_to_folder_with_app_with_position" msgid="6670979489897093325">"Dodaj u folder sa: <xliff:g id="NAME">%1$s</xliff:g> <xliff:g id="NUMBER_0">%2$s</xliff:g>. red, <xliff:g id="NUMBER_1">%3$s</xliff:g>. kolona, u: <xliff:g id="STRING">%4$s</xliff:g>"</string>
     <string name="added_to_folder" msgid="4793259502305558003">"Stavka je dodata u folder"</string>
     <string name="create_folder_with" msgid="4050141361160214248">"Napravite folder sa: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="create_folder_with_position" msgid="3093164349445159115">"Napravi folder sa: <xliff:g id="NAME">%1$s</xliff:g> <xliff:g id="NUMBER_0">%2$s</xliff:g>. red, <xliff:g id="NUMBER_1">%3$s</xliff:g>. kolona, u: <xliff:g id="STRING">%4$s</xliff:g>"</string>
     <string name="folder_created" msgid="6409794597405184510">"Folder je napravljen"</string>
     <string name="action_move_to_workspace" msgid="39528912300293768">"Premestite na početni ekran"</string>
     <string name="action_resize" msgid="1802976324781771067">"Promeni veličinu"</string>
