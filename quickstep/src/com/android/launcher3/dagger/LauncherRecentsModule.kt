@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.di
+package com.android.launcher3.dagger
 
 import android.app.KeyguardManager
 import android.content.Context
@@ -26,8 +26,7 @@ import androidx.core.content.getSystemService
 import com.android.launcher3.DeviceProfile
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
-import com.android.launcher3.dagger.ApplicationContext
-import com.android.launcher3.dagger.DisplayId
+import com.android.launcher3.views.ActivityContext
 import com.android.quickstep.RecentTasksList
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.recents.data.AppTimersRepository
@@ -65,11 +64,11 @@ import kotlinx.coroutines.SupervisorJob
 /** Module that provides dependencies required for an instance of Recents. */
 @Module
 interface LauncherRecentsModule {
-    @RecentsSingleton
+    @ActivityContextSingleton
     @Binds
     fun bindRecentTasksRepository(impl: TasksRepository): RecentTasksRepository
 
-    @RecentsSingleton
+    @ActivityContextSingleton
     @Binds
     fun bindRecentTasksDataSource(impl: RecentsModel): RecentTasksDataSource
 
@@ -80,23 +79,23 @@ interface LauncherRecentsModule {
 
     @Binds fun bindTaskVisualsChangeNotifier(impl: RecentsModel): TaskVisualsChangeNotifier
 
-    @RecentsSingleton
+    @ActivityContextSingleton
     @Binds
     fun bindUserLockedStateRepository(impl: UserLockedRepository): UserLockedStateRepository
 
-    @RecentsSingleton
+    @ActivityContextSingleton
     @Binds
     fun bindInputDeviceDataSource(impl: InputManagerWrapper): InputDeviceDataSource
 
-    @RecentsSingleton
+    @ActivityContextSingleton
     @Binds
     fun bindAppTimersRepository(impl: AppTimersRepositoryImpl): AppTimersRepository
 
-    @RecentsSingleton
+    @ActivityContextSingleton
     @Binds
     fun bindPointerRepository(impl: PointerRepositoryImpl): PointerRepository
 
-    @RecentsSingleton
+    @ActivityContextSingleton
     @Binds
     fun bindRecentsDeviceProfileRepository(
         impl: RecentsDeviceProfileRepositoryImpl
@@ -105,11 +104,15 @@ interface LauncherRecentsModule {
     @Binds fun bindRecentTasksKeysDataSource(impl: RecentTasksList): RecentTasksKeysDataSource
 
     companion object {
-        @RecentsSingleton
+        @Provides
+        fun provideRecentsViewContainer(context: ActivityContext): RecentsViewContainer =
+            context as RecentsViewContainer
+
+        @ActivityContextSingleton
         @Provides
         fun provideTaskIconDataSource(model: RecentsModel): TaskIconDataSource = model.iconCache
 
-        @RecentsSingleton
+        @ActivityContextSingleton
         @Provides
         fun provideRecentsCoroutineScope(
             @DisplayId displayId: Int,
@@ -121,36 +124,36 @@ interface LauncherRecentsModule {
                     CoroutineName("RecentsView-Display$displayId")
             )
 
-        @RecentsSingleton
+        @ActivityContextSingleton
         @Provides
         fun provideTaskThumbnailDataSource(model: RecentsModel): TaskThumbnailDataSource =
             model.thumbnailCache
 
-        @RecentsSingleton
+        @ActivityContextSingleton
         @Provides
         fun provideHighResLoadingStateNotifier(model: RecentsModel): HighResLoadingStateNotifier =
             model.thumbnailCache.highResLoadingState
 
-        @RecentsSingleton
+        @ActivityContextSingleton
         @Provides
         fun provideKeyguardManager(@ApplicationContext context: Context): KeyguardManager =
             context.getSystemService<KeyguardManager>()!!
 
-        @RecentsSingleton
+        @ActivityContextSingleton
         @Provides
         fun provideInputManager(@ApplicationContext context: Context): InputManager =
             context.getSystemService<InputManager>()!!
 
-        @RecentsSingleton
+        @ActivityContextSingleton
         @Provides
         fun provideLauncherApps(@ApplicationContext context: Context): LauncherApps =
             context.getSystemService<LauncherApps>()!!
 
-        @RecentsSingleton
+        @ActivityContextSingleton
         @Provides
         fun provideWindowManager(): IWindowManager = WindowManagerGlobal.getWindowManagerService()!!
 
-        @RecentsSingleton
+        @ActivityContextSingleton
         @Provides
         fun provideRecentsOrientedState(
             @ApplicationContext context: Context,
@@ -158,13 +161,13 @@ interface LauncherRecentsModule {
         ): RecentsOrientedState =
             RecentsOrientedState(context, recentsViewContainer.getContainerInterface())
 
-        @RecentsSingleton
+        @ActivityContextSingleton
         @Provides
         fun provideRecentsRotationStateRepository(
             recentsOrientedState: RecentsOrientedState
         ): RecentsRotationStateRepository = RecentsRotationStateRepositoryImpl(recentsOrientedState)
 
-        @RecentsSingleton
+        @ActivityContextSingleton
         @Provides
         fun provideDeviceProfileGetter(
             recentsViewContainer: RecentsViewContainer

@@ -26,12 +26,12 @@ import com.android.internal.jank.Cuj
 import com.android.launcher3.Flags.enableRefactorDigitalWellbeingToast
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
+import com.android.launcher3.dagger.ActivityContextComponent
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT
 import com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_UNDEFINED
 import com.android.quickstep.TaskOverlayFactory
-import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.recents.ui.viewmodel.GroupedTaskViewModel
 import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.RecentsOrientedState
@@ -73,8 +73,8 @@ class GroupedTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     @Inject lateinit var groupedTaskViewModel: GroupedTaskViewModel
 
-    override fun initialiseInjectables(recentsComponent: RecentsComponent) {
-        recentsComponent.inject(this)
+    override fun initialiseInjectables(component: ActivityContextComponent) {
+        component.inject(this)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

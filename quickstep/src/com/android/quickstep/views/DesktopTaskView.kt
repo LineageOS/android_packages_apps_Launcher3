@@ -37,6 +37,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.android.internal.jank.Cuj.CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS
 import com.android.launcher3.R
+import com.android.launcher3.dagger.ActivityContextComponent
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.testing.TestLogging
 import com.android.launcher3.testing.shared.TestProtocol
@@ -53,7 +54,6 @@ import com.android.quickstep.FullscreenDrawParams
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.ViewUtils.addAccessibleChildToList
-import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.recents.domain.model.TaskLayoutConfig.DesktopLayoutConfig
 import com.android.quickstep.recents.domain.model.TaskLayoutState.DesktopTaskLayoutState
 import com.android.quickstep.recents.domain.model.TaskPosition.Hidden
@@ -145,8 +145,8 @@ class DesktopTaskView @JvmOverloads constructor(context: Context, attrs: Attribu
     override val displayId: Int
         get() = desktopTask?.displayId ?: INVALID_DISPLAY
 
-    override fun initialiseInjectables(recentsComponent: RecentsComponent) {
-        recentsComponent.inject(this)
+    override fun initialiseInjectables(component: ActivityContextComponent) {
+        component.inject(this)
     }
 
     override fun onFinishInflate() {

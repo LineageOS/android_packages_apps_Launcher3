@@ -28,7 +28,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.desktop.DesktopRecentsTransitionController;
@@ -41,7 +40,6 @@ import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle;
-import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SingleTask;
@@ -73,9 +71,6 @@ public abstract class FallbackRecentsView<CONTAINER_TYPE extends Context & Recen
         super(context, attrs, defStyleAttr);
         mContainer.getStateManager().addStateListener(this);
     }
-
-    @Override
-    protected abstract void initialiseInjectables(@NonNull RecentsComponent recentsComponent);
 
     @Override
     public void init(OverviewActionsView actionsView, SplitSelectStateController splitController,

@@ -57,6 +57,7 @@ import com.android.launcher3.Utilities.getTrimmedStackTrace
 import com.android.launcher3.concurrent.annotations.LightweightBackground
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority
 import com.android.launcher3.concurrent.annotations.Ui
+import com.android.launcher3.dagger.ActivityContextComponent
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.TaskViewItemInfo
 import com.android.launcher3.testing.TestLogging
@@ -80,7 +81,6 @@ import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.TaskOverlayFactory
 import com.android.quickstep.TaskViewUtils
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler
-import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.recents.domain.usecase.ThumbnailPosition
 import com.android.quickstep.recents.ui.mapper.TaskUiStateMapper
 import com.android.quickstep.recents.ui.viewmodel.TaskData
@@ -632,8 +632,8 @@ constructor(
         return super.onHoverEvent(event)
     }
 
-    open fun initialiseInjectables(recentsComponent: RecentsComponent) {
-        recentsComponent.inject(this)
+    open fun initialiseInjectables(component: ActivityContextComponent) {
+        component.inject(this)
     }
 
     private fun showTaskDismissButton() {
