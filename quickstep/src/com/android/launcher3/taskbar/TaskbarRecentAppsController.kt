@@ -105,7 +105,7 @@ class TaskbarRecentAppsController(
         private set
 
     private var allRecentTasks: List<GroupTask> = emptyList()
-    private var taskbarRunningTasks: List<Task> = emptyList()
+    private var taskbarRunningTasks: List<GroupTask> = emptyList()
     // Keeps track of the order in which running tasks appear.
     private var orderedRunningTaskIds = emptyList<Int>()
     var shownTasks: List<GroupTask> = emptyList()
@@ -155,9 +155,9 @@ class TaskbarRecentAppsController(
             return TaskState(RunningAppState.NOT_RUNNING)
         }
         val appTasks =
-            taskbarRunningTasks.filter { task ->
-                packageName == task.key.packageName && task.key.userId == userId
-            }
+            taskbarRunningTasks
+                .flatMap { it.tasks }
+                .filter { task -> packageName == task.key.packageName && task.key.userId == userId }
         val runningTask = appTasks.find { getRunningAppState(it.key.id) == RunningAppState.RUNNING }
         if (runningTask != null) {
             return TaskState(RunningAppState.RUNNING, runningTask.key.id)
@@ -213,7 +213,7 @@ class TaskbarRecentAppsController(
             ) {
                 return emptySet()
             }
-            return taskbarRunningTasks.map { it.key.id }.toSet()
+            return taskbarRunningTasks.flatMap { it.tasks }.map { it.key.id }.toSet()
         }
 
     @VisibleForTesting
@@ -232,6 +232,7 @@ class TaskbarRecentAppsController(
             // opened window inside an inactive desk will still have long app indicator inside the
             // taskbar.
             return taskbarRunningTasks
+                .flatMap { it.tasks }
                 .filter { task -> task.isMinimized }
                 .map { task -> task.key.id }
                 .toSet()
@@ -379,15 +380,15 @@ class TaskbarRecentAppsController(
     }
 
     fun getRunningTaskWithId(id: Int): Task? {
-        return taskbarRunningTasks.find { it.key.id == id }
+        return taskbarRunningTasks.flatMap { it.tasks }.find { it.key.id == id }
     }
 
     private fun getOrderedAndWrappedRunningTasks(): List<SingleTask> {
         // We wrap each task in the Taskbar as a `SingleTask`.
         val orderFromId = orderedRunningTaskIds.withIndex().associate { (index, id) -> id to index }
-        val sortedTasks =
-            taskbarRunningTasks.sortedWith(compareBy(nullsLast()) { orderFromId[it.key.id] })
-        return sortedTasks.map { SingleTask(it) }
+        return taskbarRunningTasks
+            .filterIsInstance<SingleTask>()
+            .sortedWith(compareBy(nullsLast()) { orderFromId[it.task.key.id] })
     }
 
     private fun reloadRecentTasksIfNeeded() {
@@ -408,16 +409,29 @@ class TaskbarRecentAppsController(
                     val oldRunningTaskdIds = runningTaskIds
                     val oldMinimizedTaskIds = minimizedTaskIds
                     taskbarRunningTasks =
-                        allRecentTasks
-                            .filterIsInstance<DesktopTask>()
-                            .flatMap { it.tasks }
-                            .filterNot {
-                                desktopModeCompatPolicy.isTransparentOverlay(
-                                    it.key.isActivityStackTransparent,
-                                    it.key.numActivities,
-                                    it.key.windowingMode,
-                                )
+                        allRecentTasks.flatMap { group ->
+                            when (group) {
+                                is DesktopTask -> {
+                                    // Apply current filters: remove transparent overlays and map to
+                                    // individual icons
+                                    group.tasks
+                                        .filterNot { task ->
+                                            desktopModeCompatPolicy.isTransparentOverlay(
+                                                task.key.isActivityStackTransparent,
+                                                task.key.numActivities,
+                                                task.key.windowingMode,
+                                            )
+                                        }
+                                        .map { task -> SingleTask(task) }
+                                }
+
+                                // CURRENTLY IGNORED: Preserve current behavior by returning empty
+                                // lists
+                                is SplitTask -> emptyList()
+                                is SingleTask -> emptyList()
+                                else -> emptyList<GroupTask>()
                             }
+                        }
                     val runningTasksChanged = oldRunningTaskdIds != runningTaskIds
                     val minimizedTasksChanged = oldMinimizedTaskIds != minimizedTaskIds
 
@@ -660,9 +674,7 @@ class TaskbarRecentAppsController(
         pw.println("$prefix\tcanShowRecentApps=$canShowRecentApps")
         pw.println("$prefix\tshownHotseatItems=${shownHotseatItems.map{item->item.targetPackage}}")
         pw.println("$prefix\tallRecentTasks=${allRecentTasks.map { it.packageNames }}")
-        pw.println(
-            "$prefix\ttaskbarRunningTasks=${taskbarRunningTasks.map {  it.key.packageName }}"
-        )
+        pw.println("$prefix\ttaskbarRunningTasks=$taskbarRunningTasks")
         pw.println("$prefix\tshownTasks=${shownTasks.map { it.packageNames }}")
         pw.println("$prefix\trunningTaskIds=$runningTaskIds")
         pw.println("$prefix\tminimizedTaskIds=$minimizedTaskIds")
