@@ -172,9 +172,9 @@
     <string name="header_app_icon_description" msgid="2184625881433608027">"نماد برنامه"</string>
     <string name="header_default_app_title" msgid="8308052350689531566">"عنوان برنامه"</string>
     <string name="header_close_icon_description" msgid="9216416109255777643">"بستن"</string>
-    <string name="nudge_a11y_title" msgid="2126529303123687912">"یادآوری خودکار"</string>
+    <string name="nudge_a11y_title" msgid="2126529303123687912">"یادآور خودکار"</string>
     <string name="nudge_a11y_close" msgid="4513937143817625570">"بستن"</string>
-    <string name="nudge_a11y_image" msgid="117910310515857252">"تصویر یادآوری خودکار"</string>
+    <string name="nudge_a11y_image" msgid="117910310515857252">"جابه‌جایی جزئی تصویر"</string>
     <string name="running_app_description" msgid="1309281047289078871">"‫<xliff:g id="APP_TITLE">%1$s</xliff:g> <xliff:g id="RUNNING_STATE">%2$s</xliff:g>⁠"</string>
     <string name="ambientcue_first_time_edu_icon_description" msgid="899917821554299010">"نماد"</string>
     <string name="ambientcue_first_time_edu_title" msgid="2018548669156363447">"دریافت کردن پیشنهادهای مفید"</string>
