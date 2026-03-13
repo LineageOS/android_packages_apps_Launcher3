@@ -201,6 +201,8 @@ public class TouchInteractionHandler extends ContextWrapper {
     private final TaskbarManager mTaskbarManager;
     private final ActiveTrackpadList mTrackpadsConnected;
 
+    private final DesktopVisibilityController mDesktopVisibilityController;
+
     private boolean mUserUnlocked = false;
 
     @Nullable private DisplayModel<InputResource> mInputResourceDisplayModel;
@@ -226,6 +228,7 @@ public class TouchInteractionHandler extends ContextWrapper {
             TaskbarManager taskbarManager,
             ActiveTrackpadList activeTrackpadList,
             DisplayModel.Factory<InputResource> displayModelFactory,
+            DesktopVisibilityController desktopVisibilityController,
             @Ui Executor uiExecutor,
             @Named(CONNECTION_CLEANER) ThreadSafeRunnableList cleanupTasks
     ) {
@@ -267,6 +270,8 @@ public class TouchInteractionHandler extends ContextWrapper {
                     }
                     return null;
                 }));
+
+        mDesktopVisibilityController = desktopVisibilityController;
 
         // Call runOnUserUnlocked() before any other callbacks to ensure everything is initialized.
         lockedUserState.runOnUserUnlocked(mUserUnlockedRunnable);
@@ -621,7 +626,8 @@ public class TouchInteractionHandler extends ContextWrapper {
                         mOverviewCommandHelper.get(),
                         event,
                         rotationTouchHelper,
-                        mDesktopState);
+                        mDesktopState,
+                        mDesktopVisibilityController);
                 inputResource.uncheckedConsumer = inputResource.consumer;
             } else if ((deviceState.isFullyGesturalNavMode() || isTrackpadMultiFingerSwipe(event))
                     && deviceState.canTriggerAssistantAction(event)) {
@@ -900,7 +906,7 @@ public class TouchInteractionHandler extends ContextWrapper {
         ActiveGestureLog.INSTANCE.dump("", pw);
         RecentsModel.INSTANCE.get(this).dump("", pw);
         mTaskbarManager.dumpLogs("", pw);
-        DesktopVisibilityController.INSTANCE.get(this).dumpLogs("", pw);
+        mDesktopVisibilityController.dumpLogs("", pw);
         pw.println("ContextualSearchStateManager:");
         ContextualSearchStateManager.INSTANCE.get(this).dump("\t", pw);
         mSystemUiProxy.dump(pw);
