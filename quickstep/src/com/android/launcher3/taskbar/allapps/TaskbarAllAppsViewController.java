@@ -134,16 +134,16 @@ final class TaskbarAllAppsViewController {
         @Override
         public void onAllAppsTransitionStart(boolean toAllApps) {
             mSearchSessionController.onAllAppsTransitionStart(toAllApps);
+            if (toAllApps
+                    && mShowKeyboard
+                    && mAppsView.getSearchUiManager().getEditText() != null) {
+                mAppsView.getSearchUiManager().getEditText().requestFocusExplicitly();
+            }
         }
 
         @Override
         public void onAllAppsTransitionEnd(boolean toAllApps) {
             mSearchSessionController.onAllAppsTransitionEnd(toAllApps);
-            if (toAllApps
-                    && mShowKeyboard
-                    && mAppsView.getSearchUiManager().getEditText() != null) {
-                mAppsView.getSearchUiManager().getEditText().requestFocus();
-            }
             if (toAllApps) {
                 InteractionJankMonitorWrapper.end(Cuj.CUJ_LAUNCHER_OPEN_ALL_APPS);
             }

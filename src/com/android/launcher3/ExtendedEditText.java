@@ -41,6 +41,7 @@ public class ExtendedEditText extends EditText {
     private final Set<OnFocusChangeListener> mOnFocusChangeListeners = new HashSet<>();
 
     private boolean mForceDisableSuggestions = false;
+    private boolean mAllowRequestFocusWithoutWindow = false;
 
     /**
      * Implemented by listeners of the back key.
@@ -91,7 +92,20 @@ public class ExtendedEditText extends EditText {
      * @return true if the keyboard is shown correctly and focus is given to this view.
      */
     public boolean showKeyboard() {
-        return requestFocus() && showSoftInputInternal();
+        return requestFocusExplicitly() && showSoftInputInternal();
+    }
+
+    /**
+     * Explicitly requests focus without necessarily requesting to show the keyboard.
+     * This bypasses the window focus check to ensure the EditorInfo is updated before IME is shown.
+     */
+    public boolean requestFocusExplicitly() {
+        mAllowRequestFocusWithoutWindow = true;
+        try {
+            return requestFocus();
+        } finally {
+            mAllowRequestFocusWithoutWindow = false;
+        }
     }
 
     /**
@@ -104,6 +118,14 @@ public class ExtendedEditText extends EditText {
         // has completed.
         // We also must not request focus, as this triggers unwanted side effects.
         showSoftInputInternal();
+    }
+
+    @Override
+    public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
+        if (!isFocused() && !hasWindowFocus() && !mAllowRequestFocusWithoutWindow) {
+            return false;
+        }
+        return super.requestFocus(direction, previouslyFocusedRect);
     }
 
     public void hideKeyboard() {
