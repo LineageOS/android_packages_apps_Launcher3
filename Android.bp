@@ -422,6 +422,7 @@ android_library {
         "androidx.compose.ui_ui-tooling-preview",
         "androidx.compose.ui_ui-tooling",
         "PlatformComposeCore",
+        "PlatformComposeSceneTransitionLayout",
     ],
     manifest: "quickstep/AndroidManifest.xml",
     min_sdk_version: "current",
