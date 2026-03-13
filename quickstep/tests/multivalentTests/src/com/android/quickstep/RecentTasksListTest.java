@@ -57,8 +57,10 @@ import com.android.quickstep.util.DesktopTask;
 import com.android.quickstep.util.GroupTask;
 import com.android.quickstep.util.SingleTask;
 import com.android.quickstep.util.SplitTask;
+import com.android.quickstep.util.binder.OneWayBinderList;
 import com.android.quickstep.views.TaskViewType;
 import com.android.systemui.shared.recents.model.Task;
+import com.android.wm.shell.recents.IRecentTasksListener;
 import com.android.wm.shell.shared.GroupedTaskInfo;
 import com.android.wm.shell.shared.desktopmode.FakeDesktopState;
 import com.android.wm.shell.shared.split.SplitBounds;
@@ -110,6 +112,9 @@ public class RecentTasksListTest {
         doReturn(mKeyguardManager).when(mContext).getSystemService(KeyguardManager.class);
         when(mVirtualDeviceManager.getDeviceIdForDisplayId(anyInt()))
                 .thenReturn(Context.DEVICE_ID_DEFAULT);
+
+        doReturn(new OneWayBinderList<>(IRecentTasksListener.Stub::asInterface))
+                .when(mSystemUiProxy).getRecentTasksListeners();
 
         FakeDesktopState desktopState = new FakeDesktopState();
         desktopState.setCanEnterDesktopMode(true);

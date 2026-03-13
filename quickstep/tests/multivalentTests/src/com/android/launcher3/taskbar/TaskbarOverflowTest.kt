@@ -91,9 +91,7 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.junit.runners.model.Statement
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -119,9 +117,6 @@ class TaskbarOverflowTest {
             params =
                 SandboxParams(builderBase = mutatedComponentBuilder()) {
                     systemUiProxySpy = it.systemUiProxy
-                    doAnswer { i -> desktopTaskListener = i.getArgument(0) }
-                        .whenever(it.systemUiProxy)
-                        .setDesktopTaskListener(anyOrNull())
                 }
         )
 
@@ -155,8 +150,6 @@ class TaskbarOverflowTest {
 
     private val desktopVisibilityController: DesktopVisibilityController
         get() = DesktopVisibilityController.INSTANCE[context]
-
-    private var desktopTaskListener: IDesktopTaskListener? = null
 
     private val taskbarContext: TaskbarActivityContext
         get() = taskbarUnitTestRule.activityContext
@@ -925,7 +918,10 @@ class TaskbarOverflowTest {
             tasks + listOf(DesktopTask(deskId = 0, defaultDisplayId, desktopTasks))
         )
         for (task in 1..desktopTasks.size) {
-            desktopTaskListener?.onTasksVisibilityChanged(defaultDisplayId, task)
+            systemUiProxySpy?.desktopTaskListeners?.listeners?.forEach {
+                IDesktopTaskListener.Stub.asInterface(it)
+                    .onTasksVisibilityChanged(defaultDisplayId, task)
+            }
         }
         runOnTaskbarUiThreadSync { mockRecentsModelHelper.resolvePendingTaskRequests() }
     }

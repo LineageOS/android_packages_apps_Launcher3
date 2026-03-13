@@ -20,19 +20,18 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.Intent.ACTION_CHOOSER;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.launcher3.statehandlers.DesktopVisibilityController.INACTIVE_DESK_ID;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_TYPE_A;
-import static com.android.wm.shell.Flags.enableShellTopTaskTracking;
 import static com.android.wm.shell.Flags.enableFlexibleSplit;
+import static com.android.wm.shell.Flags.enableShellTopTaskTracking;
 import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_DESK;
 import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT;
-import static com.android.launcher3.statehandlers.DesktopVisibilityController.INACTIVE_DESK_ID;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
@@ -113,17 +112,11 @@ public class TopTaskTracker extends ISplitScreenListener.Stub implements TaskSta
             mSideStagePosition.stageType = SplitConfigurationOptions.STAGE_TYPE_SIDE;
 
             TaskStackChangeListeners.getInstance().registerTaskStackListener(this);
-            systemUiProxy.registerSplitScreenListener(this);
+            tracker.addCloseable(() ->
+                    TaskStackChangeListeners.getInstance().unregisterTaskStackListener(this));
+
+            tracker.addCloseable(systemUiProxy.getSplitScreenListeners().register(this));
         }
-
-        tracker.addCloseable(() -> {
-            if (enableShellTopTaskTracking()) {
-                return;
-            }
-
-            TaskStackChangeListeners.getInstance().unregisterTaskStackListener(this);
-            systemUiProxy.unregisterSplitScreenListener(this);
-        });
 
         mContext = context;
         mDesktopVisibilityController = desktopVisibilityController;

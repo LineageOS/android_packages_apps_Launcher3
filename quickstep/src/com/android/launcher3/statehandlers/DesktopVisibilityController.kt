@@ -39,7 +39,6 @@ import com.android.wm.shell.desktopmode.DisplayDeskState
 import com.android.wm.shell.desktopmode.IDesktopTaskListener.Stub
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useRoundedCorners
 import java.io.PrintWriter
-import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
@@ -93,16 +92,10 @@ constructor(
 
     private var inOverviewStateMap = SparseBooleanArray()
 
-    private var desktopTaskListener: DesktopTaskListenerImpl?
-
     init {
-        desktopTaskListener = DesktopTaskListenerImpl(this)
-        systemUiProxy.setDesktopTaskListener(desktopTaskListener)
-
-        lifecycleTracker.addCloseable {
-            desktopTaskListener = null
-            systemUiProxy.setDesktopTaskListener(null)
-        }
+        lifecycleTracker.addCloseable(
+            systemUiProxy.desktopTaskListeners.register(DesktopTaskListenerImpl(this))
+        )
     }
 
     /**
@@ -409,7 +402,6 @@ constructor(
 
         pw.println("$prefix\tdesktopVisibilityListeners=$desktopVisibilityListeners")
         pw.println("$prefix\tinOverviewState=$inOverviewStateMap")
-        pw.println("$prefix\tdesktopTaskListener=$desktopTaskListener")
         pw.println("$prefix\tcontext=$context")
     }
 
@@ -425,15 +417,15 @@ constructor(
      * Wrapper for the IDesktopTaskListener stub to prevent lingering references to the launcher
      * activity via the controller.
      */
-    private class DesktopTaskListenerImpl(controller: DesktopVisibilityController) : Stub() {
-        private val controller = WeakReference(controller)
+    private class DesktopTaskListenerImpl(private val controller: DesktopVisibilityController) :
+        Stub() {
 
         override fun onListenerConnected(
             displayDeskStates: Array<DisplayDeskState>,
             canCreateDesks: Boolean,
         ) {
             MAIN_EXECUTOR.execute {
-                controller.get()?.onListenerConnected(displayDeskStates, canCreateDesks)
+                controller.onListenerConnected(displayDeskStates, canCreateDesks)
             }
         }
 
@@ -447,7 +439,7 @@ constructor(
         ) {
             if (!useRoundedCorners()) return
             getTaskbarUiThread().execute {
-                controller.get()?.apply {
+                controller.apply {
                     Log.d(
                         TAG,
                         "DesktopTaskListenerImpl: doesAnyTaskRequireTaskbarRounding= " +
@@ -468,20 +460,20 @@ constructor(
         ) {}
 
         override fun onCanCreateDesksChanged(canCreateDesks: Boolean) {
-            MAIN_EXECUTOR.execute { controller.get()?.onCanCreateDesksChanged(canCreateDesks) }
+            MAIN_EXECUTOR.execute { controller.onCanCreateDesksChanged(canCreateDesks) }
         }
 
         override fun onDeskAdded(displayId: Int, deskId: Int) {
-            MAIN_EXECUTOR.execute { controller.get()?.onDeskAdded(displayId, deskId) }
+            MAIN_EXECUTOR.execute { controller.onDeskAdded(displayId, deskId) }
         }
 
         override fun onDeskRemoved(displayId: Int, deskId: Int) {
-            MAIN_EXECUTOR.execute { controller.get()?.onDeskRemoved(displayId, deskId) }
+            MAIN_EXECUTOR.execute { controller.onDeskRemoved(displayId, deskId) }
         }
 
         override fun onActiveDeskChanged(displayId: Int, newActiveDesk: Int, oldActiveDesk: Int) {
             MAIN_EXECUTOR.execute {
-                controller.get()?.onActiveDeskChanged(displayId, newActiveDesk, oldActiveDesk)
+                controller.onActiveDeskChanged(displayId, newActiveDesk, oldActiveDesk)
             }
         }
 
@@ -491,9 +483,7 @@ constructor(
             deskId: Int,
         ) {
             MAIN_EXECUTOR.execute {
-                controller
-                    .get()
-                    ?.onTaskAppearingInDeskWithOverviewShowing(taskId, displayId, deskId)
+                controller.onTaskAppearingInDeskWithOverviewShowing(taskId, displayId, deskId)
             }
         }
     }

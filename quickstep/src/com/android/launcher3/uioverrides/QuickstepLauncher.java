@@ -642,7 +642,6 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         mAppTransitionManager = null;
 
         if (mUnfoldTransitionProgressProvider != null) {
-            SystemUiProxy.INSTANCE.get(this).setUnfoldAnimationListener(null);
             mUnfoldTransitionProgressProvider.destroy();
         }
 
@@ -1222,8 +1221,8 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
                                         + "is disabled"));
         mUnfoldTransitionProgressProvider = remoteUnfoldTransitionProgressProvider;
 
-        SystemUiProxy.INSTANCE.get(this).setUnfoldAnimationListener(
-                remoteUnfoldTransitionProgressProvider);
+        closeOnDestroy(SystemUiProxy.INSTANCE.get(this).getUnfoldAnimationListeners()
+                .register(remoteUnfoldTransitionProgressProvider));
 
         initUnfoldAnimationController(mUnfoldTransitionProgressProvider,
                 unfoldComponent.getRotationChangeProvider());

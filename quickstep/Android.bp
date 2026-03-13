@@ -26,6 +26,7 @@ filegroup {
     name: "launcher3-quickstep-robo-src",
     path: "tests/multivalentTests",
     srcs: [
+        "tests/multivalentTests/src/**/*.aidl",
         "tests/multivalentTests/src/**/*.java",
         "tests/multivalentTests/src/**/*.kt",
     ],
@@ -35,6 +36,7 @@ filegroup {
     name: "launcher3-quickstep-tests-src",
     path: "tests",
     srcs: [
+        "tests/multivalentTests/src/**/*.aidl",
         "tests/multivalentTests/src/**/*.java",
         "tests/multivalentTests/src/**/*.kt",
         "tests/src/**/*.java",

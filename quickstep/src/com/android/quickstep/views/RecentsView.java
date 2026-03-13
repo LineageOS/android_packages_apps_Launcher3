@@ -174,6 +174,7 @@ import com.android.launcher3.util.SplitConfigurationOptions.StagePosition;
 import com.android.launcher3.util.TraceHelper;
 import com.android.launcher3.util.TranslateEdgeEffect;
 import com.android.launcher3.util.VibratorWrapper;
+import com.android.launcher3.util.ViewEx;
 import com.android.launcher3.util.ViewPool;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.GestureState;
@@ -1067,6 +1068,8 @@ public abstract class RecentsView<
             mEmptyMessagePaint.setAntiAlias(true);
             setWillNotDraw(false);
         }
+        ViewEx.registerLifecycleTask(this,
+                () -> mSystemUiProxy.getPipAnimationListeners().register(mIPipAnimationListener));
         updateEmptyMessage();
     }
 
@@ -1101,8 +1104,7 @@ public abstract class RecentsView<
                 .setSyncTransactionApplier(mSyncTransactionApplier));
         mRecentsModel.addThumbnailChangeListener(this);
         mIPipAnimationListener.setActivityAndRecentsView(mContainer, this);
-        mSystemUiProxy.setPipAnimationListener(
-                mIPipAnimationListener);
+
         // Late initializer for SystemUiProxy
         mSystemUiProxy.addOnStateChangeListener(mPreloadRunnable);
         mOrientationState.initListeners();
@@ -1127,7 +1129,6 @@ public abstract class RecentsView<
                 .setSyncTransactionApplier(null));
         executeSideTaskLaunchCallback();
         mRecentsModel.removeThumbnailChangeListener(this);
-        mSystemUiProxy.setPipAnimationListener(null);
         mSystemUiProxy.removeOnStateChangeListener(mPreloadRunnable);
         mIPipAnimationListener.setActivityAndRecentsView(null, null);
         mOrientationState.destroyListeners();

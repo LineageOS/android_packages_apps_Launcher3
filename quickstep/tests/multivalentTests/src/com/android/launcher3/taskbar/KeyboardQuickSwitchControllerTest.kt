@@ -52,7 +52,6 @@ import com.android.quickstep.util.SplitTask
 import com.android.systemui.shared.recents.model.Task
 import com.android.tools.dagger.mutation.annotations.BindValue
 import com.android.tools.dagger.mutation.annotations.MutatedComponent
-import com.android.wm.shell.desktopmode.IDesktopTaskListener
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants
@@ -62,9 +61,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -75,7 +72,6 @@ import org.mockito.kotlin.whenever
 @MutatedComponent(target = TaskbarWindowSandboxContext_ModifiedComponent::class)
 class KeyboardQuickSwitchControllerTest {
     private var systemUiProxySpy: SystemUiProxy? = null
-    private var desktopTaskListener: IDesktopTaskListener? = null
     private val mockRecentsModelHelper: MockedRecentsModelHelper = MockedRecentsModelHelper()
     private val taskIdCaptor = argumentCaptor<Int>()
     private val transitionCaptor = argumentCaptor<RemoteTransition>()
@@ -89,9 +85,6 @@ class KeyboardQuickSwitchControllerTest {
             params =
                 SandboxParams(builderBase = mutatedComponentBuilder()) {
                     systemUiProxySpy = it.systemUiProxy
-                    doAnswer { i -> desktopTaskListener = i.getArgument(0) }
-                        .whenever(it.systemUiProxy)
-                        .setDesktopTaskListener(anyOrNull())
                 }
         )
 
