@@ -50,6 +50,8 @@ import com.android.launcher3.icons.LauncherIconProvider
 import com.android.launcher3.icons.LauncherIconProviderImpl
 import com.android.launcher3.logging.StatsLogManager.StatsLogManagerFactory
 import com.android.launcher3.model.WellbeingModel
+import com.android.launcher3.qsb.QsbAppWidgetHost
+import com.android.launcher3.qsb.QuickstepQsbHostImpl
 import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
 import com.android.launcher3.secondarydisplay.SecondaryDisplayQuickstepDelegateImpl
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
@@ -253,6 +255,8 @@ object StaticObjectModule {
     @Provides
     fun provideLatencyTracker(@ApplicationContext context: Context): LatencyTracker =
         LatencyTracker.getInstance(context)
+
+    @Provides fun provideQsbAppWidgetHost(): QsbAppWidgetHost = QuickstepQsbHostImpl.instance
 }
 
 @Module

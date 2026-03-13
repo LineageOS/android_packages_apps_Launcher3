@@ -18,12 +18,13 @@ package com.android.launcher3.qsb
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
-import android.appwidget.AppWidgetProviderInfo
 import android.platform.test.rule.LimitDevicesRule
 import android.platform.test.rule.SkipOnDeviceless
-import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.qsb.QsbAppWidgetHost.MutableState
+import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
+import com.android.launcher3.util.ListenableRefs.skip
 import com.android.launcher3.util.RoboApiWrapper
 import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.util.WidgetUtils
@@ -45,7 +46,7 @@ class QsbAppWidgetHostTest {
     @get:Rule val widgetsPermission = RoboApiWrapper.grantWidgetBindPermissionRule()
     @get:Rule var mlimitDevicesRule: LimitDevicesRule = LimitDevicesRule()
 
-    private val host = QsbAppWidgetHost(context).apply { deleteHost() }
+    private val host = QsbAppWidgetHostImpl(context).apply { deleteHost() }
 
     fun tearDown() {
         host.deleteHost()
@@ -83,22 +84,22 @@ class QsbAppWidgetHostTest {
                 .bindAppWidgetIdIfAllowed(widgetId, widgetInfo.provider)
         )
 
+        val callbacks = MutableState()
         var providerUpdated = false
         var viewsUpdated = false
-        host.setCallbacks(
-            object : QsbAppWidgetHost.Callbacks {
-                override fun onProviderChanged(appWidget: AppWidgetProviderInfo?) {
-                    providerUpdated = true
-                }
 
-                override fun onViewsChanged(views: RemoteViews?) {
-                    // Provider should be updated before views
-                    assertTrue(providerUpdated)
+        callbacks.providerInfo.forEach(IMMEDIATE_EXECUTOR, skip(1) { providerUpdated = true })
+        callbacks.views.forEach(
+            IMMEDIATE_EXECUTOR,
+            skip(1) {
+                // Provider should be updated before views
+                assertTrue(providerUpdated)
 
-                    viewsUpdated = true
-                }
-            }
+                viewsUpdated = true
+            },
         )
+        host.addCallbacks(callbacks)
+
         host.setActiveWidget(widgetId, widgetInfo)
         assertTrue(viewsUpdated)
         assertEquals(widgetId, host.getActiveWidgetId())
@@ -121,17 +122,12 @@ class QsbAppWidgetHostTest {
         )
 
         var updateReceived = false
-        host.setCallbacks(
-            object : QsbAppWidgetHost.Callbacks {
-                override fun onProviderChanged(appWidget: AppWidgetProviderInfo?) {
-                    updateReceived = true
-                }
 
-                override fun onViewsChanged(views: RemoteViews?) {
-                    updateReceived = true
-                }
-            }
-        )
+        val callbacks = MutableState()
+        callbacks.providerInfo.forEach(IMMEDIATE_EXECUTOR, skip(1) { updateReceived = true })
+
+        callbacks.views.forEach(IMMEDIATE_EXECUTOR, skip(1) { updateReceived = true })
+        host.addCallbacks(callbacks)
         host.setActiveWidget(widgetId, widgetInfo)
         assertEquals(widgetId, host.getActiveWidgetId())
         assertTrue(updateReceived)
@@ -141,6 +137,32 @@ class QsbAppWidgetHostTest {
         assertFalse(updateReceived)
         assertEquals(widgetId, host.getActiveWidgetId())
         assertEquals(host.appWidgetIds.toList(), intArrayOf(widgetId).toList())
+    }
+
+    @Test
+    /**
+     * Test runs on Robolectric but bindAppWidgetIdIfAllowed method return null since they are not
+     * implemented in the Robolectric API.
+     */
+    @SkipOnDeviceless
+    fun addCallbacks_dispatches_old_values() {
+        val widgetInfo = WidgetUtils.findWidgetProvider(false)
+        val widgetId = host.allocateAppWidgetId()
+        assertTrue(
+            AppWidgetManager.getInstance(context)
+                .bindAppWidgetIdIfAllowed(widgetId, widgetInfo.provider)
+        )
+        host.setActiveWidget(widgetId, widgetInfo)
+
+        var updateReceived = false
+
+        val callbacks = MutableState()
+        callbacks.providerInfo.forEach(IMMEDIATE_EXECUTOR, skip(1) { updateReceived = true })
+
+        callbacks.views.forEach(IMMEDIATE_EXECUTOR, skip(1) { updateReceived = true })
+        host.addCallbacks(callbacks)
+        assertEquals(widgetId, host.getActiveWidgetId())
+        assertTrue(updateReceived)
     }
 
     @Test
