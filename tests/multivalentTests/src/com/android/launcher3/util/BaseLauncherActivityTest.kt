@@ -16,6 +16,7 @@
 package com.android.launcher3.util
 
 import android.content.Context
+import android.platform.test.rule.LimitDevicesRule
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.Launcher
@@ -34,6 +35,8 @@ import org.junit.Rule
  * This should instead be a rule, but is kept as a base class for easier migration from TAPL
  */
 open class BaseLauncherActivityTest<LAUNCHER_TYPE : Launcher> {
+
+    @get:Rule val limitDevicesRule = LimitDevicesRule()
 
     @get:Rule val testStabilityRule = TestStabilityRule()
 
