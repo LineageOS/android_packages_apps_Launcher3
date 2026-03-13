@@ -114,6 +114,7 @@ class DesktopShortcutTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
             )
     }
 
@@ -133,6 +134,7 @@ class DesktopShortcutTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
             )
     }
 
@@ -140,6 +142,7 @@ class DesktopShortcutTest {
     fun createDesktopTaskShortcutFactory_desktopEntryPointsDisabled() {
         whenever(
                 desktopModeCompatPolicy.shouldDisableDesktopEntryPoints(
+                    anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
@@ -291,6 +294,7 @@ class DesktopShortcutTest {
         verify(desktopModeCompatPolicy)
             .shouldDisableDesktopEntryPoints(
                 taskKey.baseActivity?.packageName,
+                taskKey.baseActivity?.className,
                 taskKey.numActivities,
                 taskKey.isTopActivityNoDisplay,
                 taskKey.isActivityStackTransparent,

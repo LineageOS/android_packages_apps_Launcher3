@@ -110,6 +110,7 @@ class ExternalDisplayShortcutTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
             )
     }
 
@@ -118,6 +119,7 @@ class ExternalDisplayShortcutTest {
     fun createExternalDisplayTaskShortcut_desktopEntryPointsDisabled() {
         whenever(
                 desktopModeCompatPolicy.shouldDisableDesktopEntryPoints(
+                    anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
@@ -214,6 +216,7 @@ class ExternalDisplayShortcutTest {
         verify(desktopModeCompatPolicy)
             .shouldDisableDesktopEntryPoints(
                 taskKey.baseActivity?.packageName,
+                taskKey.baseActivity?.className,
                 taskKey.numActivities,
                 taskKey.isTopActivityNoDisplay,
                 taskKey.isActivityStackTransparent,
