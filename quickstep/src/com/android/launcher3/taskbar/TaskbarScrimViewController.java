@@ -33,6 +33,7 @@ import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.taskbar.bubbles.BubbleControllers;
 import com.android.quickstep.SystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
+import com.android.wm.shell.Flags;
 
 import java.io.PrintWriter;
 
@@ -85,8 +86,9 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
      */
     public void onTaskbarVisibilityChanged(int visibility) {
         mTaskbarVisible = visibility == VISIBLE;
-        if (shouldShowScrim()) {
-            showScrim(true, computeScrimAlpha(), false /* skipAnim */);
+        float scrimAlpha = computeScrimAlpha();
+        if (shouldShowScrimForExpandedBubbles()) {
+            showScrim(true, scrimAlpha, false /* skipAnim */);
         } else if (mScrimView.getScrimAlpha() > 0f) {
             showScrim(false, 0, false /* skipAnim */);
         }
@@ -106,7 +108,7 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
             return;
         }
         mSysUiStateFlags = stateFlags;
-        showScrim(shouldShowScrim(), computeScrimAlpha(), skipAnim);
+        showScrim(shouldShowScrimForExpandedBubbles(), computeScrimAlpha(), skipAnim);
     }
 
     private boolean shouldShowScrim() {
@@ -129,6 +131,32 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
                 && !mControllers.taskbarStashController.isHiddenForBubbles();
     }
 
+    private boolean shouldShowScrimForExpandedBubbles() {
+        if (!Flags.fixTaskbarScrimViewOnHome()) {
+            return shouldShowScrim();
+        }
+        if ((mSysUiStateFlags & SYSUI_STATE_BUBBLES_EXPANDED) == 0) {
+            // bubbles not expanded - scrim should not be applied
+            return false;
+        }
+        if ((mSysUiStateFlags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) != 0) {
+            // notification shade is open - scrim should not be applied
+            return false;
+        }
+        BubbleControllers bubbleControllers = mActivity.getBubbleControllers();
+        if (bubbleControllers == null) {
+            // no bubble controllers - scrim should not be applied
+            return false;
+        }
+        if (bubbleControllers.bubbleStashController.isBubblesShowingOnHome()) {
+            // bubbles are on the launcher home screen - scrim should not be applied
+            return false;
+        }
+        return !mControllers.navbarButtonsViewController.isImeVisible()
+                && !mControllers.taskbarStashController.isStashed()
+                && !mControllers.taskbarStashController.isHiddenForBubbles();
+    }
+
     private float computeScrimAlpha() {
         boolean isTransient = mActivity.isTransientTaskbar();
         final boolean isPersistentTaskBarVisible = mTaskbarVisible && !isTransient;
@@ -139,7 +167,7 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
             // scrim so figure out what the total transparency would be.
             return BUBBLE_BAR_EXPANDED_SCRIM_ALPHA
                     + (BUBBLE_BAR_EXPANDED_SCRIM_ALPHA * (1 - BUBBLE_BAR_EXPANDED_SCRIM_ALPHA));
-        } else if (shouldShowScrim()) {
+        } else if (shouldShowScrimForExpandedBubbles()) {
             return BUBBLE_BAR_EXPANDED_SCRIM_ALPHA;
         } else {
             return 0;
