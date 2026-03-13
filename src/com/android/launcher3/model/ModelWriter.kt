@@ -72,7 +72,11 @@ open class ModelWriter(
         }
 
         override fun addItemsToDatabase(items: List<ItemInfo>) {
-            items.forEach { it.id = model.modelDbController.generateNewItemId() }
+            items.forEach {
+                if (it.id == ItemInfo.NO_ID) {
+                    it.id = model.modelDbController.generateNewItemId()
+                }
+            }
             outChangeLog.itemsAdded.addAll(items)
             val stackTrace = Throwable().stackTrace
             for (item in items) {
@@ -264,6 +268,7 @@ open class ModelWriter(
     ) {
         updateItemModel(item, container, screenId, cellX, cellY)
         if (item.id == ItemInfo.NO_ID) {
+            item.id = model.modelDbController.generateNewItemId()
             execute { it.addItemToDatabase(item) }
         } else {
             execute { it.moveItemInDatabase(item, container, screenId, cellX, cellY) }
@@ -396,6 +401,9 @@ open class ModelWriter(
         cellY: Int,
     ) {
         updateItemModel(item, container, screenId, cellX, cellY)
+        if (item.id == ItemInfo.NO_ID) {
+            item.id = model.modelDbController.generateNewItemId()
+        }
         execute { it.addItemToDatabase(item) }
     }
 
@@ -405,6 +413,11 @@ open class ModelWriter(
      * TODO(b/457449059): Remove this method.
      */
     override fun addItemsToDatabase(items: List<ItemInfo>) {
+        items.forEach {
+            if (it.id == ItemInfo.NO_ID) {
+                it.id = model.modelDbController.generateNewItemId()
+            }
+        }
         execute { it.addItemsToDatabase(items) }
     }
 

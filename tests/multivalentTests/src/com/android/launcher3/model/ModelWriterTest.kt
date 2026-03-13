@@ -31,6 +31,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -75,19 +76,22 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
     @Before
     override fun setup() {
         super.setup()
+        modelWriter = createWriter(directExecutor)
+    }
+
+    private fun createWriter(executor: Executor): ModelWriter {
         val spiedModel = spy(model)
         doReturn(CompletableFuture.completedFuture(Unit)).whenever(spiedModel).forceReload(any())
-        modelWriter =
-            ModelWriter(
-                context = mTargetContext,
-                model = spiedModel,
-                bgDataModel = bgDataModel,
-                cellPosMapper = CellPosMapper.DEFAULT,
-                modificationSource = BgDataModel.ModificationSource.ModelTask,
-                launcherStateNotifier = mockNotifier,
-                owner = mockCallbacks,
-                modelExecutor = directExecutor,
-            )
+        return ModelWriter(
+            context = mTargetContext,
+            model = spiedModel,
+            bgDataModel = bgDataModel,
+            cellPosMapper = CellPosMapper.DEFAULT,
+            modificationSource = BgDataModel.ModificationSource.ModelTask,
+            launcherStateNotifier = mockNotifier,
+            owner = mockCallbacks,
+            modelExecutor = executor,
+        )
     }
 
     private fun addToModel(vararg items: ItemInfo) {
@@ -158,7 +162,35 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
     }
 
     @Test
-    fun moveItemInDatabase_updatesPropsSynchronously() {
+    fun legacyApi_addItemToDatabase_assignsIdSynchronously() {
+        val manualExecutor = Executor {}
+        val testWriter = createWriter(manualExecutor)
+
+        val newItem = WorkspaceItemInfo().apply { id = ItemInfo.NO_ID }
+        testWriter.addItemToDatabase(newItem, Favorites.CONTAINER_DESKTOP, 2, 3, 4)
+
+        // This proves the ID is assigned on the calling thread before the method returns,
+        // even if the background task hasn't started yet.
+        assertWithMessage("Item ID should be assigned synchronously on calling thread")
+            .that(newItem.id)
+            .isNotEqualTo(ItemInfo.NO_ID)
+    }
+
+    @Test
+    fun legacyApi_addItemsToDatabase_assignsIdsSynchronously() {
+        val manualExecutor = Executor {}
+        val testWriter = createWriter(manualExecutor)
+
+        val newItem1 = WorkspaceItemInfo().apply { id = ItemInfo.NO_ID }
+        val newItem2 = WorkspaceItemInfo().apply { id = ItemInfo.NO_ID }
+        testWriter.addItemsToDatabase(listOf(newItem1, newItem2))
+
+        assertThat(newItem1.id).isNotEqualTo(ItemInfo.NO_ID)
+        assertThat(newItem2.id).isNotEqualTo(ItemInfo.NO_ID)
+    }
+
+    @Test
+    fun legacyApi_moveItemInDatabase_updatesPropsSynchronously() {
         addToModel(item1)
 
         modelWriter.moveItemInDatabase(item1, Favorites.CONTAINER_HOTSEAT, 1, 2, 3)
@@ -170,7 +202,7 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
     }
 
     @Test
-    fun moveItemsInDatabase_updatesPropsSynchronously() {
+    fun legacyApi_moveItemsInDatabase_updatesPropsSynchronously() {
         addToModel(item1, item2)
 
         val items = listOf(item1, item2)
@@ -183,7 +215,7 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
     }
 
     @Test
-    fun modifyItemInDatabase_updatesPropsSynchronously() {
+    fun legacyApi_modifyItemInDatabase_updatesPropsSynchronously() {
         addToModel(item1)
 
         modelWriter.modifyItemInDatabase(item1, Favorites.CONTAINER_DESKTOP, 2, 3, 4, 5, 6)
@@ -197,7 +229,7 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
     }
 
     @Test
-    fun addOrMoveItemInDatabase_updatesPropsSynchronously() {
+    fun legacyApi_addOrMoveItemInDatabase_updatesPropsSynchronously() {
         // Test add path
         val newItem = WorkspaceItemInfo().apply { id = ItemInfo.NO_ID }
         modelWriter.addOrMoveItemInDatabase(newItem, Favorites.CONTAINER_DESKTOP, 2, 3, 4)
@@ -217,7 +249,7 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
     }
 
     @Test
-    fun legacyMoveItem_persistsCorrectValues() {
+    fun legacyApi_moveItem_persistsCorrectValues() {
         addToModel(item1)
 
         // Move the item using legacy API
@@ -246,7 +278,7 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
     }
 
     @Test
-    fun legacyModifyItem_persistsCorrectValues() {
+    fun legacyApi_ModifyItem_persistsCorrectValues() {
         addToModel(item1)
 
         // Modify item using legacy API
