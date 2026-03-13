@@ -148,6 +148,10 @@ final class FloatingWidgetBackgroundView extends View {
                 getMaxRadius(mOriginalBackground)));
     }
 
+    public float getOutlineRadius() {
+        return mOutlineRadius;
+    }
+
     private boolean isUninitialized() {
         return mSourceView == null;
     }
