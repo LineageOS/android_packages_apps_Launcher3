@@ -41,9 +41,6 @@ import com.android.launcher3.widget.LauncherAppWidgetProviderInfo;
  */
 public class LauncherAppWidgetInfo extends ItemInfo {
 
-    public static final int OPTION_SEARCH_WIDGET = 1;
-
-
     public static final int RESTORE_COMPLETED = 0;
 
     /**

@@ -75,24 +75,32 @@ class ResizeManager(
     private val logInstanceId: InstanceId = InstanceIdSequence().newInstanceId()
 
     init {
-        val widgetProviderInfo = widgetView.appWidgetInfo as LauncherAppWidgetProviderInfo
-        val idp = cellLayout.context.appComponent.idp
+        val itemInfo = widgetView.tag as LauncherAppWidgetInfo
 
+        val widgetProviderInfo =
+            if (itemInfo.isCustomWidget)
+                cellLayout.context.appComponent.customWidgetManager.getWidgetProvider(
+                    itemInfo.providerName
+                )
+            else widgetView.appWidgetInfo as? LauncherAppWidgetProviderInfo
+
+        val resizeMode = widgetProviderInfo?.resizeMode ?: 0
+        val idp = cellLayout.context.appComponent.idp
         resizeConstraints =
             ResizeConstraints(
-                minHSpan = widgetProviderInfo.minSpanX,
-                minVSpan = widgetProviderInfo.minSpanY,
-                maxHSpan = widgetProviderInfo.maxSpanX,
-                maxVSpan = widgetProviderInfo.maxSpanY,
+                minHSpan = widgetProviderInfo?.minSpanX ?: itemInfo.spanX,
+                minVSpan = widgetProviderInfo?.minSpanY ?: itemInfo.spanY,
+                maxHSpan = widgetProviderInfo?.maxSpanX ?: itemInfo.spanX,
+                maxVSpan = widgetProviderInfo?.maxSpanY ?: itemInfo.spanY,
                 cellCountX = idp.numRows,
                 cellCountY = idp.numColumns,
                 horizontalResizeModeEnabled =
-                    widgetProviderInfo.resizeMode and AppWidgetProviderInfo.RESIZE_HORIZONTAL != 0,
+                    resizeMode and AppWidgetProviderInfo.RESIZE_HORIZONTAL != 0,
                 verticalResizeModeEnabled =
-                    widgetProviderInfo.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL != 0,
+                    resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL != 0,
             )
 
-        initializeWidgetViewForResize(widgetView.tag as LauncherAppWidgetInfo)
+        initializeWidgetViewForResize(itemInfo)
     }
 
     private fun initializeWidgetViewForResize(widgetInfo: ItemInfo) {
