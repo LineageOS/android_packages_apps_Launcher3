@@ -384,9 +384,11 @@ abstract class AbstractDeviceProfileTest {
 
     /** Asserts that the given device profile matches a previously dumped device profile state. */
     protected fun assertDump(dp: DeviceProfile, folderName: String, filename: String) {
-        val dump = dump(context!!, dp, "${folderName}_$filename.txt")
-        var expected = readDumpFromAssets(testContext, "$folderName/$filename.txt")
-        Truth.assertThat(dump).isEqualTo(expected)
+        val dump = dump(context, dp, "${folderName}_$filename.txt")
+        val expected = readDumpFromAssets(testContext, "$folderName/$filename.txt")
+        Truth.assertWithMessage("Failed to match file $folderName/$filename.txt")
+            .that(dump)
+            .isEqualTo(expected)
     }
 
     /** Create a new dump of DeviceProfile, saves to a file in the device and returns it */

@@ -335,6 +335,9 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 controllers.runAfterInit(() -> MAIN_EXECUTOR.execute(
                         () -> LauncherAppState.getInstance(mActivity).getModel()
                                 .addCallbacksAndLoad(mModelCallbacks)));
+                mActivity.closeOnDestroy(() -> MAIN_EXECUTOR.execute(
+                        () -> LauncherAppState.getInstance(mActivity).getModel()
+                                .removeCallbacks(mModelCallbacks)));
             }
             controllers.runAfterInit(mModelCallbacks::bindWorkspaceRepository);
         }
@@ -446,10 +449,6 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
 
     public void onDestroy() {
         mTaskbarView.removeOnLayoutChangeListener(mTaskbarViewLayoutChangeListener);
-        // Removing callback from LauncherModel is synchronized and we should move it to main thread
-        // to avoid blocking taskbar ui thread.
-        MAIN_EXECUTOR.execute(() -> LauncherAppState.getInstance(mActivity).getModel()
-                .removeCallbacks(mModelCallbacks));
         mActivity.removeOnDeviceProfileChangeListener(mDeviceProfileChangeListener);
         mRunningStateController.onDestroy();
     }
