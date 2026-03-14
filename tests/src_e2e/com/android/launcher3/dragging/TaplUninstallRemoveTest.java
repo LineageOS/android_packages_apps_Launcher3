@@ -21,7 +21,6 @@ import static com.android.launcher3.util.TestConstants.AppNames.MAPS_APP_NAME;
 import static com.android.launcher3.util.TestConstants.AppNames.STORE_APP_NAME;
 import static com.android.launcher3.util.TestConstants.AppNames.TEST_APP_NAME;
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -92,7 +91,7 @@ public class TaplUninstallRemoveTest extends AbstractLauncherUiTest<Launcher, Vi
     @Test
     @PortraitLandscape
     @PlatinumTest(focusArea = "launcher")
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 488077682)
+    @DesktopStability(flavors = LOCAL, bug = 488077682)
     public void testUninstallFromWorkspace() throws Exception {
         installDummyAppAndWaitForUIUpdate();
         try {

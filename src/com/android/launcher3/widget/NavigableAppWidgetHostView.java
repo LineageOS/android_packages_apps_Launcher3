@@ -99,14 +99,10 @@ public abstract class NavigableAppWidgetHostView extends AppWidgetHostView
                     case 0:
                         mChildrenFocused = false;
                         break;
-                    case 1: {
-                        if (shouldAllowDirectClick()) {
-                            focusableChildren.get(0).performClick();
-                            mChildrenFocused = false;
-                            return true;
-                        }
-                        // continue;
-                    }
+                    case 1:
+                        focusableChildren.get(0).performClick();
+                        mChildrenFocused = false;
+                        return true;
                     default:
                         focusableChildren.get(0).requestFocus();
                         return true;
@@ -115,13 +111,6 @@ public abstract class NavigableAppWidgetHostView extends AppWidgetHostView
         }
         return super.onKeyUp(keyCode, event);
     }
-
-    /**
-     * For a widget with only a single interactive element, return true if whole widget should act
-     * as a single interactive element, and clicking 'enter' should activate the child element
-     * directly. Otherwise clicking 'enter' will only move the focus inside the widget.
-     */
-    protected abstract boolean shouldAllowDirectClick();
 
     @Override
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {

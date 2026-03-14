@@ -15,6 +15,8 @@
  */
 package com.android.quickstep.views;
 
+import static com.android.app.animation.Interpolators.LINEAR;
+
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.annotation.TargetApi;
@@ -33,6 +35,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.dragndrop.DragLayer;
@@ -206,6 +209,31 @@ public class FloatingWidgetView extends FrameLayout implements AnimatorListener,
         positionViews();
     }
 
+    /**
+     * Updates the position and opacity of the floating widget's components.
+     *
+     * @param backgroundPosition      the new position of the widget's background relative to the
+     *                                {@link FloatingWidgetView}'s parent
+     * @param floatingWidgetAlpha     the overall opacity of the {@link FloatingWidgetView}
+     * @param linearProgress          the linear translation progress along primary axis
+     * @param widgetAlphaLowerBound   threshold bound of linearProgress, after which
+     *                                alpha starts animating
+     * @param cornerRadiusProgress    progress of the corner radius animation, where 0 is the
+     *                                original radius and 1 is the window radius
+     */
+    public void update(float linearProgress, float widgetAlphaLowerBound, RectF backgroundPosition,
+            float floatingWidgetAlpha,  float cornerRadiusProgress) {
+        update(backgroundPosition, floatingWidgetAlpha,
+                Utilities.mapBoundToRange(linearProgress, 0.5f, 1f, 0f, 1f, LINEAR),
+                Utilities.mapBoundToRange(linearProgress,
+                        widgetAlphaLowerBound, 1f, 1f, 0f, LINEAR),
+                cornerRadiusProgress);
+    }
+
+    public float getOutlineRadius() {
+        return mBackgroundView.getOutlineRadius();
+    }
+
     @Override
     public void setPositionOffsetY(float y) {
         mIconOffsetY = y;
@@ -257,8 +285,17 @@ public class FloatingWidgetView extends FrameLayout implements AnimatorListener,
             sTmpMatrix.setTranslate(-mBackgroundOffset.left - mAppWidgetView.getLeft(),
                     -mBackgroundOffset.top - mAppWidgetView.getTop());
             sTmpMatrix.postScale(foregroundScale, foregroundScale);
-            sTmpMatrix.postTranslate(mBackgroundPosition.left, mBackgroundPosition.top
-                    + mIconOffsetY);
+
+            if (Flags.widgetReturnAnimationMinorFixes()) {
+                float foregroundWidth = mBackgroundPosition.width();
+                float foregroundHeight = mAppWidgetBackgroundView.getHeight() * foregroundScale;
+                float left = mBackgroundPosition.centerX() - (foregroundWidth / 2);
+                float top = mBackgroundPosition.centerY() - (foregroundHeight / 2);
+                sTmpMatrix.postTranslate(left, top + mIconOffsetY);
+            } else {
+                sTmpMatrix.postTranslate(mBackgroundPosition.left, mBackgroundPosition.top
+                        + mIconOffsetY);
+            }
 
             // We use the animation matrix here, because calling setMatrix on the GhostView
             // actually sets the animation matrix, not the regular one.

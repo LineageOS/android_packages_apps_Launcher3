@@ -42,7 +42,6 @@ import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.launcher3.util.rule.TestStabilityRule
 import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
 import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
-import com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.util.DesktopTask
@@ -143,7 +142,7 @@ class KeyboardQuickSwitchControllerTest {
 
     @Test
     @DisableFlags(FLAG_ENABLE_ALT_TAB_KQS_FLATENNING)
-    @DesktopStability(flavors = LOCAL or PLATFORM_POSTSUBMIT, bug = 486204795)
+    @DesktopStability(flavors = LOCAL, bug = 486204795)
     fun singleAndDesktopTasksPresent_notOnDesktopWithFlatenningOff_onlyShowSingleTaskIds() {
         updateRecentsModel(
             listOf(

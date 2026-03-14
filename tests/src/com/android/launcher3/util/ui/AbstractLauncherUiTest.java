@@ -36,9 +36,7 @@ import com.android.launcher3.util.TestUtil;
 import com.android.launcher3.util.rule.FailureWatcher;
 import com.android.launcher3.util.rule.ShellCommandRule;
 import com.android.launcher3.util.rule.TestIsolationRule;
-import com.android.launcher3.util.rule.TestStabilityRule;
 
-import org.junit.Rule;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
@@ -60,8 +58,6 @@ public abstract class AbstractLauncherUiTest<LAUNCHER_TYPE extends Launcher,
     private static final String TAG = "AbstractLauncherUiTest";
 
     protected LooperExecutor mMainThreadExecutor = MAIN_EXECUTOR;
-
-    @Rule public TestStabilityRule mTestStabilityRule = new TestStabilityRule();
 
     protected AbstractLauncherUiTest() {
         if (TestHelpers.isInLauncherProcess()) {

@@ -16,7 +16,6 @@
 package com.android.launcher3.widget;
 
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 
 import static org.junit.Assert.assertNotNull;
@@ -59,7 +58,7 @@ public class TaplAddWidgetTest extends AbstractLauncherUiTest<Launcher, View> {
 
     @Test
     @PortraitLandscape
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280292)
+    @DesktopStability(flavors = LOCAL, bug = 486280292)
     public void testDragIcon() throws Throwable {
         reinitializeLauncherData(true);
         waitForLauncherCondition("Workspace didn't finish loading", l -> !l.isWorkspaceLoading());
@@ -90,7 +89,7 @@ public class TaplAddWidgetTest extends AbstractLauncherUiTest<Launcher, View> {
      */
     @Test
     @PortraitLandscape
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280292)
+    @DesktopStability(flavors = LOCAL, bug = 486280292)
     public void testDragCustomShortcut() throws Throwable {
         reinitializeLauncherData(true);
         waitForLauncherCondition("Workspace didn't finish loading", l -> !l.isWorkspaceLoading());
@@ -108,7 +107,7 @@ public class TaplAddWidgetTest extends AbstractLauncherUiTest<Launcher, View> {
     @PlatinumTest(focusArea = "launcher")
     @Test
     @EnableFlags(Flags.FLAG_FIX_WIDGET_SINGLE_PTR_RESIZE)
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280292)
+    @DesktopStability(flavors = LOCAL, bug = 486280292)
     public void testResizeWidget() throws Throwable {
         reinitializeLauncherData(true);
         waitForLauncherCondition("Workspace didn't finish loading", l -> !l.isWorkspaceLoading());

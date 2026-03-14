@@ -17,7 +17,6 @@ package com.android.launcher3.allapps;
 
 import static com.android.launcher3.util.TestUtil.expectFail;
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
 
 import static org.junit.Assert.assertEquals;
@@ -197,7 +196,7 @@ public class TaplOpenCloseAllAppsTest extends AbstractLauncherUiTest<Launcher, V
      */
     @Test
     @PortraitLandscape
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 488076176)
+    @DesktopStability(flavors = LOCAL, bug = 488076176)
     public void testPressBackFromAllAppsToHome() {
         InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
                 READ_DEVICE_CONFIG_PERMISSION);

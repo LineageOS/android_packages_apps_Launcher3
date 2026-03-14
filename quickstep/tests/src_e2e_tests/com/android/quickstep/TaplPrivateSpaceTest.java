@@ -19,7 +19,6 @@ package com.android.quickstep;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -108,7 +107,7 @@ public class TaplPrivateSpaceTest extends AbstractQuickStepTest {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486281068)
+    @DesktopStability(flavors = LOCAL, bug = 486281068)
     public void testPrivateSpaceContainerIsPresent() {
         // Scroll to the bottom of All Apps
         executeOnLauncher(launcher -> launcher.getAppsView().resetAndScrollToPrivateSpaceHeader());
@@ -127,7 +126,7 @@ public class TaplPrivateSpaceTest extends AbstractQuickStepTest {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486281068)
+    @DesktopStability(flavors = LOCAL, bug = 486281068)
     public void testUserInstalledAppIsShownAboveDivider() throws IOException {
         // Ensure that the App is not installed in main user otherwise, it may not be found in
         // PS container.
@@ -152,7 +151,7 @@ public class TaplPrivateSpaceTest extends AbstractQuickStepTest {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486281068)
+    @DesktopStability(flavors = LOCAL, bug = 486281068)
     public void testPrivateSpaceAppLongPressUninstallMenu() throws IOException {
         // Ensure that the App is not installed in main user otherwise, it may not be found in
         // PS container.
@@ -176,7 +175,7 @@ public class TaplPrivateSpaceTest extends AbstractQuickStepTest {
     }
 
     @Test
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486281068)
+    @DesktopStability(flavors = LOCAL, bug = 486281068)
     public void testPrivateSpaceLockingBehaviour() throws IOException {
         assumeFalse("Ignoring test because device is tablet",
             mLauncher.isTablet()); // b/367258373

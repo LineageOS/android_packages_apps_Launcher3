@@ -26,6 +26,8 @@ import com.android.launcher3.dragndrop.SystemDragController
 import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
+import com.android.launcher3.qsb.QsbAppWidgetHost
+import com.android.launcher3.qsb.QsbAppWidgetHostImpl
 import com.android.launcher3.util.BaseDefaultsValueProvider
 import com.android.launcher3.util.DefaultsValueProvider
 import com.android.launcher3.util.MutableListenableRef
@@ -76,6 +78,10 @@ object StaticObjectModule {
     fun provideRefreshRateTracker(tracker: RefreshRateTrackerImpl): RefreshRateTracker = tracker
 
     @Provides fun provideAbstractFloatingViewHelper() = AbstractFloatingViewHelper
+
+    @Provides
+    fun provideQsbAppWidgetHost(@ApplicationContext context: Context): QsbAppWidgetHost =
+        QsbAppWidgetHostImpl.getStaticInstance(context)
 }
 
 @Module

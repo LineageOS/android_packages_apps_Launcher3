@@ -37,12 +37,15 @@ import com.android.quickstep.util.SurfaceTransactionApplier
  *   the window is already scaled by the user gesture
  * @param startRadius corner radius of window at the start position
  */
-open class SpringAnimRunner(
+open class SpringAnimRunner
+@JvmOverloads
+constructor(
     private val appTargets: Array<RemoteAnimationTarget>?,
     targetRect: RectF,
     closingWindowStartRect: RectF,
     activityContext: ActivityContext,
     private val startRadius: Float,
+    private val alphaEndProgress: Float = ALPHA_END_PROGRESS,
 ) : OnUpdateListener {
 
     private val matrix = Matrix()
@@ -64,6 +67,8 @@ open class SpringAnimRunner(
     private val coordinateTransfer: RemoteAnimationCoordinateTransfer =
         RemoteAnimationCoordinateTransfer(activityContext)
 
+    private var windowCornerRadius: Float? = null
+
     init {
         // transfer the coordinate based on animation target.
         appTargets
@@ -75,6 +80,10 @@ open class SpringAnimRunner(
                 transferRect.set(windowOriginalBounds)
                 coordinateTransfer.transferRectToAnimTarget(it, transferRect, windowOriginalBounds)
             }
+    }
+
+    fun setWindowCornerRadius(radius: Float?) {
+        windowCornerRadius = radius
     }
 
     fun getCornerRadius(progress: Float): Float =
@@ -109,26 +118,14 @@ open class SpringAnimRunner(
                         (currentAnimTargetRectF.width() / windowOriginalBounds.width())
                             .coerceAtMost(1f)
                     val unscaledHeight = currentAnimTargetRectF.height() / scale
-                    val croppedHeight = windowStartBounds.height() - unscaledHeight
-                    tmpRectF.set(
-                        0f,
-                        0f,
-                        windowOriginalBounds.width(),
-                        windowStartBounds.height() - croppedHeight,
-                    )
+                    tmpRectF.set(0f, 0f, windowOriginalBounds.width(), unscaledHeight)
                 } else {
                     scale =
                         (currentAnimTargetRectF.height() / windowOriginalBounds.height())
                             .coerceAtMost(1f)
 
-                    val unscaledWidth = currentAnimTargetRectF.width() * scale
-                    val croppedWidth = windowStartBounds.width() - unscaledWidth
-                    tmpRectF.set(
-                        0f,
-                        0f,
-                        windowStartBounds.width() - croppedWidth,
-                        windowOriginalBounds.height(),
-                    )
+                    val unscaledWidth = currentAnimTargetRectF.width() / scale
+                    tmpRectF.set(0f, 0f, unscaledWidth, windowOriginalBounds.height())
                 }
 
                 // Match size and position of currentRect.
@@ -140,7 +137,7 @@ open class SpringAnimRunner(
                     .setMatrix(matrix)
                     .setWindowCrop(tmpRect)
                     .setAlpha(getWindowAlpha(progress))
-                    .setCornerRadius(getCornerRadius(progress) / scale)
+                    .setCornerRadius(windowCornerRadius ?: (getCornerRadius(progress) / scale))
             } else if (target.mode == RemoteAnimationTarget.MODE_OPENING) {
                 matrix.setTranslate(tmpPos.x.toFloat(), tmpPos.y.toFloat())
                 builder.setMatrix(matrix).setAlpha(1f)
@@ -153,12 +150,12 @@ open class SpringAnimRunner(
     private fun getWindowAlpha(progress: Float): Float =
         when {
             progress <= ALPHA_START_PROGRESS -> 1f
-            progress >= ALPHA_END_PROGRESS -> 0f
+            progress >= alphaEndProgress -> 0f
             else ->
                 Utilities.mapToRange(
                     progress,
                     ALPHA_START_PROGRESS,
-                    ALPHA_END_PROGRESS,
+                    alphaEndProgress,
                     1f,
                     0f,
                     Interpolators.ACCELERATE_1_5,

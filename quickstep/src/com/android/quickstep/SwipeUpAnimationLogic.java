@@ -46,6 +46,7 @@ import com.android.quickstep.util.AnimatorControllerWithResistance;
 import com.android.quickstep.util.RectFSpringAnim;
 import com.android.quickstep.util.RectFSpringAnim.DefaultSpringConfig;
 import com.android.quickstep.util.RectFSpringAnim.TaskbarHotseatSpringConfig;
+import com.android.quickstep.util.RectFSpringAnim.WidgetSpringConfig;
 import com.android.quickstep.util.SurfaceTransaction.SurfaceProperties;
 import com.android.quickstep.util.TaskViewSimulator;
 import com.android.quickstep.util.TransformParams;
@@ -178,12 +179,25 @@ public abstract class SwipeUpAnimationLogic implements
     }
 
     protected abstract class HomeAnimationFactory {
+        // The progress at which a closing window starts fading out.
+        private static final float ALPHA_START_PROGRESS = 0f;
+        // The progress at which a closing window becomes fully transparent.
+        private static final float ALPHA_END_PROGRESS = 0.85f;
+
         protected float mSwipeVelocity;
+        protected float mAlphaEndProgress = ALPHA_END_PROGRESS;
 
         /**
          * Returns true if we know the home animation involves an item in the hotseat.
          */
         public boolean isInHotseat() {
+            return false;
+        }
+
+        /**
+         * Returns true if the home animation involves a widget.
+         */
+        public boolean isWidget() {
             return false;
         }
 
@@ -233,8 +247,8 @@ public abstract class SwipeUpAnimationLogic implements
          */
         protected float getWindowAlpha(float progress) {
             // Alpha interpolates between [1, 0] between progress values [start, end]
-            final float start = 0f;
-            final float end = 0.85f;
+            final float start = ALPHA_START_PROGRESS;
+            final float end = mAlphaEndProgress;
 
             if (progress <= start) {
                 return 1f;
@@ -243,6 +257,15 @@ public abstract class SwipeUpAnimationLogic implements
                 return 0f;
             }
             return Utilities.mapToRange(progress, start, end, 1, 0, ACCELERATE_1_5);
+        }
+
+        /**
+         * @param progress The progress of the animation to the home screen.
+         * @return The current corner radius to set on the animating app window. A negative value
+         *   is invalid and should not be used.
+         */
+        protected float getWindowCornerRadius(float progress) {
+            return -1f;
         }
 
         /**
@@ -379,8 +402,11 @@ public abstract class SwipeUpAnimationLogic implements
                 mDp.getDeviceProperties().getTaskbarConfiguration().isTaskbarPresent()
                 && homeAnimationFactory.isInHotseat();
         RectFSpringAnim anim = new RectFSpringAnim(useTaskbarHotseatParams
-                ? new TaskbarHotseatSpringConfig(mContext, startRect, targetRect)
-                : new DefaultSpringConfig(mContext, mDp, startRect, targetRect));
+                ? new TaskbarHotseatSpringConfig(mContext, mDp, startRect, targetRect)
+                : (homeAnimationFactory.isWidget()
+                        ? new WidgetSpringConfig(mContext, mDp, startRect, targetRect)
+                        : new DefaultSpringConfig(mContext, mDp, startRect, targetRect)));
+
         homeAnimationFactory.setAnimation(anim);
 
         SpringAnimationRunner runner = new SpringAnimationRunner(
@@ -467,7 +493,46 @@ public abstract class SwipeUpAnimationLogic implements
             mHomeAnim.setPlayFraction(progress);
             if (mTargetTaskView == null) {
                 mHomeToWindowPositionMap.mapRect(mWindowCurrentRect, currentRect);
-                mMatrix.setRectToRect(mCropRectF, mWindowCurrentRect, ScaleToFit.FILL);
+
+                if (mAnimationFactory.isWidget()) {
+                    RectF cropRectF = new RectF();
+                    float scale;
+                    if (mCropRectF.height() > mCropRectF.width()) {
+                        scale = Math.min(mWindowCurrentRect.width() / mCropRectF.width(), 1f);
+                        float unscaledHeight = mWindowCurrentRect.height() / scale;
+                        float croppedHeight = mCropRectF.height() - unscaledHeight;
+                        float translate = croppedHeight / 2;
+                        cropRectF.set(
+                                0f, translate, mCropRectF.width(), mCropRectF.height() - translate);
+                        mMatrix.setScale(scale, scale);
+                        mMatrix.postTranslate(mWindowCurrentRect.left,
+                                mWindowCurrentRect.top - croppedHeight * scale / 2);
+                    } else {
+                        scale = Math.min(mWindowCurrentRect.height() / mCropRectF.height(), 1f);
+                        float unscaledWidth = mWindowCurrentRect.width() / scale;
+                        float croppedWidth = mCropRectF.width() - unscaledWidth;
+                        float translate = croppedWidth / 2;
+                        cropRectF.set(
+                                translate, 0f, mCropRectF.width() - translate, mCropRectF.height());
+                        mMatrix.setScale(scale, scale);
+                        mMatrix.postTranslate(mWindowCurrentRect.left - croppedWidth * scale / 2,
+                                mWindowCurrentRect.top);
+                    }
+                    cropRectF.round(mCropRect);
+
+                    float windowRadius = mAnimationFactory.getWindowCornerRadius(progress);
+                    if (mAnimationFactory.isWidget() && windowRadius >= 0f) {
+                        // The corner radius in the window is scaled by the matrix. So the radius
+                        // provided by the animation factory needs to be transformed by the inverse
+                        // of the window transform.
+                        Matrix inverse = new Matrix();
+                        mMatrix.invert(inverse);
+                        cornerRadius = inverse.mapRadius(windowRadius);
+                    }
+                } else {
+                    mMatrix.setRectToRect(mCropRectF, mWindowCurrentRect, ScaleToFit.FILL);
+                }
+
                 mLocalTransformParams
                         .setTargetAlpha(alpha)
                         .setCornerRadius(cornerRadius);

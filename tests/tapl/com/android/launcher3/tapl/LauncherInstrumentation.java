@@ -1171,9 +1171,13 @@ public final class LauncherInstrumentation {
                     return waitForSystemLauncherObject(OVERVIEW_RES_ID);
                 }
                 case SPLIT_SCREEN_SELECT: {
-                    waitUntilLauncherObjectGone(APPS_RES_ID);
-                    waitUntilLauncherObjectGone(WORKSPACE_RES_ID);
-                    waitUntilLauncherObjectGone(WIDGETS_RES_ID);
+                    if (!isRecentsWindowEnabled()) {
+                        // The workspace is visible on the accessibility hierarchy under the recents
+                        // window
+                        waitUntilLauncherObjectGone(APPS_RES_ID);
+                        waitUntilLauncherObjectGone(WORKSPACE_RES_ID);
+                        waitUntilLauncherObjectGone(WIDGETS_RES_ID);
+                    }
                     waitUntilGoneBySelector(
                             By.res(WIDGET_PICKER_MODULE_PACKAGE, WIDGETS_CATALOG_RES_ID));
                     if (isTablet()) {

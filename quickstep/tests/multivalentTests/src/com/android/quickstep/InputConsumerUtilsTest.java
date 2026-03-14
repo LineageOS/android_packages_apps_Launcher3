@@ -19,7 +19,6 @@ package com.android.quickstep;
 import static com.android.launcher3.Flags.FLAG_ENABLE_MOUSE_INTERACTION_CHANGES;
 import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 import static com.android.quickstep.InputConsumerUtils.newBaseConsumer;
 import static com.android.quickstep.InputConsumerUtils.newConsumer;
 
@@ -384,7 +383,7 @@ public class InputConsumerUtilsTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_MOUSE_INTERACTION_CHANGES)
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280960)
+    @DesktopStability(flavors = LOCAL, bug = 486280960)
     public void testNewBaseConsumer_nonTrackpadMouseEvent_nonDesktop_returnsDefaultInputConsumer() {
         when(mCurrentGestureState.isTrackpadGesture()).thenReturn(false);
         MotionEvent mouseEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);

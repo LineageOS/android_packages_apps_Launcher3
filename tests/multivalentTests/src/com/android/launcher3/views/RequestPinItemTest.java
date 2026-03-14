@@ -21,7 +21,6 @@ import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
-import static com.android.launcher3.util.rule.TestStabilityRule.PLATFORM_POSTSUBMIT;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
@@ -103,7 +102,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280528)
+    @DesktopStability(flavors = LOCAL, bug = 486280528)
     public void testPinWidgetNoConfig() throws Throwable {
         runTest("pinWidgetNoConfig", true, (info, view) -> info instanceof LauncherAppWidgetInfo
                 && ((LauncherAppWidgetInfo) info).appWidgetId == mAppWidgetId
@@ -116,7 +115,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280528)
+    @DesktopStability(flavors = LOCAL, bug = 486280528)
     public void testPinWidgetNoConfig_customPreview() throws Throwable {
         // Command to set custom preview
         Intent command = RequestPinItemActivity.getCommandIntent(
@@ -134,7 +133,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
      * Test is is hanging on Robolectric, possibly an issue with threading.
      */
     @SkipOnDeviceless
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280528)
+    @DesktopStability(flavors = LOCAL, bug = 486280528)
     public void testPinWidgetWithConfig() throws Throwable {
         runTest("pinWidgetWithConfig", true,
                 (info, view) -> info instanceof LauncherAppWidgetInfo
@@ -166,7 +165,7 @@ public class RequestPinItemTest extends BaseLauncherActivityTest<Launcher> {
 
     @Test
     @SkipOnDeviceless
-    @DesktopStability(flavors = LOCAL | PLATFORM_POSTSUBMIT, bug = 486280528)
+    @DesktopStability(flavors = LOCAL, bug = 486280528)
     public void testPinCancel_canClick() throws Throwable {
         // Command to set the shortcut id
         initPinActivity("pinWidgetNoConfig");

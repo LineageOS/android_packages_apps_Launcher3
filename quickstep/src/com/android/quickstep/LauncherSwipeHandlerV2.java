@@ -36,6 +36,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.app.animation.Interpolators;
+import com.android.launcher3.Flags;
+import com.android.launcher3.LauncherAnimUtils;
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.model.data.ItemInfo;
@@ -61,6 +63,7 @@ import com.android.wm.shell.shared.compat.AnimatedSurfaceUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Temporary class to allow easier refactoring
@@ -250,10 +253,30 @@ public class LauncherSwipeHandlerV2 extends AbsSwipeUpHandler<
                 FloatingWidgetView.getDefaultBackgroundColor(mContext,
                         AnimatedSurfaceUtils.from(runningTaskTarget));
         FloatingWidgetView floatingWidgetView = FloatingWidgetView.getFloatingWidgetView(mContainer,
-                hostView, backgroundLocation, windowSize, tvs.getCurrentCornerRadius(),
+                hostView, backgroundLocation, windowSize, tvs.getScaledCornerRadius(),
                 isTargetTranslucent, fallbackBackgroundColor);
 
+        final Function<RectF, Float> posProvider;
+        final float totalDiff;
+        final float startPos;
+
+        if (Flags.widgetReturnAnimationMinorFixes()) {
+            RectF startRect = new RectF(crop);
+            RectF targetRect = new RectF(backgroundLocation);
+
+            posProvider = LauncherAnimUtils.getPosProviderForRect(startRect, targetRect);
+            totalDiff = Math.abs(posProvider.apply(targetRect) - posProvider.apply(startRect));
+            startPos = posProvider.apply(startRect);
+        } else {
+            posProvider = null;
+            totalDiff = 0;
+            startPos = 0;
+        }
+
         return new FloatingViewHomeAnimationFactory(floatingWidgetView) {
+            private float mWidgetAlphaLowerBound = 1f;
+            private boolean mThresholdCaptured = false;
+
             @Nullable
             private RectF mTargetRect;
 
@@ -289,17 +312,53 @@ public class LauncherSwipeHandlerV2 extends AbsSwipeUpHandler<
             @Override
             public void update(RectF currentRect, float progress, float radius, int overlayAlpha) {
                 super.update(currentRect, progress, radius, overlayAlpha);
-                final float fallbackBackgroundAlpha =
-                        1 - mapBoundToRange(progress, 0.8f, 1, 0, 1, EXAGGERATED_EASE);
-                final float foregroundAlpha =
-                        mapBoundToRange(progress, 0.5f, 1, 0, 1, EXAGGERATED_EASE);
-                floatingWidgetView.update(currentRect, floatingWidgetAlpha, foregroundAlpha,
-                        fallbackBackgroundAlpha, 1 - progress);
+
+                if (Flags.widgetReturnAnimationMinorFixes()) {
+
+                    // The progress parameter represents the scaling progress (closing
+                    // window down to the size of FloatingWidget). currentPosProgress is
+                    // used to capture the progress for the primary axis(the axis with
+                    // longer distance between initial to final position).
+                    float currentPosProgress = totalDiff > 0
+                            ? Math.abs(posProvider.apply(currentRect) - startPos) / totalDiff
+                            : 1f;
+
+                    // Capture the lower threshold for revealing the widget only once when
+                    // the scaling is nearly finished.
+                    if (!mThresholdCaptured && progress >= 0.99f) {
+                        mWidgetAlphaLowerBound = currentPosProgress;
+                        mThresholdCaptured = true;
+                    }
+
+                    floatingWidgetView.update(currentPosProgress, mWidgetAlphaLowerBound,
+                            currentRect, floatingWidgetAlpha, 1 - progress);
+                } else {
+                    final float fallbackBackgroundAlpha =
+                            1 - mapBoundToRange(progress, 0.8f, 1, 0, 1, EXAGGERATED_EASE);
+                    final float foregroundAlpha =
+                            mapBoundToRange(progress, 0.5f, 1, 0, 1, EXAGGERATED_EASE);
+                    floatingWidgetView.update(currentRect, floatingWidgetAlpha, foregroundAlpha,
+                            fallbackBackgroundAlpha, 1 - progress);
+                }
+            }
+
+            @Override
+            public boolean isWidget() {
+                return Flags.widgetReturnAnimationMinorFixes();
             }
 
             @Override
             protected float getWindowAlpha(float progress) {
                 return 1 - mapBoundToRange(progress, 0, 0.5f, 0, 1, LINEAR);
+            }
+
+            @Override
+            protected float getWindowCornerRadius(float progress) {
+                if (Flags.widgetReturnAnimationMinorFixes()) {
+                    return floatingWidgetView.getOutlineRadius();
+                }
+
+                return -1f;
             }
         };
     }
@@ -341,12 +400,18 @@ public class LauncherSwipeHandlerV2 extends AbsSwipeUpHandler<
     }
 
     private class FloatingViewHomeAnimationFactory extends LauncherHomeAnimationFactory {
+        // The progress at which a window closing into a widget becomes fully transparent.
+        private static final float ALPHA_END_PROGRESS_WIDGET = 0.4f;
+
         private final FloatingView mFloatingView;
         @Nullable
         protected RectFSpringAnim mSiblingAnimation;
 
         FloatingViewHomeAnimationFactory(FloatingView floatingView) {
             mFloatingView = floatingView;
+            if (isWidget()) {
+                mAlphaEndProgress = ALPHA_END_PROGRESS_WIDGET;
+            }
         }
 
         @Override

@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.graphics.Color;
+import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.FloatProperty;
@@ -33,6 +34,8 @@ import android.widget.TextView;
 import com.android.launcher3.util.MultiScalePropertyFactory;
 import com.android.launcher3.views.ScrimColors;
 import com.android.launcher3.views.ScrimView;
+
+import java.util.function.Function;
 
 public class LauncherAnimUtils {
     /**
@@ -221,6 +224,16 @@ public class LauncherAnimUtils {
                     return ((ColorDrawable) view.getBackground()).getColor();
                 }
             };
+
+    /**
+     * Returns a function to fetch the coordinate (centerX or centerY) for the primary axis
+     * of movement between the start and target Rect.
+     */
+    public static Function<RectF, Float> getPosProviderForRect(RectF start, RectF target) {
+        float totalXDiff = Math.abs(start.centerX() - target.centerX());
+        float totalYDiff = Math.abs(start.centerY() - target.centerY());
+        return totalYDiff > totalXDiff ? RectF::centerY : RectF::centerX;
+    }
 
     public static final Property<ScrimView, ScrimColors> SCRIM_COLORS =
             new Property<ScrimView, ScrimColors>(ScrimColors.class, "scrimColors") {

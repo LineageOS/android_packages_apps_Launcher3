@@ -17,25 +17,28 @@
 package com.android.launcher3.qsb
 
 import android.appwidget.AppWidgetHost
-import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.ContextWrapper
 import android.widget.RemoteViews
-import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.qsb.OSEManager.Companion.OSE_LOOPER
-import javax.inject.Inject
+import com.android.launcher3.util.MutableListenableRef
+import com.android.launcher3.util.SafeCloseable
+import java.util.concurrent.CopyOnWriteArraySet
 
 /** AppWidgetHost used for QSB */
-class QsbAppWidgetHost @Inject constructor(@ApplicationContext private val ctx: Context) :
-    AppWidgetHost(WrappedContext(ctx), HOST_ID) {
+abstract class QsbAppWidgetHost(ctx: Context) : AppWidgetHost(WrappedContext(ctx), HOST_ID) {
 
-    private var callbacks: Callbacks? = null
+    private val currentState = MutableState()
+    private val callbacks = CopyOnWriteArraySet<MutableState>().apply { add(currentState) }
     private var activeWidgetId = INVALID_APPWIDGET_ID
 
-    fun setCallbacks(c: Callbacks) {
-        callbacks = c
+    fun addCallbacks(c: MutableState): SafeCloseable {
+        callbacks.add(c)
+        c.providerInfo.dispatchValue(currentState.providerInfo.value)
+        c.views.dispatchValue(currentState.views.value)
+        return SafeCloseable { callbacks.remove(c) }
     }
 
     /** Starts listening for any updates for the provided widget id */
@@ -45,8 +48,16 @@ class QsbAppWidgetHost @Inject constructor(@ApplicationContext private val ctx: 
 
         activeWidgetId = appWidgetId
         if (appWidgetId != INVALID_APPWIDGET_ID) {
-            createView(ctx, appWidgetId, info)
+            startUpdateListener(appWidgetId, info)
         }
+    }
+
+    /** Starts an update listener for the [appWidgetId] with [info] */
+    protected abstract fun startUpdateListener(appWidgetId: Int, info: AppWidgetProviderInfo?)
+
+    /** Executes the [update] for all registered callbacks if [appWidgetId] is currently active */
+    protected fun updateAllCallbacks(appWidgetId: Int, update: MutableState.() -> Unit) {
+        if (appWidgetId == activeWidgetId) callbacks.forEach { update.invoke(it) }
     }
 
     fun getActiveWidgetId() = activeWidgetId
@@ -66,33 +77,14 @@ class QsbAppWidgetHost @Inject constructor(@ApplicationContext private val ctx: 
         }
     }
 
-    override fun onCreateView(
-        context: Context?,
-        appWidgetId: Int,
-        appWidget: AppWidgetProviderInfo?,
-    ): AppWidgetHostView = DelegateHostView(appWidgetId)
-
-    private inner class DelegateHostView(val widgetId: Int) : AppWidgetHostView(ctx) {
-
-        override fun setAppWidget(appWidgetId: Int, info: AppWidgetProviderInfo?) {
-            if (activeWidgetId == widgetId) callbacks?.onProviderChanged(info)
-        }
-
-        override fun updateAppWidget(remoteViews: RemoteViews?) {
-            if (activeWidgetId == widgetId) callbacks?.onViewsChanged(remoteViews)
-        }
-    }
-
-    interface Callbacks {
-
-        fun onProviderChanged(appWidget: AppWidgetProviderInfo?)
-
-        fun onViewsChanged(views: RemoteViews?)
-    }
-
     private class WrappedContext(ctx: Context) : ContextWrapper(ctx) {
 
         override fun getMainLooper() = OSE_LOOPER.looper
+    }
+
+    class MutableState {
+        val providerInfo = MutableListenableRef<AppWidgetProviderInfo?>(null)
+        val views = MutableListenableRef<RemoteViews?>(null)
     }
 
     companion object {
