@@ -2068,6 +2068,10 @@ public abstract class RecentsView<
         taskView.setModalness(mTaskModalness);
         taskView.setTaskThumbnailSplashAlpha(mTaskThumbnailSplashAlpha);
         taskView.setBorderEnabled(mBorderEnabled);
+
+        if (taskView instanceof DesktopTaskView desktopTaskView) {
+            desktopTaskView.setExplodeProgress(mUtils.getDeskExplodeProgress());
+        }
     }
 
     public void resetTaskVisuals() {
