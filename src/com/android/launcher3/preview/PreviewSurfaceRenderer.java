@@ -25,7 +25,6 @@ import static com.android.launcher3.LauncherPrefs.NON_FIXED_LANDSCAPE_GRID_NAME;
 import static com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.widget.LauncherWidgetHolder.APPWIDGET_HOST_ID;
-import static com.android.systemui.shared.Flags.extendibleThemeManager;
 
 import android.app.WallpaperColors;
 import android.appwidget.AppWidgetHost;
@@ -147,7 +146,7 @@ public class PreviewSurfaceRenderer {
 
         // Create the preview context
         String layoutXml = bundle.getString(KEY_LAYOUT_XML);
-        boolean isCustomLayout = extendibleThemeManager() && !TextUtils.isEmpty(layoutXml);
+        boolean isCustomLayout = !TextUtils.isEmpty(layoutXml);
         int widgetHostId = isCustomLayout ? APPWIDGET_HOST_ID + callingPid : APPWIDGET_HOST_ID;
 
 
@@ -177,7 +176,7 @@ public class PreviewSurfaceRenderer {
         mAppComponent.getModelInitializer().initializeDisplayEvents(mAppComponent.getModel());
 
         // When using a custom layout, reset the widget host on destroy
-        if (extendibleThemeManager() && isCustomLayout) {
+        if (isCustomLayout) {
             mLifeCycleTracker.add(() -> {
                 AppWidgetHost host = new AppWidgetHost(mContext, widgetHostId);
                 // Start listening here, so that any previous active host is disabled

@@ -53,7 +53,6 @@ import com.android.launcher3.widget.LocalColorExtractor
 import com.android.launcher3.widget.util.WidgetSizeHandler
 import com.android.launcher3.widgetpicker.NoOpWidgetPickerModule
 import com.android.launcher3.workspacefunctions.WorkspaceFunctionsModule
-import com.android.systemui.shared.Flags
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -114,7 +113,7 @@ constructor(
         // cause either launcher appcomponent or preview to app component to go out of sync.
         builder.bindOseWidgetManager(base.appComponent.oseWidgetManager)
 
-        if (layoutXml.isNullOrEmpty() || !Flags.extendibleThemeManager()) {
+        if (layoutXml.isNullOrEmpty()) {
             mDbDir = null
             initDaggerComponent(builder.bindWidgetsFactory(base.appComponent.widgetHolderFactory))
         } else {
