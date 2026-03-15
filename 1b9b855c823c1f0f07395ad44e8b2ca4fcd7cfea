@@ -34,6 +34,23 @@
       "parentUuid": "eff54ab0_b904d473",
       "revId": "1b9b855c823c1f0f07395ad44e8b2ca4fcd7cfea",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5bc1dc19_013c551c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 29080
+      },
+      "writtenOn": "2026-03-15T15:46:44Z",
+      "side": 1,
+      "message": "Works without making it a platform app with this:\nhttps://review.lineageos.org/c/LineageOS/android_packages_modules_Permission/+/477691",
+      "revId": "1b9b855c823c1f0f07395ad44e8b2ca4fcd7cfea",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ],
   "submitRequirementResults": [
