@@ -37,4 +37,11 @@
     <string name="trust_apps_info_protected">Aplicațiile protejate necesită autentificare pentru a fi deschise din launcher</string>
     <string name="pref_suggestions_title">Sugestii</string>
     <string name="pref_suggestions_summary">Pentru toate aplicațiile &amp; sugestiile pentru ecranul de pornire</string>
+    <string name="pebble_shape_title">Pietriș</string>
+    <string name="vessel_shape_title">Navă</string>
+    <string name="pure_square_shape_title">Pătrat pur</string>
+    <string name="squircle_shape_title">Pătrat rotunjit</string>
+    <string name="tapered_rect_shape_title">Dreptunghi conic</string>
+    <string name="teardrop_shape_title">Lacrimă</string>
+    <string name="rounded_rect_shape_title">Dreptunghi rotund</string>
 </resources>

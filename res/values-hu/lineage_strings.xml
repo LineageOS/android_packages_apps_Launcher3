@@ -37,4 +37,11 @@
     <string name="trust_apps_info_protected">Egy védett alkalmazás megnyitása a launcherből hitelesítést igényel</string>
     <string name="pref_suggestions_title">Javaslatok</string>
     <string name="pref_suggestions_summary">Javaslatok a Kezdőképernyőhöz és az Alkalmazásfiókhoz</string>
+    <string name="pebble_shape_title">Kavics</string>
+    <string name="vessel_shape_title">Váza</string>
+    <string name="pure_square_shape_title">Tökéletes négyzet</string>
+    <string name="squircle_shape_title">Négyzetes kör</string>
+    <string name="tapered_rect_shape_title">Trapéz-szerű</string>
+    <string name="teardrop_shape_title">Könnycsepp</string>
+    <string name="rounded_rect_shape_title">Kerekített téglalap</string>
 </resources>

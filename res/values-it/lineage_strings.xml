@@ -37,4 +37,11 @@
     <string name="trust_apps_info_protected">Le app protette richiedono l\'autenticazione per essere aperte dal launcher</string>
     <string name="pref_suggestions_title">Suggerimenti</string>
     <string name="pref_suggestions_summary">Per visualizzare suggerimenti nel drawer e nella schermata Home</string>
+    <string name="pebble_shape_title">Ciottolo</string>
+    <string name="vessel_shape_title">Recipiente</string>
+    <string name="pure_square_shape_title">Quadrato puro</string>
+    <string name="squircle_shape_title">Quadrato-cerchio</string>
+    <string name="tapered_rect_shape_title">Quadrato senza angoli</string>
+    <string name="teardrop_shape_title">Goccia</string>
+    <string name="rounded_rect_shape_title">Quadrato arrotondato</string>
 </resources>

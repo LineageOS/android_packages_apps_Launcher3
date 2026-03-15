@@ -37,4 +37,11 @@
     <string name="trust_apps_info_protected">Les aplicacions protegides requeriran autentificació per poder ser obertes des del llançador</string>
     <string name="pref_suggestions_title">Suggeriments</string>
     <string name="pref_suggestions_summary">Per obtenir suggeriments sobre el calaix d\'aplicacions i la pantalla d\'inici</string>
+    <string name="pebble_shape_title">Còdol</string>
+    <string name="vessel_shape_title">Vaixell</string>
+    <string name="pure_square_shape_title">Quadrat pur</string>
+    <string name="squircle_shape_title">Quadrat arrodonit</string>
+    <string name="tapered_rect_shape_title">Rectangle afilat</string>
+    <string name="teardrop_shape_title">Llàgrima</string>
+    <string name="rounded_rect_shape_title">Rectangle arrodonit</string>
 </resources>

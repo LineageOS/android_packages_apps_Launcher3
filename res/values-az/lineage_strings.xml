@@ -37,4 +37,11 @@
     <string name="trust_apps_info_protected">Qorunan tətbiqlərin başladıcıdan açılması üçün kimlik doğrulama tələb olunur</string>
     <string name="pref_suggestions_title">Təkliflər</string>
     <string name="pref_suggestions_summary">Tətbiq siyirməsi və əsas ekran təklifləri üçün</string>
+    <string name="pebble_shape_title">Çınqıl</string>
+    <string name="vessel_shape_title">Qab</string>
+    <string name="pure_square_shape_title">Tam kvadrat</string>
+    <string name="squircle_shape_title">Dəyirmi kvadrat</string>
+    <string name="tapered_rect_shape_title">Daralan düzbucaqlı</string>
+    <string name="teardrop_shape_title">Damla</string>
+    <string name="rounded_rect_shape_title">Yumru künclü düzbucaqlı</string>
 </resources>

@@ -37,4 +37,11 @@
     <string name="trust_apps_info_protected">Chronione aplikacje wymagają uwierzytelniania, aby mogły zostać uruchomione z poziomu ekranu głównego</string>
     <string name="pref_suggestions_title">Sugestie</string>
     <string name="pref_suggestions_summary">Sugestie dotyczące szuflady aplikacji i ekranu głównego</string>
+    <string name="pebble_shape_title">Kamyk</string>
+    <string name="vessel_shape_title">Kadź</string>
+    <string name="pure_square_shape_title">Kwadrat</string>
+    <string name="squircle_shape_title">Kwadratokrąg</string>
+    <string name="tapered_rect_shape_title">Przycięty kwadrat</string>
+    <string name="teardrop_shape_title">Łza</string>
+    <string name="rounded_rect_shape_title">Zaokrąglony kwadrat</string>
 </resources>

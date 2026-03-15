@@ -37,4 +37,11 @@
     <string name="trust_apps_info_protected">Zaščitene aplikacije zahtevajo overitev za odpiranje iz zaganjalnika</string>
     <string name="pref_suggestions_title">Predlogi</string>
     <string name="pref_suggestions_summary">Za predloge predala aplikacij in domačega zaslona</string>
+    <string name="pebble_shape_title">Kamenček</string>
+    <string name="vessel_shape_title">Posoda</string>
+    <string name="pure_square_shape_title">Kvadrat</string>
+    <string name="squircle_shape_title">Zaobljen kvadrat</string>
+    <string name="tapered_rect_shape_title">Zožen pravokotnik</string>
+    <string name="teardrop_shape_title">Solza</string>
+    <string name="rounded_rect_shape_title">Zaobljen pravokotnik</string>
 </resources>

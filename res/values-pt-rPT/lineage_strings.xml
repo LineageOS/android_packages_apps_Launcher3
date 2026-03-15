@@ -37,4 +37,11 @@
     <string name="trust_apps_info_protected">Aplicações protegidas requerem autenticação para serem abertas a partir da gaveta de aplicações</string>
     <string name="pref_suggestions_title">Sugestões</string>
     <string name="pref_suggestions_summary">Sugestões para a gaveta de aplicações e para a Página Inicial</string>
+    <string name="pebble_shape_title">Seixo</string>
+    <string name="vessel_shape_title">Embarcação</string>
+    <string name="pure_square_shape_title">Quadrado puro</string>
+    <string name="squircle_shape_title">Quadrado arredondado</string>
+    <string name="tapered_rect_shape_title">Retângulo afunilado</string>
+    <string name="teardrop_shape_title">Lágrima</string>
+    <string name="rounded_rect_shape_title">Retângulo arredondado</string>
 </resources>

@@ -37,4 +37,11 @@
     <string name="trust_apps_info_protected">قوغدالغان ئەپنى قوزغاتقۇچتىن ئېچىشتا دەلىللەشنى تەلەپ قىلىدۇ</string>
     <string name="pref_suggestions_title">تەۋسىيە</string>
     <string name="pref_suggestions_summary">ئەپ تارتما ۋە باش ئېكراننىڭ تەۋسىيەسى</string>
+    <string name="pebble_shape_title">يۇمىلاق تاش</string>
+    <string name="vessel_shape_title">كېمە</string>
+    <string name="pure_square_shape_title">ئۇيۇل كىۋادرات</string>
+    <string name="squircle_shape_title">يۇمىلاق بۇلۇڭلۇق كىۋادرات</string>
+    <string name="tapered_rect_shape_title">كونۇسسىمان تىك تۆت بۇلۇڭ</string>
+    <string name="teardrop_shape_title">كۆز يېشى</string>
+    <string name="rounded_rect_shape_title">يۇمىلاق بۇلۇڭلۇق تىك تۆت بۇلۇڭ</string>
 </resources>
