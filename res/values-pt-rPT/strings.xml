@@ -63,8 +63,6 @@
     <string name="shortcuts_count" msgid="8471715556199592381">"{count,plural, =1{# atalho}other{# atalhos}}"</string>
     <string name="widgets_and_shortcuts_count" msgid="7209136747878365116">"<xliff:g id="WIDGETS_COUNT">%1$s</xliff:g>, <xliff:g id="SHORTCUTS_COUNT">%2$s</xliff:g>"</string>
     <string name="widget_button_text" msgid="2880537293434387943">"Widgets"</string>
-    <string name="widgets_full_sheet_search_bar_hint" msgid="8484659090860596457">"Pesquisar"</string>
-    <string name="widgets_full_sheet_cancel_button_description" msgid="5766167035728653605">"Limpe o texto da caixa de pesquisa"</string>
     <string name="no_widgets_available" msgid="4337693382501046170">"Os widgets e os atalhos não estão disponíveis"</string>
     <string name="no_search_results" msgid="3787956167293097509">"Nenhum widget ou atalho encontrado"</string>
     <string name="widgets_full_sheet_personal_tab" msgid="2743540105607120182">"Pessoal"</string>
@@ -207,9 +205,12 @@
     <string name="move_to_hotseat_position" msgid="6295412897075147808">"Mover para a posição <xliff:g id="NUMBER">%1$s</xliff:g> dos favoritos"</string>
     <string name="item_moved" msgid="4606538322571412879">"Item movido"</string>
     <string name="add_to_folder" msgid="9040534766770853243">"Adicionar à pasta: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="add_to_folder_with_position" msgid="4457486890869662">"Adicione à pasta <xliff:g id="NAME">%1$s</xliff:g>. Linha <xliff:g id="NUMBER_0">%2$s</xliff:g>, coluna <xliff:g id="NUMBER_1">%3$s</xliff:g> em <xliff:g id="STRING">%4$s</xliff:g>"</string>
     <string name="add_to_folder_with_app" msgid="4534929978967147231">"Adicionar à pasta com <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="add_to_folder_with_app_with_position" msgid="6670979489897093325">"Adicione à pasta com <xliff:g id="NAME">%1$s</xliff:g>. Linha <xliff:g id="NUMBER_0">%2$s</xliff:g>, coluna <xliff:g id="NUMBER_1">%3$s</xliff:g>, em <xliff:g id="STRING">%4$s</xliff:g>"</string>
     <string name="added_to_folder" msgid="4793259502305558003">"Item adicionado à pasta"</string>
     <string name="create_folder_with" msgid="4050141361160214248">"Criar pasta com: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="create_folder_with_position" msgid="3093164349445159115">"Crie uma pasta com <xliff:g id="NAME">%1$s</xliff:g>. Linha <xliff:g id="NUMBER_0">%2$s</xliff:g>, coluna <xliff:g id="NUMBER_1">%3$s</xliff:g>, em <xliff:g id="STRING">%4$s</xliff:g>"</string>
     <string name="folder_created" msgid="6409794597405184510">"Pasta criada"</string>
     <string name="action_move_to_workspace" msgid="39528912300293768">"Mover para o ecrã principal"</string>
     <string name="action_resize" msgid="1802976324781771067">"Redimensionar"</string>
