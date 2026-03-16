@@ -63,8 +63,6 @@
     <string name="shortcuts_count" msgid="8471715556199592381">"{count,plural, =1{# টা শ্বৰ্টকাট}one{# টা শ্বৰ্টকাট}other{# টা শ্বৰ্টকাট}}"</string>
     <string name="widgets_and_shortcuts_count" msgid="7209136747878365116">"<xliff:g id="WIDGETS_COUNT">%1$s</xliff:g>, <xliff:g id="SHORTCUTS_COUNT">%2$s</xliff:g>"</string>
     <string name="widget_button_text" msgid="2880537293434387943">"ৱিজেটসমূহ"</string>
-    <string name="widgets_full_sheet_search_bar_hint" msgid="8484659090860596457">"সন্ধান কৰক"</string>
-    <string name="widgets_full_sheet_cancel_button_description" msgid="5766167035728653605">"সন্ধান বাকচত থকা পাঠ মচক"</string>
     <string name="no_widgets_available" msgid="4337693382501046170">"ৱিজেট আৰু শ্বৰ্টকাট উপলব্ধ নহয়"</string>
     <string name="no_search_results" msgid="3787956167293097509">"কোনো ৱিজেট আৰু শ্বৰ্টকাট পোৱা নগ’ল"</string>
     <string name="widgets_full_sheet_personal_tab" msgid="2743540105607120182">"ব্যক্তিগত"</string>
@@ -207,9 +205,15 @@
     <string name="move_to_hotseat_position" msgid="6295412897075147808">"পছন্দৰ অৱস্থান <xliff:g id="NUMBER">%1$s</xliff:g>লৈ স্থানান্তৰিত কৰক"</string>
     <string name="item_moved" msgid="4606538322571412879">"বস্তুটো স্থানান্তৰ কৰা হ’ল"</string>
     <string name="add_to_folder" msgid="9040534766770853243">"ফ\'ল্ডাৰত যোগ কৰক: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for add_to_folder_with_position (4457486890869662) -->
+    <skip />
     <string name="add_to_folder_with_app" msgid="4534929978967147231">"<xliff:g id="NAME">%1$s</xliff:g>সহ ফ\'ল্ডাৰত যোগ কৰক"</string>
+    <!-- no translation found for add_to_folder_with_app_with_position (6670979489897093325) -->
+    <skip />
     <string name="added_to_folder" msgid="4793259502305558003">"বস্তুটো ফ\'ল্ডাৰত যোগ কৰা হ’ল"</string>
     <string name="create_folder_with" msgid="4050141361160214248">"<xliff:g id="NAME">%1$s</xliff:g>: ৰ জৰিয়তে ফ\'ল্ডাৰ সৃষ্টি কৰক"</string>
+    <!-- no translation found for create_folder_with_position (3093164349445159115) -->
+    <skip />
     <string name="folder_created" msgid="6409794597405184510">"ফ\'ল্ডাৰ সৃষ্টি কৰা হ’ল"</string>
     <string name="action_move_to_workspace" msgid="39528912300293768">"গৃহ স্ক্ৰীনলৈ স্থানান্তৰ কৰক"</string>
     <string name="action_resize" msgid="1802976324781771067">"আকাৰ সলনি কৰক"</string>
@@ -265,9 +269,7 @@
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"নতুন ফ’ল্ডাৰ"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"নতুন ফ’ল্ডাৰ"</string>
     <string name="something_went_wrong" msgid="1492883246069060632">"কিবা ভুল হ’ল"</string>
-    <!-- no translation found for organizer_create_screen_title (1052454457895703433) -->
-    <skip />
+    <string name="organizer_create_screen_title" msgid="1052454457895703433">"স্ক্ৰীন সৃষ্টি কৰক"</string>
     <string name="organizer_create_screen_description" msgid="3224132391919219061">"আপোনাৰ ফ’নৰ পৰা এপ্‌ আৰু ৱিজেট যোগ দিবলৈ এটা শিতান বাছনি কৰক"</string>
-    <!-- no translation found for organizer_choose_layout_title (127228966942084947) -->
-    <skip />
+    <string name="organizer_choose_layout_title" msgid="127228966942084947">"লে’আউট বাছনি কৰক"</string>
 </resources>

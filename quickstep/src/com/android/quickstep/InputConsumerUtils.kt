@@ -22,6 +22,7 @@ import android.view.MotionEvent
 import android.view.ViewConfiguration
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.Utilities.shouldEnableMouseInteractionChanges
+import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.statemanager.StatefulContainer
 import com.android.launcher3.taskbar.TaskbarApiProxy
@@ -78,6 +79,7 @@ object InputConsumerUtils {
         event: MotionEvent,
         rotationTouchHelper: RotationTouchHelper,
         desktopState: DesktopState,
+        desktopVisibilityController: DesktopVisibilityController,
     ): InputConsumer where T : RecentsViewContainer, T : StatefulContainer<S> {
         val tac = taskbarManager.getTaskbarForDisplay(event.displayId)
         val bubbleControllers = tac?.bubbleControllers
@@ -181,6 +183,7 @@ object InputConsumerUtils {
                     reasonString,
                     rotationTouchHelper,
                     desktopState,
+                    desktopVisibilityController,
                 )
         } else {
             reasonString =
@@ -495,6 +498,7 @@ object InputConsumerUtils {
         reasonString: CompoundString,
         rotationTouchHelper: RotationTouchHelper,
         desktopState: DesktopState,
+        desktopVisibilityController: DesktopVisibilityController,
     ): InputConsumer where T : RecentsViewContainer, T : StatefulContainer<S> {
         if (deviceState.isKeyguardShowingOccluded) {
             // This handles apps showing over the lockscreen (e.g. camera)
@@ -541,22 +545,30 @@ object InputConsumerUtils {
         val previousGestureAnimatedToLauncher =
             (previousGestureState.isRunningAnimationToLauncher ||
                 deviceState.isPredictiveBackToHomeInProgress)
+
+        // If a task fragment within Launcher is resumed (-1 page)
+        val launcherChildActivityResumed =
+            runningTask?.isHomeTask == true &&
+                !previousGestureState.isRecentsAnimationRunning &&
+                overviewComponentObserver.isHomeAndOverviewSame &&
+                containerInterface.isLauncherOverlayShowing
+
         // with shell-transitions, home is resumed during recents animation, so
         // explicitly check against recents animation too.
         // Home is always running and is resumed when home shows behind desktop, so check whether
         // running task is home in that case.
         val launcherResumedThroughShellTransition =
-            containerInterface.isResumed() &&
-                !previousGestureState.isRecentsAnimationRunning &&
-                (!desktopState.shouldShowHomeBehindDesktop || runningTask?.isHomeTask == true)
-
-        // If a task fragment within Launcher is resumed
-        val launcherChildActivityResumed =
-            runningTask != null &&
-                runningTask.isHomeTask &&
-                !previousGestureState.isRecentsAnimationRunning &&
-                overviewComponentObserver.isHomeAndOverviewSame &&
-                containerInterface.isLauncherOverlayShowing
+            when {
+                !containerInterface.isResumed() -> false
+                previousGestureState.isRecentsAnimationRunning -> false
+                // Forcibly use LauncherInputConsumer when home is hidden behind desktop
+                desktopVisibilityController.isInDesktopModeAndNotInOverview(
+                    gestureState.displayId
+                ) && !desktopState.shouldShowHomeBehindDesktop -> true
+                // Check launcherChildActivityResumed so that we don't override it below
+                launcherChildActivityResumed -> false
+                else -> runningTask?.isHomeTask == true
+            }
 
         return if (containerInterface.isInLiveTileMode()) {
             createLauncherInputConsumer<S, T>(

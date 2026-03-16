@@ -64,6 +64,7 @@ import com.android.launcher3.widgetpicker.repository.FakeWidgetsRepository
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.shared.model.WidgetUserProfiles
 import com.android.launcher3.widgetpicker.shared.model.isAppWidget
+import com.android.launcher3.widgetpicker.ui.CreateButtonProvider
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
 import com.android.launcher3.widgetpicker.ui.rememberViewModel
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
@@ -142,6 +143,7 @@ class LandingScreenTwoPaneTest {
         WidgetPickerTheme {
             LandingScreen(
                 isCompact = false,
+                createButtonProvider = remember { CreateButtonProvider() },
                 onEnterSearchMode = {},
                 onWidgetInteraction = {
                     if (it is WidgetInteractionInfo.WidgetAddInfo) {
