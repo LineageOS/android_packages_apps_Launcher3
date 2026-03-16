@@ -115,6 +115,7 @@ constructor(
     fun clear() {
         deepShortcutMap = emptyMap()
         extraItems.clear()
+        mutableWorkspaceData.replaceDataMap(SparseArray())
     }
 
     @Synchronized
