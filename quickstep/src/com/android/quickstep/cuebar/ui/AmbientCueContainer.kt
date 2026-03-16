@@ -22,7 +22,10 @@ import android.view.Surface.ROTATION_90
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -51,6 +55,7 @@ import com.android.launcher3.widgetpicker.ui.rememberViewModel
 import com.android.quickstep.cuebar.ui.compose.NavBarPill
 import com.android.quickstep.cuebar.ui.compose.ShortPill
 import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
+import com.android.quickstep.cuebar.ui.utils.boundsInWindow
 import com.android.quickstep.cuebar.ui.viewmodel.AmbientCueViewModel
 import com.android.quickstep.cuebar.ui.viewmodel.PillStyleViewModel
 import kotlinx.coroutines.delay
@@ -134,6 +139,17 @@ fun AmbientCueContainer(
                         },
                     onAnimationStateChange = onAnimationStateChange,
                     largeScreen = largeScreen,
+                )
+            }
+            is PillStyleViewModel.DesktopPillStyle -> {
+                DesktopAmbientCue(
+                    viewModel = viewModel,
+                    actions = actions,
+                    visible = visible,
+                    expanded = expanded,
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    onShouldInterceptTouches = onShouldInterceptTouches,
+                    onAnimationStateChange = onAnimationStateChange,
                 )
             }
             is PillStyleViewModel.Uninitialized -> {}
@@ -321,6 +337,64 @@ private fun NavBarAmbientCue(
         onCloseEducation = { viewModel.disableFirstTimeHint() },
         onAnimationStateChange = onAnimationStateChange,
     )
+}
+
+@Composable
+private fun DesktopAmbientCue(
+    viewModel: AmbientCueViewModel,
+    actions: List<ActionViewModel>,
+    visible: Boolean,
+    expanded: Boolean,
+    modifier: Modifier,
+    onShouldInterceptTouches: (Boolean, Rect?) -> Unit,
+    onAnimationStateChange: (Int, AmbientCueAnimationState) -> Unit,
+) {
+    var shortPillWindowRegion by remember { mutableStateOf<Rect?>(null) }
+    LaunchedEffect(expanded, shortPillWindowRegion) {
+        onShouldInterceptTouches(true, if (expanded) null else shortPillWindowRegion)
+    }
+    val endPadding = 6.dp
+    Box(
+        modifier =
+            modifier
+                .navigationBarsPadding()
+                // Ensure enough width for the ShortPill SmartScrim to be fully visible.
+                .widthIn(min = 400.dp)
+                .clip(RoundedCornerShape(bottomEnd = 16.dp))
+    ) {
+        val shortPillHeightDp =
+            with(LocalDensity.current) { (shortPillWindowRegion?.height ?: 0f).toDp() }
+        ActionList(
+            actions = actions,
+            visible = visible,
+            expanded = expanded,
+            onDismiss = { viewModel.collapse() },
+            showEducation = viewModel.showLongPressEducation,
+            modifier = modifier,
+            padding =
+                PaddingValues(
+                    top = ACTIONS_TOP_PADDING.dp,
+                    bottom = shortPillHeightDp,
+                    end = endPadding,
+                ),
+            horizontalAlignment = Alignment.End,
+        )
+        ShortPill(
+            actions = actions,
+            horizontal = true,
+            visible = visible,
+            expanded = expanded,
+            taskBarMode = true,
+            centerEndExpandedCloseButton = true,
+            modifier =
+                modifier.padding(end = endPadding).onGloballyPositioned {
+                    shortPillWindowRegion = it.boundsInWindow()
+                },
+            onClick = { viewModel.expand() },
+            onCloseClick = { viewModel.hide() },
+            onAnimationStateChange = onAnimationStateChange,
+        )
+    }
 }
 
 private const val NAV_BAR_WIDTH_DP = 108 // R.dimen.taskbar_stashed_small_screen from Launcher

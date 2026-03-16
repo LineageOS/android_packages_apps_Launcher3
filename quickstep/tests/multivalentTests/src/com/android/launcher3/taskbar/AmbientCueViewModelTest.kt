@@ -19,7 +19,10 @@ package com.android.launcher3.taskbar
 import android.app.ActivityTaskManager
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.platform.test.annotations.RequiresFlagsEnabled
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.launcher3.Flags
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.OnboardingPrefs
@@ -28,6 +31,7 @@ import com.android.quickstep.cuebar.data.IconModel
 import com.android.quickstep.cuebar.domain.interactor.AmbientCueInteractor
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.quickstep.cuebar.ui.viewmodel.AmbientCueViewModel
+import com.android.quickstep.cuebar.ui.viewmodel.PillStyleViewModel
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +43,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -50,6 +55,8 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class AmbientCueViewModelTest {
+
+    @get:Rule(order = 0) val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
     @Mock private lateinit var mockInteractor: AmbientCueInteractor
     @Mock private lateinit var mockLauncherPrefs: LauncherPrefs
@@ -107,12 +114,15 @@ class AmbientCueViewModelTest {
         `when`(mockLauncherPrefs.get(OnboardingPrefs.AMBIENT_CUE_FIRST_TIME_SHOWN_AT))
             .thenReturn(-1L)
         `when`(mockLauncherPrefs.get(OnboardingPrefs.AMBIENT_CUE_LONG_PRESS_SEEN)).thenReturn(true)
+    }
 
+    private fun setupViewModel(isDesktopFormFactor: Boolean = false) {
         viewModel =
             AmbientCueViewModel(
                 mockInteractor,
                 mockLauncherPrefs,
                 mockAmbientCueLogger,
+                isDesktopFormFactor,
                 testScope,
                 uiExecutor,
             )
@@ -161,6 +171,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun init_defaultState_isVisibleFalse() = runTest {
+        setupViewModel()
         assertThat(viewModel.isVisible).isFalse()
         assertThat(viewModel.actions).isEmpty()
         assertThat(viewModel.targetTaskId).isEqualTo(ActivityTaskManager.INVALID_TASK_ID)
@@ -168,6 +179,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun onUnfilteredActionsChange_nonEmpty_updatesStateAndBecomesVisible() = runTest {
+        setupViewModel()
         val testActions = listOf(createMockAction("Action 1"))
 
         updateActions(testActions)
@@ -181,6 +193,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun onUnfilteredActionsChange_empty_debouncesAndHides() = runTest {
+        setupViewModel()
         updateActions(listOf(createMockAction("Action 1")))
         assertThat(viewModel.isVisible).isTrue()
 
@@ -196,6 +209,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun onUnfilteredActionsChange_nonEmptyAfterDebounce_cancelsDebounce() = runTest {
+        setupViewModel()
         updateActions(emptyList())
         testScheduler.advanceTimeBy(AmbientCueViewModel.ACTIONS_DEBOUNCE_MS / 2)
         updateActions(listOf(createMockAction("Action 2")))
@@ -209,6 +223,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun imeVisible_filtersActions_visibilityCorrect() = runTest {
+        setupViewModel()
         val actionIme = createMockAction("IME OK", isEnabledWithIme = true)
         val actionNoIme = createMockAction("IME Blocked", isEnabledWithIme = false)
         updateActions(listOf(actionIme, actionNoIme))
@@ -229,6 +244,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun imeVisible_filtersAllActions_becomesInvisible() = runTest {
+        setupViewModel()
         val actionNoIme1 = createMockAction("IME Blocked 1", isEnabledWithIme = false)
         val actionNoIme2 = createMockAction("IME Blocked 2", isEnabledWithIme = false)
         updateActions(listOf(actionNoIme1, actionNoIme2))
@@ -244,6 +260,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun isOccluded_becomesInvisible() = runTest {
+        setupViewModel()
         updateActions(listOf(createMockAction("Action")))
         assertThat(viewModel.isVisible).isTrue()
 
@@ -256,6 +273,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun isDeactivated_becomesInvisible() = runTest {
+        setupViewModel()
         updateActions(listOf(createMockAction("Action")))
         assertThat(viewModel.isVisible).isTrue()
 
@@ -266,6 +284,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun hide_setsDeactivated_becomesInvisible() = runTest {
+        setupViewModel()
         updateActions(listOf(createMockAction("Action")))
         viewModel.hide()
 
@@ -278,6 +297,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun timeout_setsDeactivated() = runTest {
+        setupViewModel()
         updateActions(listOf(createMockAction("Action")))
         assertThat(viewModel.isVisible).isTrue()
 
@@ -289,6 +309,7 @@ class AmbientCueViewModelTest {
 
     @Test
     fun taskChange_updatesVisibility() = runTest {
+        setupViewModel()
         updateActions(listOf(createMockAction("Action", taskId = TASK_ID)))
         updateGloballyFocusedTaskId(TASK_ID)
         assertThat(viewModel.isVisible).isTrue()
@@ -299,6 +320,17 @@ class AmbientCueViewModelTest {
 
         updateGloballyFocusedTaskId(TASK_ID)
         assertThat(viewModel.isVisible).isTrue()
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_CUE_BAR_DESKTOP_FORM_FACTOR)
+    fun desktopFormFactor_usesDesktopLayout() = runTest {
+        setupViewModel(isDesktopFormFactor = true)
+
+        updateActions(listOf(createMockAction("Action", taskId = TASK_ID)))
+        updateGloballyFocusedTaskId(TASK_ID)
+
+        assertThat(viewModel.pillStyle).isEqualTo(PillStyleViewModel.DesktopPillStyle)
     }
 
     companion object {
