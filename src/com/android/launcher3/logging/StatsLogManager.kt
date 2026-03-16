@@ -724,6 +724,7 @@ open class StatsLogManager protected constructor(@JvmField protected val mContex
                     "triggering Contextual Search")
         )
         LAUNCHER_LATENCY_CONTEXTUAL_SEARCH_LPNH_ABANDON(2171),
+        @UiEvent(doc = "The duration to recreate taskbar.") LAUNCHER_LATENCY_RECREATE_TASKBAR(2683),
     }
 
     /** Launcher specific ranking related events. */

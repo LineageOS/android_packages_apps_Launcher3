@@ -785,7 +785,9 @@ public class TaskbarManagerImpl {
         Trace.beginSection(traceNameTruncated);
         int displayId = resource.getDisplayId();
 
+        TaskbarActivityContext taskbar = null;
         try {
+            resource.getCreateTaskbarLatencyLogger().logStart();
             resource.debugMsg("recreateTaskbarForDisplay: getting device profile");
 
             DeviceProfile dp;
@@ -835,7 +837,7 @@ public class TaskbarManagerImpl {
             }
 
             resource.debugMsg("recreateTaskbarForDisplay: creating taskbar");
-            TaskbarActivityContext taskbar = createTaskbarActivityContext(dp, resource);
+            taskbar = createTaskbarActivityContext(dp, resource);
             if (taskbar == null) {
                 resource.debugMsg("recreateTaskbarForDisplay: new taskbar instance is null!");
                 return;
@@ -872,6 +874,9 @@ public class TaskbarManagerImpl {
             taskbar.notifyUpdateLayoutParams();
         } finally {
             Trace.endSection();
+            if (taskbar != null) {
+                resource.getCreateTaskbarLatencyLogger().logEnd(taskbar.getStatsLogManager());
+            }
         }
     }
 
