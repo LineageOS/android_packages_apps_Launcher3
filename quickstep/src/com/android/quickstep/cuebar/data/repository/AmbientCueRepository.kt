@@ -53,6 +53,8 @@ import com.android.launcher3.taskbar.CueBarInsightRendererService
 import com.android.launcher3.taskbar.TaskbarActivityContext
 import com.android.launcher3.util.ListenableRef
 import com.android.launcher3.util.MutableListenableRef
+import com.android.quickstep.FocusState
+import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.cuebar.data.ActionModel
 import com.android.quickstep.cuebar.data.IconModel
 import com.android.quickstep.cuebar.data.InsightListener
@@ -180,7 +182,7 @@ constructor(
 
     private var debounceTaskJob: Job? = null
 
-    private val taskStackListener = AmbientCueTaskStackListener(WeakReference(this), bgExecutor)
+    private val focusListener = AmbientCueFocusListener(WeakReference(this), bgExecutor)
 
     private fun launchPendingIntent(pendingIntent: PendingIntent) {
         val options = BroadcastOptions.makeBasic()
@@ -472,7 +474,7 @@ constructor(
         }
         Log.d(TAG, "connectToAce: " + "connecting TO ACE and registering")
         CueBarInsightRendererService.registerListener(this)
-        TaskStackChangeListeners.getInstance().registerTaskStackListener(taskStackListener)
+        SystemUiProxy.INSTANCE[appContext].focusState.addListener(focusListener)
     }
 
     private fun reportInsightEvent(childInsight: ContextInsight, event: Int) {
@@ -482,14 +484,14 @@ constructor(
     override fun disconnectFromAce() {
         CueBarInsightRendererService.unregisterListener(this)
         backgroundScope.cancel()
-        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(taskStackListener)
+        SystemUiProxy.INSTANCE[appContext].focusState.removeListener(focusListener)
     }
 
     @VisibleForTesting
     override fun injectTestInsightForCueBar() {
         // In test, the listeners are not registered upon start up.
         CueBarInsightRendererService.registerListener(this)
-        TaskStackChangeListeners.getInstance().registerTaskStackListener(taskStackListener)
+        SystemUiProxy.INSTANCE[appContext].focusState.addListener(focusListener)
         val testTitle = "Test Title"
         val testSubtitle = "Test Subtitle"
         _isTestMode.dispatchValue(true)
@@ -539,21 +541,16 @@ constructor(
     }
 }
 
-/**
- * Wrapper class to hold the TaskStackChangeListener logic outside of the AmbientCueRepositoryImpl
- * instance, using a WeakReference to prevent the global TaskStackChangeListeners singleton from
- * leaking the entire repository and its associated context.
- */
-private class AmbientCueTaskStackListener(
+private class AmbientCueFocusListener(
     private val repositoryRef: WeakReference<AmbientCueRepositoryImpl>,
     private val bgExecutor: Executor,
-) : TaskStackChangeListener {
+) : FocusState.FocusChangeListener {
 
-    override fun onTaskMovedToFront(runningTaskInfo: RunningTaskInfo) {
+    override fun onFocusedTaskChanged(focusedTaskInfo: RunningTaskInfo) {
         val repository = repositoryRef.get() ?: return
         // Defer to background executor to handle any non-UI work since TaskStackChangeListener
         // can be called on a Binder thread. This then dispatches to the UI executor inside the
         // repository.
-        bgExecutor.execute { repository.onTaskMovedToFront(runningTaskInfo) }
+        bgExecutor.execute { repository.onTaskMovedToFront(focusedTaskInfo) }
     }
 }
