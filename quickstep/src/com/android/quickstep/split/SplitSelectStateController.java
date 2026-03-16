@@ -98,6 +98,7 @@ import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
 import com.android.launcher3.util.BackPressHandler;
 import com.android.launcher3.util.ComponentKey;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.SplitConfigurationOptions.StagePosition;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationCallbacks;
@@ -1015,11 +1016,12 @@ public class SplitSelectStateController {
         private final int mSplitPlaceholderSize;
         private final int mSplitPlaceholderInset;
         private ActivityManager.RunningTaskInfo mTaskInfo;
-        private DesktopSplitSelectListenerImpl mSplitSelectListener;
         private Drawable mAppIcon;
         @Nullable
         private RecentsAnimationController mRecentsAnimationController;
         private final Context mContext;
+
+        private SafeCloseable mSplitSelectListenerCleanup;
 
         public SplitFromDesktopController(RecentsViewContainer recentsViewContainer) {
             mContainer = recentsViewContainer;
@@ -1036,17 +1038,14 @@ public class SplitSelectStateController {
                     .getDimensionPixelSize(R.dimen.split_placeholder_size);
             mSplitPlaceholderInset = mContext.getResources()
                     .getDimensionPixelSize(R.dimen.split_placeholder_inset);
-            mSplitSelectListener = new DesktopSplitSelectListenerImpl(this);
-            SystemUiProxy.INSTANCE.get(mContext)
-                    .registerSplitSelectListener(mSplitSelectListener);
+            mSplitSelectListenerCleanup = SystemUiProxy.INSTANCE.get(mContext)
+                    .getSplitSelectListeners().register(new DesktopSplitSelectListenerImpl(this));
         }
 
         void onDestroy() {
-            if (mSplitSelectListener != null) {
-                SystemUiProxy.INSTANCE.get(mContext).unregisterSplitSelectListener(
-                        mSplitSelectListener);
-                mSplitSelectListener.release();
-                mSplitSelectListener = null;
+            if (mSplitSelectListenerCleanup != null) {
+                mSplitSelectListenerCleanup.close();
+                mSplitSelectListenerCleanup = null;
             }
         }
 
@@ -1322,36 +1321,24 @@ public class SplitSelectStateController {
      */
     private static class DesktopSplitSelectListenerImpl extends ISplitSelectListener.Stub {
 
-        private SplitFromDesktopController mController;
+        private final SplitFromDesktopController mController;
 
         DesktopSplitSelectListenerImpl(@NonNull SplitFromDesktopController controller) {
             mController = controller;
         }
 
-        /**
-         * Clears any references to the controller.
-         */
-        void release() {
-            mController = null;
-        }
-
         @Override
-        public boolean onRequestSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
+        public void onRequestSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
                 int splitPosition, Rect taskBounds, boolean startRecents,
                 @Nullable WindowContainerTransaction withRecentsWct) {
 
-            if (mController == null || !mController.ableToStartSplitSelectAnimation(taskInfo)) {
+            if (!mController.ableToStartSplitSelectAnimation(taskInfo)) {
                 Log.v(TAG, "onRequestSplitSelect, controller not able to start "
                         + "animation for taskId: " + taskInfo.taskId);
-                return false;
+                return;
             }
-            MAIN_EXECUTOR.execute(() -> {
-                if (mController != null) {
-                    mController.enterSplitSelect(taskInfo, splitPosition, taskBounds,
-                            startRecents, withRecentsWct);
-                }
-            });
-            return true;
+            MAIN_EXECUTOR.execute(() ->  mController.enterSplitSelect(
+                    taskInfo, splitPosition, taskBounds, startRecents, withRecentsWct));
         }
     }
 }

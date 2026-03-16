@@ -242,6 +242,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     private static final float MAX_SCRIM_ALPHA_DARK = 0.8f;
     private static final float MAX_SCRIM_ALPHA_LIGHT = 0.2f;
 
+    private final RunnableList mCleanupTask = new RunnableList();
     protected final QuickstepLauncher mLauncher;
     protected final DragLayer mDragLayer;
 
@@ -321,7 +322,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         mSystemUiProxy = SystemUiProxy.INSTANCE.get(mLauncher);
 
         if (ENABLE_SHELL_STARTING_SURFACE) {
-            mSystemUiProxy.setStartingWindowListener(mStartingWindowListener);
+            mCleanupTask.add(mSystemUiProxy.getStartingWindowListeners()
+                    .register(mStartingWindowListener)::close);
         }
 
         if (Flags.fallbackRevealAnimation()) {
@@ -1518,10 +1520,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
     }
 
     public void onActivityDestroyed() {
+        mCleanupTask.executeAllAndDestroy();
         unregisterRemoteAnimations();
         unregisterRemoteTransitions();
         mLauncher.removeOnDeviceProfileChangeListener(this);
-        SystemUiProxy.INSTANCE.get(mLauncher).setStartingWindowListener(null);
         if (Flags.fallbackRevealAnimation()) {
             mSystemUiProxy.getHomeVisibilityState().removeListener(mHomeVisibilityChangeListener);
             mHomeVisibilityChangeListener = null;
