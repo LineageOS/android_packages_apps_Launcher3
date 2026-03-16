@@ -458,7 +458,6 @@ constructor(
                 ObjectAnimator.ofFloat(iconArrowView, TRANSLATION_X, arrowTranslationWithRtl),
                 ObjectAnimator.ofFloat(iconArrowView, SCALE_Y, -1f),
             )
-            animator!!.duration = MENU_BACKGROUND_REVEAL_DURATION.toLong()
             status = AppChipStatus.Expanded
         } else {
             // Clip expanded text with reveal animation so it doesn't go beyond the edge of the menu
@@ -488,12 +487,10 @@ constructor(
                 ObjectAnimator.ofFloat(iconArrowView, TRANSLATION_X, 0f),
                 ObjectAnimator.ofFloat(iconArrowView, SCALE_Y, 1f),
             )
-            animator!!.duration = MENU_BACKGROUND_HIDE_DURATION.toLong()
             status = AppChipStatus.Collapsed
             sendToBack()
         }
 
-        if (!animated) animator!!.duration = 0
         animator!!.interpolator = Interpolators.EMPHASIZED
 
         // Increase the chip and appTitle size before the animation starts when it's expanding.
@@ -660,9 +657,6 @@ constructor(
 
     private companion object {
         private val SUM_AGGREGATOR = FloatBiFunction { a: Float, b: Float -> a + b }
-
-        private const val MENU_BACKGROUND_REVEAL_DURATION = 417
-        private const val MENU_BACKGROUND_HIDE_DURATION = 333
 
         private const val Z_INDEX_FRONT = 10f
 

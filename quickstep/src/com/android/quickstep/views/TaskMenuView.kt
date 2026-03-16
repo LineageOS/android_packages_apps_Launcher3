@@ -42,6 +42,7 @@ import com.android.launcher3.anim.RoundedRectRevealOutlineProvider
 import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.util.MultiPropertyFactory
 import com.android.launcher3.util.SplitConfigurationOptions
+import com.android.launcher3.util.safeSetDuration
 import com.android.launcher3.views.BaseDragLayer
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler
 import com.android.quickstep.util.TaskCornerRadius
@@ -272,12 +273,6 @@ constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int = 0) :
         openCloseAnimator =
             AnimatorSet()
                 .apply {
-                    duration =
-                        when {
-                            animated && closing -> REVEAL_CLOSE_DURATION
-                            animated && !closing -> REVEAL_OPEN_DURATION
-                            else -> 0L
-                        }
                     addListener(
                         object : AnimationSuccessListener() {
                             override fun onAnimationStart(animation: Animator) {
@@ -294,6 +289,15 @@ constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int = 0) :
                 .also { animator ->
                     val animatorBuilder = animator.play(revealAnimator)
                     animateOpenOrCloseAppChip(closing, animatorBuilder)
+
+                    val animDuration =
+                        when {
+                            animated && closing -> REVEAL_CLOSE_DURATION
+                            animated && !closing -> REVEAL_OPEN_DURATION
+                            else -> 0L
+                        }
+                    animator.safeSetDuration(animDuration)
+
                     animator.start()
                 }
     }
