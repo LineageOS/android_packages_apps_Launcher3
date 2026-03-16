@@ -119,6 +119,7 @@ import com.android.launcher3.util.ShortcutUtil;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.FloatingIconViewCompanion;
+import com.android.launcher3.views.OptionsPopupView;
 
 import java.text.NumberFormat;
 import java.util.HashMap;
@@ -1588,6 +1589,16 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     public PreDragCondition startLongPressAction(PopupController<?> popupController) {
         Popup popup = popupController.show(this);
         return popup != null ? popup.createPreDragCondition() : null;
+    }
+
+    /**
+     * Triggers showing the options popup menu for this icon.
+     * Subclasses can override this to provide custom popup menu behavior.
+     * @return the {@link OptionsPopupView} that was shown, or null if no popup was shown.
+     */
+    @Nullable
+    public OptionsPopupView<?> showPopup() {
+        return null;
     }
 
     /**
