@@ -26,8 +26,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import com.android.launcher3.widgetpicker.WidgetPickerUi
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
 import com.android.launcher3.widgetpicker.shared.model.SheetStyle
+import com.android.launcher3.widgetpicker.ui.CreateButtonProvider
 import com.android.launcher3.widgetpicker.ui.LocalWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCui
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCuiReporter
@@ -58,7 +60,10 @@ import javax.inject.Inject
  */
 class FullWidgetsCatalog
 @Inject
-constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
+constructor(
+    @WidgetPickerUi private val createButtonProvider: CreateButtonProvider,
+    private val viewModelFactory: FullWidgetsCatalogViewModel.Factory,
+) {
     @Composable
     fun Content(
         eventListeners: WidgetPickerEventListeners,
@@ -83,6 +88,7 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
         ) {
             FullWidgetsCatalogContent(
                 viewModel = viewModel,
+                createButtonProvider = createButtonProvider,
                 isCompactHeight = isCompactHeight,
                 isCompactWidth = isCompactWidth,
                 eventListeners = eventListeners,
@@ -93,6 +99,7 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
     @Composable
     private fun FullWidgetsCatalogContent(
         viewModel: FullWidgetsCatalogViewModel,
+        createButtonProvider: CreateButtonProvider,
         isCompactHeight: Boolean,
         isCompactWidth: Boolean,
         eventListeners: WidgetPickerEventListeners,
@@ -124,7 +131,7 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
                 onDismissSheet = onDismissSheet,
                 onSheetOpen = onSheetOpen,
             ) {
-                ActiveScreen(viewModel, isCompactWidth, eventListeners)
+                ActiveScreen(viewModel, createButtonProvider, isCompactWidth, eventListeners)
             }
         } else {
             TitledBottomSheet(
@@ -143,7 +150,7 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
                 onSheetOpen = onSheetOpen,
                 onSheetProgress = eventListeners::onSheetProgress,
             ) {
-                ActiveScreen(viewModel, isCompactWidth, eventListeners)
+                ActiveScreen(viewModel, createButtonProvider, isCompactWidth, eventListeners)
             }
         }
     }
@@ -151,6 +158,7 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
     @Composable
     private fun ActiveScreen(
         viewModel: FullWidgetsCatalogViewModel,
+        createButtonProvider: CreateButtonProvider,
         isCompactWidth: Boolean,
         eventListeners: WidgetPickerEventListeners,
     ) {
@@ -162,6 +170,7 @@ constructor(private val viewModelFactory: FullWidgetsCatalogViewModel.Factory) {
                     onWidgetInteraction = eventListeners::onWidgetInteraction,
                     showDragShadow = viewModel.showDragShadow,
                     viewModel = viewModel.landingScreenViewModel,
+                    createButtonProvider = createButtonProvider,
                 )
             }
 

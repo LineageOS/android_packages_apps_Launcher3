@@ -52,6 +52,7 @@ import com.android.launcher3.widgetpicker.repository.FakeWidgetUsersRepository
 import com.android.launcher3.widgetpicker.repository.FakeWidgetsRepository
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.shared.model.WidgetUserProfiles
+import com.android.launcher3.widgetpicker.ui.CreateButtonProvider
 import com.android.launcher3.widgetpicker.ui.rememberViewModel
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -247,6 +248,7 @@ class LandingScreenTest {
             } else {
                 LandingScreen(
                     isCompact = isCompact,
+                    createButtonProvider = remember { CreateButtonProvider() },
                     onEnterSearchMode = { isSearchMode = true },
                     onWidgetInteraction = {},
                     showDragShadow = true,
