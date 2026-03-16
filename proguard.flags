@@ -39,6 +39,10 @@
     public float getProgress();
 }
 
+# The Jetpack animation-tooling-internal library is internal and
+# unavailable to published libraries.
+-dontwarn androidx.compose.animation.tooling.**
+
 # BUG(70852369): Surpress additional warnings after changing from Proguard to R8
 -dontwarn android.app.**
 -dontwarn android.graphics.**
