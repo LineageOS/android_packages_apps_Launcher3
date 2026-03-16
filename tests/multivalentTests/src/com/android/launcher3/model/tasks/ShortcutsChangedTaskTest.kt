@@ -23,7 +23,6 @@ import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.os.Process.myUserHandle
 import android.os.UserHandle
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -157,23 +156,7 @@ class ShortcutsChangedTaskTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_RESTORE_ARCHIVED_SHORTCUTS)
     @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
-    fun `When installed unpinned shortcut is found with Flag off then remove from workspace`() {
-        TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-            whenever(mockShortcut.isPinned).thenReturn(false)
-            setupMockLauncherApps { ai ->
-                ai.enabled = true
-                ai.flags = ai.flags or FLAG_INSTALLED
-                ai.isArchived = false
-            }
-            executeTask()
-            verifyCallbacks(itemUpdated = false, itemRemoved = true)
-        }
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_RESTORE_ARCHIVED_SHORTCUTS, Flags.FLAG_MODEL_REPOSITORY)
     fun `When installed unpinned shortcut is found with Flag on then keep in workspace`() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
             // Given
@@ -200,38 +183,6 @@ class ShortcutsChangedTaskTest {
             }
             executeTask()
             verifyCallbacks(itemUpdated = false, itemRemoved = false)
-        }
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_RESTORE_ARCHIVED_SHORTCUTS)
-    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
-    fun `When archived pinned shortcut is found with flag off then keep in workspace`() {
-        TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-            whenever(mockShortcut.isPinned).thenReturn(true)
-            setupMockLauncherApps { ai ->
-                ai.enabled = true
-                ai.flags = ai.flags or FLAG_INSTALLED
-                ai.isArchived = true
-            }
-            executeTask()
-            verifyCallbacks(itemUpdated = true, itemRemoved = false)
-        }
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_RESTORE_ARCHIVED_SHORTCUTS)
-    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
-    fun `When archived unpinned shortcut is found with flag off then keep in workspace`() {
-        TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
-            whenever(mockShortcut.isPinned).thenReturn(true)
-            setupMockLauncherApps { ai ->
-                ai.enabled = true
-                ai.flags = ai.flags or FLAG_INSTALLED
-                ai.isArchived = true
-            }
-            executeTask()
-            verifyCallbacks(itemUpdated = true, itemRemoved = false)
         }
     }
 
@@ -272,7 +223,7 @@ class ShortcutsChangedTaskTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_RESTORE_ARCHIVED_SHORTCUTS, Flags.FLAG_MODEL_REPOSITORY)
+    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun `When restoring archived shortcut with flag on then skip handling`() {
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR) {
             whenever(mockShortcut.isPinned).thenReturn(true)
