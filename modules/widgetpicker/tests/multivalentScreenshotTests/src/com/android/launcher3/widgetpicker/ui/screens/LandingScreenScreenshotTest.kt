@@ -24,6 +24,7 @@ import com.android.launcher3.widgetpicker.dagger.DaggerScreenshotTestComponent
 import com.android.launcher3.widgetpicker.goldenpathmanager.WidgetPickerGoldenPathManager
 import com.android.launcher3.widgetpicker.shared.model.SheetStyle
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
+import com.android.launcher3.widgetpicker.ui.CreateButtonProvider
 import com.android.launcher3.widgetpicker.ui.NoOpWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
 import com.android.launcher3.widgetpicker.ui.WidgetPickerEventListeners
@@ -70,6 +71,7 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     private val usersRepository = ScreenshotTestWidgetUsersRepository()
     private val widgetsRepository = ScreenshotTestWidgetsRepository(testData)
     private val widgetAppIconsRepository = ScreenshotTestWidgetAppIconsRepository(testData)
+    private val createButtonProvider = CreateButtonProvider()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -85,6 +87,7 @@ class LandingScreenScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                 widgetUsersRepository = usersRepository,
                 widgetAppIconsRepository = widgetAppIconsRepository,
                 widgetsRepository = widgetsRepository,
+                createButtonProvider = createButtonProvider,
                 widgetHostInfo =
                     if (isDesktop) {
                         TestWidgetHostInfo.copy(sheetStyle = SheetStyle.FLOATING_SHEET)
