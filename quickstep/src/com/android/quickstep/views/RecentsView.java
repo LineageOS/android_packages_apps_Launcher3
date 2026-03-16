@@ -3293,6 +3293,11 @@ public abstract class RecentsView<
         SplitAnimInitProps splitAnimInitProps =
                 mSplitSelectStateController.getSplitAnimationController().getFirstAnimInitViews(
                         () -> mSplitHiddenTaskView, () -> mSplitSelectSource);
+        if (splitAnimInitProps == null) {
+            Log.w(TAG, "createInitialSplitSelectAnimation: skipping SplitAnimation as properties"
+                    + " are null");
+            return;
+        }
         if (mSplitSelectStateController.isAnimateCurrentTaskDismissal()) {
             // Create the split select animation from Overview
             mSplitHiddenTaskView.setThumbnailVisibility(false,

@@ -112,13 +112,13 @@ class SplitAnimationControllerTest {
         // Missing taskView icon
         whenever(mockIconView.getDrawable()).thenReturn(null)
 
-        val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps =
+        val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps? =
             splitAnimationController.getFirstAnimInitViews({ mockTaskView }, { splitSelectSource })
 
         assertEquals(
             "Did not fallback to use splitSource icon drawable",
             mockSplitSourceDrawable,
-            splitAnimInitProps.iconDrawable,
+            splitAnimInitProps!!.iconDrawable,
         )
     }
 
@@ -128,13 +128,13 @@ class SplitAnimationControllerTest {
         whenever(mockSplitSelectStateController.isAnimateCurrentTaskDismissal).thenReturn(true)
         whenever(mockSplitSelectStateController.isDismissingFromSplitPair).thenReturn(false)
 
-        val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps =
+        val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps? =
             splitAnimationController.getFirstAnimInitViews({ mockTaskView }, { splitSelectSource })
 
         assertEquals(
             "Did not use taskView icon drawable",
             mockTaskViewDrawable,
-            splitAnimInitProps.iconDrawable,
+            splitAnimInitProps!!.iconDrawable,
         )
     }
 
@@ -147,13 +147,13 @@ class SplitAnimationControllerTest {
         // Set split source to null
         whenever(splitSelectSource.drawable).thenReturn(null)
 
-        val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps =
+        val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps? =
             splitAnimationController.getFirstAnimInitViews({ mockTaskView }, { splitSelectSource })
 
         assertEquals(
             "Did not use taskView icon drawable",
             mockTaskViewDrawable,
-            splitAnimInitProps.iconDrawable,
+            splitAnimInitProps!!.iconDrawable,
         )
     }
 
@@ -163,13 +163,13 @@ class SplitAnimationControllerTest {
         whenever(mockSplitSelectStateController.isAnimateCurrentTaskDismissal).thenReturn(false)
         whenever(mockSplitSelectStateController.isDismissingFromSplitPair).thenReturn(false)
 
-        val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps =
+        val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps? =
             splitAnimationController.getFirstAnimInitViews({ mockTaskView }, { splitSelectSource })
 
         assertEquals(
             "Did not use splitSource icon drawable",
             mockSplitSourceDrawable,
-            splitAnimInitProps.iconDrawable,
+            splitAnimInitProps!!.iconDrawable,
         )
     }
 
@@ -188,7 +188,7 @@ class SplitAnimationControllerTest {
         whenever(mockTaskKey.getId()).thenReturn(taskId)
         whenever(mockSplitSelectStateController.initialTaskId).thenReturn(taskId)
         whenever(mockGroupedTaskView.taskContainers).thenReturn(List(1) { mockTaskContainer })
-        val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps =
+        val splitAnimInitProps: SplitAnimationController.Companion.SplitAnimInitProps? =
             splitAnimationController.getFirstAnimInitViews(
                 { mockGroupedTaskView },
                 { splitSelectSource },
@@ -197,7 +197,7 @@ class SplitAnimationControllerTest {
         assertEquals(
             "Did not use splitSource icon drawable",
             mockSplitSourceDrawable,
-            splitAnimInitProps.iconDrawable,
+            splitAnimInitProps!!.iconDrawable,
         )
     }
 
