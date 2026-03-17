@@ -45,7 +45,7 @@ typealias SimpleDialog = com.android.launcher3.views.Dialog<SimpleDialogViewMode
 class Dialog<T : DialogViewModel<T>>(
     val activityContext: ActivityContext,
     @get:VisibleForTesting val viewModel: T,
-) {
+) : DialogScope {
     @VisibleForTesting var dialog: Dialog? = null
     @VisibleForTesting var content: ComposeView? = null
     private var listener: ListenerView? = null
@@ -55,7 +55,7 @@ class Dialog<T : DialogViewModel<T>>(
 
     // TODO(b/489770998): Implement animation.
     /** Dismisses the dialog with an optional animation. */
-    fun dismiss(animate: Boolean) {
+    override fun dismiss(animate: Boolean) {
         dialog?.dismiss()
     }
 
@@ -121,7 +121,7 @@ class Dialog<T : DialogViewModel<T>>(
                     // bind the view's composition to the [activityContext] lifecycle and then
                     // dispose of it explicitly from [onDismiss()] to prevent memory leaks.
                     setViewCompositionStrategy(DisposeOnViewTreeLifecycleDestroyed)
-                    setContent { DialogView(viewModel, onDismiss = { dismiss(animate = true) }) }
+                    setContent { DialogView(viewModel) }
                 }
                 .also(dialog::setContentView)
 

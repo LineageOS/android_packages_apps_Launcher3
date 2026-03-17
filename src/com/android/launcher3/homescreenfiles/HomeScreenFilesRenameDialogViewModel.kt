@@ -17,6 +17,7 @@
 package com.android.launcher3.homescreenfiles
 
 import android.widget.Toast
+import androidx.compose.ui.text.input.TextFieldValue
 import com.android.launcher3.R
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.DialogViewModel
@@ -46,7 +47,7 @@ class HomeScreenFilesRenameDialogViewModel(
                 .asContext()
                 .getString(R.string.home_screen_files_rename_dialog_positive_button),
         onPositiveButtonClick = onPositiveButtonClick@{ viewModel ->
-                val name = viewModel.name.value.trim()
+                val name = viewModel.name.value.text.trim()
 
                 // TODO(b/489772913): Implement additional user input validation. Note that
                 //  [name] is also sanitized by the media provider downstream so this is
@@ -73,5 +74,5 @@ class HomeScreenFilesRenameDialogViewModel(
     ) {
 
     // The name which a [file] should be renamed to. Updated via user interaction with the dialog.
-    val name = MutableStateFlow(file.displayName)
+    val name = MutableStateFlow(TextFieldValue(text = file.displayName))
 }
