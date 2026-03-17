@@ -54,7 +54,6 @@ import com.android.launcher3.qsb.QsbAppWidgetHost
 import com.android.launcher3.qsb.QuickstepQsbHostImpl
 import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
 import com.android.launcher3.secondarydisplay.SecondaryDisplayQuickstepDelegateImpl
-import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.testing.TestInformationHandler
 import com.android.launcher3.uioverrides.QuickstepWidgetHolder.QuickstepWidgetHolderFactory
 import com.android.launcher3.uioverrides.SystemApiWrapper
@@ -107,7 +106,14 @@ abstract class WindowManagerProxyModule {
     @Binds abstract fun bindWindowManagerProxy(proxy: SystemWindowManagerProxy): WindowManagerProxy
 }
 
-@Module(includes = [SystemDragModule::class])
+@Module(
+    includes =
+        [
+            SystemDragModule::class,
+            LauncherRecentsModule::class,
+            PerDisplayScopedProviderModule::class,
+        ]
+)
 abstract class ActivityContextModule {
     @Binds
     abstract fun bindSecondaryDisplayDelegate(
@@ -126,18 +132,6 @@ abstract class ActivityContextModule {
         @DisplayId
         fun provideDisplayId(activityContext: ActivityContext): Int =
             activityContext.asContext().displayId
-
-        @JvmStatic
-        @Provides
-        @ActivityContextSingleton
-        fun provideTaskbarFeatureEvaluator(
-            @DisplayId displayId: Int,
-            repository: PerDisplayRepository<TaskbarFeatureEvaluator>,
-        ): TaskbarFeatureEvaluator {
-            return checkNotNull(repository[displayId]) {
-                "no TaskbarFeatureEvaluator for display id : $displayId"
-            }
-        }
     }
 }
 

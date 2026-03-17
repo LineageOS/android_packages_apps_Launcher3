@@ -19,13 +19,13 @@ package com.android.quickstep.fallback
 import android.content.Context
 import android.util.AttributeSet
 import com.android.quickstep.RecentsActivity
-import com.android.quickstep.recents.di.RecentsComponent
 
 class FallbackActivityRecentsView
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) :
     FallbackRecentsView<RecentsActivity>(context, attrs, defStyleAttr) {
-    override fun initialiseInjectables(recentsComponent: RecentsComponent) {
-        recentsComponent.inject(this)
+
+    override fun initialiseInjectables() {
+        mContainer.activityComponent.inject(this)
     }
 }

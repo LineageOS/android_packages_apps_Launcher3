@@ -196,7 +196,6 @@ import com.android.quickstep.TaskViewUtils;
 import com.android.quickstep.TopTaskTracker;
 import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.orientation.RecentsPagedOrientationHandler;
-import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.recents.viewmodel.RecentsViewModel;
 import com.android.quickstep.split.SplitAnimationController.Companion.SplitAnimInitProps;
 import com.android.quickstep.split.SplitAnimationTimings;
@@ -531,7 +530,6 @@ public abstract class RecentsView<
     public static final float UPDATE_SYSUI_FLAGS_THRESHOLD = 0.85f;
 
     protected final CONTAINER_TYPE mContainer;
-    private final RecentsComponent mRecentsComponent;
     private final float mFastFlingVelocity;
     private final int mScrollHapticMinGapMillis;
     private final int mSplitPlaceholderSize;
@@ -871,8 +869,7 @@ public abstract class RecentsView<
         mContainer = RecentsViewContainer.containerFromContext(context);
         mContainerInterface = mContainer.getContainerInterface();
 
-        mRecentsComponent = mContainer.getRecentsComponent();
-        initialiseInjectables(mRecentsComponent);
+        initialiseInjectables();
         mUtils = mUtilsFactory.create(this);
         mDismissUtils = mDismissUtilsFactory.create(this);
 
@@ -935,7 +932,7 @@ public abstract class RecentsView<
         mTintingColor = getForegroundScrimDimColor(context);
     }
 
-    protected abstract void initialiseInjectables(@NonNull RecentsComponent recentsComponent);
+    protected abstract void initialiseInjectables();
 
     public OverScroller getScroller() {
         return mScroller;
@@ -2601,7 +2598,7 @@ public abstract class RecentsView<
             case DESKTOP -> mDesktopTaskViewPool.getView();
             default -> mTaskViewPool.getView();
         };
-        taskView.initialiseInjectables(mRecentsComponent);
+        taskView.initialiseInjectables(mContainer.getActivityComponent());
         taskView.setTaskViewId(mTaskViewIdCount);
         if (mTaskViewIdCount == Integer.MAX_VALUE) {
             mTaskViewIdCount = 0;
