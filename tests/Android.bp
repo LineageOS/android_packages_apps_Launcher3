@@ -70,6 +70,7 @@ android_library {
     static_libs: [
         "flag-junit-base",
         "launcher-aosp-tapl",
+        "androidx.compose.ui_ui-test-junit4",
         "androidx.test.core",
         "androidx.test.runner",
         "androidx.test.rules",
@@ -128,6 +129,7 @@ android_test {
     ],
     static_libs: [
         "Launcher3TestLib",
+        "androidx.compose.runtime_runtime",
         "com_android_launcher3_flags_lib",
         "com_android_systemui_shared_flags_lib",
         "shark-android",
