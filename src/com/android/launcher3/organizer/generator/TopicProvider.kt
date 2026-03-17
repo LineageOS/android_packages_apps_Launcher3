@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui.spacecreator
+package com.android.launcher3.organizer.generator
 
-import android.graphics.Bitmap
+/** Provides topics for the classifier to use. */
+interface TopicProvider {
 
-/**
- * Data class for topic information.
- *
- * @param topic the name of the topic.
- * @param icons list of icons associated with the topic.
- */
-data class TopicData(val topic: String, val icons: List<Bitmap> = emptyList())
-
-/**
- * State for [CreateScreen] and all it's composables.
- *
- * @param topics list of topic data.
- */
-data class CreateScreenState(val topics: List<TopicData> = emptyList())
+    /**
+     * Gets a list of topics.
+     *
+     * @return A list of topics on which to classify items
+     */
+    suspend fun getTopics(): List<String>
+}

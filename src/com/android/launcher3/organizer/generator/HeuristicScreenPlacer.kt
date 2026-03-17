@@ -16,7 +16,6 @@
 
 package com.android.launcher3.organizer.generator
 
-import android.graphics.Point
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
@@ -24,46 +23,40 @@ import com.android.launcher3.model.data.ItemInfo
 /**
  * A [Placer] that arranges items based on predefined templates.
  *
- * It iterates through the provided templates that match the required [gridSize] and attempts to
- * fill each template slot with a compatible item from the available items list. Items can be reused
- * across different screens but are only placed once per screen.
- *
- * @property gridSize The grid size (e.g., 4x5) that templates must match to be used for placement.
+ * It iterates through the provided templates and attempts to fill each template slot with a
+ * compatible item from the available items list. Items can be reused across different screens but
+ * are only placed once per screen.
  */
-class HeuristicScreenPlacer(private val gridSize: Point) : Placer {
+class HeuristicScreenPlacer : Placer {
     /**
-     * Orchestrates the placement of [itemsByContainer] into containers defined by [templates].
+     * Orchestrates the placement of [classifiedItems] into containers defined by [templates].
      *
-     * It iterates through each group of items in [itemsByContainer], selecting a matching template
+     * It iterates through each group of items in [classifiedItems], selecting a matching template
      * for each. Within each template, it tries to find the best available item that matches the
      * type and span of each predefined slot.
      *
-     * @param itemsByContainer A list where each element is a prioritized list of items to be
-     *   arranged in a single screen.
+     * @param classifiedItems A list of items to be arranged in a single screen.
      * @param templates The list of layout templates to follow.
      * @return A list of screens, each with a list of [ItemInfo] with their desired positions filled
      *   in.
      */
     override fun place(
-        itemsByContainer: List<List<TopicClassifiedItem>>,
+        classifiedItems: List<TopicClassifiedItem>,
         templates: List<Template>,
     ): List<List<ItemInfo>> {
         // Filter templates to only those that match the expected grid size.
-        val validTemplates = templates.filter { it.gridSize == gridSize }
-
-        if (itemsByContainer.isEmpty() || validTemplates.isEmpty()) {
+        if (classifiedItems.isEmpty() || templates.isEmpty()) {
             return emptyList()
         }
 
         val filledScreens = mutableListOf<List<ItemInfo>>()
-        val numScreensToGenerate = minOf(itemsByContainer.size, validTemplates.size)
+        val numScreensToGenerate = templates.size
 
         for (screenIndex in 0 until numScreensToGenerate) {
-            val currentTemplate = validTemplates[screenIndex]
+            val currentTemplate = templates[screenIndex]
             val screenItems = mutableListOf<ItemInfo>()
 
-            val itemsToPlace = itemsByContainer[screenIndex]
-            val sortedItems = itemsToPlace.sortedByDescending { it.score }
+            val sortedItems = classifiedItems.sortedByDescending { it.score }
 
             val apps =
                 sortedItems.filter {
