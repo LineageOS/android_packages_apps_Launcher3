@@ -387,7 +387,7 @@ public abstract class ItemInfoWithIcon extends ItemInfo {
     public boolean shouldShowPendingIcon() {
         return (((this instanceof WorkspaceItemInfo wii) && wii.hasPromiseIconUi())
                 || (runtimeStatusFlags & FLAG_SHOW_DOWNLOAD_PROGRESS_MASK) != 0)
-                && !(Flags.useNewIconForArchivedApps() && isInactiveArchive());
+                && !isInactiveArchive();
     }
 
     /**
