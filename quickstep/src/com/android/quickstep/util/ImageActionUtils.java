@@ -21,13 +21,9 @@ import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
 import static android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE;
 
-import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 
-import android.app.Activity;
-import android.app.ActivityOptions;
-import android.app.PendingIntent;
 import android.app.prediction.AppTarget;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
@@ -42,20 +38,16 @@ import android.graphics.Insets;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.service.chooser.ChooserAction;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.content.FileProvider;
 
-import com.android.internal.app.ChooserActivity;
 import com.android.internal.util.ScreenshotRequest;
 import com.android.launcher3.BuildConfig;
-import com.android.launcher3.R;
 import com.android.quickstep.SystemUiProxy;
 import com.android.systemui.shared.recents.model.Task;
 
@@ -76,9 +68,6 @@ public class ImageActionUtils {
     private static final String SUB_FOLDER = "Overview";
     private static final String BASE_NAME = "overview_image_";
     private static final String TAG = "ImageActionUtils";
-    // Request code can be any number, as long as it remains consistent between calls if you want
-    // to refer to the same PendingIntent later.
-    private static final int COPY_REQUEST_CODE = 42;
 
     /**
      * Saves screenshot to location determine by SystemUiProxy
@@ -148,7 +137,7 @@ public class ImageActionUtils {
                 return;
             }
             startShareActivity(context, bitmapSupplier, crop, intent, tag,
-                    /* copyIntentAction= */ null, /* copyCropRectKey= */ null);
+                    /* customActions= */null);
         });
     }
 
@@ -156,26 +145,13 @@ public class ImageActionUtils {
      * Launch the activity to share image with custom copy action.
      */
     public static void startShareActivity(Context context, Supplier<Bitmap> bitmapSupplier,
-            Rect crop, Intent intent, String tag, String copyIntentAction, String copyCropRectKey) {
+            Rect crop, Intent intent, String tag, ChooserAction[] customActions) {
         UI_HELPER_EXECUTOR.execute(() -> {
             Bitmap bitmap = bitmapSupplier.get();
             if (bitmap == null) {
                 Log.e(tag, "No snapshot available, not starting share.");
                 return;
             }
-            Intent copyIntent = new Intent(copyIntentAction)
-                    .setPackage(context.getPackageName())
-                    .putExtra(copyCropRectKey, crop);
-            PendingIntent copyPendingIntent = PendingIntent.getBroadcast(context,
-                    COPY_REQUEST_CODE,
-                    copyIntent,
-                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-            ChooserAction[] customActions = new ChooserAction[]{
-                    new ChooserAction.Builder(Icon.createWithResource(context,
-                            R.drawable.ic_content_copy_vd_theme_24),
-                            context.getString(R.string.action_image_copy),
-                            copyPendingIntent).build()
-            };
             persistBitmapAndStartActivity(context, bitmap, crop, intent,
                     (uri, i) -> getShareIntentForImageUri(uri, i, customActions), tag);
         });
@@ -215,10 +191,6 @@ public class ImageActionUtils {
             }
         }
     }
-
-
-
-
 
     /**
      * Converts image bitmap to Uri by temporarily saving bitmap to cache, and creating Uri pointing
