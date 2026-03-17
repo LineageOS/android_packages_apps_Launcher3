@@ -20,12 +20,12 @@ import static com.android.launcher3.util.TestConstants.AppNames.GMAIL_APP_NAME;
 import static com.android.launcher3.util.TestConstants.AppNames.MAPS_APP_NAME;
 import static com.android.launcher3.util.TestConstants.AppNames.STORE_APP_NAME;
 import static com.android.launcher3.util.TestConstants.AppNames.TEST_APP_NAME;
-import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.Point;
 import android.platform.test.annotations.PlatinumTest;
+import android.platform.test.rule.SkipOnDesktop;
 import android.view.View;
 
 import com.android.launcher3.Launcher;
@@ -33,7 +33,6 @@ import com.android.launcher3.tapl.HomeAllApps;
 import com.android.launcher3.tapl.HomeAppIcon;
 import com.android.launcher3.tapl.Workspace;
 import com.android.launcher3.util.TestUtil;
-import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 import com.android.launcher3.util.ui.AbstractLauncherUiTest;
 import com.android.launcher3.util.ui.PortraitLandscapeRunner.PortraitLandscape;
 
@@ -46,6 +45,7 @@ import java.util.Arrays;
  * Test runs in Out of process (Oop) and In process (Ipc)
  * Test the behaviour of uninstalling and removing apps both from AllApps, Workspace and Hotseat.
  */
+@SkipOnDesktop  // There is no hotseat and remove/uninstall drop targets on desktop.
 public class TaplUninstallRemoveTest extends AbstractLauncherUiTest<Launcher, View> {
 
     /**
@@ -91,7 +91,6 @@ public class TaplUninstallRemoveTest extends AbstractLauncherUiTest<Launcher, Vi
     @Test
     @PortraitLandscape
     @PlatinumTest(focusArea = "launcher")
-    @DesktopStability(flavors = LOCAL, bug = 488077682)
     public void testUninstallFromWorkspace() throws Exception {
         installDummyAppAndWaitForUIUpdate();
         try {
