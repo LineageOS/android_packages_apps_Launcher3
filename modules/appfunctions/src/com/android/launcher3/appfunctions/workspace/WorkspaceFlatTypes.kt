@@ -154,3 +154,25 @@ data class UnplacedAppSpec(
   val category: String? = null,
 )
 
+/**
+ * Widget identified by component name.
+ *
+ * @property packageName Widget provider package name.
+ * @property className Widget provider class name.
+ * @property spanX Widget width in cells.
+ * @property spanY Widget height in cells.
+ * @property label Widget label.
+ * @property description Widget description.
+ * @property category Parent app category.
+ */
+@AppFunctionSerializable(isDescribedByKDoc = true)
+data class UnplacedWidgetSpec(
+  val packageName: String,
+  val className: String,
+  val spanX: Int,
+  val spanY: Int,
+  val label: String? = null,
+  val description: String? = null,
+  val category: String? = null,
+)
+

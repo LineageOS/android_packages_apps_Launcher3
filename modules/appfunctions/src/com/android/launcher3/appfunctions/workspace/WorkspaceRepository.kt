@@ -38,6 +38,15 @@ interface WorkspaceRepository {
     suspend fun getInstalledApps(orderByUsageStats: Boolean): List<UnplacedAppSpec>
 
     /**
+     * Lists all installed widgets on the device.
+     *
+     * @param orderByUsageStats If true, orders widgets by usage; otherwise uses default order for
+     *   personalization.
+     * @return A list of [UnplacedWidgetSpec] representing the installed widgets.
+     */
+    suspend fun getInstalledWidgets(orderByUsageStats: Boolean): List<UnplacedWidgetSpec>
+
+    /**
      * Starts a new, atomic transaction for modifying the workspace.
      *
      * @return A [WorkspaceTransaction] handle to chain mutation operations.
