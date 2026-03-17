@@ -103,8 +103,14 @@ public class LauncherWidgetHolder {
     @Nullable IntConsumer mAppWidgetRemovedCallback;
 
     @AssistedInject
-    protected LauncherWidgetHolder(@Assisted("UI_CONTEXT") @NonNull Context context) {
+    protected LauncherWidgetHolder(
+            @Assisted("UI_CONTEXT") @NonNull Context context,
+            ProvidersUpdateDispatcher updateDispatcher) {
         this(context, APPWIDGET_HOST_ID);
+        // In case of Launcher3, there is no central widget host, but there can only be one active
+        // host at a time. Adding a dispatcher to every created host ensures and the active host
+        // eventually dispatches the update
+        mWidgetHost.registerUpdateDispatcher(updateDispatcher);
     }
 
     public LauncherWidgetHolder(@NonNull Context context, int hostId) {

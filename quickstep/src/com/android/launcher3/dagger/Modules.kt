@@ -55,6 +55,7 @@ import com.android.launcher3.qsb.QuickstepQsbHostImpl
 import com.android.launcher3.secondarydisplay.SecondaryDisplayDelegate
 import com.android.launcher3.secondarydisplay.SecondaryDisplayQuickstepDelegateImpl
 import com.android.launcher3.testing.TestInformationHandler
+import com.android.launcher3.uioverrides.QuickstepProvidersUpdateDispatcher
 import com.android.launcher3.uioverrides.QuickstepWidgetHolder.QuickstepWidgetHolderFactory
 import com.android.launcher3.uioverrides.SystemApiWrapper
 import com.android.launcher3.uioverrides.plugins.PluginManagerWrapperImpl
@@ -72,6 +73,7 @@ import com.android.launcher3.util.window.RefreshRateTracker
 import com.android.launcher3.util.window.WindowManagerProxy
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
+import com.android.launcher3.widget.ProvidersUpdateDispatcher
 import com.android.quickstep.AspectRatioSystemShortcut
 import com.android.quickstep.AutomationRepositoryImpl
 import com.android.quickstep.DesktopShortcut
@@ -176,6 +178,11 @@ abstract class WidgetModule {
 
     @Binds
     abstract fun bindWidgetHolderFactory(factor: QuickstepWidgetHolderFactory): WidgetHolderFactory
+
+    @Binds
+    abstract fun bindUpdateDispatcher(
+        dispatcher: QuickstepProvidersUpdateDispatcher
+    ): ProvidersUpdateDispatcher
 }
 
 @Module
