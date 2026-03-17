@@ -90,3 +90,13 @@ flag {
     description: "Enable wallpaper blur for RecentsWindowManager"
     bug: "402685067"
 }
+
+flag {
+    name: "enable_save_action_in_overview_share"
+    namespace: "launcher_overview"
+    description: "Bugfix for missing Save action in Overview Share Sheet"
+    bug: "493115665"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
