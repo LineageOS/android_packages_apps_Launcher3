@@ -34,10 +34,8 @@ import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_QSB
 import com.android.launcher3.R
 import com.android.launcher3.homescreenfiles.HomeScreenFile
-import com.android.launcher3.homescreenfiles.HomeScreenFilesRenameDialog
-import com.android.launcher3.homescreenfiles.HomeScreenFilesRenameDialogFactory
+import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
-import com.android.launcher3.homescreenfiles.homeScreenFile
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceChangeEvent.FullRefresh
@@ -50,12 +48,17 @@ import com.android.launcher3.util.TestUtil
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.BaseDragLayer
 import com.android.providers.media.flags.Flags.FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API
+import java.io.File
+import java.util.concurrent.CompletableFuture
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -69,10 +72,8 @@ class PopupDataRepositoryImplUnitTest {
     @get:Rule val setFlagsRule = SetFlagsRule()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val homeScreenRepository = HomeScreenRepository()
+    @Mock private lateinit var homeScreenFilesProvider: HomeScreenFilesProvider
     @Mock private lateinit var lifeCycle: DaggerSingletonTracker
-
-    @Mock
-    private lateinit var homeScreenFilesRenameDialogFactory: HomeScreenFilesRenameDialogFactory
 
     private lateinit var popupDataSource: PopupDataSource
     private lateinit var popupDataRepository: PopupDataRepository
@@ -81,7 +82,7 @@ class PopupDataRepositoryImplUnitTest {
     fun setup() {
         // Late initialization of `PopupDataSource` is required because some of the created
         // `PopupData` use feature flags.
-        popupDataSource = PopupDataSource(homeScreenFilesRenameDialogFactory)
+        popupDataSource = PopupDataSource(homeScreenFilesProvider)
         popupDataRepository =
             PopupDataRepositoryImpl(popupDataSource, context, homeScreenRepository, lifeCycle)
     }
@@ -308,18 +309,19 @@ class PopupDataRepositoryImplUnitTest {
                 assert(labelResId == R.string.home_screen_files_context_menu_rename_label)
                 assert(eventId == LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_RENAME_VIA_CONTEXT_MENU)
 
-                val homeScreenFilesRenameDialog = mock<HomeScreenFilesRenameDialog>()
-
-                whenever(
-                        homeScreenFilesRenameDialogFactory.create(
-                            activityContext,
-                            item.homeScreenFile!!,
-                        )
-                    )
-                    .thenReturn(homeScreenFilesRenameDialog)
-
+                // TODO(b/450710219): Replace assertion once dialog is implemented.
+                whenever(homeScreenFilesProvider.rename(any(), any()))
+                    .thenReturn(CompletableFuture.completedFuture(true))
                 popupAction.invoke(activityContext, item, view)
-                verify(homeScreenFilesRenameDialog).show()
+                verify(homeScreenFilesProvider)
+                    .rename(
+                        eq(file.uri),
+                        argThat {
+                            val extension = File(file.displayName).extension
+                            val suffix = if (extension.isNotEmpty()) ".$extension" else ""
+                            matches("\\d+$suffix".toRegex())
+                        },
+                    )
             }
         }
         with(popupData[popupDataIndex++]) {
