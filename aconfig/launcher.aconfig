@@ -569,6 +569,13 @@ flag {
 }
 
 flag {
+    name: "enable_restoredbtask_modelwriter_refactor"
+    namespace: "launcher"
+    description: "Enables the refactored RestoreDbTask using ModelWriter."
+    bug: "489010281"
+}
+
+flag {
   name: "enable_transactional_model_writer"
   namespace: "launcher"
   description: "Enables the new transactional model writer for Launcher persistence."
