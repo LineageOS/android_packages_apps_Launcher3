@@ -494,13 +494,13 @@ public class InputConsumerUtilsTest {
     @Test
     public void testNewConsumer_onTrackpadGesture_returnsTrackpadStatusBarInputConsumer() {
         when(mCurrentGestureState.isTrackpadGesture()).thenReturn(true);
+        when(mCurrentGestureState.isThreeFingerTrackpadGesture()).thenReturn(true);
 
         assertCorrectInputConsumer(
                 this::createInputConsumer,
                 TrackpadStatusBarInputConsumer.class,
                 OtherActivityInputConsumer.class,
                 InputConsumer.TYPE_OTHER_ACTIVITY
-                        | InputConsumer.TYPE_NAV_HANDLE_LONG_PRESS
                         | InputConsumer.TYPE_STATUS_BAR);
     }
 
