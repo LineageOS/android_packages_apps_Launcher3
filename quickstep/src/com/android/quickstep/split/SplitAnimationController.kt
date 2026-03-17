@@ -103,14 +103,15 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
      * the state of the surface from which the split was initiated
      */
     fun getFirstAnimInitViews(
-        taskViewSupplier: Supplier<TaskView>,
+        taskViewSupplier: Supplier<TaskView?>,
         splitSelectSourceSupplier: Supplier<SplitSelectSource?>,
-    ): SplitAnimInitProps {
+    ): SplitAnimInitProps? {
         val splitSelectSource = splitSelectSourceSupplier.get()
         if (!splitSelectStateController.isAnimateCurrentTaskDismissal) {
             // Initiating from home
+            if (splitSelectSource == null) return null
             return SplitAnimInitProps(
-                splitSelectSource!!.view,
+                splitSelectSource.view,
                 originalBitmap = null,
                 splitSelectSource.drawable,
                 fadeWithThumbnail = false,
@@ -120,7 +121,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
             )
         } else if (splitSelectStateController.isDismissingFromSplitPair) {
             // Initiating split from overview, but on a split pair
-            val taskView = taskViewSupplier.get()
+            val taskView = taskViewSupplier.get() ?: return null
             for (container: TaskContainer in taskView.taskContainers) {
                 if (container.task.getKey().getId() == splitSelectStateController.initialTaskId) {
                     val drawable = getDrawable(container.iconView, splitSelectSource)
@@ -141,8 +142,8 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
             )
         } else {
             // Initiating split from overview on fullscreen task TaskView
-            val taskView = taskViewSupplier.get()
-            taskView.firstTaskContainer!!.let {
+            val taskView = taskViewSupplier.get() ?: return null
+            taskView.firstTaskContainer?.let {
                 val drawable = getDrawable(it.iconView, splitSelectSource)
                 return SplitAnimInitProps(
                     it.snapshotView,
@@ -154,6 +155,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
                     it.task.titleDescription,
                 )
             }
+            return null
         }
     }
 
