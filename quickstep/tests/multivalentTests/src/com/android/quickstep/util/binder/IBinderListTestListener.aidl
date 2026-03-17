@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.di
+package com.android.quickstep.util.binder;
 
-import dagger.Module
+/**
+ * Allows external processes to register a listener in WMShell to get updates about desktop task
+ * state.
+ */
+interface IBinderListTestListener {
 
-/** Module that provides dependencies required for an instance of Recents. */
-@Module
-interface RecentsModule {
-    companion object {
-        // TODO add providers for recents dependencies
-    }
+    oneway void firstOneWayMethod(int intParam, boolean boolParams);
+
+    oneway void secondOneWayMethod();
+
+    boolean syncMethod();
 }

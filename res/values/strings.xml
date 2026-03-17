@@ -657,6 +657,14 @@
     <string name="create_new_folder_button_text">New folder</string>
     <!-- Default name for a newly created folder -->
     <string name="default_new_folder_name">New folder</string>
+    <!-- Neutral button label for the dialog which allows the user to rename files/folders. -->
+    <string name="home_screen_files_rename_dialog_neutral_button">Cancel</string>
+    <!-- Positive button label for the dialog which allows the user to rename files/folders. -->
+    <string name="home_screen_files_rename_dialog_positive_button">Rename</string>
+    <!-- Title for the dialog which allows the user to rename files. -->
+    <string name="home_screen_files_rename_dialog_file_title">Rename file</string>
+    <!-- Title for the dialog which allows the user to rename folders. -->
+    <string name="home_screen_files_rename_dialog_folder_title">Rename folder</string>
 
     <!-- Strings for errors -->
     <!-- Displayed when an error occurs but exact causality cannot be determined/communicated. -->
@@ -672,19 +680,14 @@
     <string name="topic_category_maps" translatable="false">Maps</string>
     <string name="topic_category_productivity" translatable="false">Productivity</string>
     <string name="topic_category_accessibility" translatable="false">Accessibility</string>
+    <string name="topic_category_most_used" translatable="false">Most Used</string>
+    <string name="topic_category_other" translatable="false">Other</string>
 
 
     <!-- Screen Creation -->
     <!-- Title for the screen to create new workspace screens using the organizer. [CHAR_LIMIT=300] -->
     <string name="organizer_create_screen_title">Create screen</string>
     <string name="organizer_create_screen_description" >Choose a category to add apps and widgets from your phone</string>
-    <string name="organizer_topic_0" translatable="false">Most used</string>
-    <string name="organizer_topic_1" translatable="false">Games</string>
-    <string name="organizer_topic_2" translatable="false">Health &amp; Fitness</string>
-    <string name="organizer_topic_3" translatable="false">Productivity</string>
-    <string name="organizer_topic_4" translatable="false">Travel</string>
-    <string name="organizer_topic_5" translatable="false">Social</string>
-    <string name="organizer_topic_6" translatable="false">Entertainment</string>
 
     <!-- Title for the screen where the users chooses a layout of apps and widgets to add to their
      home screen. [CHAR_LIMIT=300]-->

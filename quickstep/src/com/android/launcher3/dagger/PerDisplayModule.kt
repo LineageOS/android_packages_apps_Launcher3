@@ -163,6 +163,10 @@ object PerDisplayRepositoriesModule {
         }
 }
 
+/**
+ * Keep the taskbar features separate from PerDisplayRepositoriesModule, as it is override in
+ * TaskbarBootComponent
+ */
 @Module
 object PerDisplayTaskbarRepositoriesModule {
     @Provides
@@ -174,6 +178,47 @@ object PerDisplayTaskbarRepositoriesModule {
             "TaskbarFeatureEvaluator",
             PerDisplayComponent::getTaskbarFeatureEvaluator,
         )
+}
+
+/**
+ * This is essentially an inverse of PerDisplayRepositoriesModule. It provides binding within a
+ * scope with [DisplayId] already defined
+ */
+@Module
+object PerDisplayScopedProviderModule {
+
+    @Provides
+    fun providePerDisplayComponent(
+        @DisplayId displayId: Int,
+        repo: PerDisplayRepository<PerDisplayComponent>,
+    ): PerDisplayComponent = requireNotNull(repo[displayId])
+
+    @Provides
+    fun provideRecentsAnimationDeviceState(
+        component: PerDisplayComponent
+    ): RecentsAnimationDeviceState = component.recentsAnimationDeviceState
+
+    @Provides
+    fun provideTaskAnimationManager(component: PerDisplayComponent): TaskAnimationManager =
+        component.taskAnimationManager
+
+    @Provides
+    fun provideRotationTouchHelper(component: PerDisplayComponent): RotationTouchHelper =
+        component.rotationTouchHelper
+
+    @Provides
+    fun provideRecentsWindowManager(component: PerDisplayComponent): RecentsWindowManager =
+        component.recentsWindowManager
+
+    @Provides
+    fun provideRecentsWindowTracker(component: PerDisplayComponent): RecentsWindowTracker =
+        component.recentsWindowTracker
+
+    @Provides
+    fun provideTaskbarFeatureEvaluator(
+        @DisplayId displayId: Int,
+        repo: PerDisplayRepository<TaskbarFeatureEvaluator>,
+    ): TaskbarFeatureEvaluator = requireNotNull(repo[displayId])
 }
 
 /**

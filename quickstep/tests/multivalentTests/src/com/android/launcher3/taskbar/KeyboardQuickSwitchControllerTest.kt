@@ -39,9 +39,6 @@ import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext_ModifiedComponent
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
-import com.android.launcher3.util.rule.TestStabilityRule
-import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
-import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
 import com.android.quickstep.RecentsModel
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.util.DesktopTask
@@ -52,7 +49,6 @@ import com.android.quickstep.util.SplitTask
 import com.android.systemui.shared.recents.model.Task
 import com.android.tools.dagger.mutation.annotations.BindValue
 import com.android.tools.dagger.mutation.annotations.MutatedComponent
-import com.android.wm.shell.desktopmode.IDesktopTaskListener
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants
@@ -62,9 +58,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -75,7 +69,6 @@ import org.mockito.kotlin.whenever
 @MutatedComponent(target = TaskbarWindowSandboxContext_ModifiedComponent::class)
 class KeyboardQuickSwitchControllerTest {
     private var systemUiProxySpy: SystemUiProxy? = null
-    private var desktopTaskListener: IDesktopTaskListener? = null
     private val mockRecentsModelHelper: MockedRecentsModelHelper = MockedRecentsModelHelper()
     private val taskIdCaptor = argumentCaptor<Int>()
     private val transitionCaptor = argumentCaptor<RemoteTransition>()
@@ -89,15 +82,10 @@ class KeyboardQuickSwitchControllerTest {
             params =
                 SandboxParams(builderBase = mutatedComponentBuilder()) {
                     systemUiProxySpy = it.systemUiProxy
-                    doAnswer { i -> desktopTaskListener = i.getArgument(0) }
-                        .whenever(it.systemUiProxy)
-                        .setDesktopTaskListener(anyOrNull())
                 }
         )
 
     @get:Rule(order = 2) val taskbarUnitTestRule = TaskbarUnitTestRule(context)
-
-    @get:Rule val testStabilityRule = TestStabilityRule()
 
     private val keyboardQuickSwitchController by
         taskbarUnitTestRule.delegate { it.keyboardQuickSwitchController }
@@ -138,23 +126,6 @@ class KeyboardQuickSwitchControllerTest {
 
         assertThat(isKqsShown).isTrue()
         assertThat(shownTaskIds).containsExactly(RUNNING_TASK_ID, PREVIOUS_TASK_ID).inOrder()
-    }
-
-    @Test
-    @DisableFlags(FLAG_ENABLE_ALT_TAB_KQS_FLATENNING)
-    @DesktopStability(flavors = LOCAL, bug = 486204795)
-    fun singleAndDesktopTasksPresent_notOnDesktopWithFlatenningOff_onlyShowSingleTaskIds() {
-        updateRecentsModel(
-            listOf(
-                createDesktopTask(listOf(PREVIOUS_TASK_ID, OLDEST_TASK_ID)),
-                createSingleTask(RUNNING_TASK_ID),
-            )
-        )
-
-        triggerAltTab()
-
-        assertThat(isKqsShown).isTrue()
-        assertThat(shownTaskIds).containsExactly(RUNNING_TASK_ID)
     }
 
     @Test

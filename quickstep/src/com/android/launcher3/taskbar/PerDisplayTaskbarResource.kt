@@ -31,6 +31,7 @@ import android.widget.FrameLayout
 import com.android.app.tracing.TraceUtils
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.display.LauncherDisplayInfo
+import com.android.launcher3.logging.RecreateTaskbarLatencyLogger
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.Preconditions
@@ -117,6 +118,8 @@ class PerDisplayTaskbarResource(
             ((sharedState.sysuiStateFlags and SYSUI_STATE_NAVIGATION_BAR_DISABLED) == 0L).also {
                 if (!it) debugMsg("No taskbar due to SYSUI_STATE_NAVIGATION_BAR_DISABLED")
             }
+
+    val createTaskbarLatencyLogger = RecreateTaskbarLatencyLogger()
 
     private val componentCallbacks =
         object : ComponentCallbacks {

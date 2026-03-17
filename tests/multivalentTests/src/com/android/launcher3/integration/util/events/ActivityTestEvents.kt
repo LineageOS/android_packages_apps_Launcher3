@@ -41,17 +41,23 @@ object ActivityTestEvents {
         // added
         val waiter = EventWaiter(TestEvent.LAUNCHER_STATE_COMPLETED)
         executeOnLauncher {
-            it.stateManager.addStateListener(
+            val stateManager = it.stateManager
+            val listener =
                 object : StateListener<LauncherState> {
                     override fun onStateTransitionStart(toState: LauncherState) {}
 
                     override fun onStateTransitionComplete(finalState: LauncherState) {
                         if (finalState == stateToWaitFor) {
                             waiter.terminate()
+                            stateManager.removeStateListener(this)
                         }
                     }
                 }
-            )
+            if (stateManager.state == stateToWaitFor) {
+                waiter.terminate()
+            } else {
+                stateManager.addStateListener(listener)
+            }
         }
         return waiter
     }
@@ -98,20 +104,22 @@ object ActivityTestEvents {
         // This works by listening to IDP changes until the value of fixed landscape changes.
         val waiter = EventWaiter(TestEvent.FIXED_LANDSCAPE)
         executeOnLauncher { launcher ->
-            if (
-                InvariantDeviceProfile.INSTANCE.get(launcher).isFixedLandscape ==
-                    expectedIsFixedLandscape
-            ) {
+            val idp = InvariantDeviceProfile.INSTANCE.get(launcher)
+            if (idp.isFixedLandscape == expectedIsFixedLandscape) {
                 waiter.terminate()
+                return@executeOnLauncher
             }
-            InvariantDeviceProfile.INSTANCE.get(launcher).addOnChangeListener {
-                if (
-                    InvariantDeviceProfile.INSTANCE.get(launcher).isFixedLandscape ==
-                        expectedIsFixedLandscape
-                ) {
-                    waiter.terminate()
+
+            var listener: InvariantDeviceProfile.OnIDPChangeListener? = null
+
+            listener =
+                InvariantDeviceProfile.OnIDPChangeListener {
+                    if (idp.isFixedLandscape == expectedIsFixedLandscape) {
+                        waiter.terminate()
+                        idp.removeOnChangeListener(listener)
+                    }
                 }
-            }
+            idp.addOnChangeListener(listener)
         }
         return waiter
     }

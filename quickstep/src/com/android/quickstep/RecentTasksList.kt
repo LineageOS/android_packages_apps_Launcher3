@@ -142,8 +142,7 @@ constructor(
                 }
             }
 
-        sysUiProxy.registerRecentTasksListener(recentTasksListener)
-        tracker.addCloseable { sysUiProxy.unregisterRecentTasksListener(recentTasksListener) }
+        tracker.addCloseable(sysUiProxy.recentTasksListeners.register(recentTasksListener))
     }
 
     /** Fetches the task keys skipping any local cache. */

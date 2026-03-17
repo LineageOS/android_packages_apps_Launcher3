@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.recents.di
+package com.android.launcher3.organizer.generator
 
-import javax.inject.Scope
+/** Provides topics for the classifier to use. */
+interface TopicProvider {
 
-/** Scope annotation for singleton items within a recents instance. */
-@MustBeDocumented @Retention(AnnotationRetention.RUNTIME) @Scope annotation class RecentsSingleton
+    /**
+     * Gets a list of topics.
+     *
+     * @return A list of topics on which to classify items
+     */
+    suspend fun getTopics(): List<String>
+}

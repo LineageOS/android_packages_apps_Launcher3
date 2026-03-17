@@ -73,6 +73,7 @@ public class PendingAppWidgetHostView extends LauncherAppWidgetHostView
     private static final int FLAG_DRAW_LABEL = 4;
 
     private static final int DEFERRED_ALPHA = 0x77;
+    private static final long PENDING_WIDGET_FADE_OUT_MS = 200L;
 
     private final Rect mRect = new Rect();
 
@@ -238,12 +239,24 @@ public class PendingAppWidgetHostView extends LauncherAppWidgetHostView
             // This occurs when LauncherAppWidgetHostView is used to render a preview layout.
             return;
         }
+
         if (mActivityContext instanceof Launcher launcher) {
-            // Remove and rebind the current widget (which was inflated in the wrong
-            // orientation), but don't delete it from the database
-            launcher.removeItem(this, info, false  /* deleteFromDb */,
-                    "widget removed because of configuration change");
+            // Remove the tag so that the Workspace doesn't mistakenly find this fading old view
+            // when searching for the newly inflated widget with the same appWidgetId.
+            setTag(null);
+            // Rebind the current widget (which was inflated in the wrong
+            // orientation), but don't delete it from the database.
             launcher.bindAppWidget(info);
+
+            // Keep the pending view around to fade it out on top of the new widget.
+            bringToFront();
+            setClickable(false);
+            animate()
+                    .alpha(0f)
+                    .setDuration(PENDING_WIDGET_FADE_OUT_MS)
+                    .withEndAction(() -> launcher.removeItem(this, info, /*deleteFromDb=*/ false,
+                            "pending widget removed after animation complete"))
+                    .start();
         }
     }
 

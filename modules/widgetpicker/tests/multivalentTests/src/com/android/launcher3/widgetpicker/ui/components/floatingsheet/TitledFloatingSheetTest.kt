@@ -31,13 +31,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.widgetpicker.ui.LocalWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.NoOpWidgetPickerCuiReporter
@@ -105,6 +109,42 @@ class TitledFloatingSheetTest {
         // Remain open if the host activity becoming not top resumed closes the sheet.
         composeTestRule.onNode(hasText(CONTENT_TEXT)).assertDoesNotExist()
         composeTestRule.onNode(hasText(CLOSED_TEXT)).assertExists()
+    }
+
+    @Test
+    fun closesOnEscapeKeyPress() {
+        composeTestRule.setContent { FloatingSheetTestContent() }
+        composeTestRule.waitForIdle()
+
+        // Verify the sheet is initially open
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
+
+        // Simulate pressing the Escape key
+        composeTestRule.onRoot().performKeyInput { pressKey(Key.Escape) }
+        composeTestRule.waitForIdle()
+
+        // Verify the sheet is closed
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertDoesNotExist()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertExists()
+    }
+
+    @Test
+    fun doesNotCloseOnOtherKeyPress() {
+        composeTestRule.setContent { FloatingSheetTestContent() }
+        composeTestRule.waitForIdle()
+
+        // Verify the sheet is initially open
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
+
+        // Simulate pressing a different key (e.g., 'A')
+        composeTestRule.onRoot().performKeyInput { pressKey(Key.A) }
+        composeTestRule.waitForIdle()
+
+        // Verify the sheet remains open
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
     }
 
     @Composable

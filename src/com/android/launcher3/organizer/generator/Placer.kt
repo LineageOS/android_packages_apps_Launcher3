@@ -26,16 +26,16 @@ import com.android.launcher3.model.data.ItemInfo
  */
 interface Placer {
     /**
-     * Arranges the given [itemsByContainer] into structured containers.
+     * Arranges the given [classifiedItems] into structured containers.
      *
-     * @param itemsByContainer A list where each element is a prioritized list of items to be
+     * @param classifiedItems A list where each element is a prioritized list of items to be
      *   arranged in a single container.
      * @param templates The list of layout templates to follow.
      * @return A list of containers, where each container is a [List] of [ItemInfo]s with their
      *   positional fields (cellX, cellY, screenId, etc.) correctly populated.
      */
     fun place(
-        itemsByContainer: List<List<TopicClassifiedItem>>,
+        classifiedItems: List<TopicClassifiedItem>,
         templates: List<Template>,
     ): List<List<ItemInfo>>
 }

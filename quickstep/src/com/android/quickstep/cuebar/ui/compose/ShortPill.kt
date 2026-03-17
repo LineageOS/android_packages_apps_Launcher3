@@ -96,6 +96,7 @@ fun ShortPill(
     expanded: Boolean = false,
     rotation: Int = 0,
     taskBarMode: Boolean = false,
+    centerEndExpandedCloseButton: Boolean = false,
     onClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
     onAnimationStateChange: (Int, AmbientCueAnimationState) -> Unit = { _, _ -> },
@@ -401,24 +402,32 @@ fun ShortPill(
             }
         }
 
-        // The layout for the expanded state (a single, centered button)
+        // The layout for the expanded state (a single button)
         if (expansionAlpha < 1f && pillContentSize != IntSize.Zero) {
-            with(density) {
-                val offsetX =
-                    pillContentPosition.x.toDp() + (pillContentSize.width.toDp() / 2) -
-                        (closeButtonTouchTargetSize / 2)
-                val offsetY =
-                    pillContentPosition.y.toDp() + (pillContentSize.height.toDp() / 2) -
-                        (closeButtonTouchTargetSize / 2)
-
-                CloseButton(
-                    onCloseClick = onCloseClick,
-                    modifier =
-                        Modifier.offset(x = offsetX, y = offsetY)
-                            .size(closeButtonSize)
-                            .graphicsLayer { alpha = 1f - expansionAlpha } // Fade IN
-                            .then(scaleAnimationModifier),
-                )
+            if (centerEndExpandedCloseButton) {
+                Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+                    CloseButton(
+                        onCloseClick = onCloseClick,
+                        modifier = Modifier.size(closeButtonSize),
+                    )
+                }
+            } else {
+                with(density) {
+                    val offsetX =
+                        pillContentPosition.x.toDp() + (pillContentSize.width.toDp() / 2) -
+                            (closeButtonTouchTargetSize / 2)
+                    val offsetY =
+                        pillContentPosition.y.toDp() + (pillContentSize.height.toDp() / 2) -
+                            (closeButtonTouchTargetSize / 2)
+                    CloseButton(
+                        onCloseClick = onCloseClick,
+                        modifier =
+                            Modifier.offset(x = offsetX, y = offsetY)
+                                .size(closeButtonSize)
+                                .graphicsLayer { alpha = 1f - expansionAlpha } // Fade IN
+                                .then(scaleAnimationModifier),
+                    )
+                }
             }
         }
     }

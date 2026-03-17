@@ -21,15 +21,14 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.view.isVisible
 import com.android.launcher3.statehandlers.DepthController
-import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.window.RecentsWindowManager
 
 class FallbackWindowRecentsView
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) :
     FallbackRecentsView<RecentsWindowManager>(context, attrs, defStyleAttr) {
-    override fun initialiseInjectables(recentsComponent: RecentsComponent) {
-        recentsComponent.inject(this)
+    override fun initialiseInjectables() {
+        mContainer.activityComponent.inject(this)
     }
 
     override fun onVisibilityChanged(changedView: View, visibility: Int) {

@@ -35,11 +35,13 @@ import com.android.launcher3.taskbar.bubbles.BubbleHelper
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.quickstep.TopTaskTracker.HISTORY_SIZE
 import com.android.quickstep.util.FakeTaskFactory
+import com.android.quickstep.util.binder.OneWayBinderList
 import com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING
 import com.android.wm.shell.shared.GroupedTaskInfo
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_DESK
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FULLSCREEN
 import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT
+import com.android.wm.shell.splitscreen.ISplitScreenListener
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -71,6 +73,9 @@ class TopTaskTrackerTest {
         val mockDaggerSingletonTracker = mock<DaggerSingletonTracker>()
         val mockSystemUiProxy = mock<SystemUiProxy>()
         val mockDesktopVisibilityController = mock<DesktopVisibilityController>()
+        doReturn(OneWayBinderList(ISplitScreenListener.Stub::asInterface))
+            .whenever(mockSystemUiProxy)
+            .splitScreenListeners
 
         topTaskTracker =
             TopTaskTracker(

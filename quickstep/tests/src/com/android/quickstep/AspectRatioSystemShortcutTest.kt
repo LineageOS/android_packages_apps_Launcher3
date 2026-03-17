@@ -24,15 +24,15 @@ import android.content.Intent
 import android.provider.Settings
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.LayoutInflater
-import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
-import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.DeviceProfile
 import com.android.launcher3.R
+import com.android.launcher3.deviceprofile.DeviceProperties
 import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.logging.StatsLogManager.StatsLogger
@@ -42,10 +42,6 @@ import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SandboxContext
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
-import com.android.launcher3.util.WindowBounds
-import com.android.launcher3.util.rule.TestStabilityRule
-import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability
-import com.android.launcher3.util.rule.TestStabilityRule.LOCAL
 import com.android.quickstep.TaskViewTestDIHelpers.mockRecentsModel
 import com.android.quickstep.orientation.LandscapePagedViewHandler
 import com.android.quickstep.task.thumbnail.TaskContentView
@@ -61,7 +57,6 @@ import com.android.systemui.shared.recents.model.Task
 import com.android.systemui.shared.recents.model.Task.TaskKey
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.eq
@@ -75,8 +70,6 @@ import org.mockito.kotlin.whenever
 
 /** Test for [AspectRatioSystemShortcut] */
 class AspectRatioSystemShortcutTest {
-
-    @get:Rule val testStabilityRule = TestStabilityRule()
 
     /** Spy on a concrete Context so we can reference real View, Layout, and Display properties. */
     private val context: Context = spy(InstrumentationRegistry.getInstrumentation().targetContext)
@@ -142,34 +135,25 @@ class AspectRatioSystemShortcutTest {
         taskView.setLayoutParams(ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT))
     }
 
-    /**
-     * When the screen doesn't meet or exceed sw600dp (eg. phone, watch), there will not be an
-     * option to open aspect ratio settings.
-     */
     @Test
-    @DesktopStability(flavors = LOCAL, bug = 486280489)
-    fun createShortcut_sw599dp_notCreated() {
+    fun createShortcut_nonLargeScreen_notCreated() {
         val task = createTask()
         val taskContainer = createTaskContainer(task)
 
-        setScreenSizeDp(widthDp = 599, heightDp = 599)
+        setIsLargeScreen(false)
         taskView.bind(SingleTask(task), orientedState, taskOverlayFactory)
 
         assertThat(factory.getShortcuts(launcher, taskContainer)).isNull()
     }
 
-    /**
-     * When the screen does meet or exceed sw600dp (eg. tablet, inner foldable screen, home cinema)
-     * there will be an option to open aspect ratio settings.
-     */
     @Test
-    fun createShortcut_sw800dp_created_andOpensSettings() {
+    fun createShortcut_largeScreen_created_andOpensSettings() {
         val task = createTask()
         val taskContainer = spy(createTaskContainer(task))
         val taskViewItemInfo = mock<TaskViewItemInfo>()
         doReturn(taskViewItemInfo).whenever(taskContainer).itemInfo
 
-        setScreenSizeDp(widthDp = 1200, heightDp = 800)
+        setIsLargeScreen(true)
         taskView.bind(SingleTask(task), orientedState, taskOverlayFactory)
 
         val singleShortcut = factory.getShortcuts(launcher, taskContainer)!!.single()
@@ -193,20 +177,15 @@ class AspectRatioSystemShortcutTest {
     }
 
     /**
-     * Overrides the screen size reported in the DeviceProfile, keeping the same pixel density as
-     * the underlying device and adjusting the pixel width/height to match what is required.
+     * Overrides the [DeviceProperties.isLargeScreen] property to simulate different screen sizes.
      */
-    private fun setScreenSizeDp(widthDp: Int, heightDp: Int) {
-        val density = context.resources.configuration.densityDpi
-        val widthPx = widthDp * density / 160
-        val heightPx = heightDp * density / 160
+    private fun setIsLargeScreen(isLargeScreen: Boolean) {
+        val deviceProperties = mock<DeviceProperties>()
+        whenever(deviceProperties.isLargeScreen).thenReturn(isLargeScreen)
 
-        val screenBounds = WindowBounds(widthPx, heightPx, widthPx, heightPx, Surface.ROTATION_0)
-        val deviceProfile =
-            InvariantDeviceProfile.INSTANCE[context].getDeviceProfile(context)
-                .toBuilder()
-                .setWindowBounds(screenBounds)
-                .build()
+        val deviceProfile = mock<DeviceProfile>()
+        whenever(deviceProfile.deviceProperties).thenReturn(deviceProperties)
+
         whenever(launcher.getDeviceProfile()).thenReturn(deviceProfile)
     }
 

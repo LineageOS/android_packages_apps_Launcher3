@@ -28,7 +28,6 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.launcher3.util.SplitConfigurationOptions.STAGE_POSITION_TOP_OR_LEFT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -57,13 +56,13 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.taskbar.TaskbarInteractor;
 import com.android.launcher3.uioverrides.QuickstepLauncher;
+import com.android.launcher3.util.SafeCloseable;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.RecentsAnimationCallbacks;
 import com.android.quickstep.RecentsAnimationController;
 import com.android.quickstep.RecentsAnimationTargets;
 import com.android.quickstep.RemoteAnimationTargets;
 import com.android.quickstep.SystemUiProxy;
-import com.android.quickstep.TopTaskTracker;
 import com.android.quickstep.util.ActiveGestureLog;
 import com.android.quickstep.util.ExternalDisplaysKt;
 import com.android.quickstep.util.ScalingWorkspaceRevealAnim;
@@ -74,7 +73,6 @@ import com.android.quickstep.views.FloatingTaskView;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.window.RecentsWindowManager;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.wm.shell.splitscreen.ISplitSelectListener;
 
@@ -101,7 +99,7 @@ public class SplitFromRunningTaskController {
     private SplitSelectStateController mSplitSelectStateController;
     private RecentsViewContainer mContainer;
     private ActivityManager.RunningTaskInfo mTaskInfo;
-    private SplitSelectListenerImpl mSplitSelectListener;
+    private SafeCloseable mSplitSelectListenerCleanup;
     private Drawable mAppIcon;
     @Nullable
     private RecentsAnimationController mRecentsAnimationController;
@@ -126,12 +124,11 @@ public class SplitFromRunningTaskController {
                 .getDimensionPixelSize(R.dimen.split_placeholder_size);
         mSplitPlaceholderInset = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.split_placeholder_inset);
-        mSplitSelectListener = new SplitSelectListenerImpl(this);
         if (mRecentsWindowManager == null && mLauncher == null) {
             return;
         }
-        SystemUiProxy.INSTANCE.get(mContext)
-                .registerSplitSelectListener(mSplitSelectListener);
+        mSplitSelectListenerCleanup = SystemUiProxy.INSTANCE.get(mContext).getSplitSelectListeners()
+                .register(new SplitSelectListenerImpl(this));
     }
 
     /** TODO(b/458362590): We should really avoid this weird circular init dependency thing */
@@ -140,10 +137,10 @@ public class SplitFromRunningTaskController {
     }
 
     void onDestroy() {
-        SystemUiProxy.INSTANCE.get(mContext).unregisterSplitSelectListener(
-                mSplitSelectListener);
-        mSplitSelectListener.release();
-        mSplitSelectListener = null;
+        if (mSplitSelectListenerCleanup != null) {
+            mSplitSelectListenerCleanup.close();
+            mSplitSelectListenerCleanup = null;
+        }
         mContainer = null;
     }
 
@@ -422,44 +419,36 @@ public class SplitFromRunningTaskController {
      */
     private static class SplitSelectListenerImpl extends ISplitSelectListener.Stub {
 
-        private SplitFromRunningTaskController mController;
+        private final SplitFromRunningTaskController mController;
 
         SplitSelectListenerImpl(@NonNull SplitFromRunningTaskController controller) {
             mController = controller;
         }
 
-        /** Clears any references to the controller. */
-        void release() {
-            mController = null;
-        }
-
         @Override
-        public boolean onRequestSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
+        public void onRequestSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
                 int splitPosition, Rect taskBounds, boolean startRecents,
                 @Nullable WindowContainerTransaction withRecentsWct) {
-            if (mController == null || !mController.ableToStartSplitSelectAnimation(taskInfo)) {
+            if (!mController.ableToStartSplitSelectAnimation(taskInfo)) {
                 Log.v(TAG, "onRequestSplitSelect, controller not able to start "
                         + "animation for taskId: " + taskInfo.taskId);
-                return false;
+                return;
             }
             MAIN_EXECUTOR.execute(() -> {
-                if (mController != null) {
-                    final StatsLogManager.LauncherEvent logEvent;
-                    boolean leftOrTop = splitPosition == STAGE_POSITION_BOTTOM_OR_RIGHT;
-                    if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
-                        logEvent = leftOrTop
-                                ? LAUNCHER_DESKTOP_MODE_SPLIT_RIGHT_BOTTOM
-                                : LAUNCHER_DESKTOP_MODE_SPLIT_LEFT_TOP;
-                    } else {
-                        logEvent = leftOrTop
-                                ? LAUNCHER_KEYBOARD_SHORTCUT_SPLIT_LEFT_TOP
-                                : LAUNCHER_KEYBOARD_SHORTCUT_SPLIT_RIGHT_BOTTOM;
-                    }
-                    mController.enterSplitSelect(taskInfo, splitPosition, taskBounds,
-                            logEvent, startRecents, withRecentsWct);
+                final StatsLogManager.LauncherEvent logEvent;
+                boolean leftOrTop = splitPosition == STAGE_POSITION_BOTTOM_OR_RIGHT;
+                if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+                    logEvent = leftOrTop
+                            ? LAUNCHER_DESKTOP_MODE_SPLIT_RIGHT_BOTTOM
+                            : LAUNCHER_DESKTOP_MODE_SPLIT_LEFT_TOP;
+                } else {
+                    logEvent = leftOrTop
+                            ? LAUNCHER_KEYBOARD_SHORTCUT_SPLIT_LEFT_TOP
+                            : LAUNCHER_KEYBOARD_SHORTCUT_SPLIT_RIGHT_BOTTOM;
                 }
+                mController.enterSplitSelect(taskInfo, splitPosition, taskBounds,
+                        logEvent, startRecents, withRecentsWct);
             });
-            return true;
         }
     }
 }

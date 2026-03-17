@@ -51,6 +51,7 @@ import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.split.SplitSelectStateController.SplitFromDesktopController
 import com.android.quickstep.util.GroupTask
 import com.android.quickstep.util.SplitTask
+import com.android.quickstep.util.binder.OneWayBinderList
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.window.RecentsWindowManager
@@ -58,6 +59,7 @@ import com.android.systemui.shared.recents.model.Task
 import com.android.wm.shell.Flags.FLAG_RESOLVE_TRAMPOLINE_DESTINATION_PACKAGES
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50
+import com.android.wm.shell.splitscreen.ISplitSelectListener
 import java.util.function.Consumer
 import java.util.function.Predicate
 import org.junit.Assert.assertEquals
@@ -154,6 +156,10 @@ class SplitSelectStateControllerTest {
         // Stub getSystemService for LayoutInflater on mockApp
         whenever(mockApp.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
             .thenReturn(mockLayoutInflater)
+
+        doReturn(OneWayBinderList(ISplitSelectListener.Stub::asInterface))
+            .whenever(systemUiProxy)
+            .splitSelectListeners
 
         splitSelectStateController =
             SplitSelectStateController(

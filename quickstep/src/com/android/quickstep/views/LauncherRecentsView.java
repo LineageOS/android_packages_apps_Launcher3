@@ -29,7 +29,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.Launcher;
@@ -46,7 +45,6 @@ import com.android.launcher3.util.SplitConfigurationOptions;
 import com.android.launcher3.util.SplitConfigurationOptions.SplitSelectSource;
 import com.android.quickstep.GestureState;
 import com.android.quickstep.SystemUiProxy;
-import com.android.quickstep.recents.di.RecentsComponent;
 import com.android.quickstep.split.SplitSelectStateController;
 import com.android.quickstep.util.SurfaceTransactionApplier;
 import com.android.wm.shell.shared.GroupedTaskInfo;
@@ -75,8 +73,8 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
     }
 
     @Override
-    protected void initialiseInjectables(@NonNull RecentsComponent recentsComponent) {
-        recentsComponent.inject(this);
+    protected void initialiseInjectables() {
+        mContainer.getActivityComponent().inject(this);
     }
 
     @Override

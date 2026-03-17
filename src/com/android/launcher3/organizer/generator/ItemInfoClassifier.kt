@@ -30,12 +30,13 @@ data class TopicClassifiedItem(val itemInfo: ItemInfo, val topic: String, val sc
 /**
  * Interface for a strategy that analyzes [ItemInfo] objects to determine their best-matching topic.
  */
-interface Classifier {
+interface ItemInfoClassifier {
     /**
      * Executes classification on [items].
      *
      * @param items The items to be classified.
+     * @param topics The topics on which to classify items.
      * @return A list of [TopicClassifiedItem]s.
      */
-    suspend fun classify(items: List<ItemInfo>): List<TopicClassifiedItem>
+    suspend fun classify(items: List<ItemInfo>, topics: List<String>): List<TopicClassifiedItem>
 }

@@ -38,7 +38,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
-class PackageManagerClassifierTest {
+class PackageManagerItemInfoClassifierTest {
 
     private val launcherApps: LauncherApps = mock()
     private val context: Context = mock {
@@ -46,21 +46,41 @@ class PackageManagerClassifierTest {
     }
 
     private val activityInfoMap = mutableMapOf<ComponentName, LauncherActivityInfo>()
-    private lateinit var classifier: PackageManagerClassifier
+    private lateinit var classifier: PackageManagerItemInfoClassifier
+    private val testTopics =
+        listOf(
+            "Games",
+            "Audio",
+            "Video",
+            "Image",
+            "Social",
+            "News",
+            "Maps",
+            "Productivity",
+            "Accessibility",
+        )
 
     @Before
     fun setup() {
-        classifier = PackageManagerClassifier(context)
-
         whenever(launcherApps.resolveActivity(any(), any())).thenAnswer { invocation ->
             val intent = invocation.arguments[0] as Intent
             activityInfoMap[intent.component]
         }
 
-        // Mock string resources
+        // Mock string resources to match our testTopics
         whenever(context.getString(R.string.topic_category_games)).thenReturn("Games")
+        whenever(context.getString(R.string.topic_category_audio)).thenReturn("Audio")
+        whenever(context.getString(R.string.topic_category_video)).thenReturn("Video")
+        whenever(context.getString(R.string.topic_category_image)).thenReturn("Image")
         whenever(context.getString(R.string.topic_category_social)).thenReturn("Social")
+        whenever(context.getString(R.string.topic_category_news)).thenReturn("News")
+        whenever(context.getString(R.string.topic_category_maps)).thenReturn("Maps")
         whenever(context.getString(R.string.topic_category_productivity)).thenReturn("Productivity")
+        whenever(context.getString(R.string.topic_category_accessibility))
+            .thenReturn("Accessibility")
+        whenever(context.getString(R.string.topic_category_other)).thenReturn("Other")
+
+        classifier = PackageManagerItemInfoClassifier(context)
     }
 
     @Test
@@ -73,7 +93,7 @@ class PackageManagerClassifierTest {
         mockAppCategory(item2, ApplicationInfo.CATEGORY_SOCIAL)
         mockAppCategory(item3, ApplicationInfo.CATEGORY_PRODUCTIVITY)
 
-        val result = classifier.classify(listOf(item1, item2, item3))
+        val result = classifier.classify(listOf(item1, item2, item3), testTopics)
 
         assertEquals(3, result.size)
         assertEquals("Games", result.find { it.itemInfo.id == 1 }?.topic)
@@ -82,11 +102,25 @@ class PackageManagerClassifierTest {
     }
 
     @Test
+    fun filterOutItemsIfTopicNotInList() = runBlocking {
+        val item = createItem(1, "pkg1")
+        mockAppCategory(item, ApplicationInfo.CATEGORY_GAME)
+
+        // Pass a list that doesn't include "Games"
+        val result = classifier.classify(listOf(item), listOf("Social", "News"))
+
+        assertTrue(
+            "Should be empty because 'Games' topic is not in the provided list",
+            result.isEmpty(),
+        )
+    }
+
+    @Test
     fun filterOutItemsWithoutResolvedActivity() = runBlocking {
         val item = createItem(1, "pkg1")
         // No mock for this item's component
 
-        val result = classifier.classify(listOf(item))
+        val result = classifier.classify(listOf(item), testTopics)
 
         assertTrue("Items without resolved activity should be ignored", result.isEmpty())
     }
@@ -96,7 +130,7 @@ class PackageManagerClassifierTest {
         val item = createItem(1, "pkg1")
         mockAppCategory(item, ApplicationInfo.CATEGORY_UNDEFINED)
 
-        val result = classifier.classify(listOf(item))
+        val result = classifier.classify(listOf(item), testTopics)
 
         assertTrue("Items with unmapped categories should be ignored", result.isEmpty())
     }
@@ -105,7 +139,7 @@ class PackageManagerClassifierTest {
     fun filterOutItemsWithoutIntent() = runBlocking {
         val item = ItemInfo().apply { id = 1 } // No intent
 
-        val result = classifier.classify(listOf(item))
+        val result = classifier.classify(listOf(item), testTopics)
 
         assertTrue("Items without intent should be ignored", result.isEmpty())
     }

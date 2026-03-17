@@ -27,8 +27,10 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.android.launcher3.LauncherApplication
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundContext
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
+import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout.ChooseLayoutState
 import com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerViewModel
+import com.android.launcher3.organizer.generator.CreationSession
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,8 +42,9 @@ import kotlinx.coroutines.withContext
 class SpaceCreatorViewModel
 @Inject
 constructor(
+    creationSessionFactory: CreationSession.Factory,
     @LightweightBackgroundContext(priority = UI)
-    private val lightweightBackgroundContext: CoroutineContext
+    private val lightweightBackgroundContext: CoroutineContext,
 ) : ViewModel() {
     var chooseLayoutState: ChooseLayoutState by mutableStateOf(ChooseLayoutState())
         private set
@@ -49,31 +52,32 @@ constructor(
     private val _createScreenState = MutableStateFlow(CreateScreenState())
     val createScreenState: StateFlow<CreateScreenState> = _createScreenState.asStateFlow()
 
+    private val screenCreationSession =
+        creationSessionFactory.createSession(CreationSession.SessionType.SCREEN)
+
     init {
         viewModelScope.launch {
-            updateTopics(
-                listOf(
-                    "Most used",
-                    "Games",
-                    "Health & Fitness",
-                    "Productivity",
-                    "Travel",
-                    "Social",
-                    "Entertainment",
-                )
-            )
+            withContext(lightweightBackgroundContext) {
+                val classifiedItems = screenCreationSession.startClassification()
+                val topics = classifiedItems.map { it.topic }.distinct()
+                val topicIcons =
+                    classifiedItems
+                        .filter { it.itemInfo is AppInfo }
+                        .groupBy({ it.topic }, { (it.itemInfo as AppInfo).bitmap.icon })
+
+                val topicDataList = topics.map { TopicData(it, topicIcons[it] ?: emptyList()) }
+                updateState(topicDataList)
+            }
         }
     }
 
     /**
-     * Update the topics list.
+     * Update the state with new topics and icons.
      *
      * @param topics The new list of topics.
      */
-    private suspend fun updateTopics(topics: List<String>) {
-        withContext(lightweightBackgroundContext) {
-            _createScreenState.value = _createScreenState.value.copy(topics = topics)
-        }
+    private fun updateState(topics: List<TopicData>) {
+        _createScreenState.value = _createScreenState.value.copy(topics = topics)
     }
 
     /**
@@ -100,6 +104,7 @@ constructor(
                         as LauncherApplication
                 val appComponent = application.appComponent
                 SpaceCreatorViewModel(
+                    creationSessionFactory = appComponent.creationSessionFactory,
                     lightweightBackgroundContext =
                         appComponent.productionDispatchers.lightweightBackgroundUiDispatcher,
                 )

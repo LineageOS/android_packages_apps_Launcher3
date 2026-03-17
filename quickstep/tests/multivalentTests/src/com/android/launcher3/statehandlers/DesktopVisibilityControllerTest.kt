@@ -28,6 +28,7 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController.TaskbarDe
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.SystemUiProxy
+import com.android.quickstep.util.binder.OneWayBinderList
 import com.android.wm.shell.desktopmode.DisplayDeskState
 import com.android.wm.shell.desktopmode.IDesktopTaskListener
 import com.google.common.truth.Truth.assertThat
@@ -39,9 +40,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
-import org.mockito.kotlin.nullableArgumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -57,16 +59,20 @@ class DesktopVisibilityControllerTest {
 
     private val context = mock<Context>()
     private val systemUiProxy = mock<SystemUiProxy>()
+    private val desktopTaskListeners = mock<OneWayBinderList<IDesktopTaskListener>>()
+
     private val lifeCycleTracker = mock<DaggerSingletonTracker>()
     private lateinit var desktopVisibilityController: DesktopVisibilityController
-    private val listenerCaptor = nullableArgumentCaptor<IDesktopTaskListener>()
+    private val listenerCaptor = argumentCaptor<IDesktopTaskListener>()
 
     @Before
     fun setUp() {
         whenever(context.resources).thenReturn(mock())
+        doReturn(desktopTaskListeners).whenever(systemUiProxy).desktopTaskListeners
+
         desktopVisibilityController =
             DesktopVisibilityController(context, systemUiProxy, lifeCycleTracker)
-        verify(systemUiProxy).setDesktopTaskListener(listenerCaptor.capture())
+        verify(desktopTaskListeners).register(listenerCaptor.capture())
     }
 
     @Test

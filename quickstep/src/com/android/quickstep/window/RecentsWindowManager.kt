@@ -125,7 +125,6 @@ import com.android.quickstep.fallback.RecentsState.Companion.HIDDEN
 import com.android.quickstep.fallback.RecentsState.Companion.MODAL_TASK
 import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELECT
 import com.android.quickstep.fallback.toLauncherStateOrdinal
-import com.android.quickstep.recents.di.RecentsComponent
 import com.android.quickstep.split.SplitScreenAppResolver
 import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.util.PerDisplayHolder
@@ -170,7 +169,6 @@ constructor(
     displayController: DisplayController,
     @Ui private val uiExecutor: LooperExecutor,
     invariantDeviceProfile: InvariantDeviceProfile,
-    recentsComponentFactory: RecentsComponent.Factory,
     propertyHolder: PerDisplayHolder<RecentsWindowManager>,
     lifeCycle: PerDisplayCleanupTask,
     @Named(WINDOW_BLUR_STATE) private val blurState: ListenableRef<Boolean>,
@@ -191,7 +189,6 @@ constructor(
             )
     }
 
-    private val recentsComponent = recentsComponentFactory.build(this)
     private var recentsView: FallbackWindowRecentsView? = null
     private var windowlessWindowManager: WindowlessWindowManager? = null
     private var surfaceControlViewHost: SurfaceControlViewHost? = null
@@ -932,8 +929,6 @@ constructor(
     ) {
         stateManager.goToState(recentsState, animated, listener)
     }
-
-    override fun getRecentsComponent() = recentsComponent
 
     override fun getRootView(): View = windowRootView
 
