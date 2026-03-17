@@ -97,6 +97,9 @@ constructor(
         val animatorFinishedCallback: (Animator) -> Unit = { animator ->
             animators -= animator
             if (animators.isEmpty()) {
+                // Releases temporary-for-animation surfaces referenced by us to
+                // potentially free up memory.
+                info.releaseAnimSurfaces()
                 RemoteRunnable.executeSafely(finishedCallback)
             }
         }
