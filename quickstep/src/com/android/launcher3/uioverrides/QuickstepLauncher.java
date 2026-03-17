@@ -45,6 +45,7 @@ import static com.android.launcher3.LauncherState.OVERVIEW_SPLIT_SELECT;
 import static com.android.launcher3.Utilities.isRtl;
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.compat.AccessibilityManagerCompat.sendCustomAccessibilityEvent;
+import static com.android.launcher3.desktop.DesktopStateProvider.getDesktopState;
 import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_ACTIVE_SCREEN;
 import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_NAVIGATION_MODE;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_APP_LAUNCH_TAP;
@@ -239,7 +240,6 @@ import com.android.wm.shell.shared.bubbles.BubbleFeatureConfig;
 import com.android.wm.shell.shared.bubbles.BubbleFeatureConfigImpl;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
-import com.android.wm.shell.shared.desktopmode.DesktopState;
 
 import kotlin.Unit;
 
@@ -380,8 +380,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         mTaskbarUiState = TaskbarUiStateMonitor.INSTANCE.get(this)
                 .getTaskbarUiState(getDisplayId());
 
-        mBubbleFeatureConfig = new BubbleFeatureConfigImpl(this,
-                DesktopState.getInstance(this));
+        mBubbleFeatureConfig = new BubbleFeatureConfigImpl(this, getDesktopState(this));
     }
 
     @Override
@@ -1458,7 +1457,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
 
     @Override
     public boolean shouldShowHomeBehindDesktop() {
-        return DesktopState.getInstance(this).getShouldShowHomeBehindDesktop();
+        return getDesktopState(this).getShouldShowHomeBehindDesktop();
     }
 
     @Override

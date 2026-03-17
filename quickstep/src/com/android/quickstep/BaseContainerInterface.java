@@ -20,6 +20,7 @@ import static com.android.app.animation.Interpolators.INSTANT;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.launcher3.LauncherAnimUtils.SCRIM_COLORS;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe;
+import static com.android.launcher3.desktop.DesktopStateProvider.getDesktopState;
 import static com.android.quickstep.AbsSwipeUpHandler.RECENTS_ATTACH_DURATION;
 import static com.android.quickstep.GestureState.GestureEndTarget.HOME;
 import static com.android.quickstep.GestureState.GestureEndTarget.LAST_TASK;
@@ -69,7 +70,6 @@ import com.android.quickstep.util.ContextInitListener;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.systemui.shared.recents.model.ThumbnailData;
-import com.android.wm.shell.shared.desktopmode.DesktopState;
 
 import java.util.HashMap;
 import java.util.List;
@@ -372,7 +372,7 @@ public abstract class BaseContainerInterface<STATE_TYPE extends BaseState<STATE_
             // In the case where home is always shown behind desktop, ensure that we reset to
             // Normal home state, and set `activityVisible` to false so we don't animate home
             // because home is already showing.
-            if (DesktopState.getInstance(context).getShouldShowHomeBehindDesktop()) {
+            if (getDesktopState(context).getShouldShowHomeBehindDesktop()) {
                 endTarget = HOME;
                 activityVisible = false;
             }
