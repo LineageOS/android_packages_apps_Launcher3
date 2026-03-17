@@ -29,7 +29,6 @@ import static com.android.launcher3.MotionEventsUtils.isTrackpadMotionEvent;
 import static com.android.launcher3.MotionEventsUtils.isTrackpadMultiFingerSwipe;
 import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_NAVIGATION_MODE;
 import static com.android.launcher3.display.LauncherDisplayInfo.CHANGE_NIGHT_MODE;
-import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar;
 import static com.android.launcher3.util.OnboardingPrefs.HOME_BOUNCE_SEEN;
 import static com.android.launcher3.util.window.WindowManagerProxy.MIN_TABLET_WIDTH;
 import static com.android.quickstep.GestureState.DEFAULT_STATE;
@@ -512,7 +511,6 @@ public class TouchInteractionHandler extends ContextWrapper {
         TaskbarActivityContext tac = mTaskbarManager.getTaskbarForDisplay(displayId);
         boolean shouldConnectedDisplayConsumeEvent =
                 displayId != DEFAULT_DISPLAY
-                && enableAutoStashConnectedDisplayTaskbar.isTrue()
                 && tac != null && tac.isTaskbarStashed();
         if (gestureStartNavMode != null && gestureStartNavMode != currentNavMode) {
             ActiveGestureProtoLogProxy.logOnInputEventNavModeSwitched(

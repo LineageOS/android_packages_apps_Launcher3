@@ -25,7 +25,6 @@ import static com.android.launcher3.Utilities.getDescendantCoordRelativeToAncest
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.taskbar.LauncherTaskbarUIController.IME_PROGRESS_INDEX;
 import static com.android.launcher3.taskbar.LauncherTaskbarUIController.SYSUI_SURFACE_PROGRESS_INDEX;
-import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableTaskbarA11yMoreOptionsButton;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_A11Y;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_BACK;
@@ -727,8 +726,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
 
     /** Should be called when the taskbar is stashed on CD to stash nav buttons. */
     public void setTaskbarStashedIfConnectedDisplay(boolean isTaskbarStashed) {
-        if (!enableAutoStashConnectedDisplayTaskbar.isTrue()
-                || mControllers.taskbarActivityContext.isPrimaryDisplay()) {
+        if (mControllers.taskbarActivityContext.isPrimaryDisplay()) {
             return;
         }
 

@@ -20,7 +20,6 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BA
 
 import static com.android.launcher3.EncryptionType.ENCRYPTED;
 import static com.android.launcher3.LauncherPrefs.nonRestorableItem;
-import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar;
 import static com.android.launcher3.taskbar.Utilities.getShapedTaskbarRadius;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 
@@ -193,7 +192,7 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
         if (activity.isPhoneGestureNavMode()) {
             onIsStashedChanged(true);
         }
-        if (!activity.isPrimaryDisplay() && enableAutoStashConnectedDisplayTaskbar.isTrue()) {
+        if (!activity.isPrimaryDisplay()) {
             mTaskStackChangeListener = new TaskStackChangeListener() {
                 @Override
                 public void onTaskStackChanged() {
@@ -385,8 +384,7 @@ public class StashedHandleViewController implements TaskbarControllers.LoggableT
      **/
     void updateHandleColorOnConnectedDisplay() {
         TaskbarActivityContext activity = mActivityRef.get();
-        if (activity == null || activity.isPrimaryDisplay()
-                || !enableAutoStashConnectedDisplayTaskbar.isTrue()) {
+        if (activity == null || activity.isPrimaryDisplay()) {
             return;
         }
 
