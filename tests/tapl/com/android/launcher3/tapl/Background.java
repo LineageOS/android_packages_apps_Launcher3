@@ -289,7 +289,7 @@ public abstract class Background extends LauncherInstrumentation.VisibleContaine
     }
 
     protected String getSwipeHeightRequestName() {
-        return TestProtocol.REQUEST_BACKGROUND_TO_OVERVIEW_SWIPE_HEIGHT;
+        return TestProtocol.REQUEST_SWIPE_TO_OVERVIEW_HEIGHT;
     }
 
     protected int getSwipeStartX() {
