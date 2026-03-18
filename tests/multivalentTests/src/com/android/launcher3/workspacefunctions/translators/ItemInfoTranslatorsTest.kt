@@ -49,6 +49,7 @@ class ItemInfoTranslatorsTest {
             ),
             emptyMap(),
             emptyMap(),
+            emptyMap(),
         )
     private val folderInfoWorkspaceTranslator = FolderInfoWorkspaceTranslator(translatorRegistry)
     private val folderInfoHotseatTranslator = FolderInfoHotseatTranslator(translatorRegistry)

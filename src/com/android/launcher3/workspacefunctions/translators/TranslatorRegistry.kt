@@ -20,6 +20,8 @@ import com.android.launcher3.appfunctions.workspace.HotseatItemSpec
 import com.android.launcher3.appfunctions.workspace.Translator
 import com.android.launcher3.appfunctions.workspace.UnplacedAppSpec
 import com.android.launcher3.appfunctions.workspace.UnplacedAppTypeTranslator
+import com.android.launcher3.appfunctions.workspace.UnplacedWidgetSpec
+import com.android.launcher3.appfunctions.workspace.UnplacedWidgetTypeTranslator
 import com.android.launcher3.appfunctions.workspace.WorkspaceItemSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceTypeTranslator
@@ -47,6 +49,8 @@ constructor(
         Map<Class<*>, @JvmSuppressWildcards Provider<WorkspaceTypeTranslator<*>>>,
     private val unplacedAppTypeTranslators:
         Map<Class<*>, @JvmSuppressWildcards Provider<UnplacedAppTypeTranslator<*>>>,
+    private val unplacedWidgetTypeTranslators:
+        Map<Class<*>, @JvmSuppressWildcards Provider<UnplacedWidgetTypeTranslator<*>>>,
 ) {
     /** Returns the translator for the given [target] and [sourceClass] types. */
     @PublishedApi
@@ -61,6 +65,7 @@ constructor(
                 AppInFolderSpec::class -> appInFolderTranslators
                 WorkspaceSpec::class -> workspaceTypeTranslators
                 UnplacedAppSpec::class -> unplacedAppTypeTranslators
+                UnplacedWidgetSpec::class -> unplacedWidgetTypeTranslators
                 else -> throw IllegalArgumentException("Unknown target type: $target")
             }
 

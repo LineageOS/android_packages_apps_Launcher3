@@ -22,6 +22,7 @@ import com.android.launcher3.appfunctions.workspace.HotseatSpec
 import com.android.launcher3.appfunctions.workspace.UnplacedAppSpec
 import com.android.launcher3.appfunctions.workspace.UnplacedAppTypeTranslator
 import com.android.launcher3.appfunctions.workspace.UnplacedWidgetSpec
+import com.android.launcher3.appfunctions.workspace.UnplacedWidgetTypeTranslator
 import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions
 import com.android.launcher3.appfunctions.workspace.WorkspaceRepository
 import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
@@ -32,12 +33,14 @@ import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.WorkspaceData
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.workspacefunctions.translators.AppInFolderTranslator
 import com.android.launcher3.workspacefunctions.translators.FolderInfoHotseatTranslator
 import com.android.launcher3.workspacefunctions.translators.FolderInfoWorkspaceTranslator
 import com.android.launcher3.workspacefunctions.translators.HotseatItemTranslator
 import com.android.launcher3.workspacefunctions.translators.LauncherAppWidgetInfoWorkspaceTranslator
 import com.android.launcher3.workspacefunctions.translators.LauncherUnplacedAppTranslator
+import com.android.launcher3.workspacefunctions.translators.LauncherUnplacedWidgetTranslator
 import com.android.launcher3.workspacefunctions.translators.LauncherWorkspaceTypeTranslator
 import com.android.launcher3.workspacefunctions.translators.WorkspaceItemInfoAppInFolderTranslator
 import com.android.launcher3.workspacefunctions.translators.WorkspaceItemInfoHotseatTranslator
@@ -75,6 +78,13 @@ abstract class WorkspaceFunctionsModule {
     abstract fun bindLauncherUnplacedAppTranslator(
         impl: LauncherUnplacedAppTranslator
     ): @JvmSuppressWildcards UnplacedAppTypeTranslator<*>
+
+    @Binds
+    @IntoMap
+    @ClassKey(LauncherAppWidgetProviderInfo::class)
+    abstract fun bindLauncherUnplacedWidgetTranslator(
+        impl: LauncherUnplacedWidgetTranslator
+    ): @JvmSuppressWildcards UnplacedWidgetTypeTranslator<*>
 
     @Binds
     @IntoMap
