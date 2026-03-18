@@ -247,4 +247,43 @@ class CustomEventsTouchHandlerTest {
 
         verify(mockListener, never()).performActions(any(), any())
     }
+
+    @Test
+    fun onLongPress_mouse_withLongPressForDragEnabled_triggersDrag() {
+        touchHandler.enableMouseLongPressForDrag = true
+
+        // Start the down event at a time long enough ago to schedule a long press. Then wait for
+        // the long press to trigger.
+        val longPressDownTime = downTime - ViewConfiguration.getLongPressTimeout() - 100
+        val downEvent =
+            obtainMouseEvent(
+                MotionEvent.ACTION_DOWN,
+                MotionEvent.BUTTON_PRIMARY,
+                customDownTime = longPressDownTime,
+            )
+        touchHandler.onDelegateTouchEvent(downEvent)
+        RoboApiWrapper.waitForLooperSync(Looper.getMainLooper())
+
+        verify(mockListener).performActions(view, ACTION_START_DRAG)
+    }
+
+    @Test
+    fun onTouchEvent_mouseDragOutsideSlop_withLongPressForDragEnabled_doesNotTriggerStartDrag() {
+        touchHandler.enableMouseLongPressForDrag = true
+
+        val downEvent =
+            obtainMouseEvent(MotionEvent.ACTION_DOWN, MotionEvent.BUTTON_PRIMARY, 10f, 10f)
+        touchHandler.onDelegateTouchEvent(downEvent)
+
+        val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+        val moveEvent =
+            obtainMouseEvent(
+                MotionEvent.ACTION_MOVE,
+                MotionEvent.BUTTON_PRIMARY,
+                10f + touchSlop + 1,
+                10f,
+            )
+        touchHandler.onDelegateTouchEvent(moveEvent)
+        verify(mockListener, never()).performActions(view, ACTION_START_DRAG)
+    }
 }

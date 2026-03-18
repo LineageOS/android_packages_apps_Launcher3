@@ -45,6 +45,10 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
+import com.android.launcher3.touch.CustomActionsListener;
+import com.android.launcher3.touch.CustomEventsTouchHandler;
+import com.android.launcher3.touch.CustomTouchDelegate;
+import com.android.launcher3.touch.WorkspaceWidgetCustomActionsListener;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
@@ -55,7 +59,8 @@ import com.android.launcher3.views.UpdateDeferrableView;
  * {@inheritDoc}
  */
 public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
-        implements TouchCompleteListener, View.OnLongClickListener, UpdateDeferrableView, Poppable {
+        implements TouchCompleteListener, View.OnLongClickListener, UpdateDeferrableView, Poppable,
+        CustomTouchDelegate {
 
     private static final String TAG = "LauncherAppWidgetHostView";
 
@@ -75,6 +80,7 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
     private static final Integer NO_LAYOUT_ID = Integer.valueOf(0);
 
     private final CheckLongPressHelper mLongPressHelper;
+    private final CustomEventsTouchHandler mCustomEventsTouchHandler;
     protected final ActivityContext mActivityContext;
 
     private boolean mIsScrollable;
@@ -94,6 +100,12 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
         super(context);
         mActivityContext = ActivityContext.lookupContext(context);
         mLongPressHelper = new CheckLongPressHelper(this, this);
+        mCustomEventsTouchHandler = new CustomEventsTouchHandler(this, (event) -> true,
+                (event) -> false);
+        mCustomEventsTouchHandler.setEnableMouseLongPressForDrag(true);
+        if (Flags.enableCursorDrivenWorkflows()) {
+            setCustomActionsListener(WorkspaceWidgetCustomActionsListener.INSTANCE);
+        }
         setAccessibilityDelegate(mActivityContext.getAccessibilityDelegate());
         setBackgroundResource(R.drawable.widget_internal_focus_bg);
         if (Flags.enableFocusOutline()) {
@@ -118,9 +130,7 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
 
     @Override
     public boolean onLongClick(View view) {
-        if (mIsScrollable) {
-            mActivityContext.getDragLayer().requestDisallowInterceptTouchEvent(false);
-        }
+        beforeDragStart();
         view.performLongClick();
         return true;
     }
@@ -233,12 +243,32 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
             }
             dragLayer.setTouchCompleteListener(this);
         }
+        if (Flags.enableCursorDrivenWorkflows()) {
+            onDelegateTouchEvent(ev);
+            // Allow widget to keep handling touches, the CustomEventsTouchHandler will monitor
+            // for gestures and intercept at the drag level where needed.
+            return false;
+        }
         mLongPressHelper.onTouchEvent(ev);
         return mLongPressHelper.hasPerformedLongPress();
     }
 
+    /**
+     * Called before a drag operation begins.
+     */
+    public void beforeDragStart() {
+        // If the widget is scrollable, this reverses the disallowInterceptTouchEvent request
+        // made during ACTION_DOWN, allowing the DragLayer to properly take over the touch stream.
+        if (mIsScrollable) {
+            mActivityContext.getDragLayer().requestDisallowInterceptTouchEvent(false);
+        }
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (Flags.enableCursorDrivenWorkflows()) {
+            return onDelegateTouchEvent(ev);
+        }
         mLongPressHelper.onTouchEvent(ev);
         // We want to keep receiving though events to be able to cancel long press on ACTION_UP
         return true;
@@ -264,7 +294,9 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
     @Override
     public void cancelLongPress() {
         super.cancelLongPress();
-        mLongPressHelper.cancelLongPress();
+        if (!Flags.enableCursorDrivenWorkflows()) {
+            mLongPressHelper.cancelLongPress();
+        }
     }
 
     @Override
@@ -276,7 +308,7 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
 
     @Override
     public void onTouchComplete() {
-        if (!mLongPressHelper.hasPerformedLongPress()) {
+        if (!Flags.enableCursorDrivenWorkflows() && !mLongPressHelper.hasPerformedLongPress()) {
             // If a long press has been performed, we don't want to clear the record of that since
             // we still may be receiving a touch up which we want to intercept
             mLongPressHelper.cancelLongPress();
@@ -389,6 +421,22 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
     @Override
     public PoppableType getPoppableType() {
         return PoppableType.WIDGET;
+    }
+
+    @Override
+    public boolean onDelegateTouchEvent(@NonNull MotionEvent event) {
+        return mCustomEventsTouchHandler.onDelegateTouchEvent(event);
+    }
+
+    @Nullable
+    @Override
+    public CustomActionsListener getCustomActionsListener() {
+        return mCustomEventsTouchHandler.getCustomActionsListener();
+    }
+
+    @Override
+    public void setCustomActionsListener(@Nullable CustomActionsListener customActionsListener) {
+        mCustomEventsTouchHandler.setCustomActionsListener(customActionsListener);
     }
 
     /**
