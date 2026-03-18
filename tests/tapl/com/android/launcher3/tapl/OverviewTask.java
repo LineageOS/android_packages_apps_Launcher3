@@ -331,8 +331,7 @@ public final class OverviewTask {
         try (LauncherInstrumentation.Closable e = mLauncher.eventsCheck();
              LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
                      "want to tap the task menu")) {
-            mLauncher.clickLauncherObject(
-                    mLauncher.waitForObjectInContainer(mTask, task.iconAppRes));
+            mLauncher.waitForObjectInContainer(mTask, task.iconAppRes).click();
 
             try (LauncherInstrumentation.Closable c1 = mLauncher.addContextLayer(
                     "tapped the task menu")) {
