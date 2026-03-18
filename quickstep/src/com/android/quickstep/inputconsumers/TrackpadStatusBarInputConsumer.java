@@ -42,6 +42,7 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
 
     private final Context mContext;
     private final SystemUiProxy mSystemUiProxy;
+    private final RecentsAnimationDeviceState mDeviceState;
     private final float mTouchSlop;
     private final PointF mDown = new PointF();
     private boolean mHasPassedTouchSlop;
@@ -58,6 +59,7 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
         mContext = context;
         mSystemUiProxy = SystemUiProxy.INSTANCE.get(context);
         mTouchSlop = deviceState.getTouchSlop();
+        mDeviceState = deviceState;
     }
 
     @Override
@@ -79,8 +81,8 @@ public class TrackpadStatusBarInputConsumer extends DelegateInputConsumer {
                         float displacementY = ev.getY() - mDown.y;
                         if (Math.abs(displacementY) > mTouchSlop) {
                             mHasPassedTouchSlop = true;
-                            if (displacementY > 0) {
-                                if (Flags.enableNewTouchpadGestures()
+                            if (displacementY > 0 || mDeviceState.isNotificationPanelVisible()) {
+                                if (displacementY > 0 && Flags.enableNewTouchpadGestures()
                                         && isThreeFingerTrackpadSwipe(ev)) {
                                     tryLaunchCurrentTaskIfInOverview();
                                 }
