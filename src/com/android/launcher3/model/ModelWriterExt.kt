@@ -17,7 +17,6 @@ package com.android.launcher3.model
 
 import androidx.annotation.WorkerThread
 import com.android.launcher3.util.Preconditions
-import java.util.function.Consumer
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -28,26 +27,27 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  *
  * This provides a more modern and convenient API for clients using Kotlin coroutines.
  *
+ * @param T Any result type
  * @param block The block of code to execute within the transaction, receiving a
  *   [TransactionContext] handle for performing mutations.
- * @return [Unit] if the transaction completes successfully.
+ * @return the result of the block if the transaction completes successfully.
  * @throws RuntimeException if the scheduled transaction fails to complete.
  */
 @WorkerThread
-suspend fun IModelWriter.scheduleTransactionSuspending(block: (TransactionContext) -> Unit) {
+suspend fun <T> IModelWriter.scheduleTransactionSuspending(block: (TransactionContext) -> T): T {
     Preconditions.assertNonUiThread()
     return suspendCancellableCoroutine { continuation ->
         scheduleTransaction(
-            onComplete = { success ->
+            onComplete = { success, result ->
                 if (success) {
-                    continuation.resume(Unit)
+                    @Suppress("UNCHECKED_CAST") continuation.resume(result as T)
                 } else {
                     continuation.resumeWithException(
                         RuntimeException("The scheduled transaction failed to complete.")
                     )
                 }
             },
-            block = Consumer { block(it) },
+            block = block,
         )
     }
 }
