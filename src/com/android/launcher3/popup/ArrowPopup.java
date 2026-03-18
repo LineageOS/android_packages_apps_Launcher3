@@ -41,7 +41,6 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsets;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
@@ -484,15 +483,8 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
         x -= insets.left;
         y -= insets.top;
 
-        int tappableBottomInset = insets.bottom;
-        WindowInsets windowInsets = dragLayer.getRootWindowInsets();
-        if (windowInsets != null) {
-            tappableBottomInset = windowInsets.getInsets(
-                    WindowInsets.Type.tappableElement()).bottom;
-        }
-
         mGravity = 0;
-        if ((insets.top + y + height) > (dragLayer.getBottom() - tappableBottomInset)) {
+        if ((insets.top + y + height) > (dragLayer.getBottom() - insets.bottom)) {
             // The container is opening off the screen, so just center it in the drag layer instead.
             mGravity = Gravity.CENTER_VERTICAL;
             // Put the container next to the icon, preferring the right side in ltr (left in rtl).
