@@ -88,6 +88,7 @@ public class TaplTestsKeyboardQuickSwitch extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 486280168)
     public void testDismiss_fromApp() {
         runTest(TestSurface.LAUNCHED_APP, TestCase.DISMISS);
     }

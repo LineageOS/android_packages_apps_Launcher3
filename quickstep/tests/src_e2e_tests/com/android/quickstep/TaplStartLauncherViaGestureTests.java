@@ -63,6 +63,7 @@ public class TaplStartLauncherViaGestureTests extends AbstractQuickStepTest {
 
     @Test
     @NavigationModeSwitch(mode = NavigationModeSwitchRule.Mode.ZERO_BUTTON)
+    @DesktopStability(flavors = LOCAL, bug = 486281085)
     public void testStressSwipeHome() {
         runTest(TestCase.TO_HOME);
     }
