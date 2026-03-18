@@ -641,7 +641,12 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         boolean isRecycled = getTag() != info;
         if (!isRecycled && getIcon() != null
                 && getIcon().getDelegate() instanceof AutomatedIconDelegate aid) {
-            aid.startExitAnimation(() -> setIcon(iconDrawable));
+            aid.startExitAnimation(() -> {
+                // Ensure view wasn't recycled for a different item while animation was running.
+                if (getTag() == info) {
+                    setIcon(iconDrawable);
+                }
+            });
             return;
         }
         setIcon(iconDrawable);

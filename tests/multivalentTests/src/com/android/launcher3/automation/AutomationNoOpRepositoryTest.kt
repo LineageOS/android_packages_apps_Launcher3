@@ -38,7 +38,7 @@ class AutomationNoOpRepositoryTest {
     @Test
     fun automationChanges_stream_neverEmits() {
         val receivedChanges = mutableListOf<AutomationChange>()
-        automationRepo.automationChanges
+        automationRepo.automatedPackages.changes
             .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
             .use { assertThat(receivedChanges).isEmpty() }
     }

@@ -28,8 +28,8 @@ import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriorit
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.util.DaggerSingletonTracker
-import com.android.launcher3.util.ListenableStream
-import com.android.launcher3.util.MutableListenableStream
+import com.android.launcher3.util.ListenableDiffAwareRef
+import com.android.launcher3.util.MutableDiffAwareRef
 import com.android.launcher3.util.PackageUserKey
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -44,20 +44,17 @@ constructor(
     lifecycle: DaggerSingletonTracker,
 ) : AutomationRepository {
 
-    private val _automationChanges: MutableListenableStream<AutomationChange> =
-        MutableListenableStream()
+    private val _automatedPackages: MutableDiffAwareRef<Set<PackageUserKey>, AutomationChange> =
+        MutableDiffAwareRef(hashSetOf())
 
-    override val automationChanges: ListenableStream<AutomationChange> =
-        _automationChanges.asListenable()
+    override val automatedPackages: ListenableDiffAwareRef<Set<PackageUserKey>, AutomationChange> =
+        _automatedPackages.asListenable()
 
     /** Callback from ComputerControlExtensions for automation changes. */
     private val automatedPackageListener = AutomatedPackageListener(::onAutomationChange)
 
     /** Cache for local automation state in case of reload. */
     private val automationCache: MutableMap<AutomationKey, Set<String>> = mutableMapOf()
-
-    /** Set of all currently automated packages for faster lookup. */
-    private var allAutomatedPackages: Set<PackageUserKey> = hashSetOf()
 
     init {
         computerControlExtensions?.registerAutomatedPackageListener(
@@ -75,11 +72,11 @@ constructor(
     }
 
     override fun isPackageAutomated(user: UserHandle, packageName: String): Boolean =
-        allAutomatedPackages.contains(PackageUserKey(packageName, user))
+        _automatedPackages.value.contains(PackageUserKey(packageName, user))
 
     // UserHandle.of() is a system API, so we only use in Quickstep implementation.
     override fun isPackageAutomated(userId: Int, packageName: String): Boolean =
-        allAutomatedPackages.contains(PackageUserKey(packageName, UserHandle.of(userId)))
+        _automatedPackages.value.contains(PackageUserKey(packageName, UserHandle.of(userId)))
 
     /**
      * Updates cache with the current state of automation for each automatingPackage (automator) and
@@ -95,9 +92,12 @@ constructor(
         automatedPackages: List<String>,
         user: UserHandle,
     ) {
-        Log.d(TAG, "onAutomationChange: automator:$automator," +
-            " automatedPackages:$automatedPackages," +
-            " user:$user")
+        Log.d(
+            TAG,
+            "onAutomationChange: automator:$automator," +
+                " automatedPackages:$automatedPackages," +
+                " user:$user",
+        )
         val key = AutomationKey(user, automator)
         val updatedPackagesSet = automatedPackages.toSet()
 
@@ -118,25 +118,27 @@ constructor(
                 .toHashSet()
 
         // Calculate delta of newly automated and no longer automated packages.
-        val currAllAutomatedPackages = allAutomatedPackages
+        val currAllAutomatedPackages = _automatedPackages.value
         val addedPackages =
             (newAllAutomatedPackages - currAllAutomatedPackages)
-                .filter { it.mUser == user }
-                .map { it.mPackageName }
+                .filter { packageUserKey -> packageUserKey.mUser == user }
+                .map { packageUserKey -> packageUserKey.mPackageName }
                 .toHashSet()
         val removedPackages =
             (currAllAutomatedPackages - newAllAutomatedPackages)
-                .filter { it.mUser == user }
-                .map { it.mPackageName }
+                .filter { packageUserKey -> packageUserKey.mUser == user }
+                .map { packageUserKey -> packageUserKey.mPackageName }
                 .toHashSet()
 
         // If there is a net change to automated packages, dispatch update.
         if (addedPackages.isNotEmpty() || removedPackages.isNotEmpty()) {
             val change = AutomationChange(user, addedPackages, removedPackages)
-            Log.d(TAG, "onAutomationChange: dispatching AutomationChange:$change")
-            _automationChanges.dispatchValue(change)
-            // Atomically replace the old set with the new one.
-            allAutomatedPackages = newAllAutomatedPackages
+            Log.d(
+                TAG,
+                "onAutomationChange: updating state and dispatching AutomationChange:$change",
+            )
+            // Atomically update state and delta change.
+            _automatedPackages.dispatchValue(newAllAutomatedPackages, change)
         }
     }
 
