@@ -559,6 +559,9 @@ class WorkspaceItemProcessor(
         var shouldUpdate = inflationResult.isUpdate
         val lapi = inflationResult.widgetInfo
         appWidgetInfo.contentDescription = lapi?.loadLabel(context.packageManager)
+        if (lapi != null) {
+            appWidgetInfo.updateWidgetFeatures(lapi)
+        }
 
         FileLog.d(
             TAG,

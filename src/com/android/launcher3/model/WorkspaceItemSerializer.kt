@@ -158,7 +158,7 @@ constructor(
                 val info = LauncherAppWidgetProviderInfo.fromProviderInfo(context, providerInfo)
                 if (info.provider != item.intent.component || info.profile != item.user) return null
 
-                val widgetInfo = LauncherAppWidgetInfo(widgetId, info.provider)
+                val widgetInfo = LauncherAppWidgetInfo(widgetId, info)
                 widgetInfo.minSpanX = info.minSpanX
                 widgetInfo.minSpanY = info.minSpanY
                 widgetInfo.spanX = min(info.spanX, idp.numColumns)

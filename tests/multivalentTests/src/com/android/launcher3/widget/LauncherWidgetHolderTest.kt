@@ -21,6 +21,7 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.launcher3.BuildConfig.WIDGETS_ENABLED
 import com.android.launcher3.util.LauncherMultivalentJUnit
 import com.android.launcher3.util.TestActivityContext
+import com.android.launcher3.widget.LauncherWidgetHolder.APPWIDGET_HOST_ID
 import com.android.launcher3.widget.LauncherWidgetHolder.FLAG_ACTIVITY_RESUMED
 import com.android.launcher3.widget.LauncherWidgetHolder.FLAG_ACTIVITY_STARTED
 import com.android.launcher3.widget.LauncherWidgetHolder.FLAG_STATE_IS_NORMAL
@@ -49,7 +50,7 @@ class LauncherWidgetHolderTest {
     @Before
     fun setUp() {
         assertTrue(WIDGETS_ENABLED)
-        widgetHolder = LauncherWidgetHolder(mContext)
+        widgetHolder = LauncherWidgetHolder(mContext, APPWIDGET_HOST_ID)
     }
 
     @After
