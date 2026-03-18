@@ -28,9 +28,12 @@ import com.android.launcher3.LauncherApplication
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundContext
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.model.data.AppInfo
+import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout.ChooseLayoutGridSize
 import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout.ChooseLayoutState
 import com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerViewModel
 import com.android.launcher3.organizer.generator.CreationSession
+import java.util.stream.Collectors
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -89,10 +92,14 @@ constructor(
         chooseLayoutState = chooseLayoutState.copy(selectedLayout = index)
     }
 
-    /** TODO(): Add a real implementation to update the Layouts. */
-    fun updateLayouts(n: Int) {
-        chooseLayoutState =
-            chooseLayoutState.copy(layouts = (0 until n).toList(), selectedLayout = 0)
+    /** Update the Layouts to be shown. Each list is a different page. */
+    fun updateLayouts(items: List<List<ItemInfo>>) {
+        chooseLayoutState = chooseLayoutState.copy(layouts = items)
+    }
+
+    /** Update the [ChooseLayoutGridSize] for the chooseLayoutState. */
+    fun updateGridSize(chooseLayoutGridSize: ChooseLayoutGridSize) {
+        chooseLayoutState = chooseLayoutState.copy(chooseLayoutGridSize = chooseLayoutGridSize)
     }
 
     companion object {
@@ -104,10 +111,25 @@ constructor(
                         as LauncherApplication
                 val appComponent = application.appComponent
                 SpaceCreatorViewModel(
-                    creationSessionFactory = appComponent.creationSessionFactory,
-                    lightweightBackgroundContext =
-                        appComponent.productionDispatchers.lightweightBackgroundUiDispatcher,
-                )
+                        creationSessionFactory = appComponent.creationSessionFactory,
+                        lightweightBackgroundContext =
+                            appComponent.productionDispatchers.lightweightBackgroundUiDispatcher,
+                    )
+                    .apply {
+                        // TODO(b/493995739): remove this and use the actual business logic. This is
+                        // only for manual testing.
+                        updateGridSize(ChooseLayoutGridSize(5, 6))
+                        val data = appComponent.homeScreenRepository.workspaceState.value
+                        val itemsFirstScreen =
+                            data
+                                .stream()
+                                .collect(Collectors.toList())
+                                .groupBy { it.screenId }
+                                .values
+                                .toList()
+                                .filter { it.isNotEmpty() }
+                        updateLayouts(itemsFirstScreen)
+                    }
             }
         }
     }
