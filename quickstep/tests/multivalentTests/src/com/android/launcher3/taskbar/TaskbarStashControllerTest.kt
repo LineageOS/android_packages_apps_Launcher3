@@ -28,6 +28,7 @@ import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING_IN_DESKTOP_MODE
 import com.android.launcher3.QuickstepTransitionManager.PINNED_TASKBAR_TRANSITION_DURATION
 import com.android.launcher3.R
+import com.android.launcher3.desktop.DesktopStateProvider.getDesktopState
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.StashedHandleViewController.ALPHA_INDEX_STASHED
 import com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_BUBBLES
@@ -65,7 +66,6 @@ import com.android.launcher3.util.RoboApiWrapper.convertToSpy
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE
 import com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR
-import com.android.wm.shell.shared.desktopmode.DesktopState
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -778,7 +778,7 @@ class TaskbarStashControllerTest {
     @Test
     @TaskbarMode(THREE_BUTTONS)
     fun testThreeButtonsTaskbarOnHome_homeShownBehindDesktop_showsIconsAndBg() {
-        val desktopState = DesktopState.getInstance(activityContext)
+        val desktopState = activityContext.getDesktopState()
         desktopState.convertToSpy()
         doReturn(true).whenever(desktopState).shouldShowHomeBehindDesktop
         LauncherPrefs.get(context).put(TASKBAR_PINNING_IN_DESKTOP_MODE, false)

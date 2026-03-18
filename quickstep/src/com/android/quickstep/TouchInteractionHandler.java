@@ -229,6 +229,7 @@ public class TouchInteractionHandler extends ContextWrapper {
             ActiveTrackpadList activeTrackpadList,
             DisplayModel.Factory<InputResource> displayModelFactory,
             DesktopVisibilityController desktopVisibilityController,
+            DesktopState desktopState,
             @Ui Executor uiExecutor,
             @Named(CONNECTION_CLEANER) ThreadSafeRunnableList cleanupTasks
     ) {
@@ -250,7 +251,7 @@ public class TouchInteractionHandler extends ContextWrapper {
         mAllAppsActionManager = allAppsActionManager;
         mOverviewComponentObserver = overviewComponentObserver;
 
-        mDesktopState = DesktopState.getInstance(this);
+        mDesktopState = desktopState;
         mMainChoreographer = Choreographer.getInstance();
         mTaskbarManager = taskbarManager;
 

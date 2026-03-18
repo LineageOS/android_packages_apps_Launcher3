@@ -21,7 +21,6 @@ import com.android.app.displaylib.DisplaysWithDecorationsRepositoryCompat;
 import com.android.app.displaylib.PerDisplayRepository;
 import com.android.internal.policy.DesktopModeCompatPolicy;
 import com.android.launcher3.LifecycleTracker;
-import com.android.quickstep.cuebar.data.repository.InsightHandler;
 import com.android.launcher3.dagger.LauncherAppComponent;
 import com.android.launcher3.dagger.LauncherBaseAppComponent;
 import com.android.launcher3.dagger.PerDisplayComponent;
@@ -44,6 +43,7 @@ import com.android.quickstep.SystemUiProxy;
 import com.android.quickstep.TaskAnimationManager;
 import com.android.quickstep.TaskOverlayFactory;
 import com.android.quickstep.TopTaskTracker;
+import com.android.quickstep.cuebar.data.repository.InsightHandler;
 import com.android.quickstep.input.QuickstepKeyGestureEventsManager;
 import com.android.quickstep.inputconsumers.NavHandleLongPressHandler;
 import com.android.quickstep.logging.SettingsChangeLogger;
@@ -53,6 +53,7 @@ import com.android.quickstep.util.ContextualSearchHapticManager;
 import com.android.quickstep.util.ContextualSearchStateManager;
 import com.android.quickstep.window.RecentsWindowManager;
 import com.android.quickstep.window.RecentsWindowTracker;
+import com.android.wm.shell.shared.desktopmode.DesktopState;
 
 import java.util.Set;
 
@@ -76,6 +77,7 @@ public interface QuickstepBaseAppComponent extends LauncherBaseAppComponent {
 
     OverviewComponentObserver getOverviewComponentObserver();
 
+    DesktopState getDesktopState();
     DesktopVisibilityController getDesktopVisibilityController();
 
     TopTaskTracker getTopTaskTracker();
