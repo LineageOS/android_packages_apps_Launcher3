@@ -72,6 +72,8 @@ import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulActivity;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarManager;
+import com.android.launcher3.taskbar.TaskbarUiState;
+import com.android.launcher3.taskbar.TaskbarUiStateMonitor;
 import com.android.launcher3.taskbar.bubbles.BubbleControllers;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
@@ -761,6 +763,8 @@ public class TouchInteractionHandler extends ContextWrapper {
             gestureState.updateLastStartedTaskIds(previousGestureState.getLastStartedTaskIds());
             gestureState.updatePreviouslyAppearedTaskIds(
                     previousGestureState.getPreviouslyAppearedTaskIds());
+            gestureState.setTaskbarAlreadyOpen(previousGestureState.isTaskbarAlreadyOpen());
+            gestureState.setTaskbarAllAppsOpen(previousGestureState.isTaskbarAllAppsOpen());
         } else {
             gestureState = new GestureState(
                     mOverviewComponentObserver.get(),
@@ -768,6 +772,10 @@ public class TouchInteractionHandler extends ContextWrapper {
                     ActiveGestureLog.INSTANCE.incrementLogId());
             taskInfo = TopTaskTracker.INSTANCE.get(this).getCachedTopTask(false, displayId);
             gestureState.updateRunningTask(taskInfo);
+            TaskbarUiState uiState = TaskbarUiStateMonitor.INSTANCE.get(this)
+                    .getTaskbarUiState(displayId);
+            gestureState.setTaskbarAlreadyOpen(!uiState.isTaskbarStashed());
+            gestureState.setTaskbarAllAppsOpen(uiState.isTaskbarAllAppsOpen());
         }
         gestureState.setTrackpadGestureType(trackpadGestureType);
 
