@@ -37,23 +37,4 @@ constructor(@ApplicationContext private val context: Context) :
             category = getCategoryTopic(context, app.getApplicationInfo().category),
         )
     }
-
-    private companion object {
-        private fun getCategoryTopic(context: Context, category: Int): String? {
-            return when (category) {
-                ApplicationInfo.CATEGORY_GAME -> context.getString(R.string.topic_category_games)
-                ApplicationInfo.CATEGORY_AUDIO -> context.getString(R.string.topic_category_audio)
-                ApplicationInfo.CATEGORY_VIDEO -> context.getString(R.string.topic_category_video)
-                ApplicationInfo.CATEGORY_IMAGE -> context.getString(R.string.topic_category_image)
-                ApplicationInfo.CATEGORY_SOCIAL -> context.getString(R.string.topic_category_social)
-                ApplicationInfo.CATEGORY_NEWS -> context.getString(R.string.topic_category_news)
-                ApplicationInfo.CATEGORY_MAPS -> context.getString(R.string.topic_category_maps)
-                ApplicationInfo.CATEGORY_PRODUCTIVITY ->
-                    context.getString(R.string.topic_category_productivity)
-                ApplicationInfo.CATEGORY_ACCESSIBILITY ->
-                    context.getString(R.string.topic_category_accessibility)
-                else -> null
-            }
-        }
-    }
 }
