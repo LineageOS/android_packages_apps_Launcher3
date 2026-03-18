@@ -21,7 +21,7 @@ import androidx.compose.runtime.Composable
 /** Abstract model for a [DialogView] */
 abstract class DialogViewModel<T : DialogViewModel<T>>(
     val title: String,
-    val content: @Composable (T) -> Unit,
+    val content: @Composable DialogScope.(T) -> Unit,
     val neutralButton: String? = null,
     val positiveButton: String? = null,
     val onPositiveButtonClick: ((T) -> Boolean)? = null,
@@ -30,7 +30,7 @@ abstract class DialogViewModel<T : DialogViewModel<T>>(
 /** Model for showing a simple [DialogView]. */
 class SimpleDialogViewModel(
     title: String,
-    content: @Composable (SimpleDialogViewModel) -> Unit,
+    content: @Composable DialogScope.(SimpleDialogViewModel) -> Unit,
     neutralButton: String? = null,
     positiveButton: String? = null,
     onPositiveButtonClick: ((SimpleDialogViewModel) -> Boolean)? = null,
