@@ -85,10 +85,8 @@ public final class TestProtocol {
     public static final String TEST_INFO_PARAM_INDEX = "index";
     public static final String TEST_INFO_PARAM_CELL_SPAN = "cell-span";
 
-    public static final String REQUEST_HOME_TO_OVERVIEW_SWIPE_HEIGHT =
-            "home-to-overview-swipe-height";
-    public static final String REQUEST_BACKGROUND_TO_OVERVIEW_SWIPE_HEIGHT =
-            "background-to-overview-swipe-height";
+    public static final String REQUEST_SWIPE_TO_OVERVIEW_HEIGHT =
+            "swipe-to-overview-height";
     public static final String REQUEST_HOME_TO_ALL_APPS_SWIPE_HEIGHT =
             "home-to-all-apps-swipe-height";
     public static final String REQUEST_ICON_HEIGHT =

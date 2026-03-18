@@ -34,7 +34,6 @@ import com.android.quickstep.dagger.SysUIConnectionComponent;
 import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
 import com.android.quickstep.util.ActiveTrackpadList;
 import com.android.quickstep.util.GroupTask;
-import com.android.quickstep.util.LayoutUtils;
 import com.android.quickstep.views.DesktopTaskView;
 import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
@@ -113,14 +112,7 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                 return response;
             }
 
-            case TestProtocol.REQUEST_HOME_TO_OVERVIEW_SWIPE_HEIGHT: {
-                final float swipeHeight =
-                        LayoutUtils.getDefaultSwipeHeight(mContext, getDeviceProfile(displayId));
-                response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD, (int) swipeHeight);
-                return response;
-            }
-
-            case TestProtocol.REQUEST_BACKGROUND_TO_OVERVIEW_SWIPE_HEIGHT: {
+            case TestProtocol.REQUEST_SWIPE_TO_OVERVIEW_HEIGHT: {
                 final float swipeHeight =
                         getDeviceProfile(displayId).getDeviceProperties().getHeightPx() / 2f;
                 response.putInt(TestProtocol.TEST_INFO_RESPONSE_FIELD, (int) swipeHeight);
