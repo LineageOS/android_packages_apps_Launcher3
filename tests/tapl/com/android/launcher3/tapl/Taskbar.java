@@ -137,9 +137,9 @@ public final class Taskbar {
                 "want to open taskbar all apps");
              LauncherInstrumentation.Closable e = mLauncher.eventsCheck()) {
 
-            mLauncher.clickLauncherObject(mLauncher.waitForObjectInContainer(
+            mLauncher.waitForObjectInContainer(
                     mLauncher.waitForSystemLauncherObject(TASKBAR_RES_ID),
-                    getAllAppsButtonSelector()));
+                    getAllAppsButtonSelector()).click();
 
             return getAllApps();
         }
@@ -182,9 +182,9 @@ public final class Taskbar {
                 "want to open home all apps from taskbar");
              LauncherInstrumentation.Closable e = mLauncher.eventsCheck()) {
 
-            mLauncher.clickLauncherObject(mLauncher.waitForObjectInContainer(
+            mLauncher.waitForObjectInContainer(
                     mLauncher.waitForSystemLauncherObject(TASKBAR_RES_ID),
-                    getAllAppsButtonSelector()));
+                    getAllAppsButtonSelector()).click();
 
             return mLauncher.getAllApps();
         }
@@ -200,9 +200,8 @@ public final class Taskbar {
         try (LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
                 "Click on taskbar overflow button");
              LauncherInstrumentation.Closable e = mLauncher.eventsCheck()) {
-            UiObject2 taskbarOverflowButton = mLauncher.waitForSystemLauncherObject(
-                    "taskbar_overflow_view");
-            mLauncher.clickLauncherObject(taskbarOverflowButton);
+            mLauncher.waitForSystemLauncherObject(
+                    "taskbar_overflow_view").click();
 
             UiObject2 kqs = mLauncher.waitForSystemLauncherObject(KEYBOARD_QUICK_SWITCH_RES_ID);
 
@@ -214,10 +213,9 @@ public final class Taskbar {
             UiObject2 task = overflownApps.get(overflownApps.size() - 1 - index);
 
             if (mLauncher.isLauncherActivityStarted()) {
-                mLauncher.executeAndWaitForLauncherStop(() -> mLauncher.clickLauncherObject(task),
-                        "clicking a task in overflow");
+                mLauncher.executeAndWaitForLauncherStop(task::click, "clicking a task in overflow");
             } else {
-                mLauncher.clickLauncherObject(task);
+                task.click();
             }
 
             mLauncher.waitUntilLauncherObjectGone(KEYBOARD_QUICK_SWITCH_RES_ID);

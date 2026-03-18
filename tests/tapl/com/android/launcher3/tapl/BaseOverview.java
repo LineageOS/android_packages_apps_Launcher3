@@ -194,9 +194,9 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
             final BySelector clearAllSelector = mLauncher.getOverviewObjectSelector("clear_all");
             flingForwardUntilClearAllVisibleImpl();
 
-            final Runnable clickClearAll = () -> mLauncher.clickLauncherObject(
+            final Runnable clickClearAll = () ->
                     mLauncher.waitForObjectInContainer(verifyActiveContainer(),
-                            clearAllSelector));
+                            clearAllSelector).click();
 
             if (mLauncher.isInDesktopFirstMode()) {
                 // In desktop-first mode clear-all does not go to a home
@@ -521,8 +521,7 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
             try (LauncherInstrumentation.Closable c1 = mLauncher.addContextLayer(
                     "scrolled to add desktop button")) {
                 int desktopTasksCount = overview.getDesktopTasksCount();
-                mLauncher.clickLauncherObject(mLauncher
-                        .waitForOverviewObject("add_desktop_button"));
+                mLauncher.waitForOverviewObject("add_desktop_button").click();
                 mLauncher.assertTrue("Failed to verify the num of desks, expected num is: "
                         + (desktopTasksCount + 1) + ", but get: " + overview.getDesktopTasksCount(),
                         mLauncher.waitAndGet(() ->
