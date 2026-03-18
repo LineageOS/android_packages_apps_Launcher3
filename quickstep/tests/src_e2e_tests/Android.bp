@@ -59,7 +59,7 @@ filegroup {
         "com/android/quickstep/recents/TaplOverviewIconTest.java",
         "com/android/quickstep/recents/TaplOverviewKeyboardTest.java",
         "com/android/quickstep/recents/TaplOverviewTest.java",
-        "com/android/quickstep/recents/TaplOverviewExternalDisplayTest.kt",
+        "com/android/quickstep/recents/TaplTestOverviewExternalDisplay.kt",
     ],
 }
 
