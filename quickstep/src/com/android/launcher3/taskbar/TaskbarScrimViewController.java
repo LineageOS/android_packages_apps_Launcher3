@@ -152,6 +152,10 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
             // bubbles are on the launcher home screen - scrim should not be applied
             return false;
         }
+        if (!mTaskbarVisible) {
+            // taskbar is not visible - scrim should not be applied
+            return false;
+        }
         return !mControllers.navbarButtonsViewController.isImeVisible()
                 && !mControllers.taskbarStashController.isStashed()
                 && !mControllers.taskbarStashController.isHiddenForBubbles();
