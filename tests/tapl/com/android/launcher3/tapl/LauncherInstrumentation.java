@@ -1620,9 +1620,17 @@ public final class LauncherInstrumentation {
     }
 
     LaunchedAppState assertAppLaunched(@NonNull String expectedPackageName) {
-        BySelector packageSelector = By.pkg(expectedPackageName);
-        assertTrue("App didn't start: (" + packageSelector + ")",
-                mDevice.wait(Until.hasObject(packageSelector),
+        return assertAppLaunched(expectedPackageName, null);
+    }
+
+    LaunchedAppState assertAppLaunched(
+            @NonNull String expectedPackageName, @Nullable String expectedVisibleText) {
+        BySelector selector = By.pkg(expectedPackageName);
+        if (expectedVisibleText != null) {
+            selector = selector.text(expectedVisibleText);
+        }
+        assertTrue("App didn't start: (" + selector + ")",
+                mDevice.wait(Until.hasObject(selector),
                         LauncherInstrumentation.WAIT_TIME_MS));
         return new LaunchedAppState(this);
     }
