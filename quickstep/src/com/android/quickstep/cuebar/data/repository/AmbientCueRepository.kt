@@ -37,6 +37,7 @@ import android.service.personalcontext.hint.PublishedContextHint
 import android.service.personalcontext.insight.ActionableInsight
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
+import android.service.personalcontext.insight.HintInvalidationInsight
 import android.service.personalcontext.insight.InsightActionDetails
 import android.service.personalcontext.insight.InsightCollection
 import android.service.personalcontext.insight.InsightDisplayDetails
@@ -182,6 +183,10 @@ constructor(
 
     private var debounceTaskJob: Job? = null
 
+    // The hint ID of the current displayed conversation hint. Used to determine if a
+    // HintInvalidationInsight is for the current conversation.
+    private var currentConversationHintId: UUID? = null
+
     private val focusListener = AmbientCueFocusListener(WeakReference(this), bgExecutor)
 
     private fun launchPendingIntent(pendingIntent: PendingIntent) {
@@ -280,6 +285,14 @@ constructor(
             val actions = mapInsightToActions(insight.getInsight())
 
             if (actions.isNotEmpty()) {
+                // Update the current conversation hint ID if the action is non-empty.
+                insight.getInsight().originHints
+                    .map { it.contextHint }
+                    .filterIsInstance<ContentCaptureConversationHint>()
+                    .firstOrNull()
+                    ?.let {
+                        currentConversationHintId = it.hintId
+                    }
                 isDeactivated.dispatchValue(false)
             } else {
                 Log.i(TAG, "No actions, clear cuebar")
@@ -302,6 +315,15 @@ constructor(
         if (insight.originHints.any { it.contextHint is AutofillInlineRequestHint }) {
             // Always ignore the insight together with AutofillInlineRequestHint.
             return false
+        }
+
+        if (insight is HintInvalidationInsight) {
+            Log.d(
+                TAG,
+                "cuebar HintInvalidationInsight: $insight, " +
+                    "currentConversationHintId: $currentConversationHintId"
+            )
+            return insight.invalidatedHintId == currentConversationHintId
         }
 
         return insight.originHints.any { hintEligibleForCueBar(it.contextHint) }
