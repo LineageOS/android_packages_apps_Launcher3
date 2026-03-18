@@ -704,3 +704,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "enable_fixed_qsb_at_bottom"
+  namespace: "launcher"
+  description: "Enables fixed QSB at the bottom of hotseat"
+  bug: "489141317"
+}
