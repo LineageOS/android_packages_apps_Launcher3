@@ -111,6 +111,8 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"Appen eller organisationen tillåter inte den här åtgärden"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Widgetar stöds för närvarande inte. Välj en annan app"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"Kopiera"</string>
+    <!-- no translation found for action_image_save (6205538612408306742) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Rotera skärmen"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animation som visar hur aktivitetsfältet dyker upp längst ned på skärmen och automatiskt döljs när det inte används"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animation som visar hur du fäster aktivitetsfältet med ett reglage så att det alltid är synligt längst ned på skärmen"</string>
