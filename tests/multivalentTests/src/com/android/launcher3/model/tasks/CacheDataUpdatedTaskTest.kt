@@ -129,11 +129,12 @@ class CacheDataUpdatedTaskTest {
     fun testSessionUpdate_updates_pending_apps() {
         // Run on model executor so that no other task runs in the middle.
         val sessionInfo =
-            ApplicationProvider.getApplicationContext<Context>()
-                .packageManager
-                .packageInstaller
-                .getSessionInfo(session1)
-        Assert.assertNotNull(sessionInfo)
+            requireNotNull(
+                ApplicationProvider.getApplicationContext<Context>()
+                    .packageManager
+                    .packageInstaller
+                    .getSessionInfo(session1)
+            )
         TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {
             getInstance(context)
                 .iconCache
