@@ -16,7 +16,6 @@
 package com.android.quickstep;
 
 
-import static com.android.launcher3.util.ui.ActivityStartUtils.getAppPackageName;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
 
 import static org.junit.Assert.assertFalse;
@@ -30,6 +29,7 @@ import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.launcher3.tapl.Overview;
+import com.android.launcher3.tapl.SplitScreenSelect;
 import com.android.launcher3.tapl.Taskbar;
 import com.android.launcher3.tapl.TaskbarAppIcon;
 import com.android.quickstep.util.SplitScreenTestUtils;
@@ -108,7 +108,7 @@ public class TaplTestsSplitscreen extends AbstractQuickStepTest {
     }
 
     @Test
-    public void testSaveAppPairMenuItemDoesNotExistOnSingleTask() throws Exception {
+    public void testSaveAppPairMenuItemDoesNotExistOnSingleTask() {
         startAppFast(CALCULATOR_APP_PACKAGE);
 
         assertFalse("Save app pair menu item is erroneously appearing on single task",
@@ -126,10 +126,14 @@ public class TaplTestsSplitscreen extends AbstractQuickStepTest {
             mLauncher.isTablet());
 
         clearAllRecentTasks();
-        startAppFast(getAppPackageName());
+        startAppFast(CALCULATOR_APP_PACKAGE);
 
-        Overview overview = mLauncher.goHome().switchToOverview();
-        overview.getCurrentTask().tapMenu().tapSplitMenuItem();
+        SplitScreenSelect overview =
+                mLauncher.getLaunchedAppState()
+                        .switchToOverview()
+                        .getCurrentTask()
+                        .tapMenu()
+                        .tapSplitMenuItem();
 
         Taskbar taskbar = overview.getTaskbar();
         String firstAppName = taskbar.getIconNames().get(0);
