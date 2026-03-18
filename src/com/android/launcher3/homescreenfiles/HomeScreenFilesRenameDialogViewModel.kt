@@ -17,29 +17,16 @@
 package com.android.launcher3.homescreenfiles
 
 import android.widget.Toast
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import com.android.launcher3.R
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.DialogViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-
-// Used to work around an issue where [androidx.compose.material3.OutlinedTextField] throws an
-// [android.content.res.Resources.NotFoundException] in tests due to common dependencies in both the
-// test and target apks. This should hypothetically be fixed by b/319712088 or by moving tests of
-// the [HomeScreenFilesRenameDialogView] out of the launcher process (b/450710219).
-typealias TextField =
-    @Composable (modifier: Modifier, value: String, onValueChange: (String) -> Unit) -> Unit
 
 /** Model for showing a home screen files rename dialog. */
 class HomeScreenFilesRenameDialogViewModel(
     activityContext: ActivityContext,
     file: HomeScreenFile,
     provider: HomeScreenFilesProvider,
-    val textField: TextField = { modifier, value, onValueChange ->
-        OutlinedTextField(modifier = modifier, value = value, onValueChange = onValueChange)
-    },
 ) :
     DialogViewModel<HomeScreenFilesRenameDialogViewModel>(
         title =

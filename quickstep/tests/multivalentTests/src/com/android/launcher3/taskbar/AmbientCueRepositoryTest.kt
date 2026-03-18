@@ -29,8 +29,10 @@ import android.service.personalcontext.hint.AutofillInlineRequestHint
 import android.service.personalcontext.hint.ContextHint
 import android.service.personalcontext.hint.PublishedContextHint
 import android.service.personalcontext.insight.ActionableInsight
+import android.service.personalcontext.hint.HintInvalidationHint
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.DisplayInsight
+import android.service.personalcontext.insight.HintInvalidationInsight
 import android.service.personalcontext.insight.InsightActionDetails
 import android.service.personalcontext.insight.InsightCollection
 import android.service.personalcontext.PersonalContextManager
@@ -68,6 +70,8 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
+import java.util.UUID
+import javax.crypto.spec.SecretKeySpec
 
 @RunWith(AndroidJUnit4::class)
 class AmbientCueRepositoryTest {
@@ -398,6 +402,79 @@ class AmbientCueRepositoryTest {
 
         verify(repository, never()).mapInsightToActions(any())
         verify(repository, never()).updateActions(any())
+    }
+
+    @Test
+    fun onInsightReceived_withMatchingHintInvalidationInsight_clearsActions() {
+        val conversationHint = createConversationHint()
+        val insight = mockActionableInsight()
+        val publishedInsight = mock(PublishedContextInsight::class.java)
+        val renderHintWithSignature = mock(PublishedContextHint::class.java).apply {
+            `when`(contextHint).thenReturn(conversationHint)
+        }
+        `when`(insight.originHints).thenReturn(setOf(renderHintWithSignature))
+        `when`(publishedInsight.insight).thenReturn(insight)
+        val renderToken = mock(RenderToken::class.java)
+
+        repository.onInsightReceived(publishedInsight, renderToken)
+
+        // Verify actions are updated with the actionable insight
+        assertThat(repository.actions.value).isNotEmpty()
+
+        // Create a HintInvalidationInsight with the matching UUID
+        val invalidationHint = mock(HintInvalidationHint::class.java)
+        `when`(invalidationHint.invalidatedHintId).thenReturn(conversationHint.hintId)
+        val publishedInvalidationHint =
+            PublishedContextHint.Builder(
+                    invalidationHint,
+                    SecretKeySpec(ByteArray(16), "HmacSHA256"),
+                )
+                .setOriginatingPackage("android")
+                .build()
+        val invalidationInsight = HintInvalidationInsight.Builder(publishedInvalidationHint).build()
+        val publishedInvalidationInsight = mock(PublishedContextInsight::class.java)
+        `when`(publishedInvalidationInsight.insight).thenReturn(invalidationInsight)
+
+        repository.onInsightReceived(publishedInvalidationInsight, renderToken)
+
+        assertThat(repository.actions.value).isEmpty()
+    }
+
+    @Test
+    fun onInsightReceived_withMismatchingHintInvalidationInsight_doesNotClearActions() {
+        val conversationHint = createConversationHint()
+        val insight = mockActionableInsight()
+        val publishedInsight = mock(PublishedContextInsight::class.java)
+        val renderHintWithSignature = mock(PublishedContextHint::class.java).apply {
+            `when`(contextHint).thenReturn(conversationHint)
+        }
+        `when`(insight.originHints).thenReturn(setOf(renderHintWithSignature))
+        `when`(publishedInsight.insight).thenReturn(insight)
+        val renderToken = mock(RenderToken::class.java)
+
+        repository.onInsightReceived(publishedInsight, renderToken)
+
+        // Verify actions are updated with the actionable insight
+        assertThat(repository.actions.value).isNotEmpty()
+
+        // Create a HintInvalidationInsight with a mismatching UUID
+        val invalidationHint = mock(HintInvalidationHint::class.java)
+        `when`(invalidationHint.invalidatedHintId).thenReturn(UUID.randomUUID())
+        val publishedInvalidationHint =
+            PublishedContextHint.Builder(
+                    invalidationHint,
+                    SecretKeySpec(ByteArray(16), "HmacSHA256"),
+                )
+                .setOriginatingPackage("android")
+                .build()
+        val invalidationInsight = HintInvalidationInsight.Builder(publishedInvalidationHint).build()
+        val publishedInvalidationInsight = mock(PublishedContextInsight::class.java)
+        `when`(publishedInvalidationInsight.insight).thenReturn(invalidationInsight)
+
+        repository.onInsightReceived(publishedInvalidationInsight, renderToken)
+
+        // Verify actions are NOT cleared
+        assertThat(repository.actions.value).isNotEmpty()
     }
 
     private fun createConversationHint(): ContentCaptureConversationHint {

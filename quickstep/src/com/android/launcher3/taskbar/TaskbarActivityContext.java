@@ -33,6 +33,7 @@ import static com.android.launcher3.AbstractFloatingView.TYPE_ON_BOARD_POPUP;
 import static com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_OVERLAY_PROXY;
 import static com.android.launcher3.Utilities.calculateTextHeight;
 import static com.android.launcher3.Utilities.isRunningInTestHarness;
+import static com.android.launcher3.desktop.DesktopStateProvider.getDesktopState;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_FOLDER_OPEN;
 import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_DRAGGING;
 import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_FULLSCREEN;
@@ -351,8 +352,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         SettingsCache settingsCache = SettingsCache.INSTANCE.get(this);
         mIsUserSetupComplete = settingsCache.getValue(URI_USER_SETUP_COMPLETE);
         mIsNavBarKidsMode = settingsCache.getValue(URI_NAV_BAR_KIDS_MODE);
-        mBubbleFeatureConfig = new BubbleFeatureConfigImpl(mWindowContext,
-                DesktopState.getInstance(mWindowContext));
+        mBubbleFeatureConfig =
+                new BubbleFeatureConfigImpl(mWindowContext, getDesktopState(mWindowContext));
 
         applyDeviceProfile(launcherDp);
         mTaskbarSpecsEvaluator = new TaskbarSpecsEvaluator(

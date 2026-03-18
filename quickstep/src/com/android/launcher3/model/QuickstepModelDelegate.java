@@ -85,7 +85,7 @@ public class QuickstepModelDelegate extends ModelDelegate {
 
     private final StatsManager mStatsManager;
 
-    protected boolean mActive = false;
+    protected boolean mActive = true;
 
     @Inject
     public QuickstepModelDelegate(@ApplicationContext Context context,
@@ -94,7 +94,6 @@ public class QuickstepModelDelegate extends ModelDelegate {
             PredictedItemFactory.Factory itemParserFactory,
             @Nullable @Named("ICONS_DB") String dbFileName) {
         super(context);
-
 
         mIDP = idp;
         mItemParserFactory = itemParserFactory;
@@ -123,11 +122,6 @@ public class QuickstepModelDelegate extends ModelDelegate {
         PredictedContainerInfo fci = new PredictedContainerInfo(state.containerId,
                 state.storage.read(mContext, parser));
         outLoadedItems.put(state.containerId, fci);
-    }
-
-    public void markActive() {
-        super.markActive();
-        mActive = true;
     }
 
     @WorkerThread
@@ -182,6 +176,7 @@ public class QuickstepModelDelegate extends ModelDelegate {
         if (mStatsManager == null) {
             Log.d(TAG, "Skipping snapshot logging");
         }
+        if (!mActive) return;
 
         try {
             mStatsManager.setPullAtomCallback(

@@ -1308,8 +1308,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         LauncherAppWidgetInfo launcherInfo;
         launcherInfo =
-                new LauncherAppWidgetInfo(
-                        appWidgetId, appWidgetInfo.provider, appWidgetInfo, hostView);
+                new LauncherAppWidgetInfo(appWidgetId, appWidgetInfo);
         launcherInfo.spanX = itemInfo.spanX;
         launcherInfo.spanY = itemInfo.spanY;
         launcherInfo.minSpanX = itemInfo.minSpanX;

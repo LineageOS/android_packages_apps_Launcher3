@@ -56,6 +56,12 @@ class WorkspaceAppFunctionsTest {
         override suspend fun getInstalledApps(orderByUsageStats: Boolean): List<UnplacedAppSpec> {
             return emptyList()
         }
+
+        override suspend fun getInstalledWidgets(
+            orderByUsageStats: Boolean
+        ): List<UnplacedWidgetSpec> {
+            return emptyList()
+        }
     }
 
     private class FakeWorkspaceTransaction : WorkspaceTransaction {

@@ -21,6 +21,7 @@ import com.android.launcher3.Flags
 import com.android.launcher3.appfunctions.workspace.HotseatSpec
 import com.android.launcher3.appfunctions.workspace.UnplacedAppSpec
 import com.android.launcher3.appfunctions.workspace.UnplacedAppTypeTranslator
+import com.android.launcher3.appfunctions.workspace.UnplacedWidgetSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions
 import com.android.launcher3.appfunctions.workspace.WorkspaceRepository
 import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
@@ -134,6 +135,10 @@ abstract class WorkspaceFunctionsModule {
         }
 
         override suspend fun getInstalledApps(orderByUsageStats: Boolean): List<UnplacedAppSpec> {
+            return emptyList()
+        }
+
+        override suspend fun getInstalledWidgets(orderByUsageStats: Boolean): List<UnplacedWidgetSpec> {
             return emptyList()
         }
 

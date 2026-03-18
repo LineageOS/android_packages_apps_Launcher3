@@ -74,6 +74,11 @@
     <!-- Whether to enable background preloading of task thumbnails. -->
     <bool name="config_enableTaskSnapshotPreloading">true</bool>
 
+    <!-- Flag: widgetReturnAnimationMinorFixes() -->
+    <item name="widget_rect_scale_stiffness" type="dimen" format="float">600</item>
+    <item name="widget_x_stiffness" type="dimen" format="float">450</item>
+    <item name="widget_y_stiffness" type="dimen" format="float">550</item>
+
     <!-- Configuration resources -->
     <item name="dismiss_task_trans_y_damping_ratio" type="dimen" format="float">0.73</item>
     <item name="dismiss_task_trans_y_stiffness" type="dimen" format="float">800</item>
@@ -82,11 +87,6 @@
     <item name="swipe_up_rect_scale_stiffness" type="dimen" format="float">200</item>
     <item name="swipe_up_rect_scale_damping_ratio_v2" type="dimen" format="float">0.99</item>
     <item name="swipe_up_rect_scale_stiffness_v2" type="dimen" format="float">500</item>
-
-    <!-- Flag: widgetReturnAnimationMinorFixes() -->
-    <item name="widget_rect_scale_stiffness" type="dimen" format="float">1100</item>
-    <item name="widget_x_stiffness" type="dimen" format="float">900</item>
-    <item name="widget_y_stiffness" type="dimen" format="float">900</item>
 
     <item name="swipe_up_rect_xy_fling_friction" type="dimen" format="float">1.5</item>
 

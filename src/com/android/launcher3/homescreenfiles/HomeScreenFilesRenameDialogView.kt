@@ -18,21 +18,23 @@ package com.android.launcher3.homescreenfiles
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
+// TODO(b/493665827): Add test coverage.
 /** Composable which renders the content view for the home screen files rename dialog. */
 @Composable
 fun HomeScreenFilesRenameDialogView(viewModel: HomeScreenFilesRenameDialogViewModel) {
     val name by viewModel.name.collectAsStateWithLifecycle()
 
-    viewModel.textField.invoke(
-        /* modifier= */ Modifier.testTag(TEXT_FIELD_TAG).fillMaxWidth(),
-        /* value= */ name,
-        /* onValueChange= */ { viewModel.name.value = it },
+    OutlinedTextField(
+        modifier = Modifier.testTag(TEXT_FIELD_TAG).fillMaxWidth(),
+        value = name,
+        onValueChange = { viewModel.name.value = it },
     )
 }
 

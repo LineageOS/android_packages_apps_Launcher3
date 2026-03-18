@@ -159,16 +159,6 @@ flag {
 }
 
 flag {
-    name: "use_new_icon_for_archived_apps"
-    namespace: "launcher"
-    description: "Archived apps will use new cloud icon in app title instead of overlay"
-    bug: "350758155"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "letter_fast_scroller"
     namespace: "launcher"
     description: "Change fast scroller to a lettered list"
@@ -576,6 +566,13 @@ flag {
   namespace: "launcher"
   description: "Enables App Lock system shortcut in Launcher"
   bug: "475598044"
+}
+
+flag {
+    name: "enable_restoredbtask_modelwriter_refactor"
+    namespace: "launcher"
+    description: "Enables the refactored RestoreDbTask using ModelWriter."
+    bug: "489010281"
 }
 
 flag {

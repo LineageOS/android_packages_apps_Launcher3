@@ -725,8 +725,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     @UiThread
     public void applyLabel(ItemInfo info) {
-        applyLabel(info.title, info.contentDescription, Flags.useNewIconForArchivedApps()
-                && info instanceof ItemInfoWithIcon infoWithIcon
+        applyLabel(info.title, info.contentDescription,
+                info instanceof ItemInfoWithIcon infoWithIcon
                 && infoWithIcon.isInactiveArchive(), info.isDisabled());
     }
 
@@ -1118,8 +1118,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                     getLineSpacingExtra());
             if (!TextUtils.equals(modifiedString, mLastModifiedText)) {
                 mLastModifiedText = modifiedString;
-                if (Flags.useNewIconForArchivedApps()
-                        && getTag() instanceof ItemInfoWithIcon infoWithIcon
+                if (getTag() instanceof ItemInfoWithIcon infoWithIcon
                         && infoWithIcon.isInactiveArchive()) {
                     setTextWithArchivingIcon(modifiedString);
                 } else {

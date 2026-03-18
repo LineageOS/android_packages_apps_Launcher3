@@ -871,6 +871,47 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
     }
 
     @Test
+    fun onRecentTasksChanged_inDesktopMode_onlyDesktopTasksConsideredRunning() {
+        setInDesktopMode(true)
+        val desktopTask = createTask(id = 1, RUNNING_APP_PACKAGE_1)
+        val singleTask = SingleTask(createTask(id = 2, RECENT_PACKAGE_1))
+        val splitTask =
+            SplitTask(
+                createTask(id = 3, "split1"),
+                createTask(id = 4, "split2"),
+                SplitBounds(Rect(), Rect(), 3, 4, SplitScreenConstants.SNAP_TO_2_50_50)
+            )
+
+        val allTasks =
+            arrayListOf(
+                DesktopTask(0, DEFAULT_DISPLAY, arrayListOf(desktopTask)),
+                singleTask,
+                splitTask
+            )
+
+        doAnswer {
+                val callback: Consumer<ArrayList<GroupTask>> = it.getArgument(1)
+                callback.accept(allTasks)
+                taskListChangeId
+            }
+            .whenever(mockRecentsModel)
+            .getTasks(any(), any<Consumer<List<GroupTask>>>())
+
+        if (enableTaskbarUiThread()) {
+            recentTasksChangedCallback?.invoke(null)
+            waitForTaskbarUiThreadSync()
+        } else {
+            recentTasksChangedListener?.onRecentTasksChanged()
+        }
+
+        // Only the task from DesktopTask should be in runningTaskIds
+        assertThat(recentAppsController.runningTaskIds).containsExactly(1)
+        // And only that task should be shown
+        assertThat(recentShownTasks).hasSize(1)
+        assertThat(recentShownTasks[0].key.id).isEqualTo(1)
+    }
+
+    @Test
     fun onRecentTasksChanged_inDesktopMode_shownTasks_returnsRunningTasks() {
         setInDesktopMode(true)
         val task1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
@@ -1645,6 +1686,37 @@ class TaskbarRecentAppsControllerTest : TaskbarBaseTestCase() {
         // RECENT_PACKAGE_1 is created with myUserHandle
         val itemInfo = createItemInfo(RECENT_PACKAGE_1, USER_HANDLE_1)
         assertThat(recentAppsController.getNonDesktopTask(itemInfo)).isNull()
+    }
+
+    @Test
+    fun getRunningTaskWithId_taskExists_returnsTask() {
+        setInDesktopMode(true)
+        val task1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
+        val task2 = createTask(id = 2, RUNNING_APP_PACKAGE_2)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = listOf(task1, task2),
+            recentTaskPackages = emptyList(),
+        )
+
+        val result = recentAppsController.getRunningTaskWithId(2)
+
+        assertThat(result).isSameInstanceAs(task2)
+    }
+
+    @Test
+    fun getRunningTaskWithId_taskDoesNotExist_returnsNull() {
+        setInDesktopMode(true)
+        val task1 = createTask(id = 1, RUNNING_APP_PACKAGE_1)
+        prepareHotseatAndRunningAndRecentApps(
+            hotseatPackages = emptyList(),
+            runningTasks = listOf(task1),
+            recentTaskPackages = emptyList(),
+        )
+
+        val result = recentAppsController.getRunningTaskWithId(99)
+
+        assertThat(result).isNull()
     }
 
     @Test

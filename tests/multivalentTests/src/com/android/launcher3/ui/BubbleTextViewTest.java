@@ -26,8 +26,6 @@ import static com.android.launcher3.BubbleTextView.DISPLAY_SEARCH_RESULT;
 import static com.android.launcher3.BubbleTextView.DISPLAY_SEARCH_RESULT_SMALL;
 import static com.android.launcher3.BubbleTextView.DISPLAY_TASKBAR;
 import static com.android.launcher3.BubbleTextView.DISPLAY_WORKSPACE;
-import static com.android.launcher3.Flags.FLAG_ENABLE_SUPPORT_FOR_ARCHIVING;
-import static com.android.launcher3.Flags.FLAG_USE_NEW_ICON_FOR_ARCHIVED_APPS;
 import static com.android.launcher3.LauncherPrefs.ENABLE_TWOLINE_ALLAPPS_TOGGLE;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_ARCHIVED;
 import static com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_AUTOMATED;
@@ -457,7 +455,6 @@ public class BubbleTextViewTest {
         assertThat(spyTextView.getShowingMinimalPopup()).isEqualTo(false);
     }
 
-    @EnableFlags({FLAG_ENABLE_SUPPORT_FOR_ARCHIVING, FLAG_USE_NEW_ICON_FOR_ARCHIVED_APPS})
     @Test
     public void applyIconAndLabel_setsImageSpan_whenInactiveArchivedApp() {
         // Given
@@ -493,7 +490,6 @@ public class BubbleTextViewTest {
         assertThat(actualSpan.getVerticalAlignment()).isEqualTo(ALIGN_CENTER);
     }
 
-    @EnableFlags({FLAG_ENABLE_SUPPORT_FOR_ARCHIVING, FLAG_USE_NEW_ICON_FOR_ARCHIVED_APPS})
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.S)
     @Test
     public void applyIconAndLabel_setsBoldDrawable_whenBoldedTextForArchivedApp() {

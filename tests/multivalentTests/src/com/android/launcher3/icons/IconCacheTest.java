@@ -298,7 +298,7 @@ public class IconCacheTest {
         AppInfo info = new AppInfo(mContext, lai, user);
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR, () -> {
             mIconCache.clearMemoryCache();
-            mIconCache.getTitleAndIcon(info, () -> lai, DEFAULT_LOOKUP_FLAG);
+            mIconCache.getTitleAndIcon(info, DEFAULT_LOOKUP_FLAG, () -> lai);
         });
         assertFalse(info.bitmap.getMatchingLookupFlag().hasThemeIcon());
     }
@@ -315,7 +315,7 @@ public class IconCacheTest {
         AppInfo info = new AppInfo(mContext, lai, user);
         TestUtil.runOnExecutorSync(MODEL_EXECUTOR, () -> {
             mIconCache.clearMemoryCache();
-            mIconCache.getTitleAndIcon(info, () -> lai, DEFAULT_LOOKUP_FLAG.withThemeIcon());
+            mIconCache.getTitleAndIcon(info, DEFAULT_LOOKUP_FLAG.withThemeIcon(), () -> lai);
         });
         assertTrue(info.bitmap.getMatchingLookupFlag().hasThemeIcon());
     }

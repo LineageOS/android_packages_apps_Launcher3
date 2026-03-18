@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import com.android.launcher3.R
 
+// TODO(b/493665827): Add test coverage.
 /** Composable which renders the view for a [Dialog<T>]. */
 @Composable
 fun <T> DialogView(viewModel: T, onDismiss: () -> Unit) where T : DialogViewModel<T> {

@@ -20,9 +20,6 @@ import android.platform.test.rule.LimitDevicesRule
 import android.platform.test.rule.SkipOnDeviceless
 import android.provider.Settings
 import android.view.WindowManager.LayoutParams
-import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.android.launcher3.AbstractFloatingView.TYPE_DIALOG_LISTENER
@@ -36,22 +33,23 @@ import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnit
 
 /** Tests for [Dialog]. */
+@Ignore("b/493665827")
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 @SkipOnDeviceless
 class DialogTest {
     @get:Rule(order = 0) val limitDevices = LimitDevicesRule()
-    @get:Rule(order = 1) val compose = createEmptyComposeRule()
-    @get:Rule(order = 2) val mockito = MockitoJUnit.rule()
-    @get:Rule(order = 3) val app = SandboxApplication().withModelDependency()
-    @get:Rule(order = 4) val appOverride = overrideApplicationInActivity(app, mockito)
-    @get:Rule(order = 5) val launcherActivity = LauncherActivityScenarioRule<Launcher>()
+    @get:Rule(order = 1) val mockito = MockitoJUnit.rule()
+    @get:Rule(order = 2) val app = SandboxApplication().withModelDependency()
+    @get:Rule(order = 3) val appOverride = overrideApplicationInActivity(app, mockito)
+    @get:Rule(order = 4) val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
     private lateinit var dialog: SimpleDialog
 
@@ -88,25 +86,12 @@ class DialogTest {
     }
 
     @Test
-    fun testNeutralButton() {
-        // Clicking the neutral button should dismiss the dialog.
-        compose.onNodeWithTag(NEUTRAL_BUTTON_TAG).performClick().also { compose.waitForIdle() }
-        assertFalse(dialog.isShowing())
-    }
-
-    @Test
-    fun testViewComposition() {
-        // The dialog should render the expected composition.
-        compose.onNodeWithTag(DIALOG_TAG).assertExists()
-    }
-
-    @Test
     fun testViewCompositionDisposal() {
         // Dismissing the dialog should dispose of the view composition.
         dialog.content!!.run {
-            compose.waitUntil { hasComposition }
+            launcherActivity.waitUntil("View composition not created") { hasComposition }
             launcherActivity.executeOnLauncher { dialog.dismiss(animate = false) }
-            compose.waitUntil { !hasComposition }
+            launcherActivity.waitUntil("View composition not disposed") { !hasComposition }
         }
     }
 

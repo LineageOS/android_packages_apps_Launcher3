@@ -54,16 +54,15 @@ constructor(
 
     /** Performs the data migration, and updates the pending flag */
     fun performMigration() {
-        var migrationDone = false
         modelWriter.scheduleTransaction(
-            onComplete = { success ->
+            onComplete = { success, migrationDone ->
                 if (success) {
                     prefs.put(PREF_MIGRATION_PENDING, false)
-                    if (migrationDone) evaluator.notifyMigrationComplete(itemsModified)
+                    if (migrationDone == true) evaluator.notifyMigrationComplete(itemsModified)
                 }
             }
         ) { txContext ->
-            migrationDone = processItems(txContext)
+            processItems(txContext)
         }
     }
 

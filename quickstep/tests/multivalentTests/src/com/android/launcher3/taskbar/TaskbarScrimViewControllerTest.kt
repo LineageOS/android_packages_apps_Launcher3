@@ -36,6 +36,7 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
 import com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR
+import com.android.wm.shell.Flags.FLAG_FIX_TASKBAR_SCRIM_VIEW_ON_HOME
 import com.android.wm.shell.shared.bubbles.BubbleConstants.BUBBLE_BAR_EXPANDED_SCRIM_ALPHA
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -96,7 +97,7 @@ class TaskbarScrimViewControllerTest {
     }
 
     @Test
-    @DisableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @DisableFlags(FLAG_ENABLE_BUBBLE_BAR, FLAG_FIX_TASKBAR_SCRIM_VIEW_ON_HOME)
     @TaskbarMode(PINNED)
     fun testOnTaskbarVisibilityChanged_pinnedTaskbarHiddenDuringScrim_hidesScrim() {
         runOnTaskbarUiThreadSync {
@@ -114,6 +115,7 @@ class TaskbarScrimViewControllerTest {
 
     @Test
     @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @DisableFlags(FLAG_FIX_TASKBAR_SCRIM_VIEW_ON_HOME)
     @TaskbarMode(PINNED)
     fun testOnTaskbarVisibilityChanged_pinnedTaskbarOnHomeHiddenDuringScrim_hidesScrim() {
         runOnTaskbarUiThreadSync {
@@ -128,6 +130,37 @@ class TaskbarScrimViewControllerTest {
         runOnTaskbarUiThreadSync {
             scrimViewController.onTaskbarVisibilityChanged(GONE)
             animatorTestRule.advanceTimeBy(animationDuration)
+        }
+        assertThat(scrimViewController.scrimAlpha).isEqualTo(0)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR, FLAG_FIX_TASKBAR_SCRIM_VIEW_ON_HOME)
+    @TaskbarMode(PINNED)
+    fun testOnTaskbarVisibilityChanged_pinnedTaskbarHiddenDuringScrimFixFlagOn_hidesScrim() {
+        runOnTaskbarUiThreadSync {
+            scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
+            scrimViewController.updateStateForSysuiFlags(SYSUI_STATE_BUBBLES_EXPANDED, true)
+        }
+        assertThat(scrimViewController.scrimAlpha).isEqualTo(BUBBLE_BAR_EXPANDED_SCRIM_ALPHA)
+
+        runOnTaskbarUiThreadSync {
+            scrimViewController.onTaskbarVisibilityChanged(GONE)
+            animatorTestRule.advanceTimeBy(animationDuration)
+        }
+        assertThat(scrimViewController.scrimAlpha).isEqualTo(0)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR, FLAG_FIX_TASKBAR_SCRIM_VIEW_ON_HOME)
+    @TaskbarMode(PINNED)
+    fun testOnTaskbarVisibilityChanged_pinnedTaskbarOnHomeWithBubblesExpanded_noScrim() {
+        runOnTaskbarUiThreadSync {
+            scrimViewController.onTaskbarVisibilityChanged(VISIBLE)
+            taskbarUnitTestRule.activityContext.bubbleControllers!!
+                .bubbleStashController
+                .launcherState = BubbleStashController.BubbleLauncherState.HOME
+            scrimViewController.updateStateForSysuiFlags(SYSUI_STATE_BUBBLES_EXPANDED, true)
         }
         assertThat(scrimViewController.scrimAlpha).isEqualTo(0)
     }

@@ -3,6 +3,7 @@ package com.android.quickstep;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.LauncherPrefs.SELECT_TIP_SEEN;
+import static com.android.launcher3.desktop.DesktopStateProvider.getDesktopState;
 import static com.android.launcher3.taskbar.TaskbarThresholdUtils.getFromNavThreshold;
 import static com.android.launcher3.testing.shared.TestProtocol.REQUEST_INFO_DISPLAY_ID;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
@@ -40,7 +41,6 @@ import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.views.TaskView;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.wm.shell.shared.bubbles.DeviceConfig;
-import com.android.wm.shell.shared.desktopmode.DesktopState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -292,7 +292,7 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                 return getTaskbarProperty(Bundle::putBoolean, t -> t.isTransient(displayId));
             case TestProtocol.REQUEST_FLAG_IS_DESKTOP_MODE_SUPPORTED: {
                 response.putBoolean(TestProtocol.TEST_INFO_RESPONSE_FIELD,
-                        DesktopState.fromContext(mContext).isDesktopModeSupportedOnDisplay(
+                        getDesktopState(mContext).isDesktopModeSupportedOnDisplay(
                                 Integer.parseInt(arg)));
                 return response;
             }
