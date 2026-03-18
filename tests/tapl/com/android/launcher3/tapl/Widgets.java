@@ -480,7 +480,7 @@ public final class Widgets extends LauncherInstrumentation.VisibleContainer
                 if (!hasHeaderExpanded && isHeaderOutOfGestureRegion) {
                     log("Header has not been expanded. Click to expand.");
                     hasHeaderExpanded = true;
-                    mLauncher.clickLauncherObject(headerTitle);
+                    headerTitle.click();
                 }
 
                 // If we are in a tablet in landscape mode then we will have a two pane view and we

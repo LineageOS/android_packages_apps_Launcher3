@@ -2024,26 +2024,6 @@ public final class LauncherInstrumentation {
         return getRealDisplaySize().x - getWindowInsets().right - 1;
     }
 
-    /**
-     * Click on the ui object right away without waiting for animation.
-     *
-     * [UiObject2.click] would wait for all animations finished before clicking. Not waiting for
-     * animations because in some scenarios there is a playing animations when the click is
-     * attempted.
-     */
-    void clickObject(UiObject2 uiObject) {
-        final long clickTime = SystemClock.uptimeMillis();
-        final Point center = uiObject.getVisibleCenter();
-        sendPointer(clickTime, clickTime, MotionEvent.ACTION_DOWN, center,
-                GestureScope.DONT_EXPECT_PILFER);
-        sendPointer(clickTime, clickTime, MotionEvent.ACTION_UP, center,
-                GestureScope.DONT_EXPECT_PILFER);
-    }
-
-    void clickLauncherObject(UiObject2 object) {
-        clickObject(object);
-    }
-
     void scrollToLastVisibleRow(
             UiObject2 container, Rect bottomVisibleIconBounds, int topPaddingInContainer,
             int appsListBottomPadding) {
