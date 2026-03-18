@@ -19,6 +19,7 @@ package com.android.launcher3.dagger
 import android.content.Context
 import android.view.Display
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
+import com.android.quickstep.FallbackWindowInterface
 import com.android.quickstep.RecentsAnimationDeviceState
 import com.android.quickstep.RotationTouchHelper
 import com.android.quickstep.TaskAnimationManager
@@ -47,6 +48,7 @@ interface PerDisplayComponent {
     val taskAnimationManager: TaskAnimationManager
     val rotationTouchHelper: RotationTouchHelper
     val recentsWindowTracker: RecentsWindowTracker
+    val fallbackWindowInterface: FallbackWindowInterface
 
     @WindowContext fun getWindowContext(): Context
 

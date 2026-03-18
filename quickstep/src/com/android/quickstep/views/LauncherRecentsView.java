@@ -249,7 +249,9 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
 
     @Override
     public boolean canLaunchFullscreenTask() {
-        return !mSplitSelectStateController.isSplitSelectActive();
+        SplitSelectStateController splitSelectStateController = getSplitSelectStateController();
+        return splitSelectStateController == null
+                || !splitSelectStateController.isSplitSelectActive();
     }
 
     @Override

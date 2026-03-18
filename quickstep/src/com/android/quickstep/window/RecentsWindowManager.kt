@@ -19,8 +19,10 @@ package com.android.quickstep.window
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.app.ActivityOptions
 import android.app.ActivityTaskManager
+import android.app.WindowConfiguration
 import android.content.ComponentCallbacks
 import android.content.ComponentName
 import android.content.Context
@@ -93,6 +95,7 @@ import com.android.launcher3.util.ListenableRef
 import com.android.launcher3.util.LooperExecutor
 import com.android.launcher3.util.OverviewReleaseFlags.enablePredictiveBackInOverview
 import com.android.launcher3.util.OverviewReleaseFlags.enableRecentsWindowBlur
+import com.android.launcher3.util.PostUnlockObject
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.ScreenOnTracker
@@ -139,6 +142,8 @@ import com.android.quickstep.views.RecentsViewContainer
 import com.android.quickstep.views.TaskView
 import com.android.systemui.animation.back.FlingOnBackAnimationCallback
 import com.android.systemui.shared.recents.model.ThumbnailData
+import com.android.systemui.shared.system.TaskStackChangeListener
+import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.android.window.flags.Flags.useInputReportedFocusForAccessibility
 import com.android.wm.shell.shared.IOverviewOverlayLeashInvalidationCallback
 import com.android.wm.shell.shared.desktopmode.DesktopState
@@ -172,6 +177,8 @@ constructor(
     propertyHolder: PerDisplayHolder<RecentsWindowManager>,
     lifeCycle: PerDisplayCleanupTask,
     @Named(WINDOW_BLUR_STATE) private val blurState: ListenableRef<Boolean>,
+    private val taskStackChangeListeners: TaskStackChangeListeners,
+    overviewComponentObserver: PostUnlockObject<OverviewComponentObserver>,
 ) :
     RecentsWindowContext(windowContext, wallpaperColorHints.hints, invariantDeviceProfile),
     RecentsViewContainer,
@@ -276,6 +283,52 @@ constructor(
             }
         }
 
+    // We should clean up the recents window on the primary display on home intent start, however we
+    // have no other way of listening to this event in the 3P launcher case.
+    private val homeIntentStartedListener =
+        object : TaskStackChangeListener {
+
+            override fun onActivityRestartAttempt(
+                taskInfo: ActivityManager.RunningTaskInfo,
+                homeTaskVisible: Boolean,
+                clearedTask: Boolean,
+                wasVisible: Boolean,
+            ) {
+                super.onActivityRestartAttempt(taskInfo, homeTaskVisible, clearedTask, wasVisible)
+                // We only want to handle home intent starts on the primary display
+                if (
+                    (taskInfo.configuration.windowConfiguration.activityType !=
+                        WindowConfiguration.ACTIVITY_TYPE_HOME) ||
+                        taskInfo.displayId != DEFAULT_DISPLAY
+                )
+                    return
+                // Only hide the recents surface if we receive the home intent while in overview,
+                // otherwise gestures will appear to stop responding when the home intent is
+                // received while in BACKGROUND_APP state.
+                if (!stateManager.state.isInOverview) return
+                stateManager.moveToRestState(/* isAnimated= */ true)
+            }
+        }
+
+    private val onTaskMovedToFrontListener =
+        object : TaskStackChangeListener {
+
+            override fun onTaskMovedToFront(taskInfo: ActivityManager.RunningTaskInfo) {
+                super.onTaskMovedToFront(taskInfo)
+                if (
+                    taskInfo.configuration.windowConfiguration.activityType ==
+                        WindowConfiguration.ACTIVITY_TYPE_HOME
+                )
+                    return
+                // The state will be cleaned up by RecentsAnimationCallbacks.onTasksAppeared
+                if (fallbackWindowInterface.isInLiveTileMode) return
+                // The state will be cleaned up by the task launch callbacks
+                if (recentsView?.hasOngoingTaskViewLaunch() == true) return
+                if (!isStarted) return
+                stateManager.moveToRestState(/* isAnimated= */ true)
+            }
+        }
+
     private val recentsAnimationListener =
         object : RecentsAnimationListener {
 
@@ -321,7 +374,11 @@ constructor(
         object : IOverviewOverlayLeashInvalidationCallback.Stub() {
             override fun onOverviewOverlayLeashInvalidated() {
                 RecentsWindowProtoLogProxy.logOnOverviewOverlayLeashInvalidated()
-                cleanUpSurfaceControlViewHost()
+                uiExecutor.execute {
+                    stateManager.moveToRestState()
+
+                    cleanUpSurfaceControlViewHostInternal()
+                }
             }
         }
 
@@ -342,6 +399,31 @@ constructor(
         displayController.getListenable(displayId)?.let {
             displayChangesSafeCloseable =
                 it.changes.forEach(uiExecutor) { _ -> onDisplayInfoChanged() }
+        }
+
+        taskStackChangeListeners.registerTaskStackListener(onTaskMovedToFrontListener)
+
+        if (displayId == DEFAULT_DISPLAY) {
+            overviewComponentObserver.whenAvailable(uiExecutor) {
+                val onOverviewTargetChangedListener =
+                    OverviewComponentObserver.OverviewChangeListener { isHomeAndOverviewSame ->
+                        if (isHomeAndOverviewSame) {
+                            taskStackChangeListeners.unregisterTaskStackListener(
+                                homeIntentStartedListener
+                            )
+                        } else {
+                            taskStackChangeListeners.registerTaskStackListener(
+                                homeIntentStartedListener
+                            )
+                        }
+                    }
+
+                onOverviewTargetChangedListener.onOverviewTargetChange(it.isHomeAndOverviewSame)
+                it.addOverviewChangeListener(onOverviewTargetChangedListener)
+
+                Runnable { it.removeOverviewChangeListener(onOverviewTargetChangedListener) }
+            }
+            lifeCycle.addCloseable(closeable = overviewComponentObserver)
         }
 
         lifeCycle.addTask { destroy() }
@@ -449,6 +531,8 @@ constructor(
             recentsView?.destroy()
             recentsView = null
             windowView = null
+            taskStackChangeListeners.unregisterTaskStackListener(homeIntentStartedListener)
+            taskStackChangeListeners.unregisterTaskStackListener(onTaskMovedToFrontListener)
         }
     }
 
@@ -567,14 +651,6 @@ constructor(
         callbacks?.removeListener(recentsAnimationListener)
         callbacks = null
         screenOnTracker.removeListener(screenChangedListener)
-    }
-
-    fun cleanUpSurfaceControlViewHost() {
-        uiExecutor.execute {
-            stateManager.moveToRestState()
-
-            cleanUpSurfaceControlViewHostInternal()
-        }
     }
 
     override fun handleConfigurationChanged(newConfiguration: Configuration?) {
