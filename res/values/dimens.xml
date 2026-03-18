@@ -563,4 +563,12 @@
 
     <!-- Automated Icons -->
     <dimen name="automated_icon_stroke_width">3dp</dimen>
+
+    <!-- Dialogs -->
+    <dimen name="dialog_button_spacing">8dp</dimen>
+    <dimen name="dialog_content_padding_bottom">24dp</dimen>
+    <dimen name="dialog_content_padding_top">16dp</dimen>
+    <dimen name="dialog_elevation">2dp</dimen>
+    <dimen name="dialog_padding">24dp</dimen>
+    <dimen name="dialog_width">400dp</dimen>
 </resources>
