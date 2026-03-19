@@ -1499,7 +1499,8 @@ public class Launcher extends StatefulActivity<LauncherState>
                         public void onAnimationSuccess(Animator animator) {
                             if (focusSearch
                                     && mAppsView.getSearchUiManager().getEditText() != null) {
-                                mAppsView.getSearchUiManager().getEditText().requestFocus();
+                                mAppsView.getSearchUiManager().getEditText()
+                                    .requestFocusExplicitly();
                             }
                         }
                     });
