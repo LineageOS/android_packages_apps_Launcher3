@@ -383,10 +383,7 @@ public class LauncherWidgetHolder {
     public AppWidgetHostView createView(
             int appWidgetId, @NonNull LauncherAppWidgetProviderInfo appWidget) {
         if (appWidget.isCustomWidget()) {
-            LauncherAppWidgetHostView lahv = new LauncherAppWidgetHostView(mContext);
-            lahv.setAppWidget(INVALID_APPWIDGET_ID, appWidget);
-            CustomWidgetManager.INSTANCE.get(mContext).onViewCreated(lahv);
-            return lahv;
+            return CustomWidgetManager.INSTANCE.get(mContext).createView(mContext, appWidget);
         }
 
         LauncherAppWidgetHostView view = createViewInternal(appWidgetId, appWidget);

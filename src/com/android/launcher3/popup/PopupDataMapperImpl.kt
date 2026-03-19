@@ -19,6 +19,7 @@ package com.android.launcher3.popup
 import com.android.launcher3.Flags.enableHomeScreenFilesRenaming
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_GROUP
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FOLDER
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
@@ -59,6 +60,7 @@ class PopupDataMapperImpl @Inject constructor(popupDataSource: PopupDataSource) 
                     widgetSystemShortcuts
                 }
             }
+            ITEM_TYPE_CUSTOM_APPWIDGET -> widgetSystemShortcuts
             ITEM_TYPE_FILE_SYSTEM_FILE,
             ITEM_TYPE_FILE_SYSTEM_FOLDER -> homeScreenFileShortcuts
             else -> null
