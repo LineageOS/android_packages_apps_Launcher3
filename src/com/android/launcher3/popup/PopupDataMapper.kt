@@ -35,9 +35,9 @@ enum class PopupCategory {
 data class PopupData(
     val iconResId: Int,
     val labelResId: Int,
-    val popupAction: (context: ActivityContext, itemInfo: ItemInfo, view: View) -> Unit,
     val category: PopupCategory,
     val eventId: EventEnum = IGNORE,
+    val popupAction: (context: ActivityContext, itemInfo: ItemInfo, view: View) -> Unit,
 )
 
 /** Mapper to get all the popup data needed for the long press menu. */

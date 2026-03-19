@@ -41,15 +41,15 @@ interface PopupController<T> where T : Context, T : ActivityContext {
         /**
          * Creates a popup controller.
          *
-         * @param popupDataMapper has the popup data for each item.
+         * @param popupDataRepository has the popup data for each item.
          * @param dragController handles drag actions.
          * @return a new PopupController.
          */
         fun <T> createPopupController(
-            popupDataMapper: PopupDataMapper,
+            popupDataRepository: PopupDataRepository,
             dragController: LauncherDragController,
         ): PopupController<T> where T : Context, T : ActivityContext? {
-            return PopupControllerForExtraHomeScreenItems(popupDataMapper, dragController)
+            return PopupControllerForExtraHomeScreenItems(popupDataRepository, dragController)
         }
 
         /**
