@@ -24,6 +24,7 @@ import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceTransaction
 import com.android.launcher3.appfunctions.workspace.provider.InstalledItemsProvider
 import com.android.launcher3.dagger.LauncherAppSingleton
+import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.workspacefunctions.translators.TranslatorRegistry
 import javax.inject.Inject
 
@@ -40,6 +41,7 @@ class WorkspaceRepositoryImpl
 constructor(
     private val workspaceProvider: LauncherWorkspaceProvider,
     private val installedAppsProvider: InstalledItemsProvider<LauncherActivityInfo>,
+    private val installedWidgetsProvider: InstalledItemsProvider<LauncherAppWidgetProviderInfo>,
     private val translators: TranslatorRegistry,
 ) : WorkspaceRepository {
 
@@ -54,7 +56,8 @@ constructor(
     }
 
     override suspend fun getInstalledWidgets(orderByUsageStats: Boolean): List<UnplacedWidgetSpec> {
-        TODO("Not yet implemented")
+        val widgets = installedWidgetsProvider.getInstalledItems(orderByUsageStats)
+        return widgets.map { translators.translate(it) }
     }
 
     override fun newTransaction(): WorkspaceTransaction {
