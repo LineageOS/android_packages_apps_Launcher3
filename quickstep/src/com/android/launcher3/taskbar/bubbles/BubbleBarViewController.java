@@ -583,6 +583,7 @@ public class BubbleBarViewController {
         mBarView.setRelativePivot(x, y);
     }
 
+    // TODO (b/495910829) -- Fix up how bubble bar visibility is represented
     /**
      * Whether the bubble bar is visible or not.
      */
@@ -590,9 +591,16 @@ public class BubbleBarViewController {
         return mBarView.getVisibility() == VISIBLE;
     }
 
+    // TODO (b/495910829) -- Fix up how bubble bar visibility is represented
     /** Returns whether the bubble bar container is visible. */
     public boolean isBubbleBarContainerVisible() {
         return mBubbleBarContainer.getVisibility() == VISIBLE;
+    }
+
+    // TODO (b/495910829) -- Fix up how bubble bar visibility is represented
+    /** Returns whether the bubble bar container is visible. */
+    public boolean isBubbleBarAndContainerVisible() {
+        return isBubbleBarVisible() && isBubbleBarContainerVisible();
     }
 
     /** Whether the bubble bar has bubbles. */
@@ -888,6 +896,11 @@ public class BubbleBarViewController {
             } else {
                 mBubbleBarContainer.setVisibility(VISIBLE);
             }
+        }
+
+        if (Flags.fixBubbleInsetsWhenInvisible()) {
+            // If bubble visibility changes, the insets need to update
+            mTaskbarInsetsController.onTaskbarOrBubblebarWindowHeightOrInsetsChanged();
         }
     }
 

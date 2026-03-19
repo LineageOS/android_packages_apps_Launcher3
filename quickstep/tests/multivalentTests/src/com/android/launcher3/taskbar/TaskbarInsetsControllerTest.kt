@@ -32,9 +32,11 @@ import com.android.launcher3.taskbar.TaskbarControllerTestUtil.waitForIdleSync
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.DEFAULT_TOUCH_REGION
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.FULLSCREEN_TASKBAR_WINDOW
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.ICONS_INVISIBLE
+import com.android.launcher3.taskbar.TaskbarStashController.FLAG_IN_APP
 import com.android.launcher3.taskbar.bubbles.BubbleBarBubble
 import com.android.launcher3.taskbar.bubbles.BubbleView
 import com.android.launcher3.taskbar.bubbles.model.BubbleIcon
+import com.android.launcher3.taskbar.bubbles.stashing.BubbleStashController
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule
 import com.android.launcher3.taskbar.rules.TaskbarModeRule.Mode.PINNED
@@ -284,6 +286,55 @@ class TaskbarInsetsControllerTest {
                     )
                 )
                 .isTrue()
+        }
+    }
+
+    @Test
+    fun bubblesVisible_addsInsets() {
+        setupBubbles()
+        runOnTaskbarUiThreadSync {
+            taskbarStashController.updateAndAnimateTransientTaskbar(true, true)
+            bubbleBarViewController.addBubble(bubble, false, true, null)
+            bubbleBarViewController.setHiddenForBubbles(false)
+        }
+        // start the animating bubble animation
+        getTaskbarUiThread().waitForIdleSync()
+        assertThat(bubbleBarViewController.hasBubbles()).isTrue()
+        assertThat(bubbleBarViewController.isBubbleBarAndContainerVisible).isTrue()
+        assertThat(bubbleBarViewController.isAnimatingNewBubble).isFalse()
+        runOnTaskbarUiThreadSync {
+            assertThat(
+                    taskbarInsetsController.debugTouchableRegion.lastSetTouchableBounds.contains(
+                        bubbleBarViewController.bubbleBarBounds
+                    )
+                )
+                .isTrue()
+        }
+    }
+
+    @EnableFlags(Flags.FLAG_FIX_BUBBLE_INSETS_WHEN_INVISIBLE)
+    @Test
+    fun bubblesNotVisibleOnHome_noInsets() {
+        setupBubbles()
+        runOnTaskbarUiThreadSync {
+            taskbarStashController.updateStateForFlag(FLAG_IN_APP.toLong(), false)
+            bubbleStashController.launcherState = BubbleStashController.BubbleLauncherState.HOME
+            bubbleBarViewController.addBubble(bubble, false, true, null)
+            bubbleBarViewController.setHiddenForBubbles(false)
+            bubbleBarViewController.setHiddenForSysui(true)
+        }
+        getTaskbarUiThread().waitForIdleSync()
+        assertThat(bubbleBarViewController.hasBubbles()).isTrue()
+        assertThat(bubbleBarViewController.isBubbleBarAndContainerVisible).isFalse()
+        assertThat(bubbleBarViewController.isAnimatingNewBubble).isFalse()
+        assertThat(bubbleStashController.isBubblesShowingOnHome).isTrue()
+        runOnTaskbarUiThreadSync {
+            assertThat(
+                    taskbarInsetsController.debugTouchableRegion.lastSetTouchableBounds.contains(
+                        bubbleBarViewController.bubbleBarBounds
+                    )
+                )
+                .isFalse()
         }
     }
 
