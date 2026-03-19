@@ -205,15 +205,12 @@
     <string name="move_to_hotseat_position" msgid="6295412897075147808">"Perkelti į <xliff:g id="NUMBER">%1$s</xliff:g> mėgstamiausių poziciją"</string>
     <string name="item_moved" msgid="4606538322571412879">"Elementas perkeltas"</string>
     <string name="add_to_folder" msgid="9040534766770853243">"Pridėti prie aplanko: „<xliff:g id="NAME">%1$s</xliff:g>“"</string>
-    <!-- no translation found for add_to_folder_with_position (4457486890869662) -->
-    <skip />
+    <string name="add_to_folder_with_position" msgid="4457486890869662">"Pridėti prie aplanko „<xliff:g id="NAME">%1$s</xliff:g>“. <xliff:g id="NUMBER_0">%2$s</xliff:g> eilutė, <xliff:g id="NUMBER_1">%3$s</xliff:g> stulpelis <xliff:g id="STRING">%4$s</xliff:g>"</string>
     <string name="add_to_folder_with_app" msgid="4534929978967147231">"Pridėti prie aplanko su „<xliff:g id="NAME">%1$s</xliff:g>“"</string>
-    <!-- no translation found for add_to_folder_with_app_with_position (6670979489897093325) -->
-    <skip />
+    <string name="add_to_folder_with_app_with_position" msgid="6670979489897093325">"Pridėti prie aplanko pavadinimu „<xliff:g id="NAME">%1$s</xliff:g>“. <xliff:g id="NUMBER_0">%2$s</xliff:g> eilutė, <xliff:g id="NUMBER_1">%3$s</xliff:g> stulpelis, <xliff:g id="STRING">%4$s</xliff:g>"</string>
     <string name="added_to_folder" msgid="4793259502305558003">"Elementas pridėtas prie aplanko"</string>
     <string name="create_folder_with" msgid="4050141361160214248">"Kurti aplanką naudojant: „<xliff:g id="NAME">%1$s</xliff:g>“"</string>
-    <!-- no translation found for create_folder_with_position (3093164349445159115) -->
-    <skip />
+    <string name="create_folder_with_position" msgid="3093164349445159115">"Sukurti aplanką pavadinimu „<xliff:g id="NAME">%1$s</xliff:g>“. <xliff:g id="NUMBER_0">%2$s</xliff:g> eilutė, <xliff:g id="NUMBER_1">%3$s</xliff:g> stulpelis, <xliff:g id="STRING">%4$s</xliff:g>"</string>
     <string name="folder_created" msgid="6409794597405184510">"Aplankas sukurtas"</string>
     <string name="action_move_to_workspace" msgid="39528912300293768">"Perkelti į pagrindinį ekraną"</string>
     <string name="action_resize" msgid="1802976324781771067">"Pakeisti dydį"</string>
