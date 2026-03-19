@@ -112,6 +112,9 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
     }
 
     private boolean shouldShowScrim() {
+        if (!mActivity.isBubbleScrimEnabled()) {
+            return false;
+        }
         final boolean bubblesExpanded = (mSysUiStateFlags & SYSUI_STATE_BUBBLES_EXPANDED) != 0;
         boolean isShadeVisible = (mSysUiStateFlags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) != 0;
         BubbleControllers bubbleControllers = mActivity.getBubbleControllers();
@@ -137,6 +140,9 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
         }
         if ((mSysUiStateFlags & SYSUI_STATE_BUBBLES_EXPANDED) == 0) {
             // bubbles not expanded - scrim should not be applied
+            return false;
+        }
+        if (!mActivity.isBubbleScrimEnabled()) {
             return false;
         }
         if ((mSysUiStateFlags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) != 0) {

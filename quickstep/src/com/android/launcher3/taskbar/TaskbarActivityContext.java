@@ -600,6 +600,11 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         return mBubbleFeatureConfig.areAppBubblesSupported();
     }
 
+    /** Returns {@code true} if the bubble scrim is enabled. */
+    public boolean isBubbleScrimEnabled() {
+        return mBubbleFeatureConfig.isScrimEnabled(getDisplayId());
+    }
+
     /**
      * Sets an override for {@link #mBubbleFeatureConfig} for testing.
      */
