@@ -21,6 +21,7 @@ import static com.android.launcher3.LauncherState.CLEAR_ALL_BUTTON;
 import static com.android.launcher3.LauncherState.OVERVIEW;
 import static com.android.launcher3.LauncherState.OVERVIEW_MODAL_TASK;
 import static com.android.launcher3.LauncherState.OVERVIEW_SPLIT_SELECT;
+import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -119,11 +120,13 @@ public class LauncherRecentsView extends RecentsView<QuickstepLauncher, Launcher
             TaskContainer taskContainer;
             if (recoveryData != null && recoveryData.getStagedTaskId() == taskId && (taskContainer =
                     mUtils.getTaskContainerById(taskId)) != null) {
-                initiateSplitSelect(
-                        taskContainer,
-                        recoveryData.getStagePosition(), recoveryData.getSource()
-                );
-                mContainer.finishSplitSelectRecovery();
+                MAIN_EXECUTOR.execute(() -> {
+                    initiateSplitSelect(
+                            taskContainer,
+                            recoveryData.getStagePosition(), recoveryData.getSource()
+                    );
+                    mContainer.finishSplitSelectRecovery();
+                });
             }
         }
     }
