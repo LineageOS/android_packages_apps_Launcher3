@@ -132,10 +132,7 @@ class DropTargetHandler(
             if (trashPath != null) {
                 Snackbar.show(
                     launcher,
-                    launcher.resources.getString(
-                        R.string.home_screen_files_moved_to_trash_message,
-                        title,
-                    ),
+                    launcher.resources.getString(R.string.home_screen_files_moved_to_trash_message),
                     R.string.undo,
                     /*onDismissed=*/ {},
                     /*onActionClicked=*/ {

@@ -131,7 +131,7 @@ class DropTargetHandlerTest {
 
             // Move to trash.
             assertThat(snackbar.labelView.text.toString())
-                .isEqualToString(R.string.home_screen_files_moved_to_trash_message, "abc.png")
+                .isEqualToString(R.string.home_screen_files_moved_to_trash_message)
             verify(homeScreenFilesProvider, times(1)).moveToTrash(eq("abc.png"))
             verifyNoMoreInteractions(homeScreenFilesProvider)
 
