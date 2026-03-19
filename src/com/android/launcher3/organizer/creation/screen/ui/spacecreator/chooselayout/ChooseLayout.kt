@@ -16,6 +16,8 @@
 
 package com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout
 
+import android.view.LayoutInflater
+import android.widget.LinearLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,18 +46,31 @@ import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.android.launcher3.BubbleTextView
+import com.android.launcher3.Launcher
 import com.android.launcher3.R
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
+import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutCompose
 import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutComposeItemSpacing
 import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutComposeSize
@@ -173,11 +188,41 @@ fun LayoutPreview(itemsInScreen: List<ItemInfo>, viewModel: SpaceCreatorViewMode
                         Modifier.width(size.width).height(size.height),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(item.title.toString())
+                        AppIcon(item as WorkspaceItemInfo, size.width, size.height)
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun AppIcon(item: WorkspaceItemInfo, width: Dp, height: Dp) {
+    var sizeScale by remember { mutableStateOf(Size(1f, 1f)) }
+    val density = LocalDensity.current
+    Box(
+        Modifier.graphicsLayer {
+                scaleX = sizeScale.width
+                scaleY = sizeScale.height
+            }
+            .wrapContentSize(unbounded = true)
+    ) {
+        AndroidView(
+            modifier =
+                Modifier.onSizeChanged {
+                    val maxScale =
+                        maxOf(
+                            with(density) { width.toPx() } / it.width,
+                            with(density) { height.toPx() } / it.height,
+                        )
+                    sizeScale = Size(maxScale, maxScale)
+                },
+            factory = { context ->
+                (LayoutInflater.from(Launcher.ACTIVITY_TRACKER.getCreatedContext())
+                        .inflate(R.layout.app_icon, LinearLayout(context), false) as BubbleTextView)
+                    .apply { applyFromWorkspaceItem(item) }
+            },
+        )
     }
 }
 
