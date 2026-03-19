@@ -14,22 +14,31 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
+package com.android.launcher3.organizer.creation.screen.ui.foldercreator
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.android.launcher3.organizer.creation.screen.ui.BlurController
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.launcher3.LauncherApplication
+import com.android.launcher3.organizer.creation.screen.ui.OrganizerComponent
 
-class WorkspaceOrganizerActivity : ComponentActivity() {
+/** Activity dedicated to the folder creation flow. */
+class FolderCreatorActivity : ComponentActivity() {
+
+    private lateinit var organizerComponent: OrganizerComponent
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent { WorkspaceOrganizer(onArrowBack = { finish() }) }
-    }
+        val appComponent = (application as LauncherApplication).appComponent
 
-    override fun onResume() {
-        super.onResume()
-        BlurController(this).apply()
+        organizerComponent = appComponent.getOrganizerComponentBuilder().build()
+
+        super.onCreate(savedInstanceState)
+        setContent {
+            val folderViewModel: FolderCreatorViewModel = viewModel {
+                organizerComponent.getFolderCreatorViewModel()
+            }
+            FolderCreator(onDismiss = { finish() }, viewModel = folderViewModel)
+        }
     }
 }

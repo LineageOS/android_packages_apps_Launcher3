@@ -88,31 +88,6 @@
             </intent-filter>
         </activity>
 
-
-        <activity android:name="com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerActivity"
-            android:excludeFromRecents="true"
-            android:autoRemoveFromRecents="true"
-            android:launchMode="singleTop"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.android.launcher3.WORKSPACE_ORGANIZER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name="com.android.launcher3.organizer.creation.screen.ui.spacecreator.SpaceCreatorActivity"
-            android:autoRemoveFromRecents="true"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:launchMode="singleTop">
-            <intent-filter>
-
-                <action android:name="com.android.launcher3.SCREEN_CREATION" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
         <service
             android:name="androidx.appfunctions.service.ExtensionAppFunctionService"
             android:permission="android.permission.BIND_APP_FUNCTION_SERVICE"

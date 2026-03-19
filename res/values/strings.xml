@@ -393,6 +393,8 @@
     <string name="msg_disabled_by_admin">Disabled by your admin</string>
     <!-- Text for settings button [CHAR LIMIT=20]-->
     <string name="settings_home_organizer">Home organizer</string>
+    <!-- Text for folder creation [CHAR LIMIT=20]-->
+    <string name="settings_folder_creation" translatable="false">Create Folder</string>
 
     <!-- Strings for settings -->
     <!-- Text explaining when the home screen will get rotated. [CHAR LIMIT=100] -->

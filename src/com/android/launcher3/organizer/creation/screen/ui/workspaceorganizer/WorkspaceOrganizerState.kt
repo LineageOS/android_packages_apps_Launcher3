@@ -19,7 +19,7 @@ package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
 import android.graphics.Bitmap
 import java.lang.ref.WeakReference
 
-/** View model used by the [WorkspaceOrganizerActivity] and its composables. */
+/** View model used by the [OrganizerActivity] and its composables. */
 data class WorkspaceOrganizerState(var selectedPage: Int = 0) {}
 
 /** Holds the information needed to render the preview of the Workspace pages. */
