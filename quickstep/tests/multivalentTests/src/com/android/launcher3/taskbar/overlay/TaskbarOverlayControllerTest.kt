@@ -22,6 +22,8 @@ import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.WindowManager
+import android.view.WindowManager.LayoutParams
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingView.TYPE_OPTIONS_POPUP
@@ -365,6 +367,28 @@ class TaskbarOverlayControllerTest {
         }
 
         assertThat(overlay.isOpen).isTrue()
+    }
+
+    @Test
+    fun testRequestCueBarWindow_afterRequestWindow_appliesNotFocusableFlag() {
+        val initialDragLayer = getOnTaskbarUiThread { overlayController.requestWindow().dragLayer }
+        runOnTaskbarUiThreadSync {
+            assertThat(initialDragLayer.isAttachedToWindow).isTrue()
+            val initialLayoutParams = initialDragLayer.layoutParams as WindowManager.LayoutParams
+            assertThat(initialLayoutParams.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+                .isEqualTo(0)
+        }
+
+        runOnTaskbarUiThreadSync { overlayController.hideWindow() }
+        val cueBarDragLayer = getOnTaskbarUiThread {
+            overlayController.requestCueBarWindow().dragLayer
+        }
+
+        runOnTaskbarUiThreadSync {
+            val cueBarLayoutParams = cueBarDragLayer.layoutParams as WindowManager.LayoutParams
+            assertThat(cueBarLayoutParams.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+                .isEqualTo(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        }
     }
 
     private class TestOverlayView

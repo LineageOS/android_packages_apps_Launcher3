@@ -207,8 +207,12 @@ public final class TaskbarOverlayController
         WindowManager wm = mOverlayContext.getSystemService(WindowManager.class);
         if (!mProxyView.isOpen()) {
             mProxyView.show();
-            if (wm != null && mOverlayContext.getDragLayer().getParent() == null) {
-                wm.addView(mOverlayContext.getDragLayer(), layoutParams);
+            if (wm != null) {
+                if (mOverlayContext.getDragLayer().getParent() == null) {
+                    wm.addView(mOverlayContext.getDragLayer(), layoutParams);
+                } else {
+                    wm.updateViewLayout(mOverlayContext.getDragLayer(), layoutParams);
+                }
             }
             TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
         } else if (wm != null) {
