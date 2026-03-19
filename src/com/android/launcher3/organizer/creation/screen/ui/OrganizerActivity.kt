@@ -30,6 +30,7 @@ import com.android.launcher3.organizer.creation.screen.ui.spacecreator.SpaceCrea
 import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout.ChooseLayout
 import com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizer
 import com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerViewModel
+import com.android.launcher3.organizer.dagger.OrganizerComponent
 
 /** Activity that handles workspace organizer and space creation flows. */
 class OrganizerActivity : ComponentActivity() {

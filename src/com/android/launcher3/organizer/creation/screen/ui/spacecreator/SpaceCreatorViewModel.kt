@@ -20,18 +20,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.android.launcher3.LauncherApplication
+import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundContext
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout.ChooseLayoutGridSize
 import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout.ChooseLayoutState
-import com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerViewModel
+import com.android.launcher3.organizer.dagger.OrganizerScope
 import com.android.launcher3.organizer.generator.CreationSession
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -40,9 +37,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+@OrganizerScope
 class SpaceCreatorViewModel
 @Inject
 constructor(
+    idp: InvariantDeviceProfile,
     creationSessionFactory: CreationSession.Factory,
     @LightweightBackgroundContext(priority = UI)
     private val lightweightBackgroundContext: CoroutineContext,
@@ -58,6 +57,7 @@ constructor(
 
     init {
         viewModelScope.launch(lightweightBackgroundContext) {
+            updateGridSize(ChooseLayoutGridSize(idp.numColumns, idp.numRows))
             val allClassifiedItems = screenCreationSession.startClassification()
             val topics = allClassifiedItems.map { it.topic }.distinct()
             val topicIcons =
@@ -110,24 +110,5 @@ constructor(
     /** Update the [ChooseLayoutGridSize] for the chooseLayoutState. */
     fun updateGridSize(chooseLayoutGridSize: ChooseLayoutGridSize) {
         chooseLayoutState = chooseLayoutState.copy(chooseLayoutGridSize = chooseLayoutGridSize)
-    }
-
-    companion object {
-        /** Returns a [ViewModelProvider.Factory] for [WorkspaceOrganizerViewModel]. */
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application =
-                    this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
-                        as LauncherApplication
-                val appComponent = application.appComponent
-                val idp = appComponent.idp
-                SpaceCreatorViewModel(
-                        creationSessionFactory = appComponent.creationSessionFactory,
-                        lightweightBackgroundContext =
-                            appComponent.productionDispatchers.lightweightBackgroundUiDispatcher,
-                    )
-                    .apply { updateGridSize(ChooseLayoutGridSize(idp.numColumns, idp.numRows)) }
-            }
-        }
     }
 }

@@ -21,7 +21,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.launcher3.LauncherApplication
-import com.android.launcher3.organizer.creation.screen.ui.OrganizerComponent
+import com.android.launcher3.organizer.dagger.OrganizerComponent
 
 /** Activity dedicated to the folder creation flow. */
 class FolderCreatorActivity : ComponentActivity() {

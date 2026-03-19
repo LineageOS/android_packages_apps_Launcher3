@@ -31,6 +31,8 @@ import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.dagger.NoOpLoggerModule
 import com.android.launcher3.dagger.PerDisplayRepositoriesModule
 import com.android.launcher3.dagger.WidgetModule
+import com.android.launcher3.organizer.dagger.NoOpGeneratorModule
+import com.android.launcher3.organizer.dagger.NoOpOrganizerModule
 import com.android.launcher3.qsb.QsbWidgetFactory
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.util.PluginManagerWrapper
@@ -100,6 +102,8 @@ abstract class QsbWidgetModule {
             NoOpLoggerModule::class,
             BootSafeModules::class,
             NoOpWorkspaceFunctionsModule::class,
+            NoOpOrganizerModule::class,
+            NoOpGeneratorModule::class,
         ]
 )
 interface TaskbarBootComponent : LauncherAppComponent {

@@ -33,6 +33,8 @@ import com.android.launcher3.dagger.PerDisplayModule
 import com.android.launcher3.graphics.theme.ThemePreference
 import com.android.launcher3.model.ModelInitializer
 import com.android.launcher3.model.data.LoaderParams
+import com.android.launcher3.organizer.dagger.NoOpGeneratorModule
+import com.android.launcher3.organizer.dagger.NoOpOrganizerModule
 import com.android.launcher3.provider.LauncherDbUtils.selectionForWorkspaceScreen
 import com.android.launcher3.qsb.OseWidgetManager
 import com.android.launcher3.util.SandboxContext
@@ -187,6 +189,8 @@ constructor(
                 NoOpLoggerModule::class,
                 PreviewModule::class,
                 BootSafeModules::class,
+                NoOpOrganizerModule::class,
+                NoOpGeneratorModule::class,
             ]
     )
     interface PreviewAppComponent : LauncherAppComponent {

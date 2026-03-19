@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.generator
+package com.android.launcher3.organizer.dagger
 
+import com.android.launcher3.organizer.generator.CompositeClassifier
+import com.android.launcher3.organizer.generator.DefaultTopicProvider
+import com.android.launcher3.organizer.generator.ItemInfoClassifier
+import com.android.launcher3.organizer.generator.MostUsedItemInfoClassifier
+import com.android.launcher3.organizer.generator.PackageManagerItemInfoClassifier
+import com.android.launcher3.organizer.generator.TopicProvider
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -23,10 +29,11 @@ import dagger.Provides
 @Module
 abstract class GeneratorModule {
 
-    @Binds abstract fun bindTopicProvider(impl: DefaultTopicProvider): TopicProvider
+    @Binds @OrganizerScope abstract fun bindTopicProvider(impl: DefaultTopicProvider): TopicProvider
 
     companion object {
         @Provides
+        @OrganizerScope
         fun provideItemInfoClassifier(
             packageManagerItemInfoClassifier: PackageManagerItemInfoClassifier,
             mostUsedItemInfoClassifier: MostUsedItemInfoClassifier,
