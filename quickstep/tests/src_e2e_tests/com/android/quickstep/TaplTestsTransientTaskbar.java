@@ -21,6 +21,8 @@ import static com.android.systemui.shared.Flags.cursorHotCorner;
 
 import static org.junit.Assume.assumeTrue;
 
+import android.platform.test.rule.SkipOnDesktop;
+
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -30,6 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @LargeTest
+@SkipOnDesktop  // There is no transient taskbar on desktop.
 @RunWith(AndroidJUnit4.class)
 public class TaplTestsTransientTaskbar extends AbstractTaplTestsTaskbar {
 
