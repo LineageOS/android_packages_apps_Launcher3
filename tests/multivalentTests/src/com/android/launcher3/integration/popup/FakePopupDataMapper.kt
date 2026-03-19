@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,10 @@ package com.android.launcher3.integration.popup
 
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.popup.PopupData
-import com.android.launcher3.popup.PopupDataRepository
+import com.android.launcher3.popup.PopupDataMapper
 
-class FakePopupDataRepository : PopupDataRepository {
+class FakePopupDataMapper : PopupDataMapper {
     private var popupData: MutableMap<Int, List<PopupData>> = mutableMapOf()
-
-    override fun getAllPopupData(): Map<Int, List<PopupData>> {
-        return popupData
-    }
 
     override fun getPopupDataByItemInfo(itemInfo: ItemInfo): List<PopupData>? {
         return popupData[itemInfo.id]

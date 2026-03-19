@@ -443,7 +443,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         mPopupControllerForHomeScreenItems =
                 PopupController.PopupControllerFactory.createPopupController(
-                        LauncherComponentProvider.get(this).getPopupDataRepository(),
+                        LauncherComponentProvider.get(this).getPopupDataMapper(),
                         getDragController());
         mPopupControllerForAppIcons = PopupController.PopupControllerFactory
                 .createPopupController();

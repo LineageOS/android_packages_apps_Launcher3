@@ -59,7 +59,7 @@ class PopupControllerTest {
 
     private val launcherActivity = LauncherActivityScenarioRule<Launcher>()
 
-    private val popupDataRepository = FakePopupDataRepository()
+    private val popupDataMapper = FakePopupDataMapper()
 
     private val popupDataSource = PopupDataSource(mock<HomeScreenFilesRenameDialogFactory>())
 
@@ -113,14 +113,14 @@ class PopupControllerTest {
         val popupData: List<PopupData> =
             listOf(popupDataSource.removePopupData, popupDataSource.appInfoPopupData)
         val popupControllerForHomeScreenItems =
-            createPopupController<Launcher>(popupDataRepository, launcherDragController)
+            createPopupController<Launcher>(popupDataMapper, launcherDragController)
         var popup: PopupContainer<Launcher>? = null
         launcherActivity.executeOnLauncher { l: Launcher ->
             val appPairView = spy(AppPairIcon(l))
             doReturn(floatingTextViewAlpha).whenever(appPairView).getFloatingViewTextAlpha()
             doReturn(0).whenever(appPairView).getIconHeight()
             appPairView.tag = appPairItemInfo
-            popupDataRepository.addPopupData(appPairView.id, popupData)
+            popupDataMapper.addPopupData(appPairView.id, popupData)
             popup = popupControllerForHomeScreenItems.show(appPairView) as PopupContainer<Launcher>?
         }
 
@@ -136,14 +136,14 @@ class PopupControllerTest {
     fun popupForFolder_showsWithCorrectNumberOfSystemShortcuts() {
         val popupData: List<PopupData> = listOf(popupDataSource.removePopupData)
         val popupControllerForExtraHomeScreenItems =
-            createPopupController<Launcher>(popupDataRepository, launcherDragController)
+            createPopupController<Launcher>(popupDataMapper, launcherDragController)
         var popup: PopupContainer<Launcher>? = null
         launcherActivity.executeOnLauncher { l: Launcher ->
             val folderIconView = spy(FolderIcon(l))
             doReturn(floatingTextViewAlpha).whenever(folderIconView).getFloatingViewTextAlpha()
             doReturn(0).whenever(folderIconView).getIconHeight()
             folderIconView.tag = folderItemInfo
-            popupDataRepository.addPopupData(folderIconView.id, popupData)
+            popupDataMapper.addPopupData(folderIconView.id, popupData)
             popup =
                 popupControllerForExtraHomeScreenItems.show(folderIconView)
                     as PopupContainer<Launcher>
@@ -161,12 +161,12 @@ class PopupControllerTest {
     fun popupForWidget_showsWithCorrectNumberOfSystemShortcuts() {
         val popupData: List<PopupData> = listOf(popupDataSource.removePopupData)
         val popupControllerForHomeScreenItems =
-            createPopupController<Launcher>(popupDataRepository, launcherDragController)
+            createPopupController<Launcher>(popupDataMapper, launcherDragController)
         var popup: PopupContainer<Launcher>? = null
         launcherActivity.executeOnLauncher { l: Launcher ->
             val widgetView = LauncherAppWidgetHostView(l)
             widgetView.tag = widgetItemInfo
-            popupDataRepository.addPopupData(widgetView.id, popupData)
+            popupDataMapper.addPopupData(widgetView.id, popupData)
             popup = popupControllerForHomeScreenItems.show(widgetView) as PopupContainer<Launcher>?
         }
 
@@ -257,7 +257,7 @@ class PopupControllerTest {
     }
 
     private fun cleanUp() {
-        popupDataRepository.clearPopupData()
+        popupDataMapper.clearPopupData()
         launcherActivity.executeOnLauncher { AbstractFloatingView.closeAllOpenViews(it) }
     }
 }

@@ -226,6 +226,13 @@ public class LauncherAppWidgetInfo extends ItemInfo {
         return (options & option) != 0;
     }
 
+    /**
+     * @return true if the widget is reconfigurable.
+     */
+    public boolean isReconfigurable() {
+        return widgetFeatures != -1 && (widgetFeatures & FEATURE_RECONFIGURABLE) != 0;
+    }
+
     @SuppressWarnings("NewApi")
     public void updateWidgetFeatures(LauncherAppWidgetProviderInfo providerInfo) {
         widgetFeatures = 0;
