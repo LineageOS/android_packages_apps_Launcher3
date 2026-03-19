@@ -111,6 +111,8 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"ایپ یا آپ کی تنظیم کی جانب سے اس کارروائی کی اجازت نہیں ہے"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"وجیٹس فی الحال تعاون یافتہ نہیں ہیں، براہ کرم کوئی اور ایپ منتخب کریں"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"کاپی کریں"</string>
+    <!-- no translation found for action_image_save (6205538612408306742) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"اسکرین کو گھمائیں"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"اینیمیشن دکھاتی ہے کہ کس طرح ٹاسک بار اسکرین کے نیچے سے نظر آتا ہے اور استعمال میں نہ ہونے پر خود بخود چھپ جاتا ہے"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"اینیمیشن یہ دکھاتی ہے کہ ٹوگل کا استعمال کرتے ہوئے آپ کے ٹاسک بار کو کیسے پن کرنا ہے، تاکہ ٹاسک بار اسکرین کے نیچے مستقل طور پر نظر آئے"</string>

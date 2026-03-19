@@ -111,6 +111,8 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"L\'aplicació o la teva organització no permeten aquesta acció"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Actualment els widgets no s\'admeten; selecciona una altra aplicació"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"Copia"</string>
+    <!-- no translation found for action_image_save (6205538612408306742) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Gira la pantalla"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animació que mostra com apareix la barra de tasques des de la part inferior de la pantalla i com s\'amaga automàticament quan no s\'utilitza"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animació que mostra com es pot fixar la barra de tasques mitjançant un commutador perquè es mantingui visible permanentment a la part inferior de la pantalla"</string>

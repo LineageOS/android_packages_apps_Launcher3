@@ -111,6 +111,8 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"Kitendo hiki hakiruhusiwi na programu au shirika lako"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Wijeti hazitumiwi kwa sasa, tafadhali chagua programu nyingine"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"Nakili"</string>
+    <!-- no translation found for action_image_save (6205538612408306742) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Zungusha skrini"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Uhuishaji unaoonyesha jinsi upauzana huonekana kutokea sehemu ya chini ya skrini na kufichwa kiotomatiki wakati hautumiki"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Uhuishaji unaoonyesha jinsi ya kubandika upauzana wako kwa kutumia kipengele cha kuwasha/kuzima, ili upauzana uendelee kuonekana sehemu ya chini kabisa ya skrini"</string>
