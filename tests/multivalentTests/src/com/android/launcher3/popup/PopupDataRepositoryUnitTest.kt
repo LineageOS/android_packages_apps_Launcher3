@@ -30,6 +30,7 @@ import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_QSB
 import com.android.launcher3.R
+import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesRenameDialog
 import com.android.launcher3.homescreenfiles.HomeScreenFilesRenameDialogFactory
@@ -38,9 +39,12 @@ import com.android.launcher3.homescreenfiles.homeScreenFile
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
+import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.BaseDragLayer
 import com.android.providers.media.flags.Flags.FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API
+import com.android.tools.dagger.mutation.annotations.BindValue
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -52,25 +56,27 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-/** Tests for the [PopupDataMapperImpl] */
+/** Tests for the [PopupDataRepository] */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class PopupDataMapperImplUnitTest {
+@MutatedComponent(target = LauncherAppComponent::class)
+class PopupDataRepositoryUnitTest {
     @get:Rule val mockitoRule = MockitoJUnit.rule()
+    @get:Rule val app = SandboxApplication()
     @get:Rule val setFlagsRule = SetFlagsRule()
 
+    @BindValue
     @Mock
-    private lateinit var homeScreenFilesRenameDialogFactory: HomeScreenFilesRenameDialogFactory
+    lateinit var homeScreenFilesRenameDialogFactory: HomeScreenFilesRenameDialogFactory
 
-    private lateinit var popupDataSource: PopupDataSource
-    private lateinit var popupDataMapper: PopupDataMapper
+    private lateinit var popupDataMapper: PopupDataRepository
 
     @Before
     fun setup() {
         // Late initialization of `PopupDataSource` is required because some of the created
         // `PopupData` use feature flags.
-        popupDataSource = PopupDataSource(homeScreenFilesRenameDialogFactory)
-        popupDataMapper = PopupDataMapperImpl(popupDataSource)
+        app.initDaggerComponent(mutatedComponentBuilder())
+        popupDataMapper = app.appComponent.popupDataRepository
     }
 
     @Test
@@ -80,7 +86,7 @@ class PopupDataMapperImplUnitTest {
                 itemType = ITEM_TYPE_QSB
                 id = 1
             }
-        val popupData = popupDataMapper.getPopupDataByItemInfo(itemInfo)
+        val popupData = popupDataMapper.getAllSupportedPopupActions(itemInfo)
 
         assert(popupData == null)
     }
@@ -88,7 +94,7 @@ class PopupDataMapperImplUnitTest {
     @Test
     fun getPopupDataByItemInfoWithEmptyItemInfoShouldReturnNull() {
         val itemInfo = ItemInfo().apply { id = 1 }
-        val popupData = popupDataMapper.getPopupDataByItemInfo(itemInfo)
+        val popupData = popupDataMapper.getAllSupportedPopupActions(itemInfo)
 
         assert(popupData == null)
     }
@@ -100,11 +106,11 @@ class PopupDataMapperImplUnitTest {
                 itemType = ITEM_TYPE_FOLDER
                 id = 1
             }
-        val popupData = popupDataMapper.getPopupDataByItemInfo(itemInfo)
+        val popupData = popupDataMapper.getAllSupportedPopupActions(itemInfo)
 
         assert(popupData != null)
         assert(popupData?.size == 1)
-        assert(popupData?.contains(popupDataSource.removePopupData) == true)
+        assert(popupData?.contains(PopupDataSource.removePopupData) == true)
     }
 
     @Test
@@ -114,11 +120,11 @@ class PopupDataMapperImplUnitTest {
                 itemType = ITEM_TYPE_APPWIDGET
                 id = 2
             }
-        val popupData = popupDataMapper.getPopupDataByItemInfo(widgetItemInfo)
+        val popupData = popupDataMapper.getAllSupportedPopupActions(widgetItemInfo)
 
         assert(popupData != null)
         assert(popupData?.size == 1)
-        assert(popupData?.contains(popupDataSource.removePopupData) == true)
+        assert(popupData?.contains(PopupDataSource.removePopupData) == true)
     }
 
     @Test
@@ -128,7 +134,7 @@ class PopupDataMapperImplUnitTest {
                 id = 1
                 itemType = ITEM_TYPE_FOLDER
             }
-        val popupData = popupDataMapper.getPopupDataByItemInfo(folderItemInfo)
+        val popupData = popupDataMapper.getAllSupportedPopupActions(folderItemInfo)
 
         assert(popupData?.size == 1)
         assert(popupData?.get(0)?.category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
@@ -219,7 +225,7 @@ class PopupDataMapperImplUnitTest {
                 intent = HomeScreenFilesUtils.buildLaunchIntent(file.uri, file)
                 title = file.displayName
             }
-        val popupData = popupDataMapper.getPopupDataByItemInfo(item)
+        val popupData = popupDataMapper.getAllSupportedPopupActions(item)
         var popupDataIndex = 0
 
         assert(popupData!!.size == if (supportsRenaming) 3 else 2)

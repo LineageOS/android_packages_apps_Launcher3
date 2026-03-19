@@ -36,7 +36,7 @@ import com.android.launcher3.widget.LauncherAppWidgetHostView
  * such as showing and dismissing them.
  */
 class PopupControllerForExtraHomeScreenItems<T>(
-    private val popupDataMapper: PopupDataMapper,
+    private val popupDataRepository: PopupDataRepository,
     private val dragController: LauncherDragController,
 ) : PopupController<T> where T : Context, T : ActivityContext {
     override fun show(view: View): Popup {
@@ -53,8 +53,8 @@ class PopupControllerForExtraHomeScreenItems<T>(
                 )
             dragController.addDragListener(container)
             if (Flags.expandableLongPressMenu()) {
-                popupDataMapper
-                    .getPopupDataByItemInfo(itemInfo)
+                popupDataRepository
+                    .getAllSupportedPopupActions(itemInfo)
                     ?.map { popupData ->
                         PopupItem(
                             iconResId = popupData.iconResId,
@@ -98,7 +98,7 @@ class PopupControllerForExtraHomeScreenItems<T>(
     ) {
         popup.systemShortcutContainer =
             popup.inflateAndAdd(R.layout.system_shortcut_rows_container, popup)
-        val popupData = popupDataMapper.getPopupDataByItemInfo(itemInfo)?.toList()
+        val popupData = popupDataRepository.getAllSupportedPopupActions(itemInfo)?.toList()
         popupData?.forEach { systemShortcut ->
             val view: DeepShortcutView =
                 popup.inflateAndAdd(R.layout.system_shortcut, popup.systemShortcutContainer)

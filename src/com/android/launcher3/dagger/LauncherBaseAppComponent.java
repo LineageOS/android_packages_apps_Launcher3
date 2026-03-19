@@ -54,7 +54,7 @@ import com.android.launcher3.notification.NotificationRepository;
 import com.android.launcher3.organizer.generator.CreationSession;
 import com.android.launcher3.pm.InstallSessionHelper;
 import com.android.launcher3.pm.UserCache;
-import com.android.launcher3.popup.PopupDataMapper;
+import com.android.launcher3.popup.PopupDataRepository;
 import com.android.launcher3.qsb.OSEManager;
 import com.android.launcher3.qsb.OseWidgetManager;
 import com.android.launcher3.qsb.QsbWidgetFactory;
@@ -152,7 +152,7 @@ public interface LauncherBaseAppComponent {
     TestableModelState getTestableModelState();
 
     /** Popup data mapping for [ItemInfo] */
-    PopupDataMapper getPopupDataMapper();
+    PopupDataRepository getPopupDataRepository();
 
     NotificationRepository getNotificationRepository();
     HomeScreenFilesProvider getHomeScreenFilesProvider();

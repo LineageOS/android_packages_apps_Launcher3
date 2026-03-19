@@ -26,14 +26,19 @@ import com.android.launcher3.graphics.theme.MonoIconThemeFactory
 import com.android.launcher3.graphics.theme.MonoIconThemeFactory.MONO_FACTORY_ID
 import com.android.launcher3.graphics.theme.ThemePreference.Companion.THEME_OVERRIDES_DAGGER_KEY
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.popup.AppPairSystemShortcuts
+import com.android.launcher3.popup.AppWidgetSystemShortcuts
+import com.android.launcher3.popup.CustomWidgetSystemShortcuts
+import com.android.launcher3.popup.FileSystemShortcuts
+import com.android.launcher3.popup.FolderSystemShortcuts
 import com.android.launcher3.popup.PopupDataMapper
-import com.android.launcher3.popup.PopupDataMapperImpl
+import com.android.launcher3.popup.PopupDataRepository.Companion.POPUP_DATA_MAPPER
 import com.android.launcher3.qsb.OseCustomWidget
 import com.android.launcher3.widget.custom.CustomWidget
 import com.android.launcher3.widget.custom.CustomWidgetManager.NAMED_CUSTOM_WIDGETS
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ElementsIntoSet
 import dagger.multibindings.IntoMap
 import dagger.multibindings.IntoSet
 import dagger.multibindings.Multibinds
@@ -42,9 +47,10 @@ import javax.inject.Named
 
 @Module
 abstract class LauncherModelModule {
-    @Binds abstract fun bindPopupDataMapper(impl: PopupDataMapperImpl): PopupDataMapper
 
     @Multibinds @Named("MODEL_ITEMS") abstract fun extraModelItems(): Set<ItemInfo>
+
+    @Multibinds @Named(POPUP_DATA_MAPPER) abstract fun popDataMappers(): Set<PopupDataMapper>
 
     @Multibinds abstract fun lifecycleTrackers(): Set<LifecycleTracker>
 
@@ -74,5 +80,24 @@ abstract class LauncherModelModule {
         @Named(NAMED_CUSTOM_WIDGETS)
         @JvmStatic
         fun monoSearchCustomWidget(): CustomWidget = OseCustomWidget
+
+        @Provides
+        @JvmStatic
+        @ElementsIntoSet
+        @Named(POPUP_DATA_MAPPER)
+        fun defaultPopupDataMappers(): Set<PopupDataMapper> =
+            setOf(
+                FolderSystemShortcuts,
+                AppPairSystemShortcuts,
+                AppWidgetSystemShortcuts,
+                CustomWidgetSystemShortcuts,
+            )
+
+        @Provides
+        @JvmStatic
+        @IntoSet
+        @Named(POPUP_DATA_MAPPER)
+        fun provideFilePopupDataMapper(fileShortcuts: FileSystemShortcuts): PopupDataMapper =
+            fileShortcuts
     }
 }
