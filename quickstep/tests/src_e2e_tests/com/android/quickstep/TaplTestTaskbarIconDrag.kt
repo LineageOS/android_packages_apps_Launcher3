@@ -66,6 +66,7 @@ class TaplTestTaskbarIconDrag : AbstractQuickStepTest() {
     @Test
     fun testAppIconDragOnOverviewFromTaskBarToBubbleBar() {
         val overview = mLauncher.workspace.switchToOverview()
+        mLauncher.showTaskbarIfHidden()
         // test left drop target
         overview.taskbar!!
             .getAppIcon(TEST_APP_NAME)
@@ -87,6 +88,7 @@ class TaplTestTaskbarIconDrag : AbstractQuickStepTest() {
     @ScreenRecord
     fun testAppIconDragOnOverviewFromTaskBarAllAppsToBubbleBar() {
         val overview = mLauncher.workspace.switchToOverview()
+        mLauncher.showTaskbarIfHidden()
         // test right drop target
         overview.taskbar!!
             .openAllApps()
