@@ -687,7 +687,6 @@
     <string name="topic_category_most_used" translatable="false">Most Used</string>
     <string name="topic_category_other" translatable="false">Other</string>
 
-
     <!-- Screen Creation -->
     <!-- Title for the screen to create new workspace screens using the organizer. [CHAR_LIMIT=300] -->
     <string name="organizer_create_screen_title">Create screen</string>
@@ -701,5 +700,10 @@
     <!-- Strings for App Functions -->
     <!-- Description for the App Functions app metadata. -->
     <string name="workspace_functions_app_display_description" translatable="false">[PLACEHOLDER] A tool to manage the Workspace</string>
+
+    <!-- Folder Creator -->
+    <string name="folder_creator_title" translatable="false">Create Folder(s)</string>
+    <string name="folder_creator_add" translatable="false">Add</string>
+    <string name="folder_creator_cancel" translatable="false">Cancel</string>
 
 </resources>
