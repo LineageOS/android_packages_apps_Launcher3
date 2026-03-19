@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0d1f39cd_7c1e0649",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 12
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2026-03-19T14:22:05Z",
+      "side": 1,
+      "message": "@grepfox@tutamail.com can you see if the following works?\nhttps://gist.github.com/luca020400/5be9cc9e0822d90a622d234d3c0afc1f + https://gist.github.com/luca020400/59f4b28be282515c45ef844ece6c6905\n\nI didn\u0027t wire up the preference xml and/or strings because I got lazy, that would be up to you.\n\nIt should avoid having to touch permissions as a whole.",
+      "revId": "2e84669f30de4485a16c8419ba8a9cd6af2c11d8",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
