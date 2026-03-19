@@ -2,6 +2,13 @@ package: "com.android.launcher3"
 container: "system_ext"
 
 flag {
+    name: "enable_compose_for_options_popup_menu_dialog"
+    namespace: "launcher"
+    description: "Gate the refactor of OptionsPopupDialog to compose."
+    bug: "316027081"
+}
+
+flag {
     name: "enable_expanding_pause_work_button"
     namespace: "launcher"
     description: "Expand and collapse pause work button while scrolling."
