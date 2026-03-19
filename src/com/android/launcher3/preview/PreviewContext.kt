@@ -23,37 +23,24 @@ import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.ProxyPrefs
 import com.android.launcher3.WorkspaceLayoutManager
-import com.android.launcher3.concurrent.ExecutorsModule
-import com.android.launcher3.dagger.ApiWrapperModule
-import com.android.launcher3.dagger.AppModule
 import com.android.launcher3.dagger.ApplicationContext
-import com.android.launcher3.dagger.AutomationModule
-import com.android.launcher3.dagger.DesktopModule
-import com.android.launcher3.dagger.HomeScreenFilesModule
+import com.android.launcher3.dagger.BootSafeModules
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.dagger.LauncherModelModule
+import com.android.launcher3.dagger.NoOpLoggerModule
 import com.android.launcher3.dagger.PerDisplayModule
-import com.android.launcher3.dagger.PluginManagerWrapperModule
-import com.android.launcher3.dagger.SettingsModule
-import com.android.launcher3.dagger.StaticObjectModule
-import com.android.launcher3.dagger.TaskOverlayModule
-import com.android.launcher3.dagger.WindowManagerProxyModule
 import com.android.launcher3.graphics.theme.ThemePreference
 import com.android.launcher3.model.ModelInitializer
 import com.android.launcher3.model.data.LoaderParams
-import com.android.launcher3.organizer.generator.GeneratorModule
 import com.android.launcher3.provider.LauncherDbUtils.selectionForWorkspaceScreen
 import com.android.launcher3.qsb.OseWidgetManager
 import com.android.launcher3.util.SandboxContext
-import com.android.launcher3.util.dagger.LauncherExecutorsModule
 import com.android.launcher3.widget.LauncherWidgetHolder
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
 import com.android.launcher3.widget.LocalColorExtractor
 import com.android.launcher3.widget.util.WidgetSizeHandler
 import com.android.launcher3.widgetpicker.NoOpWidgetPickerModule
-import com.android.launcher3.workspacefunctions.WorkspaceFunctionsModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -193,24 +180,11 @@ constructor(
     @Component(
         modules =
             [
-                WindowManagerProxyModule::class,
-                ApiWrapperModule::class,
-                PluginManagerWrapperModule::class,
-                StaticObjectModule::class,
-                AppModule::class,
                 PerDisplayModule::class,
-                ExecutorsModule::class,
-                LauncherExecutorsModule::class,
                 NoOpWidgetPickerModule::class,
-                LauncherModelModule::class,
+                NoOpLoggerModule::class,
                 PreviewModule::class,
-                HomeScreenFilesModule::class,
-                DesktopModule::class,
-                SettingsModule::class,
-                AutomationModule::class,
-                TaskOverlayModule::class,
-                WorkspaceFunctionsModule::class,
-                GeneratorModule::class,
+                BootSafeModules::class,
             ]
     )
     interface PreviewAppComponent : LauncherAppComponent {

@@ -49,9 +49,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.capture
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @MutatedComponent(target = LauncherAppComponent::class, installModules = [FakePrefsModule::class])
@@ -63,18 +61,14 @@ class SettingsChangeLoggerTest {
 
     private val mInstanceId = InstanceId.fakeInstanceId(1)
 
+    @BindValue
     @Mock(answer = Answers.RETURNS_SELF)
-    private lateinit var mMockLogger: StatsLogManager.StatsLogger
-
-    @BindValue @Mock lateinit var mStatsLogFactory: StatsLogManager.StatsLogManagerFactory
-    @Mock private lateinit var mStatsLogManager: StatsLogManager
+    lateinit var mMockLogger: StatsLogManager.StatsLogger
 
     @Captor private lateinit var mEventCaptor: ArgumentCaptor<StatsLogManager.EventEnum>
 
     @Before
     fun setUp() {
-        whenever(mStatsLogFactory.create(context)).doReturn(mStatsLogManager)
-        whenever(mStatsLogManager.logger()).doReturn(mMockLogger)
         context.initDaggerComponent(mutatedComponentBuilder())
 
         // To match the default value of THEMED_ICONS

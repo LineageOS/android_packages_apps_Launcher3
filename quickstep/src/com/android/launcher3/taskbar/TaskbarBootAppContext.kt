@@ -23,31 +23,19 @@ import android.view.ViewGroup
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.InMemoryLauncherPrefs
 import com.android.launcher3.LauncherPrefs
-import com.android.launcher3.concurrent.ExecutorsModule
-import com.android.launcher3.dagger.ApiWrapperModule
-import com.android.launcher3.dagger.AppModule
-import com.android.launcher3.dagger.AutomationModule
 import com.android.launcher3.dagger.BasePerDisplayModule
-import com.android.launcher3.dagger.DesktopModule
-import com.android.launcher3.dagger.HomeScreenFilesModule
+import com.android.launcher3.dagger.BootSafeModules
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
-import com.android.launcher3.dagger.LauncherModelModule
+import com.android.launcher3.dagger.NoOpLoggerModule
 import com.android.launcher3.dagger.PerDisplayRepositoriesModule
-import com.android.launcher3.dagger.SettingsModule
-import com.android.launcher3.dagger.StaticObjectModule
-import com.android.launcher3.dagger.TaskOverlayModule
 import com.android.launcher3.dagger.WidgetModule
-import com.android.launcher3.dagger.WindowManagerProxyModule
-import com.android.launcher3.organizer.generator.GeneratorModule
 import com.android.launcher3.qsb.QsbWidgetFactory
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.util.PluginManagerWrapper
 import com.android.launcher3.util.SandboxContext
-import com.android.launcher3.util.dagger.LauncherExecutorsModule
-import com.android.launcher3.widgetpicker.LauncherWidgetPickerModule
-import com.android.launcher3.workspacefunctions.WorkspaceFunctionsModule
+import com.android.launcher3.widgetpicker.NoOpWidgetPickerModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -103,25 +91,13 @@ abstract class QsbWidgetModule {
 @Component(
     modules =
         [
-            WindowManagerProxyModule::class,
-            ApiWrapperModule::class,
-            StaticObjectModule::class,
-            WidgetModule::class,
-            AppModule::class,
             BasePerDisplayModule::class,
             PerDisplayRepositoriesModule::class,
-            ExecutorsModule::class,
-            LauncherExecutorsModule::class,
-            LauncherWidgetPickerModule::class,
-            LauncherModelModule::class,
-            HomeScreenFilesModule::class,
-            DesktopModule::class,
-            SettingsModule::class,
             QsbWidgetModule::class,
-            AutomationModule::class,
-            TaskOverlayModule::class,
-            WorkspaceFunctionsModule::class,
-            GeneratorModule::class,
+            NoOpWidgetPickerModule::class,
+            WidgetModule::class,
+            NoOpLoggerModule::class,
+            BootSafeModules::class,
         ]
 )
 interface TaskbarBootComponent : LauncherAppComponent {
