@@ -49,6 +49,7 @@ import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.ModelTestExtensions.preloadModelData
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.quickstep.util.SingleTask
+import com.android.systemui.shared.recents.model.Task
 import com.android.window.flags.Flags.FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU
 import com.android.wm.shell.Flags.FLAG_ENABLE_CREATE_ANY_BUBBLE
 import com.android.wm.shell.shared.bubbles.FakeBubbleFeatureConfig
@@ -155,6 +156,34 @@ class TaskbarPopupControllerTest {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(false)
         assertThat(hasPopupMenu()).isFalse()
         runOnTaskbarUiThreadSync { popupController.show(recentTaskIcon) }
+        assertThat(hasPopupMenu()).isTrue()
+    }
+
+    @Test
+    fun showForIcon_recentTask_mismatchedComponent() {
+        // Create a task with a component name that doesn't match any in AllAppsStore,
+        // but has the same package name as one of the apps.
+        val originalTask = (recentTaskIcon.tag as SingleTask).task
+        val mismatchedComponent = ComponentName(originalTask.key.packageName, "MismatchedActivity")
+        val mismatchedTask =
+            Task().apply {
+                key =
+                    Task.TaskKey(
+                        123,
+                        originalTask.key.windowingMode,
+                        originalTask.key.baseIntent.cloneFilter().setComponent(mismatchedComponent),
+                        mismatchedComponent,
+                        originalTask.key.userId,
+                        originalTask.key.lastActiveTime,
+                    )
+            }
+        val mismatchedSingleTask = SingleTask(mismatchedTask)
+
+        runOnTaskbarUiThreadSync {
+            recentTaskIcon.tag = mismatchedSingleTask
+            assertThat(hasPopupMenu()).isFalse()
+            popupController.show(recentTaskIcon)
+        }
         assertThat(hasPopupMenu()).isTrue()
     }
 
