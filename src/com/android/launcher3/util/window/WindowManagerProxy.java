@@ -109,13 +109,6 @@ public class WindowManagerProxy {
     }
 
     /**
-     * Returns if we are in desktop mode or not.
-     */
-    public boolean isInDesktopMode(int displayId) {
-        return false;
-    }
-
-    /**
      * Returns if the display is in desktop-first mode.
      */
     public boolean isDisplayDesktopFirst(Context displayInfoContext) {
@@ -516,62 +509,4 @@ public class WindowManagerProxy {
         return new Rect(cutout.getSafeInsetLeft(), cutout.getSafeInsetTop(),
                 cutout.getSafeInsetRight(), cutout.getSafeInsetBottom());
     }
-
-    /** Registers a listener for Taskbar changes in Desktop Mode.  */
-    public void registerDesktopVisibilityListener(DesktopVisibilityListener listener) { }
-
-    /** Removes a previously registered listener for Taskbar changes in Desktop Mode.  */
-    public void unregisterDesktopVisibilityListener(DesktopVisibilityListener listener) { }
-
-    /** A listener for when the user enters/exits Desktop Mode.  */
-    public interface DesktopVisibilityListener {
-        /**
-         * Called whenever the conditions that allow the creation of desks change.
-         *
-         * @param canCreateDesks whether it is possible to create new desks.
-         */
-        default void onCanCreateDesksChanged(boolean canCreateDesks) {
-        }
-
-        /**
-         * Called when a new desk is added.
-         *
-         * @param displayId The ID of the display on which the desk was added.
-         * @param deskId The ID of the newly added desk.
-         */
-        default void onDeskAdded(int displayId, int deskId) {}
-
-        /**
-         * Called when an existing desk is removed.
-         *
-         * @param displayId The ID of the display on which the desk was removed.
-         * @param deskId The ID of the desk that was removed.
-         */
-        default void onDeskRemoved(int displayId, int deskId) {}
-
-        /**
-         * Called when the active desk changes.
-         *
-         * @param displayId The ID of the display on which the desk activation change is happening.
-         * @param newActiveDesk The ID of the new active desk or -1 if no desk is active anymore
-         *                      (i.e. exit desktop mode).
-         * @param oldActiveDesk The ID of the desk that was previously active, or -1 if no desk was
-         *                      active before.
-         */
-        default void onActiveDeskChanged(int displayId, int newActiveDesk, int oldActiveDesk) {}
-
-        /**
-         * Called when a task appears in a desk.
-         *
-         * @param taskId the ID of the task appearing.
-         * @param displayId the ID of the display in which the task is appearing
-         * @param deskId the ID of the desk in which the task is appearing
-         */
-        default void onTaskAppearingInDeskWithOverviewShowing(int taskId, int displayId,
-                int deskId) {}
-
-        /** Called when the listener is initialised from shell. */
-        default void onListenerInitializedFromShell() {}
-    }
-
 }

@@ -1620,9 +1620,17 @@ public final class LauncherInstrumentation {
     }
 
     LaunchedAppState assertAppLaunched(@NonNull String expectedPackageName) {
-        BySelector packageSelector = By.pkg(expectedPackageName);
-        assertTrue("App didn't start: (" + packageSelector + ")",
-                mDevice.wait(Until.hasObject(packageSelector),
+        return assertAppLaunched(expectedPackageName, null);
+    }
+
+    LaunchedAppState assertAppLaunched(
+            @NonNull String expectedPackageName, @Nullable String expectedVisibleText) {
+        BySelector selector = By.pkg(expectedPackageName);
+        if (expectedVisibleText != null) {
+            selector = selector.text(expectedVisibleText);
+        }
+        assertTrue("App didn't start: (" + selector + ")",
+                mDevice.wait(Until.hasObject(selector),
                         LauncherInstrumentation.WAIT_TIME_MS));
         return new LaunchedAppState(this);
     }
@@ -2022,26 +2030,6 @@ public final class LauncherInstrumentation {
 
     int getRightGestureStartOnScreen() {
         return getRealDisplaySize().x - getWindowInsets().right - 1;
-    }
-
-    /**
-     * Click on the ui object right away without waiting for animation.
-     *
-     * [UiObject2.click] would wait for all animations finished before clicking. Not waiting for
-     * animations because in some scenarios there is a playing animations when the click is
-     * attempted.
-     */
-    void clickObject(UiObject2 uiObject) {
-        final long clickTime = SystemClock.uptimeMillis();
-        final Point center = uiObject.getVisibleCenter();
-        sendPointer(clickTime, clickTime, MotionEvent.ACTION_DOWN, center,
-                GestureScope.DONT_EXPECT_PILFER);
-        sendPointer(clickTime, clickTime, MotionEvent.ACTION_UP, center,
-                GestureScope.DONT_EXPECT_PILFER);
-    }
-
-    void clickLauncherObject(UiObject2 object) {
-        clickObject(object);
     }
 
     void scrollToLastVisibleRow(

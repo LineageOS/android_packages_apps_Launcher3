@@ -37,11 +37,14 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.swipeDown
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.widgetpicker.ui.LocalWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.NoOpWidgetPickerCuiReporter
@@ -88,6 +91,40 @@ class TitledFloatingSheetTest {
 
         composeTestRule.onNode(hasText(CONTENT_TEXT)).assertDoesNotExist()
         composeTestRule.onNode(hasText(CLOSED_TEXT)).assertExists()
+    }
+
+    @Test
+    fun scrollDownAtTopClosesSheetWhenEnableDragOnScrollToEndIsTrue() {
+        composeTestRule.setContent {
+            FloatingSheetTestContent(shouldEnableDragOnScrollToEnd = true)
+        }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
+
+        composeTestRule.onNodeWithTag(LIST_TEST_TAG).performTouchInput { swipeDown() }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertDoesNotExist()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertExists()
+    }
+
+    @Test
+    fun scrollDownAtTopDoesNotCloseSheetWhenEnableDragOnScrollToEndIsFalse() {
+        composeTestRule.setContent {
+            FloatingSheetTestContent(shouldEnableDragOnScrollToEnd = false)
+        }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
+
+        composeTestRule.onNodeWithTag(LIST_TEST_TAG).performTouchInput { swipeDown() }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
     }
 
     @Test
@@ -148,7 +185,7 @@ class TitledFloatingSheetTest {
     }
 
     @Composable
-    private fun FloatingSheetTestContent() {
+    private fun FloatingSheetTestContent(shouldEnableDragOnScrollToEnd: Boolean = false) {
         var isClosed by remember { mutableStateOf(false) }
 
         val hostStateProvider =
@@ -175,6 +212,7 @@ class TitledFloatingSheetTest {
                         TitledFloatingSheet(
                             title = SHEET_TITLE,
                             description = null,
+                            shouldEnableDragOnScrollToEnd = shouldEnableDragOnScrollToEnd,
                             onDismissSheet = { isClosed = true },
                             onSheetOpen = {},
                             onSheetProgress = {},

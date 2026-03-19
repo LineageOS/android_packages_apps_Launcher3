@@ -53,11 +53,11 @@ import com.android.launcher3.concurrent.annotations.Ui
 import com.android.launcher3.dagger.DisplayId
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion.INACTIVE_DESK_ID
+import com.android.launcher3.statehandlers.DesktopVisibilityController.DesktopVisibilityListener
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.util.IntArray
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SafeCloseable
-import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.GestureState
 import com.android.quickstep.RemoteTargetGluer.RemoteTargetHandle
 import com.android.quickstep.RotationTouchHelper
@@ -410,7 +410,7 @@ constructor(
     /** Returns the last TaskView that should be displayed as a large tile. */
     fun getLastLargeTaskView(): TaskView? = taskViews.lastOrNull { it.isLargeTile }
 
-    override fun onCanCreateDesksChanged(canCreateDesks: Boolean) {
+    fun onCanCreateDesksChanged(canCreateDesks: Boolean) {
         recentsView.addDeskButton?.isInvisible = !canCreateDesks
     }
 

@@ -657,6 +657,8 @@
     <string name="create_new_folder_button_text">New folder</string>
     <!-- Default name for a newly created folder -->
     <string name="default_new_folder_name">New folder</string>
+    <!-- Clear button label for the dialog which allows the user to rename files/folders. -->
+    <string name="home_screen_files_rename_dialog_clear_button">Clear</string>
     <!-- Neutral button label for the dialog which allows the user to rename files/folders. -->
     <string name="home_screen_files_rename_dialog_neutral_button">Cancel</string>
     <!-- Positive button label for the dialog which allows the user to rename files/folders. -->

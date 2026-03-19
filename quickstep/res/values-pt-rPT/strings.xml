@@ -111,6 +111,8 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"Esta ação não é permitida pela app ou a sua entidade."</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Os widgets não são atualmente suportados. Selecione outra app"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"Copiar"</string>
+    <!-- no translation found for action_image_save (6205538612408306742) -->
+    <skip />
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Rodar ecrã"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animação que mostra como a Barra de tarefas aparece na parte inferior do ecrã e é ocultada automaticamente quando não está em utilização"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animação que mostra como afixar a Barra de tarefas através de um botão, para que a Barra de tarefas fique permanentemente visível na parte inferior do ecrã"</string>

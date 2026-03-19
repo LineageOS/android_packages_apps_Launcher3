@@ -20,8 +20,8 @@ import static android.view.KeyEvent.KEYCODE_ESCAPE;
 
 import static com.android.launcher3.tapl.LauncherInstrumentation.DEFAULT_POLL_INTERVAL;
 import static com.android.launcher3.tapl.LauncherInstrumentation.TASKBAR_RES_ID;
-import static com.android.launcher3.tapl.LauncherInstrumentation.eventListToString;
 import static com.android.launcher3.tapl.LauncherInstrumentation.WAIT_TIME_MS;
+import static com.android.launcher3.tapl.LauncherInstrumentation.eventListToString;
 import static com.android.launcher3.tapl.LauncherInstrumentation.log;
 import static com.android.launcher3.tapl.OverviewTask.TASK_START_EVENT;
 import static com.android.launcher3.tapl.TestHelpers.getOverviewPackageName;
@@ -194,9 +194,9 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
             final BySelector clearAllSelector = mLauncher.getOverviewObjectSelector("clear_all");
             flingForwardUntilClearAllVisibleImpl();
 
-            final Runnable clickClearAll = () -> mLauncher.clickLauncherObject(
+            final Runnable clickClearAll = () ->
                     mLauncher.waitForObjectInContainer(verifyActiveContainer(),
-                            clearAllSelector));
+                            clearAllSelector).click();
 
             if (mLauncher.isInDesktopFirstMode()) {
                 // In desktop-first mode clear-all does not go to a home
@@ -521,8 +521,7 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
             try (LauncherInstrumentation.Closable c1 = mLauncher.addContextLayer(
                     "scrolled to add desktop button")) {
                 int desktopTasksCount = overview.getDesktopTasksCount();
-                mLauncher.clickLauncherObject(mLauncher
-                        .waitForOverviewObject("add_desktop_button"));
+                mLauncher.waitForOverviewObject("add_desktop_button").click();
                 mLauncher.assertTrue("Failed to verify the num of desks, expected num is: "
                         + (desktopTasksCount + 1) + ", but get: " + overview.getDesktopTasksCount(),
                         mLauncher.waitAndGet(() ->
@@ -622,8 +621,24 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
      * Presses the enter key to launch the focused task
      * <p>
      * If no task is focused, this will fail.
+     *
+     * @param expectedPackageName the package name of the expected launched app
      */
     public LaunchedAppState launchFocusedTaskByEnterKey(@NonNull String expectedPackageName) {
+        return launchFocusedTaskByEnterKey(expectedPackageName, null);
+    }
+
+    /**
+     * Presses the enter key to launch the focused task
+     * <p>
+     * If no task is focused, this will fail.
+     *
+     * @param expectedPackageName the package name of the expected launched app
+     * @param expectedVisibleText the uniquely identifying text expected to be visible in the
+     *                            launched app
+     */
+    public LaunchedAppState launchFocusedTaskByEnterKey(
+            @NonNull String expectedPackageName, @Nullable String expectedVisibleText) {
         try (LauncherInstrumentation.Closable e = mLauncher.eventsCheck()) {
             mLauncher.expectEvent(TestProtocol.SEQUENCE_MAIN, EVENT_ENTER_UP);
             mLauncher.expectEvent(TestProtocol.SEQUENCE_MAIN, TASK_START_EVENT);
@@ -633,7 +648,7 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
                             "Failed to press enter",
                             mLauncher.getDevice().pressKeyCode(KeyEvent.KEYCODE_ENTER)),
                     "pressing enter");
-            mLauncher.assertAppLaunched(expectedPackageName);
+            mLauncher.assertAppLaunched(expectedPackageName, expectedVisibleText);
 
             try (LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
                     "pressed enter")) {

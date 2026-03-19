@@ -83,8 +83,6 @@ fun AmbientCueContainer(
         }
     }
 
-    LaunchedEffect(actions) { viewModel.delayAndDeactivateCueBar() }
-
     Box(
         modifier.clickable(enabled = expanded, indication = null, interactionSource = null) {
             viewModel.collapse()

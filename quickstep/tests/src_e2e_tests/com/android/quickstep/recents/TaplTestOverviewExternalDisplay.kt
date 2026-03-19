@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 @AllowInRecentsWindowTests
-class TaplOverviewExternalDisplayTest : AbstractQuickStepTest() {
+class TaplTestOverviewExternalDisplay : AbstractQuickStepTest() {
 
     @Before
     override fun setUp() {

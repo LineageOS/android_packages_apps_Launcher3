@@ -69,10 +69,10 @@ public abstract class Launchable {
 
                 if (launcherStopsAfterLaunch()) {
                     mLauncher.executeAndWaitForLauncherToYieldFocus(
-                            () -> mLauncher.clickLauncherObject(mObject),
+                            () -> mObject.click(),
                             "clicking the launchable");
                 } else {
-                    mLauncher.clickLauncherObject(mObject);
+                    mObject.click();
                 }
 
                 try (LauncherInstrumentation.Closable c2 = mLauncher.addContextLayer("clicked")) {
@@ -102,7 +102,7 @@ public abstract class Launchable {
                     mObject));
 
             mLauncher.executeAndWaitForLauncherStop(
-                    () -> mLauncher.clickLauncherObject(mObject),
+                    () -> mObject.click(),
                     "clicking the launchable");
 
             try (LauncherInstrumentation.Closable c2 = mLauncher.addContextLayer("clicked")) {

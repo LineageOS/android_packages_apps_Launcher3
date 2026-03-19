@@ -16,13 +16,7 @@
 
 package com.android.launcher3.tapl;
 
-import androidx.annotation.NonNull;
-import androidx.test.uiautomator.By;
-import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiObject2;
-import androidx.test.uiautomator.Until;
-
-import java.util.regex.Pattern;
 
 /**
  * Operations on qsb from either Home screen or AllApp screen.
@@ -61,7 +55,7 @@ public abstract class Qsb implements SearchInputSource {
     }
 
     protected void clickQsb() {
-        mLauncher.clickLauncherObject(waitForQsbObject());
+        waitForQsbObject().click();
     }
 
     @Override

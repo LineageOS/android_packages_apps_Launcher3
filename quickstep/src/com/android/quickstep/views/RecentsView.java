@@ -901,7 +901,13 @@ public abstract class RecentsView<
 
             // Update its visibility based on whether we can create a desk or not.
             mUtils.onCanCreateDesksChanged(
-                    mDesktopVisibilityController.getCanCreateDesks());
+                    mDesktopVisibilityController.getCanCreateDesks().getValue());
+            ViewEx.registerLifecycleTask(this,
+                    () -> mDesktopVisibilityController.getCanCreateDesks().forEach(
+                            mContainer.getUiExecutor(), b -> {
+                                mUtils.onCanCreateDesksChanged(b);
+                                return Unit.INSTANCE;
+                            }));
         }
 
         mTaskViewPool = new ViewPool<>(context, this, R.layout.task, 20 /* max size */,

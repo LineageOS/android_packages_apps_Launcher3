@@ -25,9 +25,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 
-@AllowedDevices(
-    allowed = [DeviceProduct.TANGORPRO, DeviceProduct.CF_TABLET, DeviceProduct.CF_DESKTOP]
-)
+@AllowedDevices(allowed = [DeviceProduct.TANGORPRO, DeviceProduct.CF_TABLET])
 @AllowInRecentsWindowTests
 class TaplTaskbarPinningTest : AbstractTaplTestsTaskbar() {
 

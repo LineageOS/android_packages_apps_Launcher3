@@ -205,15 +205,12 @@
     <string name="move_to_hotseat_position" msgid="6295412897075147808">"移至收藏夹第 <xliff:g id="NUMBER">%1$s</xliff:g> 个位置"</string>
     <string name="item_moved" msgid="4606538322571412879">"已移动项目"</string>
     <string name="add_to_folder" msgid="9040534766770853243">"添加到“<xliff:g id="NAME">%1$s</xliff:g>”文件夹"</string>
-    <!-- no translation found for add_to_folder_with_position (4457486890869662) -->
-    <skip />
+    <string name="add_to_folder_with_position" msgid="4457486890869662">"添加到 <xliff:g id="NAME">%1$s</xliff:g> 文件夹中。“<xliff:g id="STRING">%4$s</xliff:g>”中的第 <xliff:g id="NUMBER_0">%2$s</xliff:g> 行，第 <xliff:g id="NUMBER_1">%3$s</xliff:g> 列"</string>
     <string name="add_to_folder_with_app" msgid="4534929978967147231">"添加到“<xliff:g id="NAME">%1$s</xliff:g>”所在文件夹"</string>
-    <!-- no translation found for add_to_folder_with_app_with_position (6670979489897093325) -->
-    <skip />
+    <string name="add_to_folder_with_app_with_position" msgid="6670979489897093325">"添加到包含 <xliff:g id="NAME">%1$s</xliff:g> 的文件夹中。“<xliff:g id="STRING">%4$s</xliff:g>”中的第 <xliff:g id="NUMBER_0">%2$s</xliff:g> 行，第 <xliff:g id="NUMBER_1">%3$s</xliff:g> 列"</string>
     <string name="added_to_folder" msgid="4793259502305558003">"项目已添加到文件夹"</string>
     <string name="create_folder_with" msgid="4050141361160214248">"创建“<xliff:g id="NAME">%1$s</xliff:g>”文件夹"</string>
-    <!-- no translation found for create_folder_with_position (3093164349445159115) -->
-    <skip />
+    <string name="create_folder_with_position" msgid="3093164349445159115">"创建 <xliff:g id="NAME">%1$s</xliff:g> 文件夹。“<xliff:g id="STRING">%4$s</xliff:g>”中的第 <xliff:g id="NUMBER_0">%2$s</xliff:g> 行，第 <xliff:g id="NUMBER_1">%3$s</xliff:g> 列"</string>
     <string name="folder_created" msgid="6409794597405184510">"文件夹已创建"</string>
     <string name="action_move_to_workspace" msgid="39528912300293768">"移至主屏幕"</string>
     <string name="action_resize" msgid="1802976324781771067">"调整大小"</string>

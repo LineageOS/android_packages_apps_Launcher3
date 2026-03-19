@@ -266,7 +266,7 @@ public final class OverviewTask {
             final boolean hasDesktopTasks = hasDesktopTasks();
 
             mLauncher.executeAndWaitForLauncherStop(
-                    () -> mLauncher.clickLauncherObject(mTask),
+                    () -> mTask.click(),
                     "clicking an overview task");
             if (mOverview.getContainerType()
                     == LauncherInstrumentation.ContainerType.SPLIT_SCREEN_SELECT) {
@@ -331,8 +331,7 @@ public final class OverviewTask {
         try (LauncherInstrumentation.Closable e = mLauncher.eventsCheck();
              LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
                      "want to tap the task menu")) {
-            mLauncher.clickLauncherObject(
-                    mLauncher.waitForObjectInContainer(mTask, task.iconAppRes));
+            mLauncher.waitForObjectInContainer(mTask, task.iconAppRes).click();
 
             try (LauncherInstrumentation.Closable c1 = mLauncher.addContextLayer(
                     "tapped the task menu")) {
@@ -364,9 +363,8 @@ public final class OverviewTask {
              LauncherInstrumentation.Closable c = mLauncher.addContextLayer(
                      "wanted to tap the close button")) {
             UiObject2 thumbnailViewHeader = getDesktopThumbnailViewHeader(activityName);
-            mLauncher.clickLauncherObject(
-                    mLauncher.waitForObjectInContainer(
-                            thumbnailViewHeader, DESKTOP_TASK_THUMBNAIL_VIEW_HEADER_CLOSE_BUTTON));
+            mLauncher.waitForObjectInContainer(
+                    thumbnailViewHeader, DESKTOP_TASK_THUMBNAIL_VIEW_HEADER_CLOSE_BUTTON).click();
             if (thumbnailViewCount > 1) {
                 // There still should be other thumbnail views in the desktop task view, check its
                 // count.
@@ -396,7 +394,7 @@ public final class OverviewTask {
             UiObject2 thumbnailView = getDesktopThumbnailView(activityName);
             mLauncher.expectEvent(TestProtocol.SEQUENCE_MAIN, TASK_START_EVENT_DESKTOP);
             mLauncher.executeAndWaitForLauncherStop(
-                    () -> mLauncher.clickLauncherObject(thumbnailView),
+                    thumbnailView::click,
                     "clicking on a desktop thumbnail view");
             return new LaunchedAppState(mLauncher, /* inDesktopMode= */ true);
         }

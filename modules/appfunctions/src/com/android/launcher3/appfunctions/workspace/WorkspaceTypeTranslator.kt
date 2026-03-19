@@ -21,10 +21,10 @@ interface Translator<C, S> {
     /**
      * Converts a [C] to a [S].
      *
-     * @param obj The [C] to convert.
+     * @param info The [C] to convert.
      * @return The converted [S].
      */
-    fun toSpec(obj: C): S
+    fun toSpec(info: C): S
 }
 
 /**
@@ -38,3 +38,9 @@ interface WorkspaceTypeTranslator<T> : Translator<T, WorkspaceSpec>
  * actually used by the launcher.
  */
 interface UnplacedAppTypeTranslator<T> : Translator<T, UnplacedAppSpec>
+
+/**
+ * A translator for converting between the flat [UnplacedWidgetSpec] and a structured widget type [T]
+ * actually used by the launcher.
+ */
+interface UnplacedWidgetTypeTranslator<T> : Translator<T, UnplacedWidgetSpec>

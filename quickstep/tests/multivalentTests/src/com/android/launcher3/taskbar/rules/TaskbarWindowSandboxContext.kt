@@ -34,7 +34,6 @@ import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.dagger.LauncherAppSingleton
-import com.android.launcher3.display.DisplayController
 import com.android.launcher3.statehandlers.DesktopVisibilityController
 import com.android.launcher3.taskbar.customization.TaskbarFeatureEvaluator
 import com.android.launcher3.util.DaggerSingletonTracker
@@ -245,12 +244,11 @@ object TaskbarTestOverridesModule {
     @Provides
     @LauncherAppSingleton
     fun provideTaskbarModeUtil(
-        @ApplicationContext context: Context,
-        displayController: DisplayController,
         windowManagerProxy: WindowManagerProxy,
+        visibilityController: DesktopVisibilityController,
         launcherPrefs: LauncherPrefs,
     ): TaskbarModeUtil {
-        return spy(TaskbarModeUtil(windowManagerProxy, launcherPrefs))
+        return spy(TaskbarModeUtil(windowManagerProxy, launcherPrefs, visibilityController))
     }
 
     @JvmStatic

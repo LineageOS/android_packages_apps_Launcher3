@@ -31,8 +31,8 @@ import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.getTaskbarUiThread
+import com.android.launcher3.util.MutableListenableRef
 import com.android.launcher3.util.Preconditions
-import com.android.launcher3.util.window.WindowManagerProxy.DesktopVisibilityListener
 import com.android.quickstep.SystemUiProxy
 import com.android.quickstep.fallback.RecentsState
 import com.android.wm.shell.desktopmode.DisplayDeskState
@@ -71,20 +71,15 @@ constructor(
         val deskIds: MutableSet<Int>,
     )
 
+    private val _canCreateDesks = MutableListenableRef(false)
+
     /** True if it is possible to create new desks on current setup. */
-    var canCreateDesks: Boolean = false
-        private set(value) {
-            if (field == value) return
-            field = value
-            desktopVisibilityListeners.forEach { it.onCanCreateDesksChanged(field) }
-        }
+    val canCreateDesks = _canCreateDesks.asListenable()
 
     /** Maps each display by its ID to its desks configuration. */
     private val displaysDesksConfigsMap = SparseArray<DisplayDeskConfig>()
 
     private val desktopVisibilityListeners: MutableSet<DesktopVisibilityListener> =
-        ConcurrentHashMap.newKeySet()
-    private val taskbarDesktopModeListeners: MutableSet<TaskbarDesktopModeListener> =
         ConcurrentHashMap.newKeySet()
 
     // to let launcher hold off on notifying desktop visibility listeners.
@@ -132,18 +127,6 @@ constructor(
         return isInDesktopMode(displayId) && !inOverviewState
     }
 
-    /** Registers a listener for Taskbar changes in Desktop Mode. */
-    @AnyThread
-    fun registerTaskbarDesktopModeListener(listener: TaskbarDesktopModeListener) {
-        taskbarDesktopModeListeners.add(listener)
-    }
-
-    /** Removes a previously registered listener for Taskbar changes in Desktop Mode. */
-    @AnyThread
-    fun unregisterTaskbarDesktopModeListener(listener: TaskbarDesktopModeListener) {
-        taskbarDesktopModeListeners.remove(listener)
-    }
-
     fun onLauncherStateChanged(displayId: Int, state: LauncherState) {
         onLauncherStateChanged(
             state,
@@ -172,7 +155,7 @@ constructor(
     }
 
     /** Process launcher state change and update launcher view visibility based on desktop state */
-    fun onLauncherStateChanged(
+    private fun onLauncherStateChanged(
         state: BaseState<*>,
         isBackgroundAppState: Boolean,
         isRecentsViewVisible: Boolean,
@@ -227,7 +210,7 @@ constructor(
                     displayId,
             )
         }
-        for (listener in taskbarDesktopModeListeners) {
+        for (listener in desktopVisibilityListeners) {
             listener.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding, displayId)
         }
     }
@@ -304,8 +287,7 @@ constructor(
             )
         }
 
-        this.canCreateDesks = canCreateDesks
-
+        onCanCreateDesksChanged(canCreateDesks)
         notifyOnListenerInitializedFromShell()
     }
 
@@ -338,7 +320,7 @@ constructor(
     }
 
     private fun onCanCreateDesksChanged(canCreateDesks: Boolean) {
-        this.canCreateDesks = canCreateDesks
+        this._canCreateDesks.dispatchValue(canCreateDesks)
     }
 
     private fun onDeskAdded(displayId: Int, deskId: Int) {
@@ -488,8 +470,47 @@ constructor(
         }
     }
 
-    /** A listener for Taskbar in Desktop Mode. */
-    interface TaskbarDesktopModeListener {
+    /** A listener for when the user enters/exits Desktop Mode. */
+    interface DesktopVisibilityListener {
+        /**
+         * Called when a new desk is added.
+         *
+         * @param displayId The ID of the display on which the desk was added.
+         * @param deskId The ID of the newly added desk.
+         */
+        fun onDeskAdded(displayId: Int, deskId: Int) {}
+
+        /**
+         * Called when an existing desk is removed.
+         *
+         * @param displayId The ID of the display on which the desk was removed.
+         * @param deskId The ID of the desk that was removed.
+         */
+        fun onDeskRemoved(displayId: Int, deskId: Int) {}
+
+        /**
+         * Called when the active desk changes.
+         *
+         * @param displayId The ID of the display on which the desk activation change is happening.
+         * @param newActiveDesk The ID of the new active desk or -1 if no desk is active anymore
+         *   (i.e. exit desktop mode).
+         * @param oldActiveDesk The ID of the desk that was previously active, or -1 if no desk was
+         *   active before.
+         */
+        fun onActiveDeskChanged(displayId: Int, newActiveDesk: Int, oldActiveDesk: Int) {}
+
+        /**
+         * Called when a task appears in a desk.
+         *
+         * @param taskId the ID of the task appearing.
+         * @param displayId the ID of the display in which the task is appearing
+         * @param deskId the ID of the desk in which the task is appearing
+         */
+        fun onTaskAppearingInDeskWithOverviewShowing(taskId: Int, displayId: Int, deskId: Int) {}
+
+        /** Called when the listener is initialised from shell. */
+        fun onListenerInitializedFromShell() {}
+
         /**
          * Callback for when task is resized in desktop mode. This callback is executed on taskbar
          * ui thread.
@@ -500,20 +521,6 @@ constructor(
             doesAnyTaskRequireTaskbarRounding: Boolean,
             displayId: Int,
         ) {}
-
-        /**
-         * Callback for when user is exiting desktop mode.
-         *
-         * @param duration for exit transition
-         */
-        fun onExitDesktopMode(duration: Int) {}
-
-        /**
-         * Callback for when user is entering desktop mode.
-         *
-         * @param duration for enter transition
-         */
-        fun onEnterDesktopMode(duration: Int) {}
     }
 
     companion object {
