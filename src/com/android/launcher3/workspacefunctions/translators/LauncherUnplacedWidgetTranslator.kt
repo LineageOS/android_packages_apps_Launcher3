@@ -36,7 +36,11 @@ constructor(@ApplicationContext private val context: Context) :
             spanY = info.spanY,
             label = info.getLabel().toString(),
             description = info.loadDescription(context)?.toString(),
-            category = getCategoryTopic(context, info.getApplicationInfo()?.category ?: ApplicationInfo.CATEGORY_UNDEFINED),
+            category =
+                getCategoryTopic(
+                    context,
+                    info.getApplicationInfo()?.category ?: ApplicationInfo.CATEGORY_UNDEFINED,
+                ),
         )
     }
 }
