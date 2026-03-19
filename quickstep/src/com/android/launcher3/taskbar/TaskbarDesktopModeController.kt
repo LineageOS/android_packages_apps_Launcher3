@@ -18,7 +18,7 @@ package com.android.launcher3.taskbar
 
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.statehandlers.DesktopVisibilityController
-import com.android.launcher3.statehandlers.DesktopVisibilityController.TaskbarDesktopModeListener
+import com.android.launcher3.statehandlers.DesktopVisibilityController.DesktopVisibilityListener
 import com.android.launcher3.taskbar.TaskbarBackgroundRenderer.Companion.MAX_ROUNDNESS
 import com.android.launcher3.util.Executors.getTaskbarUiThread
 import com.android.launcher3.util.SafeCloseable
@@ -27,7 +27,7 @@ import com.android.launcher3.util.SafeCloseable
 class TaskbarDesktopModeController(
     private val taskbarActivityContext: TaskbarActivityContext,
     private val desktopVisibilityController: DesktopVisibilityController,
-) : TaskbarDesktopModeListener {
+) : DesktopVisibilityListener {
 
     private var displayInfoChangeSafeCloseable: SafeCloseable? = null
 
@@ -46,7 +46,7 @@ class TaskbarDesktopModeController(
         taskbarControllers = controllers
         taskbarSharedState = sharedState
         taskbarUiState = uiState
-        desktopVisibilityController.registerTaskbarDesktopModeListener(this)
+        desktopVisibilityController.registerDesktopVisibilityListener(this)
         displayInfoChangeSafeCloseable =
             DisplayController.INSTANCE.get(taskbarActivityContext).listenable?.forEach(
                 getTaskbarUiThread()
@@ -90,7 +90,7 @@ class TaskbarDesktopModeController(
     }
 
     fun onDestroy() {
-        desktopVisibilityController.unregisterTaskbarDesktopModeListener(this)
+        desktopVisibilityController.unregisterDesktopVisibilityListener(this)
         displayInfoChangeSafeCloseable?.close()
         displayInfoChangeSafeCloseable = null
     }
