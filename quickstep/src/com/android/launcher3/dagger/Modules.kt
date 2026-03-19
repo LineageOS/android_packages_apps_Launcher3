@@ -313,8 +313,12 @@ object DesktopModule {
         DesktopModeCompatPolicy(context)
 
     @Provides
-    fun provideDesktopState(@ApplicationContext context: Context): DesktopState =
-        DesktopState.getInstance(context)
+    @LauncherAppSingleton
+    fun provideDesktopState(
+        @ApplicationContext context: Context,
+        lifecycle: DaggerSingletonTracker,
+    ): DesktopState =
+        DesktopState.fromContext(context).also { lifecycle.addCloseable { it.destroy() } }
 }
 
 @Module
