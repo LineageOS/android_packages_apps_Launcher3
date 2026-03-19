@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -54,6 +53,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.R
+import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.ItemInfoWithIcon
+import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutCompose
 import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutComposeItemSpacing
 import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutComposeSize
@@ -118,7 +120,7 @@ fun ChooseLayoutContent(padding: PaddingValues, viewModel: SpaceCreatorViewModel
             itemSpacing = ChooseLayoutDimens.carouselItemSpacing,
             contentPadding = PaddingValues(ChooseLayoutDimens.carouselPadding),
         ) { i ->
-            LayoutPreview()
+            LayoutPreview(viewModel.chooseLayoutState.layouts[i], viewModel)
         }
         PaginationDots(carouselState)
         AddButton()
@@ -126,65 +128,54 @@ fun ChooseLayoutContent(padding: PaddingValues, viewModel: SpaceCreatorViewModel
 }
 
 @Composable
-fun LayoutPreview() {
-    Row(Modifier.wrapContentSize()) {
+fun LayoutPreview(itemsInScreen: List<ItemInfo>, viewModel: SpaceCreatorViewModel) {
+    val iconItems = itemsInScreen.filterIsInstance<ItemInfoWithIcon>()
+    val widgets = itemsInScreen.filterIsInstance<LauncherAppWidgetInfo>()
+    Row(
+        Modifier.wrapContentSize()
+            .background(
+                color = Color(ChooseLayoutDimens.previewPageBackgroundColor),
+                shape = RoundedCornerShape(size = ChooseLayoutDimens.previewCornerSize),
+            )
+    ) {
         CellLayoutCompose(
             width = ChooseLayoutDimens.itemWidth,
             height = ChooseLayoutDimens.itemHeight,
-            gridSize = CellLayoutComposeSize(x = 4, y = 5),
+            gridSize =
+                CellLayoutComposeSize(
+                    x = viewModel.chooseLayoutState.chooseLayoutGridSize.x,
+                    y = viewModel.chooseLayoutState.chooseLayoutGridSize.y,
+                ),
             spacing = CellLayoutComposeItemSpacing(8.dp, 8.dp),
             modifier = Modifier.padding(ChooseLayoutDimens.carouselPadding),
         ) {
-            item(cellAndSpan = ItemLocation(0, 0)) { size ->
-                Box(
-                    modifier =
-                        Modifier.width(size.width)
-                            .height(size.height)
-                            .background(Color.Blue, CircleShape)
-                ) {}
+            for (widget in widgets) {
+                item(
+                    cellAndSpan =
+                        ItemLocation(
+                            widget.cellX,
+                            widget.cellY,
+                            spanX = widget.spanX,
+                            spanY = widget.spanY,
+                        )
+                ) { size ->
+                    Box(
+                        Modifier.width(size.width).height(size.height),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text("" + widget.targetComponent?.className)
+                    }
+                }
             }
-
-            item(cellAndSpan = ItemLocation(0, 1)) { size ->
-                Box(
-                    modifier =
-                        Modifier.width(size.width)
-                            .height(size.height)
-                            .background(Color.Blue, CircleShape)
-                ) {}
-            }
-
-            item(cellAndSpan = ItemLocation(0, 4)) { size ->
-                Box(
-                    modifier =
-                        Modifier.width(size.width)
-                            .height(size.height)
-                            .background(Color.Blue, CircleShape)
-                ) {}
-            }
-
-            item(cellAndSpan = ItemLocation(3, 4)) { size ->
-                Box(
-                    modifier =
-                        Modifier.width(size.width)
-                            .height(size.height)
-                            .background(Color.Blue, CircleShape)
-                ) {}
-            }
-
-            item(cellAndSpan = ItemLocation(1, 0)) { size ->
-                Box(
-                    modifier =
-                        Modifier.width(size.width)
-                            .height(size.height)
-                            .background(Color.Blue, CircleShape)
-                ) {}
-            }
-
-            item(cellAndSpan = ItemLocation(1, 1, 2, 2)) { size ->
-                Box(
-                    modifier =
-                        Modifier.width(size.width).height(size.height).background(Color.Green)
-                ) {}
+            for (item in iconItems) {
+                item(cellAndSpan = ItemLocation(item.cellX, item.cellY)) { size ->
+                    Box(
+                        Modifier.width(size.width).height(size.height),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(item.title.toString())
+                    }
+                }
             }
         }
     }
@@ -252,6 +243,7 @@ fun AddButton() {
     }
 }
 
+// TODO(b/493996430): Remove hardcoded dimensions and move them to resources.
 object ChooseLayoutDimens {
     val chooseLayoutContentItemSpacing = 26.dp
     val iconSize = 41.dp
@@ -268,4 +260,6 @@ object ChooseLayoutDimens {
     val paginationDotsWidth = 140.dp
     val paginationDotsHeight = 48.dp
     val circleShape = RoundedCornerShape(size = 360.dp)
+    val previewPageBackgroundColor = 0x52FFFFFF
+    val previewCornerSize = 16.dp
 }

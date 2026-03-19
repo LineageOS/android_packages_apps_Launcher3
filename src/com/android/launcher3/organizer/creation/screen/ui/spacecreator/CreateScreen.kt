@@ -209,6 +209,7 @@ fun TopicPreview(
     }
 }
 
+// TODO(b/493996430): Remove hardcoded dimensions and move them to resources.
 object CreateScreenDimens {
     val iconSize = 41.dp
     val topicPadding = 20.dp
