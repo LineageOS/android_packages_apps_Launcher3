@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"अ‍ॅप किंवा तुमच्या संस्थेद्वारे ही क्रिया करण्याची अनुमती नाही"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"विजेटना सध्या सपोर्ट नाही, कृपया दुसरे अ‍ॅप निवडा"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"कॉपी करा"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"सेव्ह करा"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"स्क्रीन फिरवा"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"टास्कबार स्क्रीनच्या तळापासून कसा दिसू लागतो आणि वापरात नसताना आपोआप कसा लपवला जातो हे दाखवणारे ॲनिमेशन"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"टॉगल वापरून तुमचा टास्कबार कसा पिन करायचा, जेणेकरून टास्कबार तुमच्या स्क्रीनच्या तळाशी कायमचा दृश्यमान राहतो हे दाखवणारे ॲनिमेशन"</string>

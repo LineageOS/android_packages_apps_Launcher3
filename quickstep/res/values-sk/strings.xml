@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"Aplikácia alebo vaša organizácia túto akciu nepovoľuje"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Miniaplikácie nie sú momentálne podporované, vyberte inú aplikáciu"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"Skopírovať"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"Uložiť"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Otočiť obrazovku"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animácia zobrazujúca, ako sa panel aplikácií zobrazí z dolnej časti obrazovky a automaticky skryje, keď ho nepoužívate"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animácia znázorňujúca, ako pripnúť panel aplikácií pomocou prepínača, aby bol stále viditeľný v dolnej časti obrazovky"</string>

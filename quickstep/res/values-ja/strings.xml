@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"この操作はアプリまたは組織で許可されていません"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"ウィジェットは現在サポートされていません。他のアプリを選択してください。"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"コピー"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"保存"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"画面を回転"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"タスクバーが画面下部に表示され、使用していないときは自動的に非表示になる様子を紹介するアニメーション"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"切り替えを使用してタスクバーを固定し、画面下部に表示したままにする方法を紹介するアニメーション"</string>

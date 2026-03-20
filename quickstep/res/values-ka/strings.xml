@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"ეს მოქმედება არ არის დაშვებული აპის ან თქვენი ორგანიზაციის მიერ"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"ვიჯეტები ამჟამად არ არის მხარდაჭერილი. გთხოვთ, აირჩიოთ სხვა აპი"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"კოპირება"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"შენახვა"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"ეკრანის შეტრიალება"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"ანიმაცია, რომელიც აჩვენებს, როგორ ჩნდება ამოცანათა ზოლი ეკრანის ქვედა ნაწილში და ავტომატურად ქრება, როდესაც არ იყენებთ"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"ანიმაცია, რომელიც აჩვენებს, როგორ ჩაამაგროთ თქვენი ამოცანათა ზოლი გადართვის გამოყენებით, რომ ამოცანათა ზოლი მუდმივად ხილული დარჩეს ეკრანის ქვედა ნაწილში"</string>
