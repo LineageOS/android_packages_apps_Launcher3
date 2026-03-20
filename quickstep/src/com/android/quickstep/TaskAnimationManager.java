@@ -461,7 +461,7 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
             mRecentsAnimationStartPending = getSystemUiProxy().startRecentsTransition(intent,
                     options, mCallbacks, gestureState.useSyntheticRecentsTransition(), null,
                     mDisplayId);
-            recentsWindowManager.showRecentsWindow(mCallbacks);
+            MAIN_EXECUTOR.execute(() -> recentsWindowManager.showRecentsWindow(mCallbacks));
         } else {
             mRecentsAnimationStartPending = getSystemUiProxy().startRecentsTransition(intent,
                     options, mCallbacks, false /* useSyntheticRecentsTransition */, null,
