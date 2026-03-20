@@ -49,6 +49,7 @@ import com.android.launcher3.allapps.AllAppsStore;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.model.data.TaskItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.popup.PinToTaskbarShortcut;
 import com.android.launcher3.popup.Popup;
@@ -531,8 +532,11 @@ public class TaskbarPopupController implements TaskbarControllers.LoggableTaskba
     private boolean shouldShowMultiInstanceOptions(ItemInfo itemInfo) {
         ComponentKey key = itemInfo.getComponentKey();
         AppInfo app = getApp(key);
+        // When a running tasks icon is associated with an item info by looking it up in appsStore,
+        // it ends up having CONTAINER_ALL_APPS item info even if it's at the unpinned running apps
+        // area. Adding a TaskItemInfo check to avoid running apps being filtered out.
         return app != null && app.supportsMultiInstance()
-                && itemInfo.container != CONTAINER_ALL_APPS;
+                && (itemInfo instanceof TaskItemInfo || itemInfo.container != CONTAINER_ALL_APPS);
     }
 
     protected static boolean canPinAppWithContextMenu(TaskbarActivityContext context) {
