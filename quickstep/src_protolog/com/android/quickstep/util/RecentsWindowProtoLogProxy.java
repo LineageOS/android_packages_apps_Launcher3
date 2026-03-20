@@ -19,6 +19,7 @@ package com.android.quickstep.util;
 import static com.android.quickstep.util.QuickstepProtoLogGroup.RECENTS_WINDOW;
 import static com.android.quickstep.util.QuickstepProtoLogGroup.isProtoLogInitialized;
 
+import android.app.ActivityManager;
 import android.util.Log;
 import android.window.DesktopExperienceFlags;
 
@@ -53,57 +54,94 @@ public class RecentsWindowProtoLogProxy {
         }
     }
 
-    public static void logOnStateSetStart(@NonNull String stateName) {
-        if (willProtoLog()) {
-            ProtoLog.d(PROTO_LOG_GROUP, "onStateSetStart: %s", stateName);
-        }
-        logToLogcatIfNeeded("onStateSetStart: %s", stateName);
-    }
-
-    public static void logOnStateSetEnd(@NonNull String stateName) {
-        if (willProtoLog()) {
-            ProtoLog.d(PROTO_LOG_GROUP, "onStateSetEnd: %s", stateName);
-        }
-        logToLogcatIfNeeded("onStateSetEnd: %s", stateName);
-    }
-
-    public static void logOnRepeatStateSetAborted(@NonNull String stateName) {
-        if (willProtoLog()) {
-            ProtoLog.d(PROTO_LOG_GROUP, "onRepeatStateSetAborted: %s", stateName);
-        }
-        logToLogcatIfNeeded("onRepeatStateSetAborted: %s", stateName);
-    }
-
-    public static void logStartRecentsWindow(boolean isShowing, boolean windowViewIsNull) {
+    public static void logOnStateSetStart(int displayId, @NonNull String stateName) {
         if (willProtoLog()) {
             ProtoLog.d(PROTO_LOG_GROUP,
-                    "Starting recents window: isShowing=%b, windowViewIsNull=%b",
+                    "onStateSetStart: displayId=%d, state=%s",
+                    displayId,
+                    stateName);
+        }
+        logToLogcatIfNeeded("onStateSetStart: displayId=%d, state=%s", displayId, stateName);
+    }
+
+    public static void logOnStateSetEnd(int displayId, @NonNull String stateName) {
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP,
+                    "onStateSetEnd: displayId=%d, state=%s",
+                    displayId,
+                    stateName);
+        }
+        logToLogcatIfNeeded("onStateSetEnd: displayId=%d, state=%s", displayId, stateName);
+    }
+
+    public static void logOnRepeatStateSetAborted(int displayId, @NonNull String stateName) {
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP,
+                    "onRepeatStateSetAborted: displayId=%d, state=%s",
+                    displayId,
+                    stateName);
+        }
+        logToLogcatIfNeeded("onRepeatStateSetAborted: displayId=%d, state=%s",
+                displayId,
+                stateName);
+    }
+
+    public static void logStartRecentsWindow(
+            int displayId, boolean isShowing, boolean windowViewIsNull) {
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP,
+                    "Starting recents window: displayId=%d, isShowing=%b, windowViewIsNull=%b",
+                    displayId,
                     isShowing,
                     windowViewIsNull);
         }
-        logToLogcatIfNeeded("Starting recents window: isShowing=%b, windowViewIsNull=%b",
+        logToLogcatIfNeeded(
+                "Starting recents window: displayId=%d, isShowing=%b, windowViewIsNull=%b",
+                displayId,
                 isShowing,
                 windowViewIsNull);
     }
 
-    public static void logCleanup(boolean isShowing) {
+    public static void logCleanup(int displayId, boolean isShowing) {
         if (willProtoLog()) {
-            ProtoLog.d(PROTO_LOG_GROUP, "Cleaning up recents window: isShowing=%b", isShowing);
+            ProtoLog.d(PROTO_LOG_GROUP,
+                    "Cleaning up recents window: displayId=%d, isShowing=%b",
+                    displayId,
+                    isShowing);
         }
-        logToLogcatIfNeeded("Cleaning up recents window: isShowing=%b", isShowing);
+        logToLogcatIfNeeded("Cleaning up recents window: displayId=%d, isShowing=%b",
+                displayId,
+                isShowing);
     }
 
-    public static void logOnOverviewOverlayLeashInvalidated() {
+    public static void logOnOverviewOverlayLeashInvalidated(int displayId) {
         if (willProtoLog()) {
-            ProtoLog.d(PROTO_LOG_GROUP, "onOverviewOverlayLeashInvalidated");
+            ProtoLog.d(PROTO_LOG_GROUP,
+                    "onOverviewOverlayLeashInvalidated: displayId=%d",
+                    displayId);
         }
-        logToLogcatIfNeeded("onOverviewOverlayLeashInvalidated");
+        logToLogcatIfNeeded("onOverviewOverlayLeashInvalidated: displayId=%d", displayId);
     }
 
-    public static void logCleanUpSurfaceControlViewHostInternal() {
+    public static void logCleanUpSurfaceControlViewHostInternal(int displayId) {
         if (willProtoLog()) {
-            ProtoLog.d(PROTO_LOG_GROUP, "cleanUpSurfaceControlViewHostInternal");
+            ProtoLog.d(PROTO_LOG_GROUP,
+                    "cleanUpSurfaceControlViewHostInternal: displayId=%d",
+                    displayId);
         }
-        logToLogcatIfNeeded("cleanUpSurfaceControlViewHostInternal");
+        logToLogcatIfNeeded("cleanUpSurfaceControlViewHostInternal: displayId=%d", displayId);
+    }
+
+    public static void logOnTaskMovedToFront(
+            int displayId, @NonNull ActivityManager.RunningTaskInfo taskInfo) {
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP,
+                    "onTaskMovedToFront: displayId=%d, taskInfo=%s",
+                    displayId,
+                    taskInfo.toString());
+        }
+        logToLogcatIfNeeded("onTaskMovedToFront: displayId=%d, taskInfo=%s",
+                displayId,
+                taskInfo.toString());
     }
 }
