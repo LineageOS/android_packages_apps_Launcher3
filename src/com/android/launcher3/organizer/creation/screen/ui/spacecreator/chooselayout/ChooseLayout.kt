@@ -160,7 +160,11 @@ fun LayoutPreview(itemsInScreen: List<ItemInfo>, viewModel: SpaceCreatorViewMode
                     x = viewModel.chooseLayoutState.chooseLayoutGridSize.x,
                     y = viewModel.chooseLayoutState.chooseLayoutGridSize.y,
                 ),
-            spacing = CellLayoutComposeItemSpacing(8.dp, 8.dp),
+            spacing =
+                CellLayoutComposeItemSpacing(
+                    ChooseLayoutDimens.cellItemSpacing,
+                    ChooseLayoutDimens.cellItemSpacing,
+                ),
             modifier = Modifier.padding(ChooseLayoutDimens.carouselPadding),
         ) {
             for (itemInfo in itemsInScreen) {
@@ -215,20 +219,20 @@ fun AppIcon(item: WorkspaceItemInfo, width: Dp, height: Dp) {
     val density = LocalDensity.current
     Box(
         Modifier.graphicsLayer {
-                scaleX = sizeScale.width
-                scaleY = sizeScale.height
-            }
-            .wrapContentSize(unbounded = true)
+            scaleX = sizeScale.width
+            scaleY = sizeScale.height
+        }
     ) {
         AndroidView(
             modifier =
                 Modifier.onSizeChanged {
-                    val maxScale =
-                        maxOf(
+                    if (it.width == 0 || it.height == 0) return@onSizeChanged
+                    val minScale =
+                        minOf(
                             with(density) { width.toPx() } / it.width,
                             with(density) { height.toPx() } / it.height,
                         )
-                    sizeScale = Size(maxScale, maxScale)
+                    sizeScale = Size(minScale, minScale)
                 },
             factory = { context ->
                 (LayoutInflater.from(Launcher.ACTIVITY_TRACKER.getCreatedContext())
@@ -245,20 +249,20 @@ fun FolderPreviewIcon(item: FolderInfo, width: Dp, height: Dp) {
     val density = LocalDensity.current
     Box(
         Modifier.graphicsLayer {
-                scaleX = sizeScale.width
-                scaleY = sizeScale.height
-            }
-            .wrapContentSize(unbounded = true)
+            scaleX = sizeScale.width
+            scaleY = sizeScale.height
+        }
     ) {
         AndroidView(
             modifier =
                 Modifier.onSizeChanged {
-                    val maxScale =
-                        maxOf(
+                    if (it.width == 0 || it.height == 0) return@onSizeChanged
+                    val minScale =
+                        minOf(
                             with(density) { width.toPx() } / it.width,
                             with(density) { height.toPx() } / it.height,
                         )
-                    sizeScale = Size(maxScale, maxScale)
+                    sizeScale = Size(minScale, minScale)
                 },
             factory = {
                 val launcher = Launcher.ACTIVITY_TRACKER.getCreatedContext<Launcher>()
@@ -335,7 +339,7 @@ object ChooseLayoutDimens {
     val chooseLayoutContentItemSpacing = 26.dp
     val iconSize = 41.dp
     val itemWidth = 312.00003.dp
-    val itemHeight = 499.04849.dp
+    val itemHeight = 580.dp
     val carouselPadding = 15.14563.dp
     val carouselItemSpacing = 16.dp
     val contentSidePadding = 24.dp
@@ -349,4 +353,5 @@ object ChooseLayoutDimens {
     val circleShape = RoundedCornerShape(size = 360.dp)
     val previewPageBackgroundColor = 0x52FFFFFF
     val previewCornerSize = 16.dp
+    val cellItemSpacing = 4.dp
 }
