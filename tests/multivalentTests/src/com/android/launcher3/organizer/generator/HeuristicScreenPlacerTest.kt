@@ -16,9 +16,13 @@
 
 package com.android.launcher3.organizer.generator
 
+import android.content.ComponentName
+import android.content.Intent
 import android.graphics.Point
+import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.LauncherSettings
+import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.CellAndSpan
@@ -360,11 +364,20 @@ class HeuristicScreenPlacerTest {
         score: Float = 1.0f,
     ): TopicClassifiedItem {
         val info =
-            ItemInfo().apply {
-                this.id = id
-                this.itemType = type
-                this.spanX = spanX
-                this.spanY = spanY
+            if (type == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
+                AppInfo(ComponentName("pkg", "class$id"), topic, Process.myUserHandle(), Intent())
+                    .apply {
+                        this.id = id
+                        this.spanX = spanX
+                        this.spanY = spanY
+                    }
+            } else {
+                ItemInfo().apply {
+                    this.id = id
+                    this.itemType = type
+                    this.spanX = spanX
+                    this.spanY = spanY
+                }
             }
         return TopicClassifiedItem(info, topic, score)
     }

@@ -33,14 +33,12 @@ import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselay
 import com.android.launcher3.organizer.creation.screen.ui.spacecreator.chooselayout.ChooseLayoutState
 import com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerViewModel
 import com.android.launcher3.organizer.generator.CreationSession
-import java.util.stream.Collectors
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class SpaceCreatorViewModel
 @Inject
@@ -59,18 +57,16 @@ constructor(
         creationSessionFactory.createSession(CreationSession.SessionType.SCREEN)
 
     init {
-        viewModelScope.launch {
-            withContext(lightweightBackgroundContext) {
-                val classifiedItems = screenCreationSession.startClassification()
-                val topics = classifiedItems.map { it.topic }.distinct()
-                val topicIcons =
-                    classifiedItems
-                        .filter { it.itemInfo is AppInfo }
-                        .groupBy({ it.topic }, { (it.itemInfo as AppInfo).bitmap.icon })
+        viewModelScope.launch(lightweightBackgroundContext) {
+            val allClassifiedItems = screenCreationSession.startClassification()
+            val topics = allClassifiedItems.map { it.topic }.distinct()
+            val topicIcons =
+                allClassifiedItems
+                    .filter { it.itemInfo is AppInfo }
+                    .groupBy({ it.topic }, { (it.itemInfo as AppInfo).bitmap.icon })
 
-                val topicDataList = topics.map { TopicData(it, topicIcons[it] ?: emptyList()) }
-                updateState(topicDataList)
-            }
+            val topicDataList = topics.map { TopicData(it, topicIcons[it] ?: emptyList()) }
+            updateState(topicDataList)
         }
     }
 
@@ -81,6 +77,20 @@ constructor(
      */
     private fun updateState(topics: List<TopicData>) {
         _createScreenState.value = _createScreenState.value.copy(topics = topics)
+    }
+
+    /**
+     * Generates layouts for the selected topic and updates the state.
+     *
+     * @param topic The selected topic.
+     */
+    fun prepareLayoutsForTopic(topic: String) {
+        viewModelScope.launch(lightweightBackgroundContext) {
+            val result = screenCreationSession.startGeneration(listOf(topic))
+            if (result is CreationSession.GenerationResult.Screens) {
+                updateLayouts(result.pages)
+            }
+        }
     }
 
     /**
@@ -110,26 +120,13 @@ constructor(
                     this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
                         as LauncherApplication
                 val appComponent = application.appComponent
+                val idp = appComponent.idp
                 SpaceCreatorViewModel(
                         creationSessionFactory = appComponent.creationSessionFactory,
                         lightweightBackgroundContext =
                             appComponent.productionDispatchers.lightweightBackgroundUiDispatcher,
                     )
-                    .apply {
-                        // TODO(b/493995739): remove this and use the actual business logic. This is
-                        // only for manual testing.
-                        updateGridSize(ChooseLayoutGridSize(5, 6))
-                        val data = appComponent.homeScreenRepository.workspaceState.value
-                        val itemsFirstScreen =
-                            data
-                                .stream()
-                                .collect(Collectors.toList())
-                                .groupBy { it.screenId }
-                                .values
-                                .toList()
-                                .filter { it.isNotEmpty() }
-                        updateLayouts(itemsFirstScreen)
-                    }
+                    .apply { updateGridSize(ChooseLayoutGridSize(idp.numColumns, idp.numRows)) }
             }
         }
     }

@@ -17,6 +17,7 @@
 package com.android.launcher3.organizer.generator
 
 import com.android.launcher3.LauncherSettings
+import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
 
@@ -87,12 +88,13 @@ class HeuristicScreenPlacer : Placer {
                             availableApps.remove(app)
                             appsByTopic[app.topic]?.remove(app)
                             val placedItem =
-                                ItemInfo().apply {
-                                    copyFrom(app.itemInfo)
-                                    this.cellX = templateItem.cellAndSpan.cellX
-                                    this.cellY = templateItem.cellAndSpan.cellY
-                                    this.screenId = screenIndex
-                                }
+                                (app.itemInfo as AppInfo)
+                                    .makeWorkspaceItem(/* context */ null)
+                                    .apply {
+                                        this.cellX = templateItem.cellAndSpan.cellX
+                                        this.cellY = templateItem.cellAndSpan.cellY
+                                        this.screenId = screenIndex
+                                    }
                             screenItems.add(placedItem)
                         }
                     }
