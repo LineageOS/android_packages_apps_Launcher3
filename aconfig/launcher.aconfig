@@ -75,6 +75,13 @@ flag {
 }
 
 flag {
+  name: "enable_taskbar_icon_desktop_clicks"
+  namespace: "lse_desktop_experience"
+  description: "Enables desktop style tasakbar icon clicks, including click-to-minimize and multi-window picking."
+  bug: "433770976"
+}
+
+flag {
     name: "enable_two_pane_launcher_settings"
     namespace: "launcher"
     description: "Enables two panel settings when on large enough displays"
