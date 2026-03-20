@@ -48,7 +48,9 @@ import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.icons.LauncherIconProvider
 import com.android.launcher3.icons.LauncherIconProviderImpl
-import com.android.launcher3.logging.StatsLogManager.StatsLogManagerFactory
+import com.android.launcher3.logging.StatsLogManager.StatsImpressionLogger
+import com.android.launcher3.logging.StatsLogManager.StatsLatencyLogger
+import com.android.launcher3.logging.StatsLogManager.StatsLogger
 import com.android.launcher3.model.WellbeingModel
 import com.android.launcher3.qsb.QsbAppWidgetHost
 import com.android.launcher3.qsb.QuickstepQsbHostImpl
@@ -84,7 +86,9 @@ import com.android.quickstep.QuickstepTestInformationHandler
 import com.android.quickstep.TaskShortcutFactory
 import com.android.quickstep.TaskUtils
 import com.android.quickstep.WellbeingShortcut
-import com.android.quickstep.logging.StatsLogCompatManager.StatsLogCompatManagerFactory
+import com.android.quickstep.logging.StatsLogCompatManager.StatsCompatImpressionLogger
+import com.android.quickstep.logging.StatsLogCompatManager.StatsCompatLatencyLogger
+import com.android.quickstep.logging.StatsLogCompatManager.StatsCompatLogger
 import com.android.quickstep.util.ChoreographerFrameRateTracker
 import com.android.quickstep.util.ContextualSearchStateManager
 import com.android.quickstep.util.GestureExclusionManager
@@ -138,11 +142,17 @@ abstract class ActivityContextModule {
 }
 
 @Module
-abstract class ApiWrapperModule {
+abstract class StatsLoggerModule {
+    @Binds abstract fun bindStatsLogger(impl: StatsCompatLogger): StatsLogger
+
+    @Binds abstract fun bindStatsLatencyLogger(impl: StatsCompatLatencyLogger): StatsLatencyLogger
+
     @Binds
-    abstract fun bindStatsLogManagerFactory(
-        impl: StatsLogCompatManagerFactory
-    ): StatsLogManagerFactory
+    abstract fun bindStatsImpressionLogger(impl: StatsCompatImpressionLogger): StatsImpressionLogger
+}
+
+@Module
+abstract class ApiWrapperModule {
 
     @Binds abstract fun bindApiWrapper(systemApiWrapper: SystemApiWrapper): ApiWrapper
 
