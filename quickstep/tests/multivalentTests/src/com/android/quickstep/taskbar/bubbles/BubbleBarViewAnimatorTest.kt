@@ -558,6 +558,61 @@ class BubbleBarViewAnimatorTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_FIX_DISMISS_FLYOUT_PERSISTENT_TASKBAR)
+    fun animateToInitialState_persistentTaskbar_inApp() {
+        setUpBubbleBar()
+        bubbleStashController.launcherState = BubbleLauncherState.IN_APP
+        bubbleStashController.isTransientTaskBar = false
+
+        val barAnimator = PhysicsAnimator.getInstance(bubbleBarView)
+
+        var notifiedBubbleBarVisible = false
+        val onBubbleBarVisible = Runnable { notifiedBubbleBarVisible = true }
+        val animator =
+            BubbleBarViewAnimator(
+                bubbleBarView,
+                bubbleStashController,
+                flyoutController,
+                bubbleBarParentViewController,
+                onExpanded = emptyRunnable,
+                onBubbleBarVisible = onBubbleBarVisible,
+                onAnimationEnded = onAnimationEnded,
+                animatorScheduler,
+            )
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleBarView.visibility = INVISIBLE
+            animator.animateToInitialState(bubble, isInApp = true, isExpanding = false)
+        }
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {}
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Y)
+
+        barAnimator.assertIsNotRunning()
+        assertThat(animator.isAnimating).isTrue()
+        assertThat(bubbleBarView.alpha).isEqualTo(1)
+        assertThat(bubbleBarView.translationY).isEqualTo(BAR_TRANSLATION_Y_FOR_TASKBAR)
+        assertThat(bubbleBarParentViewController.timesInvoked).isEqualTo(1)
+        waitForFlyoutToShow()
+
+        assertThat(animatorScheduler.delayedBlock).isNotNull()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(animatorScheduler.delayedBlock!!)
+
+        waitForFlyoutToHide()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {}
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Y)
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        assertThat(bubbleBarParentViewController.timesInvoked).isEqualTo(2)
+        assertThat(animator.isAnimating).isFalse()
+        assertThat(bubbleBarView.visibility).isEqualTo(VISIBLE)
+        assertThat(notifiedBubbleBarVisible).isTrue()
+        assertThat(bubbleStashController.isStashed).isFalse()
+        assertThat(animationEnded).isTrue()
+    }
+
+    @Test
     fun animateToInitialState_whileDragging_inApp() {
         setUpBubbleBar()
         bubbleStashController.launcherState = BubbleLauncherState.IN_APP
@@ -1872,10 +1927,15 @@ class BubbleBarViewAnimatorTest {
         override val isStashed: Boolean
             get() = _isStashed
 
+        override val isStashingAllowed: Boolean
+            get() = isTransientTaskBar && launcherState == BubbleLauncherState.IN_APP
+
         override var bubbleBarVerticalCenterForHome = 0
         override var isSysuiLocked = false
-        override val isTransientTaskBar = true
-        override val hasHandleView = true
+        override var isTransientTaskBar = true
+        override val hasHandleView: Boolean
+            get() = isTransientTaskBar
+
         override val bubbleBarTranslationYForTaskbar = BAR_TRANSLATION_Y_FOR_TASKBAR
         override val bubbleBarTranslationYForHotseat = BAR_TRANSLATION_Y_FOR_HOTSEAT
         override var inAppDisplayOverrideProgress = 0f
@@ -1928,7 +1988,7 @@ class BubbleBarViewAnimatorTest {
         override fun getStashedHandleTranslationForNewBubbleAnimation() = HANDLE_TRANSLATION
 
         override fun getStashedHandlePhysicsAnimator(): PhysicsAnimator<View>? {
-            return handleAnimator
+            return if (hasHandleView) handleAnimator else null
         }
 
         override fun updateTaskbarTouchRegion() {
