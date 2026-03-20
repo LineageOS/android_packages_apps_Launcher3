@@ -736,3 +736,13 @@ flag {
   description: "Enables support for copy/paste of home screen files."
   bug: "482073141"
 }
+
+flag {
+  name: "enable_collapse_sysui_panels_on_taskbar_click"
+  namespace: "launcher"
+  description: "Collapses system UI panels in response to user actions in taskbar"
+  bug: "492177154"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

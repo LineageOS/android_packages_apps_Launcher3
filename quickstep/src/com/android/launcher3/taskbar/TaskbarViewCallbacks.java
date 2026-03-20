@@ -206,7 +206,10 @@ public class TaskbarViewCallbacks {
 
     /** Returns on click listener for the taskbar overflow view. */
     public View.OnClickListener getRecentsOverflowOnClickListener() {
-        return v -> toggleKeyboardQuickSwitchView();
+        return v -> {
+            mActivity.collapseSysUiPanels();
+            toggleKeyboardQuickSwitchView();
+        };
     }
 
     /** Returns on long click listener for the taskbar overflow view. */
@@ -219,7 +222,10 @@ public class TaskbarViewCallbacks {
 
     /** Returns on click listener for the taskbar overflow view. */
     public View.OnClickListener getPinnedOverflowOnClickListener() {
-        return this::togglePinnedOverflowView;
+        return v -> {
+            mActivity.collapseSysUiPanels();
+            togglePinnedOverflowView(v);
+        };
     }
 
     /** Returns on long click listener for the taskbar overflow view. */
@@ -301,6 +307,7 @@ public class TaskbarViewCallbacks {
 
         @Override
         public boolean onSingleTapUp(@NonNull MotionEvent event) {
+            mActivity.collapseSysUiPanels();
             return true;
         }
 

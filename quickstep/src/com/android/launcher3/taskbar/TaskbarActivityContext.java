@@ -60,6 +60,7 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
+import android.app.StatusBarManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -1123,6 +1124,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     public void onPopupVisibilityChanged(boolean isVisible) {
         boolean needsUpdate = false;
         if (isVisible) {
+            collapseSysUiPanels();
             mVisiblePopupCount++;
             needsUpdate = mVisiblePopupCount == 1;
         } else {
@@ -1302,6 +1304,18 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     /**
+     * Collapses the Quick Settings and Notification panels.
+     */
+    public void collapseSysUiPanels() {
+        if (Flags.enableCollapseSysuiPanelsOnTaskbarClick() && isNotificationShadeExpanded()) {
+            StatusBarManager statusBarManager = getSystemService(StatusBarManager.class);
+            if (statusBarManager != null) {
+                statusBarManager.collapsePanels();
+            }
+        }
+    }
+
+    /**
      * Hides the taskbar icons and background when the notification shade is expanded.
      */
     private void onNotificationShadeExpandChanged(long systemUiStateFlags,
@@ -1312,7 +1326,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mIsNotificationShadeExpanded = isExpanded;
         // Close all floating views within the Taskbar window to make sure nothing is shown over
         // the notification shade.
-        if (isExpanded) {
+        if (isExpanded && isExpandedUpdated) {
             AbstractFloatingView.closeAllOpenViewsExcept(this, TYPE_TASKBAR_OVERLAY_PROXY);
         }
 
@@ -1781,6 +1795,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         Object tag = view.getTag();
 
         mControllers.keyboardQuickSwitchController.closeQuickSwitchView(false);
+        collapseSysUiPanels();
 
         if (tag instanceof SingleTask singleTask) {
             RemoteTransition remoteTransition =
