@@ -15,6 +15,7 @@
  */
 package com.android.quickstep.recents;
 
+import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
 
 import static org.junit.Assert.assertNotNull;
@@ -26,6 +27,7 @@ import android.platform.test.annotations.PlatinumTest;
 import com.android.launcher3.tapl.Overview;
 import com.android.launcher3.tapl.OverviewTask.OverviewTaskContainer;
 import com.android.launcher3.tapl.OverviewTaskMenu;
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 import com.android.launcher3.util.ui.BaseLauncherTaplTest.AllowInRecentsWindowTests;
 import com.android.quickstep.AbstractQuickStepTest;
 import com.android.quickstep.util.SplitScreenTestUtils;
@@ -44,6 +46,7 @@ public class TaplOverviewIconTest extends AbstractQuickStepTest {
 
     @PlatinumTest(focusArea = "launcher")
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 489799688)
     public void testOverviewActionsMenu() {
         startTestAppsWithCheck();
 
@@ -64,6 +67,7 @@ public class TaplOverviewIconTest extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 489799688)
     public void testSplitTaskTapBothIconMenus() {
         clearAllRecentTasks();
         Overview overview = SplitScreenTestUtils.createAndLaunchASplitPairInOverview(mLauncher);

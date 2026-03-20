@@ -16,6 +16,7 @@
 package com.android.quickstep;
 
 
+import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
 
 import static org.junit.Assert.assertFalse;
@@ -32,6 +33,7 @@ import com.android.launcher3.tapl.Overview;
 import com.android.launcher3.tapl.SplitScreenSelect;
 import com.android.launcher3.tapl.Taskbar;
 import com.android.launcher3.tapl.TaskbarAppIcon;
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 import com.android.quickstep.util.SplitScreenTestUtils;
 
 import org.junit.After;
@@ -70,6 +72,7 @@ public class TaplTestsSplitscreen extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 491264140)
     public void testSplitAppFromHomeWithItself() throws Exception {
         // Currently only tablets have Taskbar in Overview, so test is only active on tablets
         assumeTrue("Ignoring test because device is not a tablet",
@@ -97,6 +100,7 @@ public class TaplTestsSplitscreen extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 489799688)
     public void testSaveAppPairMenuItemOrActionExistsOnSplitPair() {
         clearAllRecentTasks();
         Overview overview = SplitScreenTestUtils.createAndLaunchASplitPairInOverview(mLauncher);
@@ -108,6 +112,7 @@ public class TaplTestsSplitscreen extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 489799688)
     public void testSaveAppPairMenuItemDoesNotExistOnSingleTask() {
         startAppFast(CALCULATOR_APP_PACKAGE);
 
@@ -120,6 +125,7 @@ public class TaplTestsSplitscreen extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 489799688)
     public void testSplitSingleTaskFromTaskbar() {
         // Currently only tablets have Taskbar in Overview, so test is only active on tablets
         assumeTrue("Ignoring test because device is not a tablet",
