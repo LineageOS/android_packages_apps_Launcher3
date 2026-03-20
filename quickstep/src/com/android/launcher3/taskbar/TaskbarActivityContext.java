@@ -1291,6 +1291,13 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     /**
+     * Returns whether the taskbar should remain touchable when the notification shade is expanded.
+     */
+    public boolean isTaskbarTouchableBehindNotificationShade() {
+        return !fixSwipeUpNotificationShadeWithBubbleBar() || isDesktopFormFactor();
+    }
+
+    /**
      * Hides the taskbar icons and background when the notification shade is expanded.
      */
     private void onNotificationShadeExpandChanged(long systemUiStateFlags,
@@ -1322,7 +1329,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             mControllers.bubbleControllers.ifPresent(controllers -> {
                 BubbleBarViewController bubbleBarViewController =
                         controllers.bubbleBarViewController;
-                if (fixSwipeUpNotificationShadeWithBubbleBar()
+                if (!isTaskbarTouchableBehindNotificationShade()
                         && bubbleBarViewController.isExpanded()) {
                     // If bubbles are expanded when the shade expansion changes, then the touchable
                     // insets need to be updated.
