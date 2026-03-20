@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.quickstep.util
+package com.android.quickstep.window
 
 import android.view.Display.DEFAULT_DISPLAY
 import com.android.launcher3.util.LauncherMultivalentJUnit
@@ -25,7 +25,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(LauncherMultivalentJUnit::class)
-class PerDisplayHolderTest {
+class RecentsWindowManagerRepoTest {
 
     @get:Rule val context = SandboxApplication()
 
