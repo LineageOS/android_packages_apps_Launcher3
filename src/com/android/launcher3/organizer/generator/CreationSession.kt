@@ -16,6 +16,7 @@
 
 package com.android.launcher3.organizer.generator
 
+import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
 import javax.inject.Inject
 import javax.inject.Provider
@@ -33,9 +34,18 @@ interface CreationSession {
      * Starts generation of screens or folders.
      *
      * @param selectedTopics A list of topics that were selected for generation.
-     * @return a list of screens/folders, which are themselves represented by a list of [ItemInfo].
+     * @return a [GenerationResult] containing screens or folders.
      */
-    suspend fun startGeneration(selectedTopics: List<String>): List<List<ItemInfo>>
+    suspend fun startGeneration(selectedTopics: List<String>): GenerationResult
+
+    /** Result of the generation process. */
+    sealed class GenerationResult {
+        /** Represents a list of screens, where each screen is a list of [ItemInfo]. */
+        data class Screens(val pages: List<List<ItemInfo>>) : GenerationResult()
+
+        /** Represents a list of [FolderInfo] objects. */
+        data class Folders(val folders: List<FolderInfo>) : GenerationResult()
+    }
 
     /** Cancels a creation session. */
     suspend fun cancelSession()
