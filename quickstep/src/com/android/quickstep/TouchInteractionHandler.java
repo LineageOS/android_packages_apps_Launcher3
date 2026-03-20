@@ -15,7 +15,6 @@
  */
 package com.android.quickstep;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
@@ -41,7 +40,6 @@ import static com.android.quickstep.InputConsumerUtils.tryCreateAssistantInputCo
 import static com.android.quickstep.RecentsAnimationDeviceState.RESET_TO_DEFAULT_GESTURAL_HEIGHT;
 import static com.android.quickstep.dagger.SysUIConnectionComponentKt.CONNECTION_CLEANER;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
@@ -68,7 +66,6 @@ import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.desktop.DesktopAppLaunchTransitionManager;
 import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.statehandlers.DesktopVisibilityController;
-import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StatefulActivity;
 import com.android.launcher3.taskbar.TaskbarActivityContext;
 import com.android.launcher3.taskbar.TaskbarManager;
@@ -88,7 +85,6 @@ import com.android.launcher3.util.ThreadSafeRunnableList;
 import com.android.launcher3.util.TraceHelper;
 import com.android.quickstep.OverviewComponentObserver.OverviewChangeListener;
 import com.android.quickstep.dagger.SysUIConnectionSingleton;
-import com.android.quickstep.fallback.RecentsState;
 import com.android.quickstep.inputconsumers.BubbleBarInputConsumer;
 import com.android.quickstep.inputconsumers.OneHandedModeInputConsumer;
 import com.android.quickstep.util.ActiveGestureLog;
@@ -104,8 +100,6 @@ import com.android.systemui.shared.system.InputChannelCompat.InputEventReceiver;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
-import com.android.systemui.shared.system.TaskStackChangeListener;
-import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
 
 import kotlinx.coroutines.CoroutineDispatcher;
@@ -138,43 +132,6 @@ public class TouchInteractionHandler extends ContextWrapper {
             this::createRecentsWindowSwipeHandler;
 
     private final OverviewChangeListener mOverviewChangeListener = this::onOverviewTargetChanged;
-
-    // We should clean up the recents window on the primary display on home intent start, however we
-    // have no other way of listening to this event in the 3P launcher case.
-    private final TaskStackChangeListener mHomeIntentStartedListener =
-            new TaskStackChangeListener() {
-                @Override
-                public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
-                        boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-                    TaskStackChangeListener.super.onActivityRestartAttempt(task, homeTaskVisible,
-                            clearedTask, wasVisible);
-                    if (task.configuration.windowConfiguration.getActivityType()
-                            != ACTIVITY_TYPE_HOME
-                            || task.displayId != DEFAULT_DISPLAY) {
-                        // We only want to handle home intent starts on the primary
-                        // display.
-                        return;
-                    }
-                    BaseContainerInterface<?, ?> defaultContainerInterface =
-                            OverviewComponentObserver.INSTANCE.get(
-                                    TouchInteractionHandler.this).getContainerInterface(
-                                    DEFAULT_DISPLAY);
-                    if (defaultContainerInterface == null
-                            || !(defaultContainerInterface.getCreatedContainer()
-                            instanceof RecentsWindowManager recentsWindowManager)) {
-                        return;
-                    }
-                    StateManager<RecentsState, RecentsWindowManager> stateManager =
-                            recentsWindowManager.getStateManager();
-                    if (!stateManager.getState().isInOverview()) {
-                        // Only hide the recents surface if we receive the home intent while in
-                        // overview, otherwise gestures will appear to stop responding when the home
-                        // intent is received while in BACKGROUND_APP state.
-                        return;
-                    }
-                    stateManager.moveToRestState(/* animated=*/ true);
-                }
-            };
 
     private final PerDisplayRepository<RotationTouchHelper> mRotationTouchHelperRepository;
     private final PerDisplayRepository<RecentsAnimationDeviceState> mDeviceStateRepository;
@@ -399,15 +356,6 @@ public class TouchInteractionHandler extends ContextWrapper {
                 mTaskbarManager.setRecentsViewContainer(newOverviewContainer);
             }
         }
-        mRecentsWindowManagerRepository.forEach(
-                /* createIfAbsent= */ false, RecentsWindowManager::cleanUpSurfaceControlViewHost);
-        if (isHomeAndOverviewSame) {
-            TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
-                    mHomeIntentStartedListener);
-        } else {
-            TaskStackChangeListeners.getInstance().registerTaskStackListener(
-                    mHomeIntentStartedListener);
-        }
     }
 
     @UiThread
@@ -459,8 +407,6 @@ public class TouchInteractionHandler extends ContextWrapper {
         }
         mDesktopAppLaunchTransitionManager = null;
         mLockedUserState.removeOnUserUnlockedRunnable(mUserUnlockedRunnable);
-        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
-                mHomeIntentStartedListener);
     }
 
     protected void onScreenOnChanged(boolean isOn) {

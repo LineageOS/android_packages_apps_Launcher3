@@ -28,9 +28,11 @@ import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingView.TYPE_TOUCH_CONTROLLER_NO_INTERCEPT
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.automation.AutomationRepository
+import com.android.launcher3.desktop.DesktopRecentsTransitionController
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.util.MutableListenableStream
+import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
 import com.android.quickstep.RotationTouchHelper
@@ -41,6 +43,7 @@ import com.android.quickstep.fallback.RecentsState
 import com.android.quickstep.fallback.RecentsState.Companion.BACKGROUND_APP
 import com.android.quickstep.fallback.RecentsState.Companion.DEFAULT
 import com.android.quickstep.fallback.RecentsState.Companion.HIDDEN
+import com.android.quickstep.split.SplitSelectStateController
 import com.android.quickstep.task.thumbnail.TaskContentView
 import com.android.quickstep.task.thumbnail.TaskThumbnailView
 import com.android.quickstep.window.RecentsWindowManager
@@ -276,6 +279,72 @@ class RecentsViewUtilsTest {
         whenever(recentsView.isTaskInExpectedScrollPosition(taskView)).thenReturn(true)
 
         assertThat(utils.shouldSwipeDownLaunchTaskView(taskView)).isTrue()
+    }
+
+    @Test
+    fun hasOngoingTaskViewLaunch_withNoTrackedLaunches_returnFalse() {
+        assertThat(utils.hasOngoingTaskViewLaunch()).isFalse()
+    }
+
+    @Test
+    fun hasOngoingTaskViewLaunch_withLaunchingTaskView_returnTrue() {
+        utils.launchingTaskView = mock()
+
+        assertThat(utils.hasOngoingTaskViewLaunch()).isTrue()
+    }
+
+    @Test
+    fun hasOngoingTaskViewLaunch_withNoOngoingDesktopTaskLaunch_returnFalse() {
+        val desktopRecentsController = mock<DesktopRecentsTransitionController>()
+        whenever(recentsView.desktopRecentsController).thenReturn(desktopRecentsController)
+
+        assertThat(utils.hasOngoingTaskViewLaunch()).isFalse()
+    }
+
+    @Test
+    fun hasOngoingTaskViewLaunch_withOngoingDesktopTaskLaunch_returnTrue() {
+        val desktopRecentsController = mock<DesktopRecentsTransitionController>()
+        whenever(recentsView.desktopRecentsController).thenReturn(desktopRecentsController)
+
+        whenever(desktopRecentsController.isDesktopLaunchOngoing()).thenReturn(true)
+
+        assertThat(utils.hasOngoingTaskViewLaunch()).isTrue()
+    }
+
+    @Test
+    fun hasOngoingTaskViewLaunch_withNoOngoingSplitPairLaunch_returnFalse() {
+        val splitSelectStateController = mock<SplitSelectStateController>()
+        whenever(recentsView.splitSelectStateController).thenReturn(splitSelectStateController)
+
+        assertThat(utils.hasOngoingTaskViewLaunch()).isFalse()
+    }
+
+    @Test
+    fun hasOngoingTaskViewLaunch_withOngoingSplitPairLaunch_returnTrue() {
+        val splitSelectStateController = mock<SplitSelectStateController>()
+        whenever(recentsView.splitSelectStateController).thenReturn(splitSelectStateController)
+
+        whenever(splitSelectStateController.isSplitPairLaunchOngoing).thenReturn(true)
+
+        assertThat(utils.hasOngoingTaskViewLaunch()).isTrue()
+    }
+
+    @Test
+    fun hasOngoingTaskViewLaunch_withPendingSideTaskLaunchCallback_returnTrue() {
+        val sideTaskLaunchCallback = mock<RunnableList>()
+        whenever(recentsView.sideTaskLaunchCallback).thenReturn(sideTaskLaunchCallback)
+
+        assertThat(utils.hasOngoingTaskViewLaunch()).isTrue()
+    }
+
+    @Test
+    fun hasOngoingTaskViewLaunch_withNoPendingSideTaskLaunchCallback_returnFalse() {
+        val sideTaskLaunchCallback = mock<RunnableList>()
+        whenever(recentsView.sideTaskLaunchCallback).thenReturn(sideTaskLaunchCallback)
+
+        whenever(sideTaskLaunchCallback.isDestroyed).thenReturn(true)
+
+        assertThat(utils.hasOngoingTaskViewLaunch()).isFalse()
     }
 
     private fun createTaskView(id: Int, packageName: String, @UserIdInt userId: Int): TaskView {
