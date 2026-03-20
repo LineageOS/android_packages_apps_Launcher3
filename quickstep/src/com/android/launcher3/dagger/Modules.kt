@@ -34,14 +34,14 @@ import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
-import com.android.launcher3.concurrent.annotations.ThreadPool
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.display.DisplayControllerImpl
 import com.android.launcher3.dragndrop.SystemDragController
 import com.android.launcher3.dragndrop.SystemDragControllerImpl
 import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.dragndrop.SystemDragListener
-import com.android.launcher3.homescreenfiles.EnvironmentWrapper
+import com.android.launcher3.homescreenfiles.HomeScreenFilesIconProvider
+import com.android.launcher3.homescreenfiles.HomeScreenFilesIconProviderImpl
 import com.android.launcher3.homescreenfiles.HomeScreenFilesMediaStoreProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
@@ -97,7 +97,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
 import java.io.File
-import java.util.concurrent.ExecutorService
 import java.util.function.Consumer
 import javax.inject.Named
 
@@ -282,26 +281,20 @@ object SystemDragModule {
 
 /** A dagger module responsible for managing files on the home screen. */
 @Module
-object HomeScreenFilesModule {
-    @Provides
-    @LauncherAppSingleton
-    fun provideHomeScreenFilesProvider(
-        @ApplicationContext context: Context,
-        @ThreadPool executorService: ExecutorService,
-        environmentWrapper: EnvironmentWrapper,
-        tracker: DaggerSingletonTracker,
-    ): HomeScreenFilesProvider {
-        return if (HomeScreenFilesUtils.isFeatureEnabled) {
-            HomeScreenFilesMediaStoreProvider(
-                context,
-                executorService,
-                ::File,
-                environmentWrapper,
-                tracker,
-            )
-        } else {
-            HomeScreenFilesNoOpProvider()
-        }
+interface HomeScreenFilesModule {
+    @Binds
+    fun bindHomeScreenFilesIconProvider(
+        impl: HomeScreenFilesIconProviderImpl
+    ): HomeScreenFilesIconProvider
+
+    companion object {
+        @Provides
+        @LauncherAppSingleton
+        fun provideHomeScreenFilesProvider(
+            factory: HomeScreenFilesMediaStoreProvider.Factory
+        ): HomeScreenFilesProvider =
+            if (HomeScreenFilesUtils.isFeatureEnabled) factory.create(::File)
+            else HomeScreenFilesNoOpProvider()
     }
 }
 
