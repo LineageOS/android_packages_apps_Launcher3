@@ -18,15 +18,10 @@ package com.android.launcher3.workspacefunctions
 import android.content.pm.LauncherActivityInfo
 import android.util.Log
 import com.android.launcher3.Flags
-import com.android.launcher3.appfunctions.workspace.HotseatSpec
-import com.android.launcher3.appfunctions.workspace.UnplacedAppSpec
 import com.android.launcher3.appfunctions.workspace.UnplacedAppTypeTranslator
-import com.android.launcher3.appfunctions.workspace.UnplacedWidgetSpec
 import com.android.launcher3.appfunctions.workspace.UnplacedWidgetTypeTranslator
 import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions
 import com.android.launcher3.appfunctions.workspace.WorkspaceRepository
-import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
-import com.android.launcher3.appfunctions.workspace.WorkspaceTransaction
 import com.android.launcher3.appfunctions.workspace.WorkspaceTypeTranslator
 import com.android.launcher3.appfunctions.workspace.provider.InstalledItemsProvider
 import com.android.launcher3.model.data.FolderInfo
@@ -56,9 +51,6 @@ import javax.inject.Provider
 /** Dagger module for binding workspace functions interfaces. */
 @Module
 abstract class WorkspaceFunctionsModule {
-
-    /** Binds the concrete implementation of the repository to its interface. */
-    @Binds abstract fun bindWorkspaceRepository(impl: WorkspaceRepositoryImpl): WorkspaceRepository
 
     @Binds
     abstract fun bindInstalledAppsProvider(
@@ -133,64 +125,31 @@ abstract class WorkspaceFunctionsModule {
         impl: LauncherAppWidgetInfoWorkspaceTranslator
     ): @JvmSuppressWildcards WorkspaceItemTranslator<*>
 
-    /**
-     * A dummy implementation of [WorkspaceRepository] that returns an empty workspace and throws
-     * exceptions on any mutation.
-     *
-     * This is used when the Kondo planner is not enabled.
-     */
-    private class DummyWorkspaceRepository : WorkspaceRepository {
-        override suspend fun getWorkspace(): WorkspaceSpec {
-            return WorkspaceSpec(
-                screens = listOf(),
-                hotseat = HotseatSpec(listOf()),
-                rows = null,
-                columns = null,
-            )
-        }
-
-        override suspend fun getInstalledApps(orderByUsageStats: Boolean): List<UnplacedAppSpec> {
-            return emptyList()
-        }
-
-        override suspend fun getInstalledWidgets(
-            orderByUsageStats: Boolean
-        ): List<UnplacedWidgetSpec> {
-            return emptyList()
-        }
-
-        override fun newTransaction(): WorkspaceTransaction {
-            throw UnsupportedOperationException("Not implemented")
-        }
-    }
-
     companion object {
 
         @Provides
-        fun provideWorkspaceAppFunctions(
-            repositoryProvider: Provider<WorkspaceRepository>
-        ): WorkspaceAppFunctions {
+        fun provideWorkspaceRepository(
+            realRepositoryProvider: Provider<WorkspaceRepositoryImpl>
+        ): WorkspaceRepository {
             val kondoPlannerEnabled = Flags.kondoPlanner()
-            Log.d("WorkspaceFunctionsModule", "Executing factory. Flag: $kondoPlannerEnabled")
+            Log.d("WorkspaceFunctionsModule", "Providing repository. Flag: $kondoPlannerEnabled")
 
-            return WorkspaceAppFunctions(
-                if (kondoPlannerEnabled) {
-                    try {
-                        repositoryProvider.get().also {
-                            Log.d("WorkspaceFunctionsModule", "Successfully hydrated repository!")
-                        }
-                    } catch (e: Exception) {
-                        Log.e(
-                            "WorkspaceFunctionsModule",
-                            "Crash during repositoryProvider.get()",
-                            e,
-                        )
-                        DummyWorkspaceRepository()
+            return if (kondoPlannerEnabled) {
+                try {
+                    realRepositoryProvider.get().also {
+                        Log.d("WorkspaceFunctionsModule", "Successfully hydrated repository!")
                     }
-                } else {
-                    DummyWorkspaceRepository()
+                } catch (e: Exception) {
+                    Log.e(
+                        "WorkspaceFunctionsModule",
+                        "Crash during realRepositoryProvider.get()",
+                        e,
+                    )
+                    FakeWorkspaceRepository()
                 }
-            )
+            } else {
+                FakeWorkspaceRepository()
+            }
         }
     }
 }

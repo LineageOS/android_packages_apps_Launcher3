@@ -16,10 +16,10 @@
 package com.android.launcher3.dagger
 
 import com.android.launcher3.concurrent.ExecutorsModule
+import com.android.launcher3.dagger.WorkspaceFunctionsLauncherModule
 import com.android.launcher3.organizer.generator.GeneratorModule
 import com.android.launcher3.util.dagger.LauncherExecutorsModule
 import com.android.launcher3.widgetpicker.LauncherWidgetPickerModule
-import com.android.launcher3.workspacefunctions.WorkspaceFunctionsModule
 import dagger.Module
 
 @Module(
@@ -43,7 +43,6 @@ class LauncherAppModule
             DesktopModule::class,
             AutomationModule::class,
             TaskOverlayModule::class,
-            WorkspaceFunctionsModule::class,
             GeneratorModule::class,
         ]
 )
@@ -58,6 +57,7 @@ class BootSafeModules
             LauncherWidgetPickerModule::class,
             WidgetModule::class,
             StatsLoggerModule::class,
+            WorkspaceFunctionsLauncherModule::class,
         ]
 )
 class BootUnsafeModules
