@@ -16,14 +16,12 @@
 package com.android.launcher3.workspacefunctions
 
 import android.content.pm.LauncherActivityInfo
-import com.android.launcher3.appfunctions.workspace.HotseatSpec
 import com.android.launcher3.appfunctions.workspace.UnplacedAppSpec
 import com.android.launcher3.appfunctions.workspace.UnplacedWidgetSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceRepository
 import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceTransaction
 import com.android.launcher3.appfunctions.workspace.provider.InstalledItemsProvider
-import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo
 import com.android.launcher3.workspacefunctions.translators.TranslatorRegistry
 import javax.inject.Inject
@@ -35,7 +33,6 @@ import javax.inject.Inject
  * model. It will use the [LauncherWorkspaceProvider] to read data and the `IModelWriter` (not yet
  * injected) to handle transactions.
  */
-@LauncherAppSingleton
 class WorkspaceRepositoryImpl
 @Inject
 constructor(

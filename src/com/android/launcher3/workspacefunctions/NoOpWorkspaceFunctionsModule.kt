@@ -15,18 +15,19 @@
  */
 package com.android.launcher3.workspacefunctions
 
-import com.android.launcher3.appfunctions.workspace.provider.WorkspaceProvider
-import com.android.launcher3.model.data.WorkspaceData
-import com.android.launcher3.model.repository.HomeScreenRepository
-import javax.inject.Inject
+import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions
+import dagger.Module
+import dagger.Provides
 
-/** A provider that manages the [WorkspaceData] for AppFunctions. */
-class LauncherWorkspaceProvider
-@Inject
-constructor(private val homeScreenRepository: HomeScreenRepository) :
-    WorkspaceProvider<WorkspaceData> {
+/**
+ * A module that provides a dummy [WorkspaceAppFunctions] for dagger graph that doesn't involve
+ * workspace functions e.g. launcher preview.
+ */
+@Module
+class NoOpWorkspaceFunctionsModule {
 
-    override suspend fun getWorkspace(): WorkspaceData {
-        return homeScreenRepository.workspaceState.value
+    @Provides
+    fun provideWorkspaceAppFunctions(): WorkspaceAppFunctions {
+        return WorkspaceAppFunctions(FakeWorkspaceRepository())
     }
 }
