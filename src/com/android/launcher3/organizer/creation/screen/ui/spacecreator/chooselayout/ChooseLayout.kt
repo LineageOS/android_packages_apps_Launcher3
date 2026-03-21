@@ -24,10 +24,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -38,12 +43,10 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.carousel.CarouselState
-import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
-import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,16 +54,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -116,30 +120,43 @@ fun ChooseLayout(viewModel: SpaceCreatorViewModel, onBack: () -> Unit) {
                 },
             )
         },
+        bottomBar = {
+            Box(
+                modifier =
+                    Modifier.fillMaxWidth().padding(bottom = ChooseLayoutDimens.contentSidePadding),
+                contentAlignment = Alignment.Center,
+            ) {
+                AddButton()
+            }
+        },
         content = { padding -> ChooseLayoutContent(padding = padding, viewModel = viewModel) },
     )
 }
 
 @Composable
 fun ChooseLayoutContent(padding: PaddingValues, viewModel: SpaceCreatorViewModel) {
-    val carouselState = rememberCarouselState { viewModel.chooseLayoutState.layouts.size }
-    LaunchedEffect(carouselState) { viewModel.setSelectedLayout(carouselState.currentItem) }
+    val pagerState = rememberPagerState { viewModel.chooseLayoutState.layouts.size }
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val contentPadding = (screenWidth - ChooseLayoutDimens.itemWidth) / 2
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }
+            .collect { index -> viewModel.setSelectedLayout(index) }
+    }
     Column(
-        modifier = Modifier.padding(padding),
+        modifier = Modifier.padding(padding).fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement =
-            Arrangement.spacedBy(ChooseLayoutDimens.chooseLayoutContentItemSpacing),
+        verticalArrangement = Arrangement.Center,
     ) {
-        HorizontalUncontainedCarousel(
-            state = carouselState,
-            itemWidth = ChooseLayoutDimens.itemWidth + ChooseLayoutDimens.carouselPadding.times(2),
-            itemSpacing = ChooseLayoutDimens.carouselItemSpacing,
-            contentPadding = PaddingValues(ChooseLayoutDimens.carouselPadding),
+        HorizontalPager(
+            state = pagerState,
+            contentPadding = PaddingValues(horizontal = contentPadding),
+            pageSpacing = ChooseLayoutDimens.carouselItemSpacing,
+            beyondViewportPageCount = 1,
         ) { i ->
             LayoutPreview(viewModel.chooseLayoutState.layouts[i], viewModel)
         }
-        PaginationDots(carouselState)
-        AddButton()
+        PaginationDots(pagerState)
     }
 }
 
@@ -273,7 +290,7 @@ fun FolderPreviewIcon(item: FolderInfo, width: Dp, height: Dp) {
 }
 
 @Composable
-fun PaginationDots(carouselState: CarouselState) {
+fun PaginationDots(pagerState: PagerState) {
     val tint = colorResource(R.color.materialColorPrimary)
     val scope = rememberCoroutineScope()
     Row(
@@ -285,9 +302,8 @@ fun PaginationDots(carouselState: CarouselState) {
         IconButton(
             onClick = {
                 scope.launch {
-                    if (carouselState.canScrollBackward) {
-                        val prevIndex = (carouselState.currentItem - 1)
-                        carouselState.scrollToItem(prevIndex)
+                    if (pagerState.currentPage > 0) {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
                     }
                 }
             }
@@ -301,9 +317,8 @@ fun PaginationDots(carouselState: CarouselState) {
         IconButton(
             onClick = {
                 scope.launch {
-                    if (carouselState.canScrollForward) {
-                        val nextIndex = (carouselState.currentItem + 1)
-                        carouselState.scrollToItem(nextIndex)
+                    if (pagerState.currentPage < pagerState.pageCount - 1) {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     }
                 }
             }
@@ -322,21 +337,23 @@ fun AddButton() {
     Button(
         onClick = {},
         modifier =
-            Modifier.wrapContentSize()
-                .background(
-                    color = colorResource(R.color.materialColorPrimary),
+            Modifier.background(
+                    color = colorResource(R.color.materialColorOnPrimary),
                     shape = ChooseLayoutDimens.addButtonShape,
                 )
                 .width(ChooseLayoutDimens.addButtonWidth)
                 .height(ChooseLayoutDimens.addButtonHeight),
     ) {
-        Text("Add", style = TextStyle(color = colorResource(R.color.materialColorOnSurface)))
+        Text(
+            "Add",
+            style = MaterialTheme.typography.titleMedium,
+            color = colorResource(R.color.materialColorOnSurface),
+        )
     }
 }
 
 // TODO(b/493996430): Remove hardcoded dimensions and move them to resources.
 object ChooseLayoutDimens {
-    val chooseLayoutContentItemSpacing = 26.dp
     val iconSize = 41.dp
     val itemWidth = 312.00003.dp
     val itemHeight = 580.dp
