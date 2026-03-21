@@ -265,6 +265,12 @@
     <string name="arch_shape_title" msgid="2213843822192871318">"Oblúk"</string>
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"Nový priečinok"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"Nový priečinok"</string>
+    <!-- no translation found for home_screen_files_rename_dialog_clear_button (1516608063079626727) -->
+    <skip />
+    <string name="home_screen_files_rename_dialog_neutral_button" msgid="961781261154618336">"Zrušiť"</string>
+    <string name="home_screen_files_rename_dialog_positive_button" msgid="6506701192246379747">"Premenovať"</string>
+    <string name="home_screen_files_rename_dialog_file_title" msgid="3540941610992603887">"Premenovať súbor"</string>
+    <string name="home_screen_files_rename_dialog_folder_title" msgid="2453152990256864379">"Premenovať priečinok"</string>
     <string name="something_went_wrong" msgid="1492883246069060632">"Niečo sa pokazilo"</string>
     <string name="organizer_create_screen_title" msgid="1052454457895703433">"Vytvoriť obrazovku"</string>
     <string name="organizer_create_screen_description" msgid="3224132391919219061">"Vyberte kategóriu, do ktorej chcete pridať aplikácie a widgety z telefónu"</string>

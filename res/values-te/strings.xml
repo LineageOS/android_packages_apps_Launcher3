@@ -265,6 +265,12 @@
     <string name="arch_shape_title" msgid="2213843822192871318">"ఆర్చ్"</string>
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"కొత్త ఫోల్డర్"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"కొత్త ఫోల్డర్"</string>
+    <!-- no translation found for home_screen_files_rename_dialog_clear_button (1516608063079626727) -->
+    <skip />
+    <string name="home_screen_files_rename_dialog_neutral_button" msgid="961781261154618336">"రద్దు చేయండి"</string>
+    <string name="home_screen_files_rename_dialog_positive_button" msgid="6506701192246379747">"పేరు మార్చండి"</string>
+    <string name="home_screen_files_rename_dialog_file_title" msgid="3540941610992603887">"ఫైల్ పేరు మార్చండి"</string>
+    <string name="home_screen_files_rename_dialog_folder_title" msgid="2453152990256864379">"ఫోల్డర్ పేరు మార్చండి"</string>
     <string name="something_went_wrong" msgid="1492883246069060632">"ఏదో పొరపాటు జరిగింది"</string>
     <string name="organizer_create_screen_title" msgid="1052454457895703433">"స్క్రీన్‌ను క్రియేట్ చేయండి"</string>
     <string name="organizer_create_screen_description" msgid="3224132391919219061">"మీ ఫోన్ నుండి యాప్‌లను, విడ్జెట్‌లను జోడించడానికి ఒక కేటగిరీని ఎంచుకోండి"</string>
