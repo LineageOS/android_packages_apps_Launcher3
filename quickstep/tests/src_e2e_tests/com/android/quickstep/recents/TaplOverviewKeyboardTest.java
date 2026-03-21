@@ -16,6 +16,7 @@
 
 package com.android.quickstep.recents;
 
+import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
 import static com.android.launcher3.util.ui.ActivityStartUtils.resolveSystemApp;
 
 import static org.junit.Assert.assertTrue;
@@ -30,6 +31,7 @@ import com.android.launcher3.LauncherState;
 import com.android.launcher3.tapl.Overview;
 import com.android.launcher3.tapl.SelectModeButtons;
 import com.android.launcher3.tapl.Workspace;
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 import com.android.launcher3.util.ui.BaseLauncherTaplTest.AllowInRecentsWindowTests;
 import com.android.quickstep.AbstractQuickStepTest;
 
@@ -62,6 +64,7 @@ public class TaplOverviewKeyboardTest extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 489811503)
     public void testOpenOverviewWithActionPlusTabKeys() throws Exception {
         startTestAppsWithCheck();
         startAppFast(CALCULATOR_APP_PACKAGE); // Ensure Calculator is last opened app.
@@ -75,6 +78,7 @@ public class TaplOverviewKeyboardTest extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 489811503)
     public void testOpenOverviewWithRecentsKey() throws Exception {
         startTestAppsWithCheck();
         startAppFast(CALCULATOR_APP_PACKAGE); // Ensure Calculator is last opened app.
@@ -88,6 +92,7 @@ public class TaplOverviewKeyboardTest extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 489811503)
     public void testDismissOverviewWithEscKey() throws Exception {
         startTestAppsWithCheck();
         final Overview overview =
@@ -99,6 +104,7 @@ public class TaplOverviewKeyboardTest extends AbstractQuickStepTest {
     }
 
     @Test
+    @DesktopStability(flavors = LOCAL, bug = 489799688)
     public void testDismissModalTaskAndOverviewWithEscKey() throws Exception {
         startTestAppsWithCheck();
         final Overview overview =

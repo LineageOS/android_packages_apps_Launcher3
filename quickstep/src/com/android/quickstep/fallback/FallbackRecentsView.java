@@ -131,6 +131,7 @@ public abstract class FallbackRecentsView<CONTAINER_TYPE extends Context & Recen
                 if (dismissSpringSet != null) {
                     dismissSpringSet.addEndListener(() -> {
                         setCurrentTask(-1);
+                        finishRecentsAnimation(/* toHome= */ false, () -> {});
                         return Unit.INSTANCE;
                     });
                     mDismissUtils.play(animatorSet, dismissSpringSet);
@@ -286,8 +287,9 @@ public abstract class FallbackRecentsView<CONTAINER_TYPE extends Context & Recen
             setTaskBorderEnabled(true);
         }
 
-        if (finalState != OVERVIEW_SPLIT_SELECT) {
-            mSplitSelectStateController.resetState();
+        SplitSelectStateController splitSelectStateController = getSplitSelectStateController();
+        if (splitSelectStateController != null && finalState != OVERVIEW_SPLIT_SELECT) {
+            splitSelectStateController.resetState();
         }
     }
 

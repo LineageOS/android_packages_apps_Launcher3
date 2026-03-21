@@ -2,6 +2,13 @@ package: "com.android.launcher3"
 container: "system_ext"
 
 flag {
+    name: "enable_compose_for_options_popup_menu_dialog"
+    namespace: "launcher"
+    description: "Gate the refactor of OptionsPopupDialog to compose."
+    bug: "316027081"
+}
+
+flag {
     name: "enable_expanding_pause_work_button"
     namespace: "launcher"
     description: "Expand and collapse pause work button while scrolling."
@@ -65,6 +72,13 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "enable_taskbar_icon_desktop_clicks"
+  namespace: "lse_desktop_experience"
+  description: "Enables desktop style tasakbar icon clicks, including click-to-minimize and multi-window picking."
+  bug: "433770976"
 }
 
 flag {

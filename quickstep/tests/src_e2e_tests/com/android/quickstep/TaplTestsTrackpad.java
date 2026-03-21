@@ -16,6 +16,7 @@
 
 package com.android.quickstep;
 
+import static com.android.launcher3.util.rule.TestStabilityRule.LOCAL;
 import static com.android.quickstep.NavigationModeSwitchRule.Mode.ZERO_BUTTON;
 
 import static org.junit.Assert.assertNotNull;
@@ -37,6 +38,7 @@ import com.android.launcher3.tapl.LauncherInstrumentation.TrackpadGestureType;
 import com.android.launcher3.tapl.Workspace;
 import com.android.launcher3.util.rule.ScreenRecordRule;
 import com.android.launcher3.util.rule.ShellCommandRule;
+import com.android.launcher3.util.rule.TestStabilityRule.DesktopStability;
 import com.android.quickstep.NavigationModeSwitchRule.NavigationModeSwitch;
 
 import org.junit.After;
@@ -86,6 +88,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
     //  trackpad gesture back in SysUI. Normally it's triggered by the attachment of a trackpad. We
     //  need to figure out a way to emulate that in the test, or bypass the logic altogether.
     @NavigationModeSwitch(mode = ZERO_BUTTON)
+    @DesktopStability(flavors = LOCAL, bug = 489812017)
     public void pressBack() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
             mLauncher.isTablet());
@@ -131,6 +134,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
 
     @Test
     @NavigationModeSwitch
+    @DesktopStability(flavors = LOCAL, bug = 489809350)
     public void testQuickSwitchFromApp() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
                 mLauncher.isTablet());
@@ -162,6 +166,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
 
     @Test
     @NavigationModeSwitch
+    @DesktopStability(flavors = LOCAL, bug = 489811602)
     public void testNotificationsFromHome() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
                 mLauncher.isTablet());
@@ -171,6 +176,7 @@ public class TaplTestsTrackpad extends AbstractQuickStepTest {
 
     @Test
     @NavigationModeSwitch
+    @DesktopStability(flavors = LOCAL, bug = 489810953)
     public void testNotificationsFromApp() throws Exception {
         assumeTrue("Ignoring test because device is not a tablet",
                 mLauncher.isTablet());

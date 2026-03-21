@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
 
 package com.android.launcher3.popup
 
-import android.content.Context
 import android.net.Uri
 import android.os.Process
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.util.SparseArray
 import android.view.View
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.DropTargetHandler
@@ -33,6 +30,7 @@ import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_QSB
 import com.android.launcher3.R
+import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.homescreenfiles.HomeScreenFile
 import com.android.launcher3.homescreenfiles.HomeScreenFilesRenameDialog
 import com.android.launcher3.homescreenfiles.HomeScreenFilesRenameDialogFactory
@@ -40,16 +38,13 @@ import com.android.launcher3.homescreenfiles.HomeScreenFilesUtils
 import com.android.launcher3.homescreenfiles.homeScreenFile
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.model.data.WorkspaceChangeEvent.FullRefresh
-import com.android.launcher3.model.data.WorkspaceData.ImmutableWorkspaceData
 import com.android.launcher3.model.data.WorkspaceItemInfo
-import com.android.launcher3.model.repository.HomeScreenRepository
-import com.android.launcher3.util.DaggerSingletonTracker
-import com.android.launcher3.util.Executors
-import com.android.launcher3.util.TestUtil
+import com.android.launcher3.util.SandboxApplication
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.BaseDragLayer
 import com.android.providers.media.flags.Flags.FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API
+import com.android.tools.dagger.mutation.annotations.BindValue
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -61,143 +56,85 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-/** Tests for the [PopupDataRepositoryImpl] */
+/** Tests for the [PopupDataRepository] */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class PopupDataRepositoryImplUnitTest {
+@MutatedComponent(target = LauncherAppComponent::class)
+class PopupDataRepositoryUnitTest {
     @get:Rule val mockitoRule = MockitoJUnit.rule()
+    @get:Rule val app = SandboxApplication()
     @get:Rule val setFlagsRule = SetFlagsRule()
-    private val context: Context = ApplicationProvider.getApplicationContext()
-    private val homeScreenRepository = HomeScreenRepository()
-    @Mock private lateinit var lifeCycle: DaggerSingletonTracker
 
+    @BindValue
     @Mock
-    private lateinit var homeScreenFilesRenameDialogFactory: HomeScreenFilesRenameDialogFactory
+    lateinit var homeScreenFilesRenameDialogFactory: HomeScreenFilesRenameDialogFactory
 
-    private lateinit var popupDataSource: PopupDataSource
-    private lateinit var popupDataRepository: PopupDataRepository
+    private lateinit var popupDataMapper: PopupDataRepository
 
     @Before
     fun setup() {
         // Late initialization of `PopupDataSource` is required because some of the created
         // `PopupData` use feature flags.
-        popupDataSource = PopupDataSource(homeScreenFilesRenameDialogFactory)
-        popupDataRepository =
-            PopupDataRepositoryImpl(popupDataSource, context, homeScreenRepository, lifeCycle)
+        app.initDaggerComponent(mutatedComponentBuilder())
+        popupDataMapper = app.appComponent.popupDataRepository
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
-    fun getAllPopupDataWithInvalidItemInfoShouldReturnEmptyList() {
-        val itemInfo = ItemInfo()
-        itemInfo.itemType = ITEM_TYPE_QSB
-        itemInfo.id = 1
-        seedData(itemInfo)
-        val popupDataMap = popupDataRepository.getAllPopupData()
+    fun getPopupDataByItemInfoWithInvalidItemInfoShouldReturnNull() {
+        val itemInfo =
+            ItemInfo().apply {
+                itemType = ITEM_TYPE_QSB
+                id = 1
+            }
+        val popupData = popupDataMapper.getAllSupportedPopupActions(itemInfo)
 
-        assert(popupDataMap.isEmpty())
+        assert(popupData == null)
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
-    fun getAllPopupDataWithEmptyItemInfoShouldReturnEmptyList() {
-        val itemInfo = ItemInfo()
-        itemInfo.id = 1
-        seedData(itemInfo)
-        val popupDataMap = popupDataRepository.getAllPopupData()
+    fun getPopupDataByItemInfoWithEmptyItemInfoShouldReturnNull() {
+        val itemInfo = ItemInfo().apply { id = 1 }
+        val popupData = popupDataMapper.getAllSupportedPopupActions(itemInfo)
 
-        assert(popupDataMap.isEmpty())
+        assert(popupData == null)
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
-    fun getAllPopupDataWithFolderShouldReturnMapContainingFolderItem() {
-        val itemInfo = ItemInfo()
-        itemInfo.itemType = ITEM_TYPE_FOLDER
-        itemInfo.id = 1
-        seedData(itemInfo)
-        val popupDataMap = popupDataRepository.getAllPopupData()
+    fun getPopupDataByItemInfoWithFolderShouldReturnPopupData() {
+        val itemInfo =
+            ItemInfo().apply {
+                itemType = ITEM_TYPE_FOLDER
+                id = 1
+            }
+        val popupData = popupDataMapper.getAllSupportedPopupActions(itemInfo)
 
-        assert(popupDataMap.size == 1)
-        assert(popupDataMap[itemInfo.id] != null)
+        assert(popupData != null)
+        assert(popupData?.size == 1)
+        assert(popupData?.contains(PopupDataSource.removePopupData) == true)
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
-    fun getAllPopupDataWithFolderAndWidgetShouldReturnMapContainingFolderAndWidgetItem() {
-        val folderItemInfo = ItemInfo()
-        folderItemInfo.id = 1
-        folderItemInfo.itemType = ITEM_TYPE_FOLDER
-        val widgetItemInfo = ItemInfo()
-        widgetItemInfo.itemType = ITEM_TYPE_APPWIDGET
-        widgetItemInfo.id = 2
-        seedData(folderItemInfo, widgetItemInfo)
-        val popupDataMap = popupDataRepository.getAllPopupData()
+    fun getPopupDataByItemInfoWithWidgetShouldReturnPopupData() {
+        val widgetItemInfo =
+            ItemInfo().apply {
+                itemType = ITEM_TYPE_APPWIDGET
+                id = 2
+            }
+        val popupData = popupDataMapper.getAllSupportedPopupActions(widgetItemInfo)
 
-        assert(popupDataMap.size == 2)
-        assert(popupDataMap[folderItemInfo.id] != null)
-        assert(popupDataMap[widgetItemInfo.id] != null)
+        assert(popupData != null)
+        assert(popupData?.size == 1)
+        assert(popupData?.contains(PopupDataSource.removePopupData) == true)
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
-    fun getPopupDataByItemInfoShouldBeNullIfWeDontHaveThatItem() {
-        val folderItemInfo = ItemInfo()
-        folderItemInfo.id = 1
-        folderItemInfo.itemType = ITEM_TYPE_FOLDER
-        val widgetItemInfo = ItemInfo()
-        widgetItemInfo.id = 2
-        widgetItemInfo.itemType = ITEM_TYPE_APPWIDGET
-        seedData(folderItemInfo, widgetItemInfo)
-        val popupDataStream = popupDataRepository.getPopupDataByItemInfo(ItemInfo())
-
-        assert(popupDataStream == null)
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
-    fun getPopupDataByItemInfoShouldNotBeNullIfWeHaveThatItem() {
-        val folderItemInfo = ItemInfo()
-        folderItemInfo.id = 1
-        folderItemInfo.itemType = ITEM_TYPE_FOLDER
-        val widgetItemInfo = ItemInfo()
-        widgetItemInfo.id = 2
-        widgetItemInfo.itemType = ITEM_TYPE_APPWIDGET
-        seedData(folderItemInfo, widgetItemInfo)
-        val popupDataStream = popupDataRepository.getPopupDataByItemInfo(folderItemInfo)
-
-        assert(popupDataStream != null)
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
-    fun getPopupDataByItemInfoShouldStillWorkIfMapDoesNotHaveItem() {
-        val folderItemInfo = ItemInfo()
-        folderItemInfo.id = 1
-        folderItemInfo.itemType = ITEM_TYPE_FOLDER
-
-        // There should be no popup data since we didn't update the home screen repository.
-        assert(popupDataRepository.getAllPopupData().isEmpty())
-
-        val popupDataStream = popupDataRepository.getPopupDataByItemInfo(folderItemInfo)
-
-        // Now that we called getPopupDataByItemInfo we should have the folderItemInfo.
-        assert(popupDataRepository.getAllPopupData().size == 1)
-
-        // Verify the stream is correct.
-        assert(popupDataStream != null)
-        assert(popupDataStream?.size == 1)
-        assert(popupDataStream?.contains(popupDataSource.removePopupData) == true)
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_MODEL_REPOSITORY)
     fun popupDataShouldHaveAllTheDataFilledIn() {
-        val folderItemInfo = ItemInfo()
-        folderItemInfo.id = 1
-        folderItemInfo.itemType = ITEM_TYPE_FOLDER
-        seedData(folderItemInfo)
-        val popupData = popupDataRepository.getPopupDataByItemInfo(folderItemInfo)
+        val folderItemInfo =
+            ItemInfo().apply {
+                id = 1
+                itemType = ITEM_TYPE_FOLDER
+            }
+        val popupData = popupDataMapper.getAllSupportedPopupActions(folderItemInfo)
 
         assert(popupData?.size == 1)
         assert(popupData?.get(0)?.category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
@@ -288,7 +225,7 @@ class PopupDataRepositoryImplUnitTest {
                 intent = HomeScreenFilesUtils.buildLaunchIntent(file.uri, file)
                 title = file.displayName
             }
-        val popupData = popupDataRepository.getPopupDataByItemInfo(item)
+        val popupData = popupDataMapper.getAllSupportedPopupActions(item)
         var popupDataIndex = 0
 
         assert(popupData!!.size == if (supportsRenaming) 3 else 2)
@@ -341,15 +278,5 @@ class PopupDataRepositoryImplUnitTest {
             verify(dropTargetHandler, times(1)).prepareToUndoDelete(item)
             verify(dropTargetHandler, times(1)).onDeleteComplete(item, view)
         }
-    }
-
-    private fun seedData(vararg items: ItemInfo) {
-        val data: SparseArray<ItemInfo> = SparseArray()
-        items.forEachIndexed { i: Int, item: ItemInfo -> data[i] = item }
-        homeScreenRepository.dispatchWorkspaceDataChange(
-            ImmutableWorkspaceData(version = 0, modificationId = 0, items = data),
-            FullRefresh(reason = "seedData"),
-        )
-        TestUtil.runOnExecutorSync(Executors.DATA_HELPER_EXECUTOR) {}
     }
 }

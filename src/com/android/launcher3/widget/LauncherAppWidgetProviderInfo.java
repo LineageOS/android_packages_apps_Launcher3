@@ -29,7 +29,7 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo;
  */
 public class LauncherAppWidgetProviderInfo extends AppWidgetProviderInfo implements CachedObject {
 
-    public static final String CLS_CUSTOM_WIDGET_PREFIX = "#custom-widget-";
+    public static final String CUSTOM_WIDGET_PACKAGE = "custom-widget";
 
     /**
      * The desired number of cells that this widget occupies horizontally in
@@ -213,7 +213,7 @@ public class LauncherAppWidgetProviderInfo extends AppWidgetProviderInfo impleme
     }
 
     public boolean isCustomWidget() {
-        return provider.getClassName().startsWith(CLS_CUSTOM_WIDGET_PREFIX);
+        return provider.getPackageName().equals(CUSTOM_WIDGET_PACKAGE);
     }
 
     public int getWidgetFeatures() {

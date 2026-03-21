@@ -31,8 +31,8 @@ public enum QuickstepProtoLogGroup implements IProtoLogGroup {
     ACTIVE_GESTURE_LOG(true, Constants.DEBUG_ACTIVE_GESTURE, "ActiveGestureLog"),
     RECENTS_WINDOW(true, Constants.DEBUG_RECENTS_WINDOW, "RecentsWindow"),
     LAUNCHER_STATE_MANAGER(true, Constants.DEBUG_STATE_MANAGER, "LauncherStateManager"),
-    OVERVIEW_COMMAND_HELPER(true, Constants.DEBUG_OVERVIEW_COMMAND_HELPER,
-            "OverviewCommandHelper");
+    OVERVIEW_COMMAND_HELPER(true, Constants.DEBUG_OVERVIEW_COMMAND_HELPER, "OverviewCommandHelper"),
+    BUBBLES(true, Constants.DEBUG_BUBBLES, "Bubbles");
 
     private final boolean mEnabled;
     private volatile boolean mLogToLogcat;
@@ -101,6 +101,7 @@ public enum QuickstepProtoLogGroup implements IProtoLogGroup {
         private static final boolean DEBUG_RECENTS_WINDOW = false;
         private static final boolean DEBUG_STATE_MANAGER = false; // b/279059025, b/325463989
         private static final boolean DEBUG_OVERVIEW_COMMAND_HELPER = false;
+        private static final boolean DEBUG_BUBBLES = true;
 
         private static final int LOG_START_ID =
                 (int) (UUID.nameUUIDFromBytes(QuickstepProtoLogGroup.class.getName().getBytes())

@@ -165,8 +165,8 @@ class WidgetsModelTest {
 
         val widgetsByComponentKey: Map<ComponentKey, WidgetItem> = underTest.widgetsByComponentKey
 
-        // Has all widgets including ones not visible in picker
-        assertThat(widgetsByComponentKey).hasSize(4)
+        // Has all widgets including ones not visible in picker and the custom widget
+        assertThat(widgetsByComponentKey).hasSize(5)
         widgetsByComponentKey.forEach { entry ->
             assertThat(entry.key).isEqualTo(entry.value as ComponentKey)
         }

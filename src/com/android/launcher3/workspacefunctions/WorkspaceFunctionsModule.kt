@@ -66,6 +66,11 @@ abstract class WorkspaceFunctionsModule {
     ): InstalledItemsProvider<LauncherActivityInfo>
 
     @Binds
+    abstract fun bindInstalledWidgetsProvider(
+        impl: LauncherInstalledWidgetsProvider
+    ): InstalledItemsProvider<LauncherAppWidgetProviderInfo>
+
+    @Binds
     @IntoMap
     @ClassKey(WorkspaceData::class)
     abstract fun bindLauncherWorkspaceTypeTranslator(
@@ -148,7 +153,9 @@ abstract class WorkspaceFunctionsModule {
             return emptyList()
         }
 
-        override suspend fun getInstalledWidgets(orderByUsageStats: Boolean): List<UnplacedWidgetSpec> {
+        override suspend fun getInstalledWidgets(
+            orderByUsageStats: Boolean
+        ): List<UnplacedWidgetSpec> {
             return emptyList()
         }
 

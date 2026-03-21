@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,43 +16,26 @@
 
 package com.android.launcher3.popup
 
-import android.view.View
-import com.android.launcher3.logging.StatsLogManager.EventEnum
-import com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.views.ActivityContext
+import javax.inject.Inject
+import javax.inject.Named
 
-/**
- * Enum for the category of popup we have, as we handle different categories of shortcuts
- * differently depending on the category.
- */
-enum class PopupCategory {
-    SYSTEM_SHORTCUT,
-    SYSTEM_SHORTCUT_FIXED,
-}
-
-/** Data class which stores all the values we need to create a long press menu shortcut. */
-data class PopupData(
-    val iconResId: Int,
-    val labelResId: Int,
-    val popupAction: (context: ActivityContext, itemInfo: ItemInfo, view: View) -> Unit,
-    val category: PopupCategory,
-    val eventId: EventEnum = IGNORE,
-)
-
-/** Repository to get all the popup data needed for the long press menu. */
-interface PopupDataRepository {
-    /**
-     * @return a map where we the key is the type of poppable and the value is a stream of popup
-     *   data belonging to that type.
-     */
-    fun getAllPopupData(): Map<Int, List<PopupData>>
+class PopupDataRepository
+@Inject
+constructor(@Named(POPUP_DATA_MAPPER) val mappers: Set<@JvmSuppressWildcards PopupDataMapper>) {
 
     /**
-     * Get the popup data for a specific item.
+     * Retrieves the popup data for a specific [ItemInfo].
      *
-     * @param itemInfo is linked to a popupData list specific to it.
-     * @return a list of popup data belonging to that item.
+     * @param itemInfo The item to retrieve popup data for.
+     * @return the list of [PopupData] if available, or null if the item type is not supported.
      */
-    fun getPopupDataByItemInfo(itemInfo: ItemInfo): List<PopupData>?
+    fun getAllSupportedPopupActions(itemInfo: ItemInfo): List<PopupData>? {
+        // TODO: Implement some sorting logic
+        return mappers.mapNotNull { it.getPopupDataByItemInfo(itemInfo) }.flatten().ifEmpty { null }
+    }
+
+    companion object {
+        const val POPUP_DATA_MAPPER = "POPUP_DATA_MAPPER"
+    }
 }

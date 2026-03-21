@@ -151,7 +151,9 @@ public interface LauncherBaseAppComponent {
     /** Returns reference to various model objects used for test verification */
     TestableModelState getTestableModelState();
 
+    /** Popup data mapping for [ItemInfo] */
     PopupDataRepository getPopupDataRepository();
+
     NotificationRepository getNotificationRepository();
     HomeScreenFilesProvider getHomeScreenFilesProvider();
 

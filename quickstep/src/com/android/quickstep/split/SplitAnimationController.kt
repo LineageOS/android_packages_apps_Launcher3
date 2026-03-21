@@ -23,7 +23,6 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
-import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -31,6 +30,7 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
@@ -86,6 +86,8 @@ import java.util.function.Supplier
  */
 class SplitAnimationController(val splitSelectStateController: SplitSelectStateController) {
     companion object {
+        private const val TAG = "SplitAnimationController"
+
         // Break this out into maybe enums? Abstractions into its own classes? Tbd.
         data class SplitAnimInitProps(
             val originalView: View,
@@ -531,24 +533,29 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
             check(info != null && t != null) {
                 "trying to launch an app pair icon, but encountered an unexpected null"
             }
-            val appPairLaunchingAppIndex = hasChangesForBothAppPairs(launchingIconView, info)
-            if (appPairLaunchingAppIndex == -1) {
-                // Launch split app pair animation
-                composeIconSplitLaunchAnimator(
-                    launchingIconView,
-                    info,
-                    t,
-                    finishCallback,
-                    cornerRadius,
-                )
-            } else {
-                composeFullscreenIconSplitLaunchAnimator(
-                    launchingIconView,
-                    info,
-                    t,
-                    finishCallback,
-                    appPairLaunchingAppIndex,
-                )
+            when (val launchKind = getSplitLaunchKind(launchingIconView, info)) {
+                SplitLaunchKind.SPLIT,
+                SplitLaunchKind.PARTIAL_SPLIT -> {
+                    // Launch split app pair animation
+                    composeIconSplitLaunchAnimator(
+                        launchingIconView,
+                        info,
+                        t,
+                        finishCallback,
+                        cornerRadius,
+                    )
+                }
+                SplitLaunchKind.FULLSCREEN_FIRST,
+                SplitLaunchKind.FULLSCREEN_SECOND,
+                SplitLaunchKind.FULLSCREEN_PAUSED -> {
+                    composeFullscreenIconSplitLaunchAnimator(
+                        launchingIconView,
+                        info,
+                        t,
+                        finishCallback,
+                        launchKind,
+                    )
+                }
             }
         } else {
             // Fallback case: simple fade-in animation
@@ -621,40 +628,103 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
     }
 
     /**
-     * @return -1 if [transitionInfo] contains both apps of the app pair to be animated, otherwise
-     *   the integer index corresponding to [launchingIconView]'s contents for the single app to be
-     *   animated
+     * There are 6 app pair launch scenarios
+     *
+     *  1 Successfully launch both apps
+     *  2 Neither apps launch because both are paused
+     *  3 Launch first app because second is paused
+     *  4 Launch second app because first is paused
+     *  5 First app is paused and second app is in Pip
+     *  6 Second app is paused and first app is in Pip
+     *
+     * 1 (happy path), 3, 4 are normal split launch animations
+     * 2 is handled upstream at click where we  show a toast saying app pair is unavailable.
+     * 3, 4 we launch the split pair and the half where the app is paused a system dialog shows up
+     *   asking if user wants to unpause the app.
+     * 5 and 6 are when the system gives us only a single fullscreen system dialog to animate.
      */
-    fun hasChangesForBothAppPairs(
+    enum class SplitLaunchKind {
+        /** Launching both apps in split-screen mode. Refers to 1 above. */
+        SPLIT,
+        /**
+         * Either one of the two apps in the app pair is in split, but the other one is a
+         * non-fullscreen other app (i.e. system pause dialog). Refers to 2 above.
+         */
+        PARTIAL_SPLIT,
+        /** Only the first app in the pair is launching, in fullscreen. Second app not present. */
+        FULLSCREEN_FIRST,
+        /** Only the second app in the pair is launching, in fullscreen. First app not present. */
+        FULLSCREEN_SECOND,
+        /**
+         * Neither app from the pair is detected, but exactly one fullscreen app is opening. We
+         * fallback to animating this unknown app in fullscreen (i.e. paused/suspended app).
+         */
+        FULLSCREEN_PAUSED,
+    }
+
+    /**
+     * @return [SplitLaunchKind.SPLIT] if we should proceed with a split-screen animation, otherwise
+     *   the specific fullscreen launch kind if only one app is opening in fullscreen.
+     */
+    fun getSplitLaunchKind(
         launchingIconView: AppPairIcon,
         transitionInfo: TransitionInfo,
-    ): Int {
+    ): SplitLaunchKind {
         val intent1 = launchingIconView.info.getFirstApp().intent.component?.packageName
         val intent2 = launchingIconView.info.getSecondApp().intent.component?.packageName
+
+        var hasApp1 = false
+        var hasApp2 = false
+
         var launchFullscreenAppIndex = -1
+        var numFullscreenTasks = 0
+
         for (change in transitionInfo.changes) {
             val taskInfo: RunningTaskInfo = change.taskInfo ?: continue
-            if (
-                TransitionUtil.isOpeningType(change.mode) &&
-                    taskInfo.windowingMode == WINDOWING_MODE_FULLSCREEN
-            ) {
-                val baseIntent = taskInfo.baseIntent.component?.packageName
-                if (baseIntent == intent1) {
+            if (!TransitionUtil.isOpeningType(change.mode)) continue
+
+            val baseIntent = taskInfo.baseIntent.component?.packageName
+            val isApp1 = baseIntent == intent1
+            val isApp2 = baseIntent == intent2
+            if (isApp1) hasApp1 = true
+            if (isApp2) hasApp2 = true
+
+            if (taskInfo.windowingMode == WINDOWING_MODE_FULLSCREEN) {
+                // We'll generally get a fullscreen task even in the happy path for the split root
+                numFullscreenTasks++
+                if (isApp1) {
                     if (launchFullscreenAppIndex > -1) {
                         launchFullscreenAppIndex = -1
-                        break
+                    } else {
+                        launchFullscreenAppIndex = 0
                     }
-                    launchFullscreenAppIndex = 0
-                } else if (baseIntent == intent2) {
+                } else if (isApp2) {
                     if (launchFullscreenAppIndex > -1) {
                         launchFullscreenAppIndex = -1
-                        break
+                    } else {
+                        launchFullscreenAppIndex = 1
                     }
-                    launchFullscreenAppIndex = 1
                 }
             }
         }
-        return launchFullscreenAppIndex
+
+        if (hasApp1 && hasApp2) {
+            return SplitLaunchKind.SPLIT
+        }
+
+        if (launchFullscreenAppIndex == 0) {
+            return SplitLaunchKind.FULLSCREEN_FIRST
+        } else if (launchFullscreenAppIndex == 1) {
+            return SplitLaunchKind.FULLSCREEN_SECOND
+        } else if (!hasApp1 && !hasApp2 && numFullscreenTasks == 1) {
+            return SplitLaunchKind.FULLSCREEN_PAUSED
+        } else if ((hasApp1 && !hasApp2) || (!hasApp1 && hasApp2)) {
+            return SplitLaunchKind.PARTIAL_SPLIT
+        }
+
+        // Technically (hopefully) we should never reach this state, but launching a fullscreen app
+        // is safest bet in case things go wrong
+        return SplitLaunchKind.FULLSCREEN_PAUSED
     }
 
     /**
@@ -693,12 +763,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         // If launching an app pair from Taskbar inside of an app context (no access to Launcher),
         // use the scale-up animation
         if (launchingIconView.context is TaskbarActivityContext) {
-            composeScaleUpLaunchAnimation(
-                transitionInfo,
-                t,
-                finishCallback,
-                WINDOWING_MODE_MULTI_WINDOW,
-            )
+            composeScaleUpLaunchAnimation(transitionInfo, t, finishCallback)
             return
         }
 
@@ -770,6 +835,35 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         launchAnimation.start()
     }
 
+    @VisibleForTesting
+    fun getFallbackAppInfoForUnknownFullscreen(launchingIconView: AppPairIcon): WorkspaceItemInfo {
+        val app1 = launchingIconView.info.getFirstApp()
+        val app2 = launchingIconView.info.getSecondApp()
+        val pm = launchingIconView.context.packageManager
+
+        val pkg1 = app1.intent.component?.packageName
+        val pkg2 = app2.intent.component?.packageName
+
+        try {
+            if (pkg2 != null && pm.isPackageSuspended(pkg2)) {
+                return app2
+            }
+        } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "Exception launching split unknown fs app", e)
+        }
+
+        try {
+            if (pkg1 != null && pm.isPackageSuspended(pkg1)) {
+                return app1
+            }
+        } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "Exception launching split unknown fs app", e)
+        }
+
+        // Default to app 1
+        return app1
+    }
+
     /**
      * Similar to [composeIconSplitLaunchAnimator], but instructs [FloatingAppPairView] to animate a
      * single fullscreen icon + background instead of for a pair
@@ -780,17 +874,12 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         transitionInfo: TransitionInfo,
         t: Transaction,
         finishCallback: Runnable,
-        launchFullscreenIndex: Int,
+        launchKind: SplitLaunchKind,
     ) {
         // If launching an app pair from Taskbar inside of an app context (no access to Launcher),
         // use the scale-up animation
         if (launchingIconView.context is TaskbarActivityContext) {
-            composeScaleUpLaunchAnimation(
-                transitionInfo,
-                t,
-                finishCallback,
-                WINDOWING_MODE_FULLSCREEN,
-            )
+            composeScaleUpLaunchAnimation(transitionInfo, t, finishCallback)
             return
         }
 
@@ -802,18 +891,35 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         val launchAnimation = AnimatorSet()
 
         val appInfo =
-            launchingIconView.info.getContents()[launchFullscreenIndex] as WorkspaceItemInfo
-        val intentToLaunch = appInfo.intent.component?.packageName
+            when (launchKind) {
+                SplitLaunchKind.FULLSCREEN_FIRST -> launchingIconView.info.getFirstApp()
+                SplitLaunchKind.FULLSCREEN_SECOND -> launchingIconView.info.getSecondApp()
+                SplitLaunchKind.FULLSCREEN_PAUSED ->
+                    getFallbackAppInfoForUnknownFullscreen(launchingIconView)
+                else -> throw IllegalStateException("Unexpected launch kind: $launchKind")
+            }
+
+        val intentToLaunch =
+            if (launchKind == SplitLaunchKind.FULLSCREEN_PAUSED) {
+                null
+            } else {
+                appInfo.intent.component?.packageName
+            }
+
         var rootCandidate: Change? = null
         for (change in transitionInfo.changes) {
             val taskInfo: RunningTaskInfo = change.taskInfo ?: continue
             val baseIntent = taskInfo.baseIntent.component?.packageName
             if (
                 TransitionUtil.isOpeningType(change.mode) &&
-                    taskInfo.windowingMode == WINDOWING_MODE_FULLSCREEN &&
-                    baseIntent == intentToLaunch
+                    taskInfo.windowingMode == WINDOWING_MODE_FULLSCREEN
             ) {
-                rootCandidate = change
+                if (
+                    launchKind == SplitLaunchKind.FULLSCREEN_PAUSED || baseIntent == intentToLaunch
+                ) {
+                    rootCandidate = change
+                    break
+                }
             }
         }
 
@@ -955,7 +1061,6 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
         transitionInfo: TransitionInfo,
         t: Transaction,
         finishCallback: Runnable,
-        windowingMode: Int,
     ) {
         val launchAnimation = AnimatorSet()
         val progressUpdater = ValueAnimator.ofFloat(0f, 1f)
