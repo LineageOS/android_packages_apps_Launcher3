@@ -19,6 +19,7 @@ package com.android.launcher3.organizer.generator
 import android.graphics.Point
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FOLDER
 import com.android.launcher3.util.CellAndSpan
 
 /** Generate templates using a preset set of rules. */
@@ -79,13 +80,19 @@ class PresetTemplateGenerator : TemplateGenerator {
             items.add(TemplateItem(CellAndSpan(widgetX, 1, widgetWidth, 2), ITEM_TYPE_APPWIDGET))
         }
 
-        // A few icons in the bottom row
-        val iconCount = gridSize.x.coerceAtMost(4)
-        val startX = (gridSize.x - iconCount) / 2
-        for (x in 0 until iconCount) {
-            items.add(
-                TemplateItem(CellAndSpan(startX + x, gridSize.y - 1, 1, 1), ITEM_TYPE_APPLICATION)
-            )
+        // Fill the bottom row
+        val iconCount = gridSize.x
+        items.add(TemplateItem(CellAndSpan(0, gridSize.y - 1, 1, 1), ITEM_TYPE_FOLDER))
+        val startX = (gridSize.x - iconCount).coerceAtLeast(1).coerceAtMost(gridSize.x - 1)
+        for (x in 0 until (iconCount - 1).coerceAtLeast(0)) {
+            if (startX + x < gridSize.x) {
+                items.add(
+                    TemplateItem(
+                        CellAndSpan(startX + x, gridSize.y - 1, 1, 1),
+                        ITEM_TYPE_APPLICATION,
+                    )
+                )
+            }
         }
         return Template(items)
     }

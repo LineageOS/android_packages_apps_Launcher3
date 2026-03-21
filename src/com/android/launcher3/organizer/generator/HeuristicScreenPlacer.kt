@@ -20,6 +20,7 @@ import com.android.launcher3.LauncherSettings
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.WorkspaceItemInfo
 
 /**
  * A [Placer] that arranges items based on predefined templates.
@@ -88,13 +89,11 @@ class HeuristicScreenPlacer : Placer {
                             availableApps.remove(app)
                             appsByTopic[app.topic]?.remove(app)
                             val placedItem =
-                                (app.itemInfo as AppInfo)
-                                    .makeWorkspaceItem(/* context */ null)
-                                    .apply {
-                                        this.cellX = templateItem.cellAndSpan.cellX
-                                        this.cellY = templateItem.cellAndSpan.cellY
-                                        this.screenId = screenIndex
-                                    }
+                                WorkspaceItemInfo(app.itemInfo as AppInfo).apply {
+                                    this.cellX = templateItem.cellAndSpan.cellX
+                                    this.cellY = templateItem.cellAndSpan.cellY
+                                    this.screenId = screenIndex
+                                }
                             screenItems.add(placedItem)
                         }
                     }
@@ -143,10 +142,15 @@ class HeuristicScreenPlacer : Placer {
                 this.screenId = screenIndex
                 this.title = topic
             }
-        appsForFolder.forEach {
-            folderInfo.add(it.itemInfo)
-            availableApps.remove(it)
-            validTopicEntry.value.remove(it)
+        appsForFolder.forEachIndexed { index, topicItem ->
+            val item = topicItem.itemInfo
+            val workspaceItem =
+                if (item is AppInfo) WorkspaceItemInfo(item) else item.makeShallowCopy()
+            workspaceItem.rank = index
+            folderInfo.add(workspaceItem)
+
+            availableApps.remove(topicItem)
+            validTopicEntry.value.remove(topicItem)
         }
         return folderInfo
     }

@@ -67,8 +67,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.Launcher
 import com.android.launcher3.R
+import com.android.launcher3.folder.FolderIcon
+import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.organizer.creation.screen.ui.components.CellLayoutCompose
@@ -144,8 +145,6 @@ fun ChooseLayoutContent(padding: PaddingValues, viewModel: SpaceCreatorViewModel
 
 @Composable
 fun LayoutPreview(itemsInScreen: List<ItemInfo>, viewModel: SpaceCreatorViewModel) {
-    val iconItems = itemsInScreen.filterIsInstance<ItemInfoWithIcon>()
-    val widgets = itemsInScreen.filterIsInstance<LauncherAppWidgetInfo>()
     Row(
         Modifier.wrapContentSize()
             .background(
@@ -164,31 +163,45 @@ fun LayoutPreview(itemsInScreen: List<ItemInfo>, viewModel: SpaceCreatorViewMode
             spacing = CellLayoutComposeItemSpacing(8.dp, 8.dp),
             modifier = Modifier.padding(ChooseLayoutDimens.carouselPadding),
         ) {
-            for (widget in widgets) {
-                item(
-                    cellAndSpan =
-                        ItemLocation(
-                            widget.cellX,
-                            widget.cellY,
-                            spanX = widget.spanX,
-                            spanY = widget.spanY,
-                        )
-                ) { size ->
-                    Box(
-                        Modifier.width(size.width).height(size.height),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text("" + widget.targetComponent?.className)
+            for (itemInfo in itemsInScreen) {
+                when (itemInfo) {
+                    is LauncherAppWidgetInfo -> {
+                        item(
+                            cellAndSpan =
+                                ItemLocation(
+                                    itemInfo.cellX,
+                                    itemInfo.cellY,
+                                    spanX = itemInfo.spanX,
+                                    spanY = itemInfo.spanY,
+                                )
+                        ) { size ->
+                            Box(
+                                Modifier.width(size.width).height(size.height),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text("" + itemInfo.targetComponent?.className)
+                            }
+                        }
                     }
-                }
-            }
-            for (item in iconItems) {
-                item(cellAndSpan = ItemLocation(item.cellX, item.cellY)) { size ->
-                    Box(
-                        Modifier.width(size.width).height(size.height),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        AppIcon(item as WorkspaceItemInfo, size.width, size.height)
+                    is WorkspaceItemInfo -> {
+                        item(cellAndSpan = ItemLocation(itemInfo.cellX, itemInfo.cellY)) { size ->
+                            Box(
+                                Modifier.width(size.width).height(size.height),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                AppIcon(itemInfo, size.width, size.height)
+                            }
+                        }
+                    }
+                    is FolderInfo -> {
+                        item(cellAndSpan = ItemLocation(itemInfo.cellX, itemInfo.cellY)) { size ->
+                            Box(
+                                Modifier.width(size.width).height(size.height),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                FolderPreviewIcon(itemInfo, size.width, size.height)
+                            }
+                        }
                     }
                 }
             }
@@ -221,6 +234,35 @@ fun AppIcon(item: WorkspaceItemInfo, width: Dp, height: Dp) {
                 (LayoutInflater.from(Launcher.ACTIVITY_TRACKER.getCreatedContext())
                         .inflate(R.layout.app_icon, LinearLayout(context), false) as BubbleTextView)
                     .apply { applyFromWorkspaceItem(item) }
+            },
+        )
+    }
+}
+
+@Composable
+fun FolderPreviewIcon(item: FolderInfo, width: Dp, height: Dp) {
+    var sizeScale by remember { mutableStateOf(Size(1f, 1f)) }
+    val density = LocalDensity.current
+    Box(
+        Modifier.graphicsLayer {
+                scaleX = sizeScale.width
+                scaleY = sizeScale.height
+            }
+            .wrapContentSize(unbounded = true)
+    ) {
+        AndroidView(
+            modifier =
+                Modifier.onSizeChanged {
+                    val maxScale =
+                        maxOf(
+                            with(density) { width.toPx() } / it.width,
+                            with(density) { height.toPx() } / it.height,
+                        )
+                    sizeScale = Size(maxScale, maxScale)
+                },
+            factory = {
+                val launcher = Launcher.ACTIVITY_TRACKER.getCreatedContext<Launcher>()
+                FolderIcon.inflateFolderAndIcon(R.layout.folder_icon, launcher, null, item)
             },
         )
     }
