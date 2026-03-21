@@ -64,6 +64,10 @@ object HomeScreenFilesCachingLogic : CachingLogic<HomeScreenFile> {
     override fun loadIcon(request: IconLoadRequest<HomeScreenFile>): BitmapInfo =
         request.run {
             iconFactory.use { iconFactory ->
+                if (item.isDirectory) {
+                    return HomeScreenFilesProvider.INSTANCE[context].iconProvider.folderIcon
+                }
+
                 val mimeType = item.mimeType
                 if (mimeType.isNullOrEmpty()) {
                     return BitmapInfo.LOW_RES_INFO

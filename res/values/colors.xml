@@ -278,4 +278,7 @@
 
     <color name="suw_all_set_expressive_theme_color">#ECDFE5</color>
     <color name="suw_all_set_scrim">#40000000</color>
+
+    <!-- Home screen files -->
+    <color name="home_screen_files_folder_icon_color">@color/system_primary_light</color>
 </resources>
