@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"यो एप वा तपाईंको सङ्गठनले यो कारबाही गर्ने अनुमति दिँदैन"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"हाल विजेटहरू प्रयोग गर्न मिल्दैनन् कृपया अर्को एप चयन गर्नुहोस्"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"कपी गर्नुहोस्"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"सेभ गर्नुहोस्"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"स्क्रिन घुमाउनुहोस्"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"टास्कबार कसरी स्क्रिनको फेदबाट माथितिर निस्कन्छ र प्रयोग नगरिएका बेलामा कसरी स्वतः लुक्छ भन्ने कुरा देखाइएको एनिमेसन"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"टास्कबार स्क्रिनको फेदमा स्थायी रूपमा देखियोस् भन्नाका लागि टगल प्रयोग गरी आफ्नो टास्कबार पिन गर्ने तरिका देखाइएको एनिमेसन"</string>

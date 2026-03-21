@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"ಆ್ಯಪ್ ಅಥವಾ ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಈ ಕ್ರಿಯೆಯನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"ವಿಜೆಟ್‌ಗಳು ಪ್ರಸ್ತುತ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ, ಮತ್ತೊಂದು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"ಕಾಪಿ ಮಾಡಿ"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"ಸೇವ್ ಮಾಡಿ"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"ಸ್ಕ್ರೀನ್ ತಿರುಗಿಸಿ"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"ಸ್ಕ್ರೀನ್ ಕೆಳಗಿನಿಂದ ಟಾಸ್ಕ್ ಬಾರ್ ಹೇಗೆ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ ಮತ್ತು ಬಳಕೆಯಲ್ಲಿಲ್ಲದಿದ್ದಾಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಹೇಗೆ ಮರೆಮಾಡುತ್ತದೆ ಎಂಬುದನ್ನು ತೋರಿಸುವ ಆ್ಯನಿಮೇಶನ್"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"ಟಾಗಲ್ ಬಳಸಿ ನಿಮ್ಮ ಟಾಸ್ಕ್ ಬಾರ್ ಅನ್ನು ಹೇಗೆ ಪಿನ್ ಮಾಡುವುದು ಎಂಬುದನ್ನು ತೋರಿಸುವ ಆ್ಯನಿಮೇಶನ್, ಇದರಿಂದ ಟಾಸ್ಕ್ ಬಾರ್ ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಭಾಗದಲ್ಲಿ ಶಾಶ್ವತವಾಗಿ ಗೋಚರಿಸುತ್ತದೆ"</string>

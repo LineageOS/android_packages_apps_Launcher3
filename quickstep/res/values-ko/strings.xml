@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"이 작업은 앱 또는 조직에서 허용되지 않습니다."</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"위젯이 현재 지원되지 않습니다. 다른 앱을 선택하세요."</string>
     <string name="action_image_copy" msgid="6877540054727709339">"복사"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"저장"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"화면 회전"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"화면 하단에서 태스크 바가 표시되고 사용하지 않을 때 자동으로 숨겨지는 과정을 보여 주는 애니메이션"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"화면 하단에 태스크 바가 영구적으로 표시되도록 전환을 사용하여 태스크 바를 고정하는 방법을 보여 주는 애니메이션"</string>

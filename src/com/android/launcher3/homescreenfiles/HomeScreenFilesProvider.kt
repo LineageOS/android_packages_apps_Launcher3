@@ -35,6 +35,8 @@ data class HomeScreenFile(
 
 /** An interface for managing file items to be shown on the home screen. */
 interface HomeScreenFilesProvider {
+    /** Icon provider for home screen files/folders. */
+    val iconProvider: HomeScreenFilesIconProvider
 
     /** A stream of updates to file items shown on the home screen. */
     val updates: ListenableStream<HomeScreenFilesUpdate>

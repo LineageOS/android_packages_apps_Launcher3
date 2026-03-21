@@ -39,9 +39,14 @@ import android.webkit.MimeTypeMap
 import androidx.annotation.WorkerThread
 import androidx.core.database.getStringOrNull
 import com.android.launcher3.R
+import com.android.launcher3.concurrent.annotations.ThreadPool
+import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider.Companion.HOME_SCREEN_FOLDER_RELATIVE_PATH
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.MutableListenableStream
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.runAsync
@@ -50,11 +55,14 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 
 /** MediaStore-based implementation of [HomeScreenFilesProvider]. */
-class HomeScreenFilesMediaStoreProvider(
-    private val context: Context,
-    private val executorService: ExecutorService,
-    private val fileFactory: (path: String) -> File,
+class HomeScreenFilesMediaStoreProvider
+@AssistedInject
+constructor(
+    @ApplicationContext private val context: Context,
+    @ThreadPool private val executorService: ExecutorService,
+    @Assisted private val fileFactory: (path: String) -> File,
     private val environmentWrapper: EnvironmentWrapper,
+    override val iconProvider: HomeScreenFilesIconProvider,
     lifecycle: DaggerSingletonTracker,
 ) : HomeScreenFilesProvider {
     override val updates = MutableListenableStream<HomeScreenFilesUpdate>()
@@ -529,5 +537,10 @@ class HomeScreenFilesMediaStoreProvider(
 
         private fun Uri.hasIdSegment(): Boolean =
             runCatching { ContentUris.parseId(this) != -1L }.getOrDefault(false)
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(fileFactory: (path: String) -> File): HomeScreenFilesMediaStoreProvider
     }
 }

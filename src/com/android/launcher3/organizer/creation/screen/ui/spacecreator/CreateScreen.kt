@@ -60,7 +60,7 @@ import com.android.launcher3.R
 fun CreateScreen(
     onArrowBack: () -> Unit,
     viewModel: SpaceCreatorViewModel,
-    onNavigateToChooser: () -> Unit,
+    onNavigateToChooser: (topic: String) -> Unit,
 ) {
     val state by viewModel.createScreenState.collectAsStateWithLifecycle()
     Scaffold(
@@ -101,7 +101,7 @@ fun CreateScreen(
             CreateScreenContent(
                 padding = padding,
                 topics = state.topics,
-                onTopicClick = { onNavigateToChooser.invoke() },
+                onTopicClick = { topic -> onNavigateToChooser.invoke(topic) },
             )
         },
     )

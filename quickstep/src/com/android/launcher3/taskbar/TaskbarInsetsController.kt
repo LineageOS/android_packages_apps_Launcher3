@@ -64,7 +64,6 @@ import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegio
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.UI_CONTROLLER_UNTOUCHABLE
 import com.android.launcher3.testing.shared.ResourceUtils
 import com.android.launcher3.util.Executors
-import com.android.wm.shell.Flags
 import java.io.PrintWriter
 import kotlin.jvm.optionals.getOrNull
 
@@ -149,9 +148,8 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
             defaultTouchableRegion.setEmpty()
             // when the shade is expanded, it takes the touches
             val validShadeState =
-                if (Flags.fixSwipeUpNotificationShadeWithBubbleBar())
-                    !controllers.taskbarActivityContext.isNotificationShadeExpanded()
-                else true
+                !context.isNotificationShadeExpanded ||
+                    context.isTaskbarTouchableBehindNotificationShade()
             if (bubbleControllers != null && validShadeState) {
                 val bubbleBarViewController = bubbleControllers.bubbleBarViewController
                 val isBubbleBarVisible =

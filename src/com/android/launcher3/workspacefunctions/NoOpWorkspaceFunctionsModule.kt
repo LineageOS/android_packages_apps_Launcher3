@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.launcher3.workspacefunctions
 
-package com.android.quickstep.util
-
-import com.android.launcher3.dagger.PerDisplaySingleton
-import javax.inject.Inject
+import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions
+import dagger.Module
+import dagger.Provides
 
 /**
- * Simple class to hold reference of [PerDisplaySingleton] objects. This is useful to keeping track
- * of lazily initialized singletons
+ * A module that provides a dummy [WorkspaceAppFunctions] for dagger graph that doesn't involve
+ * workspace functions e.g. launcher preview.
  */
-@PerDisplaySingleton
-class PerDisplayHolder<T> @Inject constructor() {
+@Module
+class NoOpWorkspaceFunctionsModule {
 
-    var value: T? = null
+    @Provides
+    fun provideWorkspaceAppFunctions(): WorkspaceAppFunctions {
+        return WorkspaceAppFunctions(FakeWorkspaceRepository())
+    }
 }

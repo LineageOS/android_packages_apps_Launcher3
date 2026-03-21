@@ -31,12 +31,21 @@ import android.provider.MediaStore.Files.FileColumns.WIDTH
 import android.util.DisplayMetrics
 import android.util.Size
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.LargeTest
+import com.android.launcher3.Launcher
+import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.icons.BaseIconFactory
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.cache.BaseIconCache
 import com.android.launcher3.icons.cache.IconLoadRequest
+import com.android.launcher3.integration.util.LauncherActivityScenarioRule
+import com.android.launcher3.testutil.rule.TestRules.overrideApplicationInActivity
+import com.android.launcher3.util.SandboxApplication
+import com.android.tools.dagger.mutation.annotations.BindValue
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth.assertThat
 import java.io.IOException
+import java.util.concurrent.CompletableFuture
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -54,24 +63,34 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+@LargeTest
 @RunWith(AndroidJUnit4::class)
+@MutatedComponent(target = LauncherAppComponent::class)
 class HomeScreenFilesCachingLogicTest {
     @get:Rule val mockito = MockitoJUnit.rule()
+    @get:Rule val app = SandboxApplication().withModelDependency()
+    @get:Rule val appOverride = overrideApplicationInActivity(app, mockito)
+    @get:Rule val launcherActivity = LauncherActivityScenarioRule<Launcher>()
+
+    @BindValue @Mock lateinit var provider: HomeScreenFilesProvider
+
     @Mock private lateinit var context: Context
     @Mock private lateinit var contentResolver: ContentResolver
     @Mock private lateinit var baseIconCache: BaseIconCache
+    @Mock private lateinit var baseIconFactory: BaseIconFactory
     @Mock private lateinit var bitmap: Bitmap
     @Mock private lateinit var bitmapInfo: BitmapInfo
     @Mock private lateinit var drawable: Drawable
     @Mock private lateinit var icon: Icon
-
-    private lateinit var baseIconFactory: BaseIconFactory
+    @Mock private lateinit var iconProvider: HomeScreenFilesIconProvider
 
     @Before
     fun setUp() {
-        baseIconFactory = mock<BaseIconFactory>()
         whenever(context.contentResolver).thenReturn(contentResolver)
         whenever(baseIconCache.iconFactory).thenAnswer { baseIconFactory }
+        whenever(provider.iconProvider).thenReturn(iconProvider)
+        whenever(provider.onReady()).thenReturn(CompletableFuture())
+        app.initDaggerComponent(mutatedComponentBuilder())
     }
 
     @Test
@@ -87,6 +106,20 @@ class HomeScreenFilesCachingLogicTest {
         val component = HomeScreenFilesCachingLogic.getComponent(hsf)
         assertThat(component.packageName).isEqualTo("com.android.launcher3.homescreenfiles")
         assertThat(component.className).isEqualTo("content://media/external_primary/file/1")
+    }
+
+    @Test
+    fun testGetFolderIcon() {
+        val folderIcon = mock<BitmapInfo>()
+        val hsf = mock<HomeScreenFile>()
+
+        whenever(hsf.isDirectory).thenReturn(true)
+        whenever(iconProvider.folderIcon).thenReturn(folderIcon)
+
+        launcherActivity.executeOnLauncher { launcher ->
+            val icon = hsf.loadIcon(launcher)
+            assertThat(icon).isEqualTo(folderIcon)
+        }
     }
 
     @Test
@@ -267,9 +300,9 @@ class HomeScreenFilesCachingLogicTest {
         assertThat(icon).isEqualTo(BitmapInfo.LOW_RES_INFO)
     }
 
-    private fun HomeScreenFile.loadIcon() =
+    private fun HomeScreenFile.loadIcon(ctx: Context = context) =
         IconLoadRequest(
-                context = context,
+                context = ctx,
                 item = this,
                 logic = HomeScreenFilesCachingLogic,
                 cache = baseIconCache,

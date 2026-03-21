@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"Bu amal ilova yoki tashkilotingiz tomonidan taqiqlangan"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Vidjetlar ishlamaydi. Boshqa ilovani tanlang"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"Nusxa olish"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"Saqlash"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Ekranni burish"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Vazifalar paneli ekranning pastki qismidan qanday koʻrinishini va ishlatilmayotganda avtomatik berkitilishi aks etgan animatsiya"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Vazifalar panelini almashinuv tugmasi yordamida qanday qadashni koʻrsatuvchi animatsiya, shu bois vazifalar paneli ekranning pastki qismida doimiy chiqib turadi"</string>

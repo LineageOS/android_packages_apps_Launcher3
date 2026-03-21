@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"该应用或您所在的单位不允许执行此操作"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"目前不支持微件，请选择其他应用"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"复制"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"保存"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"旋转屏幕"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"该动画展示了任务栏如何显示在屏幕底部，以及如何在不使用时自动隐藏"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"该动画展示了如何使用切换开关固定任务栏，让任务栏始终显示在屏幕底部"</string>

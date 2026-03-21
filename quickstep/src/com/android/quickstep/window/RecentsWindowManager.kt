@@ -130,7 +130,6 @@ import com.android.quickstep.fallback.RecentsState.Companion.OVERVIEW_SPLIT_SELE
 import com.android.quickstep.fallback.toLauncherStateOrdinal
 import com.android.quickstep.split.SplitScreenAppResolver
 import com.android.quickstep.split.SplitSelectStateController
-import com.android.quickstep.util.PerDisplayHolder
 import com.android.quickstep.util.QuickstepProtoLogGroup
 import com.android.quickstep.util.RecentsAtomicAnimationFactory
 import com.android.quickstep.util.RecentsWindowProtoLogProxy
@@ -174,7 +173,6 @@ constructor(
     displayController: DisplayController,
     @Ui private val uiExecutor: LooperExecutor,
     invariantDeviceProfile: InvariantDeviceProfile,
-    propertyHolder: PerDisplayHolder<RecentsWindowManager>,
     lifeCycle: PerDisplayCleanupTask,
     @Named(WINDOW_BLUR_STATE) private val blurState: ListenableRef<Boolean>,
     private val taskStackChangeListeners: TaskStackChangeListeners,
@@ -427,7 +425,6 @@ constructor(
         }
 
         lifeCycle.addTask { destroy() }
-        propertyHolder.value = this
 
         TraceStateLoggerHelper(this).startTraceStateLogger()
     }

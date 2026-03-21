@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"এপ্‌টোৱে অথবা আপোনাৰ প্ৰতিষ্ঠানে এই কাৰ্যটোৰ অনুমতি নিদিয়ে"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"বৰ্তমান ৱিজেট সমৰ্থিত নহয়, অনুগ্ৰহ কৰি আন এটা এপ্‌ বাছনি কৰক"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"প্ৰতিলিপি কৰক"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"ছেভ কৰক"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"স্ক্ৰীনখন ঘূৰাওক"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"স্ক্ৰীনখনৰ একেবাৰে তলৰ পৰা টাস্কবাৰ কেনেকৈ দেখা পোৱা যায় আৰু ব্যৱহাৰ হৈ নথকা অৱস্থাত কেনেকৈ স্বয়ংক্ৰিয়ভাৱে লুকাই থাকে সেয়া দেখুওৱা এনিমেশ্বন"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"স্ক্ৰীনখনৰ একেবাৰে তলত টাস্কবাৰডাল স্থায়ীভাৱে দৃশ্যমান হৈ থাকিবৰ বাবে এটা ট’গল ব্যৱহাৰ কৰি আপোনাৰ টাস্কবাৰ কেনেকৈ পিন কৰিব সেয়া দেখুওৱা এনিমেশ্বন"</string>
