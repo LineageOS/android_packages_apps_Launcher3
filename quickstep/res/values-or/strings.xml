@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"ଆପ୍ କିମ୍ବା ଆପଣଙ୍କ ସଂସ୍ଥା ଦ୍ୱାରା ଏହି କାର୍ଯ୍ୟକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"ୱିଜେଟଗୁଡ଼ିକ ବର୍ତ୍ତମାନ ସମର୍ଥିତ ନୁହେଁ, ଦୟାକରି ଅନ୍ୟ ଏକ ଆପ ଚୟନ କରନ୍ତୁ"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"କପି କରନ୍ତୁ"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"ସେଭ କରନ୍ତୁ"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"ସ୍କ୍ରିନ ଘୂରାନ୍ତୁ"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"ସ୍କ୍ରିନର ନିମ୍ନରୁ ଟାସ୍କବାର କିପରି ଦେଖାଯାଏ ଏବଂ ବ୍ୟବହାରରେ ନଥିବା ସମୟରେ ସ୍ୱତଃ ଲୁଚିଯାଏ ତାହା ଦେଖାଉଥିବା ଆନିମେସନ"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"ଏକ ଟୋଗଲ ବ୍ୟବହାର କରି ଆପଣଙ୍କର ଟାସ୍କବାରକୁ କିପରି ପିନ କରିବେ ତାହା ଦେଖାଉଥିବା ଆନିମେସନ, ଫଳରେ ଟାସ୍କବାର ସ୍କ୍ରିନର ନିମ୍ନରେ ସ୍ଥାୟୀ ଭାବରେ ଦେଖାଯିବ"</string>
