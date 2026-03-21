@@ -722,3 +722,13 @@ flag {
   description: "Enables fixed QSB at the bottom of hotseat"
   bug: "489141317"
 }
+
+flag {
+  name: "translate_imeswitcher_3buttons_with_bubble"
+  namespace: "launcher"
+  description: "Translate the IME Switcher when 3-buttons Navigation with Bubble Icon"
+  bug: "494111189"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
