@@ -18,7 +18,9 @@ package com.android.launcher3.organizer.generator
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
-import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.AppInfo
+import com.android.launcher3.model.data.FolderInfo
+import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.repository.AppsListRepository
 import javax.inject.Inject
 
@@ -49,15 +51,29 @@ constructor(
         return topicClassifiedItems
     }
 
-    override suspend fun startGeneration(selectedTopics: List<String>): List<List<ItemInfo>> {
-        return topicClassifiedItems
-            .asSequence()
-            .filter { selectedTopics.contains(it.topic) && it.score > 0.8 }
-            .groupBy { it.topic }
-            .map { (_, items) -> items }
-            .filter { it.size >= 3 }
-            .map { folderItems -> folderItems.map { it.itemInfo } }
-            .toList()
+    override suspend fun startGeneration(
+        selectedTopics: List<String>
+    ): CreationSession.GenerationResult {
+        val folders =
+            topicClassifiedItems
+                .asSequence()
+                .filter { selectedTopics.contains(it.topic) && it.score >= 0.8f }
+                .groupBy { it.topic }
+                .filter { (_, items) -> items.size >= 3 }
+                .map { (topic, items) ->
+                    val folderInfo = FolderInfo()
+                    folderInfo.title = topic
+                    items.forEachIndexed { index, topicItem ->
+                        val item = topicItem.itemInfo
+                        val workspaceItem =
+                            if (item is AppInfo) WorkspaceItemInfo(item) else item.makeShallowCopy()
+                        workspaceItem.rank = index
+                        folderInfo.add(workspaceItem)
+                    }
+                    folderInfo
+                }
+                .toList()
+        return CreationSession.GenerationResult.Folders(folders)
     }
 
     override suspend fun cancelSession() {
