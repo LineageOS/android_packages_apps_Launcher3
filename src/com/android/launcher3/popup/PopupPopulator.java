@@ -108,13 +108,14 @@ public class PopupPopulator {
     /**
      * Returns a runnable to update the provided shortcuts
      */
-    public static <T extends Context & ActivityContext> Runnable createUpdateRunnable(
-            final T context,
+    public static Runnable createUpdateRunnable(
+            final ActivityContext activityContext,
             final ItemInfo originalInfo,
             final Handler uiHandler,
             final PopupContainerWithArrow container,
             final List<DeepShortcutView> shortcutViews
     ) {
+        final Context context = activityContext.asContext();
         final ComponentName activity = originalInfo.getTargetComponent();
         final UserHandle user = originalInfo.user;
         final String targetPackage = originalInfo.getTargetPackage();
@@ -134,7 +135,8 @@ public class PopupPopulator {
                 si.container = CONTAINER_SHORTCUTS;
 
                 final DeepShortcutView view = shortcutViews.get(i);
-                uiHandler.post(() -> view.applyShortcutInfo(si, shortcut, container, context));
+                uiHandler.post(
+                        () -> view.applyShortcutInfo(si, shortcut, container, activityContext));
             }
         };
     }
@@ -143,8 +145,8 @@ public class PopupPopulator {
     /**
      * Returns a runnable to update the provided shortcuts
      */
-    public static <T extends Context & ActivityContext> Runnable createUpdateRunnable(
-            final T context,
+    public static Runnable createUpdateRunnable(
+            final Context context,
             final ItemInfo originalInfo,
             final Handler uiHandler,
             final Consumer<List<ItemInfoWithIcon>> deepShortcutsConsumer

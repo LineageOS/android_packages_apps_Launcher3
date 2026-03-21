@@ -21,8 +21,9 @@ import android.util.Log
 import com.android.launcher3.BaseActivity
 import com.android.launcher3.R
 import com.android.launcher3.logging.StatsLogManager
+import com.android.launcher3.popup.PopupCategory
+import com.android.launcher3.popup.PopupData
 import com.android.launcher3.views.ActivityContext
-import com.android.launcher3.views.OptionsPopupView.OptionItem
 import javax.inject.Inject
 
 /** Provides option items when QSB is long pressed. */
@@ -33,15 +34,17 @@ constructor(
     private val activityContext: ActivityContext,
 ) {
 
-    open fun getOptionItems(): List<OptionItem> {
+    open fun getOptionItems(): List<PopupData> {
         if (appWidgetSupportsReconfigure() && activityContext is BaseActivity) {
             val widgetSettingsItem =
-                OptionItem(
-                    activityContext.getString(R.string.gadget_setup_text),
-                    activityContext.getDrawable(R.drawable.ic_setting),
-                    StatsLogManager.LauncherEvent.LAUNCHER_QSB_WIDGET_SETTINGS_TAP,
-                    { v -> oseWidgetManager.startConfigActivity(activityContext) },
-                )
+                PopupData(
+                    iconResId = R.drawable.ic_setting,
+                    labelResId = R.string.gadget_setup_text,
+                    category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+                    eventId = StatsLogManager.LauncherEvent.LAUNCHER_QSB_WIDGET_SETTINGS_TAP,
+                ) { activityContext, _, _ ->
+                    oseWidgetManager.startConfigActivity(activityContext as BaseActivity)
+                }
             return listOf(widgetSettingsItem)
         }
         return emptyList()

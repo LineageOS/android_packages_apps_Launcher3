@@ -16,6 +16,7 @@
 package com.android.launcher3.popup
 
 import android.animation.LayoutTransition
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
 import android.graphics.Typeface
@@ -51,7 +52,8 @@ import kotlin.math.max
  *
  * @param <T> The activity on with the popup shows </T>
  */
-class PopupContainerWithArrow<T>
+@SuppressLint("ViewConstructor")
+class PopupContainerWithArrow<T : ActivityContext>
 private constructor(
     context: Context,
     val originalIcon: View,
@@ -61,7 +63,7 @@ private constructor(
     PopupContainer<T>(context, originalIcon, itemInfo, updateIconUi),
     DragSource,
     DragController.DragListener,
-    Popup where T : Context, T : ActivityContext {
+    Popup {
 
     private val deepShortcuts: MutableList<DeepShortcutView> = ArrayList()
     private val interceptTouchDown = PointF()
@@ -195,7 +197,7 @@ private constructor(
             // Load the shortcuts on a background thread and update the container as it animates.
             Executors.MODEL_EXECUTOR.handler.postAtFrontOfQueue(
                 PopupPopulator.createUpdateRunnable(
-                    mActivityContext,
+                    context,
                     originalItemInfo,
                     Handler(context.mainLooper),
                     viewModel::onDeepShortcutsLoaded,
@@ -502,12 +504,12 @@ private constructor(
          * @return A new instance of [PopupContainerWithArrow].
          */
         @JvmStatic
-        fun <T> create(
+        fun <T : ActivityContext> create(
             context: Context,
             originalView: View,
             itemInfo: ItemInfo,
             updateIconUi: Boolean = true,
-        ): PopupContainerWithArrow<T> where T : Context, T : ActivityContext {
+        ): PopupContainerWithArrow<T> {
             val container =
                 PopupContainerWithArrow<T>(context, originalView, itemInfo, updateIconUi)
             container.id = R.id.popup_container
