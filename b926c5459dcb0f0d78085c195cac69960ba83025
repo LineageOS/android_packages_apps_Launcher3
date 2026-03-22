@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b83dae0d_cdf119cb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2026-03-22T10:28:20Z",
+      "side": 1,
+      "message": "I think you probably want to revert this change?\nWe probably still want `switchToScreenshot`\n\nhttps://github.com/LineageOS/android_packages_apps_Launcher3/commit/8c29f95b375439cea2d82d19f87cf2f075752a74",
+      "revId": "b926c5459dcb0f0d78085c195cac69960ba83025",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
