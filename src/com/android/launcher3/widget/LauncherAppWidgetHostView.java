@@ -45,7 +45,6 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
-import com.android.launcher3.popup.PopupController;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
@@ -90,7 +89,6 @@ public class LauncherAppWidgetHostView extends BaseLauncherAppWidgetHostView
     private boolean mTrackingWidgetUpdate = false;
 
     private int mFocusRectOutsets = 0;
-    private PopupController mPopupController;
 
     public LauncherAppWidgetHostView(Context context) {
         super(context);

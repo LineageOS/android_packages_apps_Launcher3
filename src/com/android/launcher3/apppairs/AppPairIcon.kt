@@ -39,7 +39,6 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.popup.IconViewController
 import com.android.launcher3.popup.Poppable
 import com.android.launcher3.popup.PoppableType
-import com.android.launcher3.popup.PopupController
 import com.android.launcher3.touch.CustomActionsListener
 import com.android.launcher3.touch.CustomEventsTouchHandler
 import com.android.launcher3.touch.CustomTouchDelegate
@@ -86,7 +85,6 @@ class AppPairIcon :
     // Required for Reorderable -- handles translation and bouncing movements
     private val mTranslateDelegate = MultiTranslateDelegate(this)
     private var mScaleForReorderBounce = 1f
-    private val mPopupController: PopupController<*>? = null
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
