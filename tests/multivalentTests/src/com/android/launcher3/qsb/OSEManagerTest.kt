@@ -35,6 +35,7 @@ import com.android.launcher3.pm.InstallSessionTracker
 import com.android.launcher3.pm.PackageInstallInfo
 import com.android.launcher3.pm.PackageInstallInfo.Companion.STATUS_INSTALLED
 import com.android.launcher3.qsb.OSEManager.Companion.OVERLAY_ACTION
+import com.android.launcher3.qsb.OSEManager.OSEInfo
 import com.android.launcher3.testutil.rule.LazyInitRule.Companion.lazyRule
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
 import com.android.launcher3.util.SafeCloseable
@@ -407,6 +408,21 @@ class OSEManagerTest {
             .isEqualTo(oseManager.oseInfo.value.pkg)
         assertThat(oseManager.oseInfo.value.installPending).isTrue()
         assertThat(oseManager.tracker).isEqualTo(tracker3)
+    }
+
+    @Test
+    fun oseInfo_compares_overlay() {
+        val base = OSEInfo(pkg = GOOGLE_PACKAGE)
+        assertThat(base.overlayPackage).isEqualTo(GOOGLE_PACKAGE)
+        assertThat(base.isDifferentFrom(OSEInfo(pkg = BING_PKG))).isTrue()
+
+        val other =
+            OSEInfo(
+                pkg = GOOGLE_PACKAGE,
+                overlayTarget = ActivityInfo().apply { packageName = GOOGLE_PACKAGE },
+            )
+        assertThat(other.overlayPackage).isEqualTo(GOOGLE_PACKAGE)
+        assertThat(base.isDifferentFrom(other)).isTrue()
     }
 
     private fun mockResolverInfo(pkg: String) =
