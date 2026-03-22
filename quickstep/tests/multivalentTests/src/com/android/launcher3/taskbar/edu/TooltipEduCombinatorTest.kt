@@ -48,6 +48,7 @@ import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
 import com.android.launcher3.util.OnboardingPrefs
 import com.android.systemui.shared.Flags.FLAG_ENABLE_RECENTS_IN_TASKBAR
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.TruthJUnit.assume
 import org.hamcrest.CoreMatchers.allOf
 import org.junit.After
 import org.junit.Before
@@ -107,6 +108,9 @@ class TooltipEduCombinatorTest {
 
     @Before
     fun setUp() {
+        // TODO(b/496164737): Remove when we enable EDU tooltips on desktop.
+        assume().that(taskbarContext.isDesktopFormFactor).isFalse()
+
         tooltipEduCombinator =
             TooltipEduCombinator(taskbarContext, taskbarStashController, { sysuiLocked }, { true })
         Utilities.disableRunningInTestHarnessForTests()

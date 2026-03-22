@@ -57,6 +57,7 @@ class TooltipEduCombinator(
             return !Utilities.isRunningInTestHarness() &&
                 !context.isPhoneMode &&
                 !context.isTinyTaskbar &&
+                !context.isDesktopFormFactor &&
                 !blockedBySysUiState() &&
                 !UserManager.isDeviceInDemoMode(context)
         }
@@ -317,7 +318,7 @@ class TooltipEduCombinator(
     ): MutableCollection<TooltipInfo> {
         val tooltipsToShow = mutableListOf<TooltipInfo>()
 
-        if (blockedBySysUiState()) {
+        if (blockedBySysUiState() || context.isDesktopFormFactor) {
             return tooltipsToShow
         }
 
