@@ -77,7 +77,7 @@ class DesktopAppLaunchTransitionManagerTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_CROSS_DISPLAY_TRANSITION)
+    @DisableFlags(Flags.FLAG_CROSS_DISPLAY_TRANSITION_V2)
     fun registerTransitions_usesCorrectFilter() {
         transitionManager.registerTransitions()
         val transitionArgumentCaptor = argumentCaptor<RemoteTransition>()
@@ -98,7 +98,7 @@ class DesktopAppLaunchTransitionManagerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_CROSS_DISPLAY_TRANSITION)
+    @EnableFlags(Flags.FLAG_CROSS_DISPLAY_TRANSITION_V2)
     fun registerTransitions_usesCorrectFilter_withCrossDisplayFlag() {
         transitionManager.registerTransitions()
         val transitionArgumentCaptor = argumentCaptor<RemoteTransition>()

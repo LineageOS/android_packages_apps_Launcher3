@@ -113,7 +113,7 @@ class DesktopAppLaunchTransitionManager(
                 }
 
             val requirements =
-                if (Flags.crossDisplayTransition()) {
+                if (Flags.crossDisplayTransitionV2()) {
                     val notCrossDisplayRequirement =
                         TransitionFilter.Requirement().apply {
                             mNot = true
