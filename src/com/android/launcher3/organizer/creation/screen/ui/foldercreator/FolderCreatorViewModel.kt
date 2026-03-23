@@ -26,6 +26,7 @@ import com.android.launcher3.model.WorkspaceItemSpaceFinder
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.scheduleTransactionSuspending
+import com.android.launcher3.organizer.OrganizerTransactionContext
 import com.android.launcher3.organizer.generator.CreationSession
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -108,8 +109,7 @@ constructor(
     private suspend fun persistAndBindFolders(folders: List<FolderInfo>) {
         try {
             modelWriter.scheduleTransactionSuspending { context ->
-                FolderCreatorTransactionContext(context, workspaceItemSpaceFinder)
-                    .addFolders(folders)
+                OrganizerTransactionContext(context).addFolders(folders, workspaceItemSpaceFinder)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to persist folders", e)

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui.foldercreator
+package com.android.launcher3.organizer
 
 import com.android.launcher3.LauncherSettings.Favorites
+import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.TransactionContext
 import com.android.launcher3.model.WorkspaceItemSpaceFinder
 import com.android.launcher3.model.data.FolderInfo
@@ -24,29 +25,53 @@ import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.IntSet
 import java.util.ArrayList
 
-/**
- * A specialized [TransactionContext] for creating and placing multiple folders on the workspace.
- */
-class FolderCreatorTransactionContext(
-    private val delegate: TransactionContext,
-    private val spaceFinder: WorkspaceItemSpaceFinder,
-    private val folders: List<FolderInfo>,
-) : TransactionContext by delegate {
+/** A specialized [TransactionContext] for organizer. */
+class OrganizerTransactionContext(private val delegate: TransactionContext) :
+    TransactionContext by delegate {
 
-    private val placedItems = ArrayList<ItemInfo>()
+    /**
+     * Adds a new screen to the workspace containing the provided [items].
+     *
+     * This method automatically determines the next available screen ID and places all items on
+     * that screen within the desktop container.
+     */
+    fun addScreen(items: List<ItemInfo>, bgDataModel: BgDataModel) {
+        val screens = bgDataModel.itemsIdMap.collectWorkspaceScreens()
+        val maxScreenId = (0 until screens.size()).maxOfOrNull { screens.get(it) } ?: -1
+        val nextScreenId = maxScreenId + 1
+
+        for (item in items) {
+            item.container = Favorites.CONTAINER_DESKTOP
+            item.screenId = nextScreenId
+
+            addItemToDatabase(item)
+
+            if (item is FolderInfo) {
+                for (folderItem in item.getContents()) {
+                    folderItem.container = item.id
+                    addItemToDatabase(folderItem)
+                }
+            }
+        }
+    }
 
     /**
      * Adds multiple folders to the workspace, automatically finding available space for each to
      * avoid collisions.
      */
-    fun addFolders() {
+    fun addFolders(folders: List<FolderInfo>, spaceFinder: WorkspaceItemSpaceFinder) {
+        val placedItems = ArrayList<ItemInfo>()
         for (folder in folders) {
-            addFolder(folder)
+            addFolder(folder, spaceFinder, placedItems)
         }
     }
 
     /** Adds a single folder to the workspace, finding available space for it. */
-    private fun addFolder(folder: FolderInfo) {
+    private fun addFolder(
+        folder: FolderInfo,
+        spaceFinder: WorkspaceItemSpaceFinder,
+        placedItems: ArrayList<ItemInfo>,
+    ) {
         val coords = spaceFinder.findSpaceForItem(placedItems, folder.spanX, folder.spanY, IntSet())
         folder.container = Favorites.CONTAINER_DESKTOP
         folder.screenId = coords.screenId
