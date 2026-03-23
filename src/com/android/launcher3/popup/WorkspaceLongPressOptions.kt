@@ -101,7 +101,7 @@ object WorkspaceLongPressOptions {
             }
         )
 
-        if (Flags.kondoPlanner()) {
+        if (Flags.condoPlanner()) {
             add(
                 PopupData(
                     R.drawable.ic_create_new_folder,
@@ -118,7 +118,7 @@ object WorkspaceLongPressOptions {
             )
             add(
                 PopupData(
-                    R.drawable.kondo_planner_icon,
+                    R.drawable.condo_planner_icon,
                     R.string.settings_home_organizer,
                     SYSTEM_SHORTCUT,
                     LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
