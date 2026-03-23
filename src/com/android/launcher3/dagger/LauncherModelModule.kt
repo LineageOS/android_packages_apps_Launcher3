@@ -20,11 +20,14 @@ import com.android.launcher3.ConstantItem
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LifecycleTracker
 import com.android.launcher3.ModelReloader
+import com.android.launcher3.dagger.LauncherAppSingleton
 import com.android.launcher3.graphics.ThemeManager.Companion.ICON_FACTORY_DAGGER_KEY
 import com.android.launcher3.graphics.theme.IconThemeFactory
 import com.android.launcher3.graphics.theme.MonoIconThemeFactory
 import com.android.launcher3.graphics.theme.MonoIconThemeFactory.MONO_FACTORY_ID
 import com.android.launcher3.graphics.theme.ThemePreference.Companion.THEME_OVERRIDES_DAGGER_KEY
+import com.android.launcher3.model.ModelWriterFactory
+import com.android.launcher3.model.ModelWriterFactoryImpl
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.popup.AppPairSystemShortcuts
 import com.android.launcher3.popup.AppWidgetSystemShortcuts
@@ -36,6 +39,7 @@ import com.android.launcher3.popup.PopupDataRepository.Companion.POPUP_DATA_MAPP
 import com.android.launcher3.qsb.OseCustomWidget
 import com.android.launcher3.widget.custom.CustomWidget
 import com.android.launcher3.widget.custom.CustomWidgetManager.NAMED_CUSTOM_WIDGETS
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
@@ -47,6 +51,10 @@ import javax.inject.Named
 
 @Module
 abstract class LauncherModelModule {
+
+    @Binds
+    @LauncherAppSingleton
+    abstract fun bindModelWriterFactory(impl: ModelWriterFactoryImpl): ModelWriterFactory
 
     @Multibinds @Named("MODEL_ITEMS") abstract fun extraModelItems(): Set<ItemInfo>
 

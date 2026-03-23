@@ -39,12 +39,11 @@ import com.android.launcher3.model.ModelDelegate
 import com.android.launcher3.model.ModelInitializer
 import com.android.launcher3.model.ModelLauncherCallbacks
 import com.android.launcher3.model.ModelTaskController
-import com.android.launcher3.model.ModelWriter
+import com.android.launcher3.model.ModelWriterFactory
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.model.tasks.CacheDataUpdatedTask
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.DaggerSingletonTracker
-import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.views.ActivityContext
@@ -78,6 +77,7 @@ constructor(
     private val loaderFactory: LoaderTaskFactory,
     private val binderFactory: BaseLauncherBinderFactory,
     val modelDbController: ModelDbController,
+    private val modelWriterFactory: ModelWriterFactory,
     dumpManager: DumpManager,
 ) : LauncherDumpable {
 
@@ -128,18 +128,7 @@ constructor(
         activity: ActivityContext,
         owner: BgDataModel.Callbacks?,
     ): IModelWriter =
-        ModelWriter.create(
-            context,
-            this,
-            mBgDataModel,
-            verifyChanges,
-            activity.cellPosMapper,
-            UISurface(activity),
-            // TODO: (b/455016031) - Remove owner from ModelWriter
-            owner,
-            MODEL_EXECUTOR,
-            MAIN_EXECUTOR,
-        )
+        modelWriterFactory.create(verifyChanges, activity.cellPosMapper, UISurface(activity), owner)
 
     /** Called when the model is destroyed */
     fun destroy() {

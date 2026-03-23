@@ -20,8 +20,8 @@ import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.data.ItemInfo
 
 /**
- * Temporary interface for a component that manages and dispatches
- * UI state notifications.
+ * Temporary interface for a component that manages and dispatches UI state notifications.
+ *
  * TODO(b/457449059): Remove this interface once the implementation is finalized.
  */
 interface LauncherUiStateNotifier {
@@ -37,4 +37,15 @@ interface LauncherUiStateNotifier {
 
     /** Notifies the UI that the model has changed. */
     fun notifyModelChanged(changeLog: IModelWriter.ChangeLog, owner: Callbacks?)
+}
+
+/** A no-op implementation of [LauncherUiStateNotifier]. */
+class NoOpLauncherUiStateNotifier : LauncherUiStateNotifier {
+    override fun addCallback(callback: Callbacks) {}
+
+    override fun removeCallback(callback: Callbacks) {}
+
+    override fun notifyItemModifiedOptimistically(item: ItemInfo) {}
+
+    override fun notifyModelChanged(changeLog: IModelWriter.ChangeLog, owner: Callbacks?) {}
 }
