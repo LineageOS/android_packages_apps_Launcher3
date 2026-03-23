@@ -11,9 +11,11 @@ import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 
@@ -318,16 +320,26 @@ public class QuickstepTestInformationHandler extends TestInformationHandler {
                         },
                         this::getRecentsViewContainer);
             }
-            case TestProtocol.REQUEST_GET_DESK_COUNT:
+            case TestProtocol.REQUEST_GET_DESK_COUNT: {
                 return getUIProperty(Bundle::putInt,
                         recentsViewContainer -> {
                             final RecentsView recentsView = recentsViewContainer.getOverviewPanel();
                             return recentsView.getDesktopTaskViewCount();
                         },
                         this::getRecentsViewContainer);
-            case TestProtocol.REQUEST_MARK_OVERVIEW_SELECT_TIP_SEEN:
+            }
+            case TestProtocol.REQUEST_MARK_OVERVIEW_SELECT_TIP_SEEN: {
                 LauncherPrefs.get(mContext).put(SELECT_TIP_SEEN, true);
                 return response;
+            }
+            case TestProtocol.REQUEST_DISPLAY_BOUNDS: {
+                Rect bounds = mDisplayContextRepository.get(getDisplayIdForRequest(extras))
+                        .getSystemService(WindowManager.class)
+                        .getMaximumWindowMetrics().getBounds();
+                response.putParcelable(TestProtocol.TEST_INFO_RESPONSE_FIELD,
+                        new Point(bounds.width(), bounds.height()));
+                return response;
+            }
         }
 
         return super.call(method, arg, extras);
