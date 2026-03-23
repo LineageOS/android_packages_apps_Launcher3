@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar
 
 import android.content.ComponentName
 import android.content.Intent
+import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -35,6 +36,7 @@ import com.android.launcher3.dragndrop.DragView
 import com.android.launcher3.folder.FolderIcon
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.popup.PinToTaskbarShortcut
 import com.android.launcher3.popup.SystemShortcut.BubbleShortcut
@@ -46,9 +48,11 @@ import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecents
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createTestWorkspaceItem
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarWindowSandboxContext
+import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.ModelTestExtensions.preloadModelData
 import com.android.launcher3.util.TestUtil.getOnTaskbarUiThread
 import com.android.quickstep.util.SingleTask
+import com.android.systemui.shared.recents.model.Task
 import com.android.window.flags.Flags.FLAG_ENABLE_PINNING_APP_WITH_CONTEXT_MENU
 import com.android.wm.shell.Flags.FLAG_ENABLE_CREATE_ANY_BUBBLE
 import com.android.wm.shell.shared.bubbles.FakeBubbleFeatureConfig
@@ -62,7 +66,6 @@ import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
-@DisableFlags(FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR)
 class TaskbarPopupControllerTest {
     @get:Rule(order = 0) val setFlagsRule = SetFlagsRule()
 
@@ -155,6 +158,34 @@ class TaskbarPopupControllerTest {
         whenever(desktopVisibilityController.isInDesktopMode(context.displayId)).thenReturn(false)
         assertThat(hasPopupMenu()).isFalse()
         runOnTaskbarUiThreadSync { popupController.show(recentTaskIcon) }
+        assertThat(hasPopupMenu()).isTrue()
+    }
+
+    @Test
+    fun showForIcon_recentTask_mismatchedComponent() {
+        // Create a task with a component name that doesn't match any in AllAppsStore,
+        // but has the same package name as one of the apps.
+        val originalTask = (recentTaskIcon.tag as SingleTask).task
+        val mismatchedComponent = ComponentName(originalTask.key.packageName, "MismatchedActivity")
+        val mismatchedTask =
+            Task().apply {
+                key =
+                    Task.TaskKey(
+                        123,
+                        originalTask.key.windowingMode,
+                        originalTask.key.baseIntent.cloneFilter().setComponent(mismatchedComponent),
+                        mismatchedComponent,
+                        originalTask.key.userId,
+                        originalTask.key.lastActiveTime,
+                    )
+            }
+        val mismatchedSingleTask = SingleTask(mismatchedTask)
+
+        runOnTaskbarUiThreadSync {
+            recentTaskIcon.tag = mismatchedSingleTask
+            assertThat(hasPopupMenu()).isFalse()
+            popupController.show(recentTaskIcon)
+        }
         assertThat(hasPopupMenu()).isTrue()
     }
 
@@ -447,5 +478,38 @@ class TaskbarPopupControllerTest {
 
         val hasBubble = systemShortcuts.any { it is BubbleShortcut }
         assertThat(hasBubble).isFalse()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_MULTI_INSTANCE_MENU_TASKBAR)
+    fun getShortcuts_recentTask_multiInstanceSupported_showsMultiInstanceOptions() {
+        val originalTask = (recentTaskIcon.tag as SingleTask).task
+        val componentKey =
+            ComponentKey(originalTask.key.component, UserHandle.of(originalTask.key.userId))
+
+        // Enable multi-instance
+        val appInfo = popupController.getApp(componentKey)
+        assertThat(appInfo).isNotNull()
+        appInfo!!.runtimeStatusFlags =
+            appInfo.runtimeStatusFlags or ItemInfoWithIcon.FLAG_SUPPORTS_MULTI_INSTANCE
+
+        val workspaceItemInfo = appInfo.makeWorkspaceItem(context)
+        val taskItemInfo =
+            SingleTask.createTaskItemInfo(recentTaskIcon.tag as SingleTask, workspaceItemInfo)
+
+        val shortcut =
+            popupController
+                .createNewWindowShortcutFactory()
+                .getShortcut(taskbarContext, taskItemInfo, recentTaskIcon)
+
+        assertThat(shortcut).isNotNull()
+        assertThat(shortcut is NewWindowTaskbarShortcut<*>).isTrue()
+
+        val manageShortcut =
+            popupController
+                .createManageWindowsShortcutFactory()
+                .getShortcut(taskbarContext, taskItemInfo, recentTaskIcon)
+        assertThat(manageShortcut).isNotNull()
+        assertThat(manageShortcut is ManageWindowsTaskbarShortcut<*>).isTrue()
     }
 }

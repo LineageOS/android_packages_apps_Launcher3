@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -184,8 +185,54 @@ class TitledFloatingSheetTest {
         composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
     }
 
+    @Test
+    fun closesOnScrimTap() {
+        composeTestRule.setContent { FloatingSheetTestContent() }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
+
+        // Click at the top center of the screen, which should be outside the bottom sheet (on the
+        // scrim)
+        composeTestRule.onRoot().performTouchInput { click(topCenter) }
+        composeTestRule.waitForIdle()
+
+        // Verify the sheet is closed
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertDoesNotExist()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertExists()
+    }
+
+    @Test
+    fun doesNotShowHeaderWhenTitleIsNull() {
+        composeTestRule.setContent { FloatingSheetTestContent(title = null) }
+        composeTestRule.waitForIdle()
+
+        // Verify that the title and close button are not displayed
+        composeTestRule.onNodeWithText(SHEET_TITLE).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription("Close sheet").assertDoesNotExist()
+
+        // Verify that the content is still displayed
+        composeTestRule.onNodeWithText(CONTENT_TEXT).assertIsDisplayed()
+    }
+
+    @Test
+    fun accessibilityEnabled_rendersCorrectly() {
+        // Set accessibility to enabled to cover the branch where nested scrolling is disabled
+        accessibilityState = AccessibilityState(isEnabled = true)
+        composeTestRule.setContent { FloatingSheetTestContent() }
+        composeTestRule.waitForIdle()
+
+        // Verify the sheet still renders correctly
+        composeTestRule.onNodeWithText(SHEET_TITLE).assertIsDisplayed()
+        composeTestRule.onNodeWithText(CONTENT_TEXT).assertIsDisplayed()
+    }
+
     @Composable
-    private fun FloatingSheetTestContent(shouldEnableDragOnScrollToEnd: Boolean = false) {
+    private fun FloatingSheetTestContent(
+        shouldEnableDragOnScrollToEnd: Boolean = false,
+        title: String? = SHEET_TITLE
+    ) {
         var isClosed by remember { mutableStateOf(false) }
 
         val hostStateProvider =
@@ -210,7 +257,7 @@ class TitledFloatingSheetTest {
                         Text(CLOSED_TEXT)
                     } else {
                         TitledFloatingSheet(
-                            title = SHEET_TITLE,
+                            title = title,
                             description = null,
                             shouldEnableDragOnScrollToEnd = shouldEnableDragOnScrollToEnd,
                             onDismissSheet = { isClosed = true },
