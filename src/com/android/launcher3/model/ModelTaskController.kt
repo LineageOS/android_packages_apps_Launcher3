@@ -27,7 +27,6 @@ import com.android.launcher3.model.BgDataModel.ModificationSource.ModelTask
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
-import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.widget.model.WidgetsListBaseEntriesBuilder
 import java.util.function.Predicate
 import javax.inject.Inject
@@ -41,6 +40,7 @@ constructor(
     val dataModel: BgDataModel,
     val allAppsList: AllAppsList,
     val model: LauncherModel,
+    val modelWriterFactory: ModelWriterFactory,
 ) {
 
     private val uiExecutor = MAIN_EXECUTOR
@@ -57,17 +57,12 @@ constructor(
      * changes as the ModelTasks always push the changes to callbacks
      */
     fun getModelWriter(): IModelWriter =
-        ModelWriter.create(
-            context,
-            model,
-            dataModel,
+        modelWriterFactory.create(
             verifyChanges = false,
             CellPosMapper.DEFAULT,
             modificationSource = ModelTask,
             // TODO: (b/455016031) - Remove owner from ModelWriter
             owner = null,
-            modelExecutor = MODEL_EXECUTOR,
-            uiExecutor = uiExecutor,
         )
 
     fun bindUpdatedWorkspaceItems(allUpdates: Collection<ItemInfo>) {

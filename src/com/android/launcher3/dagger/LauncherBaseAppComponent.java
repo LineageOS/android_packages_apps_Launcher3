@@ -46,6 +46,7 @@ import com.android.launcher3.model.ItemInstallQueue;
 import com.android.launcher3.model.LayoutParserFactory;
 import com.android.launcher3.model.LoaderCursor.LoaderCursorFactory;
 import com.android.launcher3.model.ModelProxyProvider;
+import com.android.launcher3.model.ModelWriterFactory;
 import com.android.launcher3.model.TestableModelState;
 import com.android.launcher3.model.repository.AppsListRepository;
 import com.android.launcher3.model.repository.HomeScreenRepository;
@@ -143,6 +144,8 @@ public interface LauncherBaseAppComponent {
     LayoutImportExportHelper getLayoutImportExportHelper();
     /** Returns the layout parser factory for default layout parsing */
     LayoutParserFactory getLayoutParserFactory();
+    /** Returns the model writer factory */
+    ModelWriterFactory getModelWriterFactory();
     /** Returns new [ModelProxyProvider] */
     ModelProxyProvider getModelProxyProvider();
 
