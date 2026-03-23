@@ -71,6 +71,10 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
 
     val extraContainerCallbacks = SparseArray<Consumer<List<ItemInfo>>>()
 
+    init {
+        launcher.closeOnDestroy { activeBindTask.get().cancel() }
+    }
+
     fun bindWorkspaceDataModel() {
         if (!useModelRepositoryBinding()) return
 
@@ -464,6 +468,11 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
     override fun bindCompleteModelAsync(itemIdMap: WorkspaceData, isBindingSync: Boolean) {
         if (useModelRepositoryBinding()) return
 
+        if (launcher.isDestroyed) {
+            Log.e(TAG, "Attempting to bind complete model after Launcher was destroyed")
+            return
+        }
+
         if (Flags.simplifiedLauncherModelBinding()) {
             bindModelWithAsyncInflation(itemIdMap, isBindingSync, "bindCompleteModelAsync")
             return
@@ -586,6 +595,11 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
         isBindingSync: Boolean,
         reason: String,
     ) {
+        if (launcher.isDestroyed) {
+            Log.e(TAG, "Attempting to bind complete model after Launcher was destroyed")
+            return
+        }
+
         val taskTracker = CancellationSignal()
         // Cancel any previously running task and set the current as active task
         activeBindTask.getAndSet(taskTracker).cancel()
