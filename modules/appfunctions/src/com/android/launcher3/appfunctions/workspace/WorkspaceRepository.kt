@@ -69,6 +69,14 @@ interface WorkspaceTransaction {
     // fun addItem(item: WorkspaceItemSpec, screen: Int): WorkspaceTransaction
 
     /**
+     * Queues the removal of an item from the workspace, hotseat, or folder.
+     *
+     * @param target The specification of the item to remove.
+     * @return This [WorkspaceTransaction] instance for chaining.
+     */
+    fun removeItem(target: RemoveItemParamsSpec): WorkspaceTransaction
+
+    /**
      * Commits all the changes made in this transaction to the underlying model.
      *
      * @return The new, updated [WorkspaceSpec] after the transaction is complete.
