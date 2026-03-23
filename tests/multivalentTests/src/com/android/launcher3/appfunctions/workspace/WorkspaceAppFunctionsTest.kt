@@ -39,10 +39,39 @@ class WorkspaceAppFunctionsTest {
         assertThat(workspaceResponse.proof).isEqualTo(Proof.GET_CURRENT_WORKSPACE_PROOF)
     }
 
+    @Test
+    fun removeItem_returnsWorkspaceResponse(): Unit = runBlocking {
+        val target = RemoveItemParamsSpec(
+            item = ItemSelectorSpec(
+                label = null,
+                screenIndex = 0,
+                x = 1,
+                y = 2,
+                hotseatRank = null,
+                packageName = null,
+                className = null
+            )
+        )
+        val response = workspaceAppFunctions.removeItem(FakeAppFunctionContext(context), target)
+
+        assertThat(response.success).isTrue()
+        assertThat(response.proof).isEqualTo(Proof.REMOVE_ITEM_PROOF)
+        val lastTransaction = fakeWorkspaceRepository.lastTransaction as FakeWorkspaceTransaction
+        assertThat(lastTransaction.lastRemovedTarget).isEqualTo(target)
+    }
+
     private class FakeWorkspaceRepository : WorkspaceRepository {
+        var lastTransaction: WorkspaceTransaction = FakeWorkspaceTransaction()
+
         override suspend fun getWorkspace(): WorkspaceSpec {
             return WorkspaceSpec(
-                screens = listOf(),
+                screens = listOf(
+                    WorkspaceScreenSpec(
+                        items = listOf(
+                            WorkspaceItemSpec(x = 1, y = 2)
+                        )
+                    )
+                ),
                 hotseat = HotseatSpec(listOf()),
                 rows = null,
                 columns = null,
@@ -50,7 +79,8 @@ class WorkspaceAppFunctionsTest {
         }
 
         override fun newTransaction(): WorkspaceTransaction {
-            return FakeWorkspaceTransaction()
+            lastTransaction = FakeWorkspaceTransaction()
+            return lastTransaction
         }
 
         override suspend fun getInstalledApps(orderByUsageStats: Boolean): List<UnplacedAppSpec> {
@@ -65,8 +95,20 @@ class WorkspaceAppFunctionsTest {
     }
 
     private class FakeWorkspaceTransaction : WorkspaceTransaction {
+        var lastRemovedTarget: RemoveItemParamsSpec? = null
+
+        override fun removeItem(target: RemoveItemParamsSpec): WorkspaceTransaction {
+            lastRemovedTarget = target
+            return this
+        }
+
         override suspend fun commit(): WorkspaceSpec {
-            throw UnsupportedOperationException()
+            return WorkspaceSpec(
+                screens = listOf(),
+                hotseat = HotseatSpec(listOf()),
+                rows = null,
+                columns = null,
+            )
         }
     }
 

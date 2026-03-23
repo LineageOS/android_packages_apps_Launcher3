@@ -29,6 +29,7 @@ import androidx.appfunctions.service.AppFunction
 class WorkspaceAppFunctions(
     private val repository: WorkspaceRepository
 ) {
+    private val mutationManager = WorkspaceMutationManager(repository)
 
     /// Query functions
     /// These are exposed [AppFunction]s that can be called by any client
@@ -85,6 +86,22 @@ class WorkspaceAppFunctions(
             proof = Proof.GET_INSTALLED_WIDGETS_PROOF,
         )
     }
+
+    /**
+     * Removes an item or folder from the workspace or hotseat, or an app from a folder.
+     *
+     * @param appFunctionContext App function context.
+     * @param target The specification of the item to remove.
+     * @return [WorkspaceUpdateResult] with the updated workspace state and a new proof.
+     */
+    @AppFunction(isDescribedByKDoc = true)
+    suspend fun removeItem(
+        appFunctionContext: AppFunctionContext,
+        target: RemoveItemParamsSpec,
+    ): WorkspaceUpdateResult {
+        return mutationManager.removeItem(target)
+    }
+
 
     /// Decorated responses to the AppFunction agents, the kdoc for these is used
     // as the raw documentation ingested by the agents.
