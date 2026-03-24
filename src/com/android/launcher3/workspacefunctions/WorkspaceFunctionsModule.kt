@@ -16,7 +16,6 @@
 package com.android.launcher3.workspacefunctions
 
 import android.content.pm.LauncherActivityInfo
-import android.util.Log
 import com.android.launcher3.Flags
 import com.android.launcher3.appfunctions.workspace.UnplacedAppTypeTranslator
 import com.android.launcher3.appfunctions.workspace.UnplacedWidgetTypeTranslator
@@ -46,11 +45,15 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import javax.inject.Provider
 
 /** Dagger module for binding workspace functions interfaces. */
 @Module
 abstract class WorkspaceFunctionsModule {
+
+    @Binds
+    abstract fun bindWorkspaceRepository(
+        impl: WorkspaceRepositoryImpl
+    ): WorkspaceRepository
 
     @Binds
     abstract fun bindInstalledAppsProvider(
@@ -128,28 +131,10 @@ abstract class WorkspaceFunctionsModule {
     companion object {
 
         @Provides
-        fun provideWorkspaceRepository(
-            realRepositoryProvider: Provider<WorkspaceRepositoryImpl>
-        ): WorkspaceRepository {
-            val kondoPlannerEnabled = Flags.kondoPlanner()
-            Log.d("WorkspaceFunctionsModule", "Providing repository. Flag: $kondoPlannerEnabled")
-
-            return if (kondoPlannerEnabled) {
-                try {
-                    realRepositoryProvider.get().also {
-                        Log.d("WorkspaceFunctionsModule", "Successfully hydrated repository!")
-                    }
-                } catch (e: Exception) {
-                    Log.e(
-                        "WorkspaceFunctionsModule",
-                        "Crash during realRepositoryProvider.get()",
-                        e,
-                    )
-                    FakeWorkspaceRepository()
-                }
-            } else {
-                FakeWorkspaceRepository()
-            }
+        fun provideWorkspaceAppFunctions(
+            repository: WorkspaceRepository
+        ): WorkspaceAppFunctions {
+            return WorkspaceAppFunctions(repository)
         }
     }
 }

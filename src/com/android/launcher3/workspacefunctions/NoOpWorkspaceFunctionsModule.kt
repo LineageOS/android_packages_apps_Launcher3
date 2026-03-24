@@ -15,7 +15,13 @@
  */
 package com.android.launcher3.workspacefunctions
 
+import com.android.launcher3.appfunctions.workspace.HotseatSpec
+import com.android.launcher3.appfunctions.workspace.UnplacedAppSpec
+import com.android.launcher3.appfunctions.workspace.UnplacedWidgetSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceAppFunctions
+import com.android.launcher3.appfunctions.workspace.WorkspaceRepository
+import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
+import com.android.launcher3.appfunctions.workspace.WorkspaceTransaction
 import dagger.Module
 import dagger.Provides
 
@@ -28,6 +34,31 @@ class NoOpWorkspaceFunctionsModule {
 
     @Provides
     fun provideWorkspaceAppFunctions(): WorkspaceAppFunctions {
-        return WorkspaceAppFunctions(FakeWorkspaceRepository())
+        return WorkspaceAppFunctions(NoOpWorkspaceRepository())
+    }
+
+    private class NoOpWorkspaceRepository : WorkspaceRepository {
+        override suspend fun getWorkspace(): WorkspaceSpec {
+            return WorkspaceSpec(
+                screens = listOf(),
+                hotseat = HotseatSpec(listOf()),
+                rows = null,
+                columns = null,
+            )
+        }
+
+        override suspend fun getInstalledApps(orderByUsageStats: Boolean): List<UnplacedAppSpec> {
+            return listOf()
+        }
+
+        override suspend fun getInstalledWidgets(
+            orderByUsageStats: Boolean
+        ): List<UnplacedWidgetSpec> {
+            return listOf()
+        }
+
+        override fun newTransaction(): WorkspaceTransaction {
+            throw UnsupportedOperationException("Not implemented")
+        }
     }
 }
