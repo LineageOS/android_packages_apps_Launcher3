@@ -1119,13 +1119,11 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
         DeviceProfile taskbarDp = mActivity.getDeviceProfile();
         boolean isTransientTaskbar = mActivity.isTransientTaskbar();
 
-        boolean isDeviceLocked = mControllers.taskbarStashController.isDeviceLocked();
         // If Hotseat is not the top element, Taskbar should maintain in-app state as it fades out,
         // or fade in while already in in-app state.
         Interpolator interpolator = mIsHotseatIconOnTopWhenAligned ? LINEAR : FINAL_FRAME;
 
-        int offsetY =
-                isDeviceLocked ? taskbarDp.getTaskbarOffsetY() : launcherDp.getTaskbarOffsetY();
+        int offsetY = taskbarDp.getTaskbarOffsetY();
         setter.setFloat(mTaskbarIconTranslationYForHome, VALUE, -offsetY, interpolator);
         setter.setFloat(mTaskbarNavButtonTranslationY, VALUE, -offsetY, interpolator);
         setter.setFloat(mTaskbarNavButtonTranslationYForInAppDisplay, VALUE, offsetY, interpolator);
@@ -1394,7 +1392,8 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
             taskbarWindowSize = Math.max(taskbarWindowSize, bubbleBarMaxHeight);
         }
         mActivity.setTaskbarWindowSize(taskbarWindowSize);
-        mTaskbarNavButtonTranslationY.updateValue(-deviceProfile.getTaskbarOffsetY());
+        mTaskbarNavButtonTranslationY.updateValue(
+                -mActivity.getDeviceProfile().getTaskbarOffsetY());
     }
 
     public LauncherBindableItemsContainer getContent() {
