@@ -30,6 +30,7 @@ import com.android.launcher3.touch.CustomActionsListener.Companion.ACTION_START_
 import com.android.launcher3.touch.CustomActionsListener.Companion.hasFlags
 import com.android.launcher3.util.ShortcutUtil
 import com.android.launcher3.views.BubbleTextHolder
+import com.android.launcher3.widget.LauncherAppWidgetHostView
 
 /**
  * Interface for listening to custom actions performed on a view.
@@ -106,6 +107,32 @@ abstract class BaseItemCustomActionsListener : CustomActionsListener {
      *   [ItemInfo].
      */
     abstract fun onStartDrag(target: View, btv: BubbleTextView?)
+}
+
+/** Implementation of [CustomActionsListener] for widgets. */
+object WorkspaceWidgetCustomActionsListener : CustomActionsListener {
+    override fun performActions(view: View, actionMask: Int) {
+        view as? LauncherAppWidgetHostView ?: return
+        when (actionMask) {
+            ACTION_POPUP_MENU or ACTION_START_DRAG -> view.onLongClick(view)
+
+            ACTION_POPUP_MENU -> {
+                val launcher = Launcher.getLauncher(view.context)
+                launcher.closeOpenViews()
+                launcher.popupControllerForHomeScreenItems.show(view)
+            }
+
+            ACTION_START_DRAG -> {
+                val launcher = Launcher.getLauncher(view.context)
+                if (ItemLongClickListener.canStartDrag(launcher)) {
+                    view.beforeDragStart()
+                    val options = DragOptions().apply { isMouseDrag = true }
+                    val tag = view.tag as? ItemInfo ?: return
+                    ItemLongClickListener.beginDrag(view, launcher, tag, options)
+                }
+            }
+        }
+    }
 }
 
 /**

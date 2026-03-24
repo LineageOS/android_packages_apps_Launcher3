@@ -104,6 +104,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         }
 
         getHitRect(tempRect)
+        // Hit rect might not yet be initialized if the resize frame intercepts the touch event
+        // (e.g., ACTION_UP from a right-click) before the first layout pass has completed.
+        if (tempRect.isEmpty) {
+            return false
+        }
+
         if (tempRect.contains(ev.x.toInt(), ev.y.toInt())) {
             return false // let the widget's OR our compose view's handling do its thing.
         }
