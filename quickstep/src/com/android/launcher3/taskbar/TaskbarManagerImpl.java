@@ -26,7 +26,6 @@ import static com.android.launcher3.LauncherPrefs.TASKBAR_PINNING_IN_DESKTOP_MOD
 import static com.android.launcher3.LauncherPrefs.TASKBAR_PINNING_KEY;
 import static com.android.launcher3.display.LauncherDisplayInfo.getChangeFlagsString;
 import static com.android.launcher3.statehandlers.DesktopVisibilityController.INACTIVE_DESK_ID;
-import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar;
 import static com.android.launcher3.taskbar.growth.GrowthConstants.BROADCAST_SHOW_NUDGE;
 import static com.android.launcher3.taskbar.growth.GrowthConstants.GROWTH_NUDGE_PERMISSION;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
@@ -184,10 +183,6 @@ public class TaskbarManagerImpl {
                                     mPrimaryDisplayId,
                                     INACTIVE_DESK_ID,
                                     visibilityController.getActiveDeskId(mPrimaryDisplayId));
-                        }
-
-                        if (!enableAutoStashConnectedDisplayTaskbar.isTrue()) {
-                            return;
                         }
 
                         mResources.forEach(resource -> {

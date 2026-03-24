@@ -37,14 +37,6 @@ object TaskbarDesktopExperienceFlags {
         )
 
     @JvmField
-    val enableAutoStashConnectedDisplayTaskbar: DesktopExperienceFlag =
-        DesktopExperienceFlag(
-            Flags::enableAutoStashConnectedDisplayTaskbar,
-            /* shouldOverrideByDevOption= */ true,
-            Flags.FLAG_ENABLE_AUTO_STASH_CONNECTED_DISPLAY_TASKBAR,
-        )
-
-    @JvmField
     val enableTaskbarA11yMoreOptionsButton: DesktopExperienceFlag =
         DesktopExperienceFlag(
             Flags::enableTaskbarA11yMoreOptionsButton,

@@ -16,8 +16,6 @@
 package com.android.launcher3.secondarydisplay;
 
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
-
-import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar;
 import static com.android.launcher3.util.OnboardingPrefs.ALL_APPS_VISITED_COUNT;
 import static com.android.window.flags.Flags.useInputReportedFocusForAccessibility;
 
@@ -156,8 +154,7 @@ public final class SecondaryDisplayQuickstepDelegateImpl extends SecondaryDispla
 
     @Override
     void updateStashControllerStateFlags(int displayId, boolean isVisible) {
-        if (displayId == Display.DEFAULT_DISPLAY
-                || !enableAutoStashConnectedDisplayTaskbar.isTrue()) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
             return;
         }
 
