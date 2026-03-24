@@ -233,9 +233,10 @@ interface BubbleStashController {
     fun dump(pw: PrintWriter) {
         pw.println("Bubble stash controller state:")
         pw.println("  isStashed: $isStashed")
-        pw.println("  isBubblesShowingOnOverview: $isBubblesShowingOnOverview")
-        pw.println("  isBubblesShowingOnHome: $isBubblesShowingOnHome")
+        pw.println("  launcherState: $launcherState")
         pw.println("  isSysuiLocked: $isSysuiLocked")
+        pw.println("  bubbleBarTranslationYForHotseat: $bubbleBarTranslationYForHotseat")
+        pw.println("  bubbleBarTranslationYForTaskbar: $bubbleBarTranslationYForTaskbar")
     }
 
     companion object {

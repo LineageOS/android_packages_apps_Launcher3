@@ -66,6 +66,7 @@ import com.android.wm.shell.Flags
 import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.bubbles.ContextUtils.isRtl
+import java.io.PrintWriter
 import kotlin.math.max
 
 class TransientBubbleStashController
@@ -785,5 +786,10 @@ constructor(
     private fun BubbleBarLocation.isSameSideWith(anotherLocation: BubbleBarLocation): Boolean {
         val isRtl = context.isRtl
         return this.isOnLeft(isRtl) == anotherLocation.isOnLeft(isRtl)
+    }
+
+    override fun dump(pw: PrintWriter) {
+        super.dump(pw)
+        pw.println("  controllerType: transient")
     }
 }

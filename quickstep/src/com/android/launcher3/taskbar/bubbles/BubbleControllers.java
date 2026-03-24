@@ -164,6 +164,7 @@ public class BubbleControllers {
     /** Dumps bubble controllers state. */
     public void dump(PrintWriter pw) {
         bubbleBarViewController.dump(pw);
+        bubbleStashController.dump(pw);
         BubbleLog.dump(pw);
     }
 }
