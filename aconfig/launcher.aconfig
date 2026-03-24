@@ -380,6 +380,13 @@ flag {
 }
 
 flag {
+  name: "enable_taskbar_drag_to_remove"
+  namespace: "launcher"
+  description: "Enable dragging to remove pinned apps on the taskbar."
+  bug: "495823552"
+}
+
+flag {
     name: "show_files_on_home_screen"
     namespace: "launcher"
     description: "Enables file and folder items on the home screen"
