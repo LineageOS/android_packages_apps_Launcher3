@@ -75,7 +75,6 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -2621,10 +2620,8 @@ public final class LauncherInstrumentation {
 
     /** Returns the bounds of the display as a Point where x is width and y is height. */
     Point getRealDisplaySize() {
-        final Rect displayBounds = getContext().getSystemService(WindowManager.class)
-                .getMaximumWindowMetrics()
-                .getBounds();
-        return new Point(displayBounds.width(), displayBounds.height());
+        return getTestInfo(TestProtocol.REQUEST_DISPLAY_BOUNDS)
+                .getParcelable(TEST_INFO_RESPONSE_FIELD, Point.class);
     }
 
     int getActionCornerPadding() {

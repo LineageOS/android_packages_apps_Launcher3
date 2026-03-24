@@ -220,6 +220,7 @@ public final class TestProtocol {
     public static final String REQUEST_ENABLE_REGISTER_EVENT_NOT_FROM_TEST =
             "enable_register_event_not_from_test";
 
+    public static final String REQUEST_DISPLAY_BOUNDS = "display_bounds";
     public static final String REQUEST_INFO_DISPLAY_ID = "display_id";
 
     public static final String REQUEST_MARK_OVERVIEW_SELECT_TIP_SEEN =
