@@ -23,7 +23,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.RectF
 import android.os.Process.myUserHandle
 import android.util.AttributeSet
 import android.util.Log
@@ -34,19 +33,17 @@ import androidx.core.net.toUri
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
-import com.android.launcher3.Utilities
 import com.android.launcher3.allapps.AllAppsStore
 import com.android.launcher3.dagger.LauncherComponentProvider.appComponent
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
+import com.android.launcher3.popup.PopupContainer
 import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.util.ViewEx.registerLifecycleTask
 import com.android.launcher3.views.ActivityContext
-import com.android.launcher3.views.OptionsPopupView
-import com.android.launcher3.views.OptionsPopupView.OptionItem
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 
 /**
@@ -66,7 +63,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     init {
         activityContext.appWidgetHolder?.onViewCreationCallback?.accept(this)
-        setOnLongClickListener { onWidgetLongClick(it) }
+        setOnLongClickListener {
+            PopupContainer.showForMenuItems(
+                activityContext,
+                this,
+                activityContext.activityComponent.getOseWidgetOptionsProvider().getOptionItems(),
+            ) != null
+        }
     }
 
     override fun onAttachedToWindow() {
@@ -193,27 +196,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             intent,
             this@OseWidgetView.tag as? ItemInfo,
         )
-    }
-
-    @VisibleForTesting
-    fun onWidgetLongClick(view: View): Boolean {
-        val oseWidgetOptionsProvider =
-            activityContext.activityComponent.getOseWidgetOptionsProvider()
-        val optionItems = oseWidgetOptionsProvider.getOptionItems()
-        if (optionItems.isEmpty()) return false
-
-        val bounds =
-            RectF(Utilities.getViewBounds(this)).apply {
-                left = centerX()
-                right = centerX()
-            }
-        showOptionsPopup(bounds, optionItems)
-        return true
-    }
-
-    @VisibleForTesting
-    fun showOptionsPopup(bounds: RectF, optionItems: List<OptionItem>) {
-        OptionsPopupView.showNoReturn(activityContext, bounds, optionItems, true)
     }
 
     private class QsbItemInfo : ItemInfo() {
