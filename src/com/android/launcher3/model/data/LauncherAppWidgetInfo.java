@@ -41,9 +41,6 @@ import com.android.launcher3.widget.LauncherAppWidgetProviderInfo;
  */
 public class LauncherAppWidgetInfo extends ItemInfo {
 
-    public static final int OPTION_SEARCH_WIDGET = 1;
-
-
     public static final int RESTORE_COMPLETED = 0;
 
     /**
@@ -224,6 +221,13 @@ public class LauncherAppWidgetInfo extends ItemInfo {
      */
     public final boolean hasOptionFlag(int option) {
         return (options & option) != 0;
+    }
+
+    /**
+     * @return true if the widget is reconfigurable.
+     */
+    public boolean isReconfigurable() {
+        return widgetFeatures != -1 && (widgetFeatures & FEATURE_RECONFIGURABLE) != 0;
     }
 
     @SuppressWarnings("NewApi")

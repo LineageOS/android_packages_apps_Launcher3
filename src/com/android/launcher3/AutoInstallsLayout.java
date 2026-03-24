@@ -20,6 +20,7 @@ import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICA
 import static com.android.launcher3.LauncherSettings.Favorites.TABLE_NAME;
 import static com.android.launcher3.provider.LauncherDbUtils.itemIdMatch;
 import static com.android.launcher3.util.XmlElement.getRootElement;
+import static com.android.launcher3.widget.LauncherAppWidgetProviderInfo.CUSTOM_WIDGET_PACKAGE;
 
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -42,7 +43,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.annotation.WorkerThread;
 import androidx.annotation.XmlRes;
 
 import com.android.launcher3.LauncherSettings.Favorites;
@@ -51,7 +51,7 @@ import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pm.UserCache;
-import com.android.launcher3.qsb.QsbContainerView;
+import com.android.launcher3.qsb.OseCustomWidget;
 import com.android.launcher3.shortcuts.ShortcutKey;
 import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.IntArray;
@@ -60,6 +60,7 @@ import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.UserIconInfo;
 import com.android.launcher3.util.XmlElement;
 import com.android.launcher3.widget.LauncherWidgetHolder;
+import com.android.launcher3.widget.custom.CustomWidgetManager;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -539,21 +540,26 @@ public class AutoInstallsLayout {
         }
     }
 
-    protected class SearchWidgetParser extends PendingWidgetParser {
-        @Override
-        @Nullable
-        @WorkerThread
-        public ComponentName getComponentName(XmlElement element) {
-            return QsbContainerView.getSearchComponentName(mContext);
-        }
+    protected class SearchWidgetParser implements TagParser {
 
         @Override
-        protected int verifyAndInsert(ComponentName cn, Bundle extras) {
-            mValues.put(Favorites.OPTIONS, LauncherAppWidgetInfo.OPTION_SEARCH_WIDGET);
-            int flags = mValues.getAsInteger(Favorites.RESTORED)
-                    | WorkspaceItemInfo.FLAG_RESTORE_STARTED;
-            mValues.put(Favorites.RESTORED, flags);
-            return super.verifyAndInsert(cn, extras);
+        public int parseAndAdd(XmlElement element) throws XmlPullParserException, IOException {
+            var cn = new ComponentName(CUSTOM_WIDGET_PACKAGE, OseCustomWidget.INSTANCE.getId());
+            mValues.put(Favorites.SPANX, element.get(ATTR_SPAN_X));
+            mValues.put(Favorites.SPANY, element.get(ATTR_SPAN_Y));
+            mValues.put(Favorites.ITEM_TYPE, Favorites.ITEM_TYPE_APPWIDGET);
+            mValues.put(Favorites.APPWIDGET_PROVIDER, cn.flattenToString());
+            mValues.put(Favorites._ID, mCallback.generateNewItemId());
+            mValues.put(Favorites.RESTORED, LauncherAppWidgetInfo.RESTORE_COMPLETED);
+            mValues.put(Favorites.APPWIDGET_ID,
+                    CustomWidgetManager.INSTANCE.get(mContext).allocateCustomAppWidgetId(cn));
+
+            int insertedId = mCallback.insertAndCheck(mDb, mValues);
+            if (insertedId < 0) {
+                return -1;
+            } else {
+                return insertedId;
+            }
         }
     }
 

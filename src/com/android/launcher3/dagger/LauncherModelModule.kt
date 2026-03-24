@@ -26,19 +26,23 @@ import com.android.launcher3.graphics.theme.MonoIconThemeFactory
 import com.android.launcher3.graphics.theme.MonoIconThemeFactory.MONO_FACTORY_ID
 import com.android.launcher3.graphics.theme.ThemePreference.Companion.THEME_OVERRIDES_DAGGER_KEY
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.popup.PopupDataRepository
-import com.android.launcher3.popup.PopupDataRepositoryImpl
+import com.android.launcher3.popup.PopupDataMapper
+import com.android.launcher3.popup.PopupDataMapperImpl
+import com.android.launcher3.qsb.OseCustomWidget
+import com.android.launcher3.widget.custom.CustomWidget
+import com.android.launcher3.widget.custom.CustomWidgetManager.NAMED_CUSTOM_WIDGETS
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap
+import dagger.multibindings.IntoSet
 import dagger.multibindings.Multibinds
 import dagger.multibindings.StringKey
 import javax.inject.Named
 
 @Module
 abstract class LauncherModelModule {
-    @Binds abstract fun bindPopupDataRepository(impl: PopupDataRepositoryImpl): PopupDataRepository
+    @Binds abstract fun bindPopupDataMapper(impl: PopupDataMapperImpl): PopupDataMapper
 
     @Multibinds @Named("MODEL_ITEMS") abstract fun extraModelItems(): Set<ItemInfo>
 
@@ -47,6 +51,8 @@ abstract class LauncherModelModule {
     @Multibinds
     @Named(THEME_OVERRIDES_DAGGER_KEY)
     abstract fun legacyThemeKeys(): Map<String, ConstantItem<String>>
+
+    @Multibinds @Named(NAMED_CUSTOM_WIDGETS) abstract fun extraCustomWidgets(): Set<CustomWidget>
 
     companion object {
 
@@ -62,5 +68,11 @@ abstract class LauncherModelModule {
         fun provideModelReloader(model: LauncherModel): ModelReloader {
             return ModelReloader { model.reloadIfActive("ModelReloader") }
         }
+
+        @Provides
+        @IntoSet
+        @Named(NAMED_CUSTOM_WIDGETS)
+        @JvmStatic
+        fun monoSearchCustomWidget(): CustomWidget = OseCustomWidget
     }
 }

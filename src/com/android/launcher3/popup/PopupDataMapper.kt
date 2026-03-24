@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,8 @@ data class PopupData(
     val eventId: EventEnum = IGNORE,
 )
 
-/** Repository to get all the popup data needed for the long press menu. */
-interface PopupDataRepository {
-    /**
-     * @return a map where we the key is the type of poppable and the value is a stream of popup
-     *   data belonging to that type.
-     */
-    fun getAllPopupData(): Map<Int, List<PopupData>>
-
+/** Mapper to get all the popup data needed for the long press menu. */
+interface PopupDataMapper {
     /**
      * Get the popup data for a specific item.
      *
