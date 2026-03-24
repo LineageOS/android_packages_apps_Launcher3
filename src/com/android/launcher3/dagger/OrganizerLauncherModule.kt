@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
+package com.android.launcher3.dagger
 
-import android.graphics.Bitmap
-import java.lang.ref.WeakReference
+import com.android.launcher3.organizer.dagger.OrganizerComponent
+import dagger.Module
 
-/** View model used by the [OrganizerActivity] and its composables. */
-data class WorkspaceOrganizerState(var selectedPage: Int = 0) {}
-
-/** Holds the information needed to render the preview of the Workspace pages. */
-data class WorkspacePage(
-    val bitmap: Bitmap? = null,
-    val screenId: Int,
-    val lastGeneratedBitmap: WeakReference<Bitmap>? = null,
-)
+/** A module that installs organizer for launcher. */
+@Module(subcomponents = [OrganizerComponent::class]) interface OrganizerLauncherModule

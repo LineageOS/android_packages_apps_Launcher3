@@ -16,7 +16,6 @@
 
 package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
 
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -60,23 +59,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
 import com.android.launcher3.R
-import com.android.launcher3.organizer.creation.screen.ui.spacecreator.SpaceCreatorActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WorkspaceOrganizer(onArrowBack: () -> Unit) {
-    val context = LocalContext.current
-    val viewModel =
-        ViewModelProvider(context as ViewModelStoreOwner, WorkspaceOrganizerViewModel.Factory)[
-            WorkspaceOrganizerViewModel::class.java]
+fun WorkspaceOrganizer(
+    onArrowBack: () -> Unit,
+    onNavigateToSpaceCreator: () -> Unit,
+    viewModel: WorkspaceOrganizerViewModel,
+) {
     Scaffold(
         containerColor = Color.Transparent,
         floatingActionButton = { FloatingMenu(viewModel) },
@@ -111,12 +106,16 @@ fun WorkspaceOrganizer(onArrowBack: () -> Unit) {
             )
         },
     ) { padding ->
-        WorkspaceOrganizerContent(viewModel, padding)
+        WorkspaceOrganizerContent(viewModel, padding, onNavigateToSpaceCreator)
     }
 }
 
 @Composable
-fun WorkspaceOrganizerContent(viewModel: WorkspaceOrganizerViewModel, padding: PaddingValues) {
+fun WorkspaceOrganizerContent(
+    viewModel: WorkspaceOrganizerViewModel,
+    padding: PaddingValues,
+    onNavigateToSpaceCreator: () -> Unit,
+) {
     val pages: List<WorkspacePage> by viewModel.workspacePages.collectAsState()
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -135,7 +134,7 @@ fun WorkspaceOrganizerContent(viewModel: WorkspaceOrganizerViewModel, padding: P
                 onClick = { viewModel.setSelectedWorkspacePage(index) },
             )
         }
-        item { WorkspaceOrganizerAddPage() }
+        item { WorkspaceOrganizerAddPage(onNavigateToSpaceCreator) }
     }
 }
 
@@ -185,8 +184,7 @@ fun WorkspaceOrganizerPage(
 }
 
 @Composable
-fun WorkspaceOrganizerAddPage() {
-    val context = LocalContext.current
+fun WorkspaceOrganizerAddPage(onAddClick: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,
         modifier =
@@ -197,9 +195,7 @@ fun WorkspaceOrganizerAddPage() {
                     shape = RoundedCornerShape(size = WorkspaceOrganizerDimens.workspaceCornerSize),
                 )
                 .padding(WorkspaceOrganizerDimens.workspacePagePadding)
-                .clickable {
-                    context.startActivity(Intent(context, SpaceCreatorActivity::class.java))
-                },
+                .clickable { onAddClick() },
     ) {
         Icon(
             modifier =

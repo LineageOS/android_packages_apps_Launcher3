@@ -571,4 +571,22 @@
     <dimen name="dialog_elevation">2dp</dimen>
     <dimen name="dialog_padding">24dp</dimen>
     <dimen name="dialog_width">400dp</dimen>
+
+    <!-- Folder Creator -->
+    <item name="folder_creator_sheet_height_ratio" format="float" type="dimen">0.65</item>
+    <dimen name="folder_creator_sheet_bottom_padding">16dp</dimen>
+    <dimen name="folder_creator_title_spacing">16dp</dimen>
+    <dimen name="folder_creator_list_horizontal_padding">24dp</dimen>
+    <dimen name="folder_creator_list_vertical_padding">16dp</dimen>
+    <dimen name="folder_creator_list_item_spacing">8dp</dimen>
+    <dimen name="folder_creator_preview_width">178dp</dimen>
+    <dimen name="folder_creator_preview_height">114dp</dimen>
+    <dimen name="folder_creator_preview_corner_radius">24dp</dimen>
+    <dimen name="folder_creator_preview_border_width">3dp</dimen>
+    <dimen name="folder_creator_preview_vertical_padding">20dp</dimen>
+    <dimen name="folder_creator_preview_icon_box_size">50dp</dimen>
+    <dimen name="folder_creator_preview_icon_size">20dp</dimen>
+    <dimen name="folder_creator_preview_icon_inner_spacing">5dp</dimen>
+    <dimen name="folder_creator_preview_icon_padding_bottom">8dp</dimen>
+    <dimen name="folder_creator_actions_padding">16dp</dimen>
 </resources>
