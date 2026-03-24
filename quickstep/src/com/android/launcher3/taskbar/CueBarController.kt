@@ -76,6 +76,9 @@ class CueBarController(private val activity: TaskbarActivityContext) :
     val isExpanded: Boolean
         get() = ambientCueViewModel.isExpanded
 
+    val isVisible: Boolean
+        get() = ambientCueViewModel.isVisible
+
     private val ambientCueViewModel: AmbientCueViewModel =
         AmbientCueViewModel(
                 ambientCueInteractor = ambientCueInteractor,
@@ -223,6 +226,10 @@ class CueBarController(private val activity: TaskbarActivityContext) :
         }
         taskbarControllers.sharedState?.cueBarVisible = isCueBarVisible
 
+        val context = taskbarControllers.taskbarActivityContext
+        if (context != null && context.isThreeButtonNav) {
+            taskbarControllers.navbarButtonsViewController?.setCueBarVisible(isCueBarVisible)
+        }
         animateStashHandleAlpha(!isCueBarVisible)
 
         if (isCueBarVisible) {
