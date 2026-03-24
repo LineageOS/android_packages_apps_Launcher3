@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.workspacefunctions.translators
 
+import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.appfunctions.workspace.HotseatSpec
@@ -31,7 +32,8 @@ import javax.inject.Inject
 /** A translator that converts between [WorkspaceData] and [WorkspaceSpec]. */
 class LauncherWorkspaceTypeTranslator
 @Inject
-constructor(private val translators: TranslatorRegistry) : WorkspaceTypeTranslator<WorkspaceData> {
+constructor(private val translators: TranslatorRegistry, private val idp: InvariantDeviceProfile) :
+    WorkspaceTypeTranslator<WorkspaceData> {
 
     override fun toSpec(workspace: WorkspaceData): WorkspaceSpec {
         val desktopItems = mutableListOf<ItemInfo>()
@@ -39,10 +41,9 @@ constructor(private val translators: TranslatorRegistry) : WorkspaceTypeTranslat
         val folderContentsMap = mutableMapOf<Int, MutableList<ItemInfo>>()
 
         // We only want WorkspaceItemInfo, LauncherAppWidgetInfo, and FolderInfo.
-        val filteredItems =
-            workspace.filter {
-                it is WorkspaceItemInfo || it is LauncherAppWidgetInfo || it is FolderInfo
-            }
+        val filteredItems = workspace.filter {
+            it is WorkspaceItemInfo || it is LauncherAppWidgetInfo || it is FolderInfo
+        }
 
         for (item in filteredItems) {
             when (item.container) {
@@ -78,8 +79,8 @@ constructor(private val translators: TranslatorRegistry) : WorkspaceTypeTranslat
         return WorkspaceSpec(
             screens = screenSpecs,
             hotseat = hotseatSpec,
-            rows = null, // TODO(b/457458301): Fetch from device profile
-            columns = null,
+            rows = idp.numRows,
+            columns = idp.numColumns,
         )
     }
 }
