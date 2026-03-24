@@ -111,16 +111,16 @@ public class ItemLongClickListener {
 
         // Start the drag
         final DragController dragController = launcher.getDragController();
-        dragController.addDragListener(new DragController.DragListener() {
+        dragController.addDragSessionListener(new DragController.DragSessionListener() {
             @Override
-            public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
+            public void onDragSessionStart(DropTarget.DragObject dragObject, DragOptions options) {
                 v.setVisibility(INVISIBLE);
             }
 
             @Override
-            public void onDragEnd() {
+            public void onDragSessionEnd() {
                 v.setVisibility(VISIBLE);
-                dragController.removeDragListener(this);
+                dragController.removeDragSessionListener(this);
             }
         });
 

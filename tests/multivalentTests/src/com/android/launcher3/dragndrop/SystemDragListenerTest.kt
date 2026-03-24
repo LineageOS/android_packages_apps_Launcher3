@@ -151,7 +151,7 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
         // NOTE: The system drag listener registers itself with the launcher's drag controller
         // during construction. Verify the expected registration but then clear invocations so that
         // tests below don't need to be mindful of constructor-related interactions.
-        verify(mockContext.dragController).addDragListener(listener)
+        verify(mockContext.dragController).addDragSessionListener(listener)
         verify(mockContext.dragController).addSystemDragHandler(listener)
         clearInvocations(mockContext.dragController)
     }
@@ -179,12 +179,12 @@ class SystemDragListenerTest(val name: String, private val params: SystemDragPar
     }
 
     @Test
-    fun testDragEnd() {
+    fun testDragSessionEnd() {
         val callback = mock<Runnable>()
         listener.setCleanupCallback(callback)
-        listener.onDragEnd()
+        listener.onDragSessionEnd()
         verify(callback).run()
-        verify(mockContext.dragController).removeDragListener(listener)
+        verify(mockContext.dragController).removeDragSessionListener(listener)
     }
 
     @Test

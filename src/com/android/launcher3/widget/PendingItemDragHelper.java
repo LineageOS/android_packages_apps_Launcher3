@@ -202,7 +202,8 @@ public class PendingItemDragHelper extends DragPreviewProvider {
                 previewHeight = preview.getIntrinsicHeight();
             }
             scale = previewBounds.width() / (float) previewWidth;
-            launcher.getDragController().addDragListener(new WidgetHostViewLoader(launcher, mView));
+            launcher.getDragController().addDragSessionListener(
+                    new WidgetHostViewLoader(launcher, mView));
 
             dragRegion = null;
             draggableView = DraggableView.ofType(DraggableView.DRAGGABLE_WIDGET);

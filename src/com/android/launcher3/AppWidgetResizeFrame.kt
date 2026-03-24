@@ -100,7 +100,7 @@ class AppWidgetResizeFrame
 constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
     AppWidgetResizeFrameBase(context, attrs, defStyleAttr),
     View.OnKeyListener,
-    DragController.DragListener {
+    DragController.DragSessionListener {
     private val launcher: Launcher = Launcher.getLauncher(context)
     private var stateAnnouncer: DragViewStateAnnouncer?
     private val firstFrameAnimatorHelper: FirstFrameAnimatorHelper
@@ -170,7 +170,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     private var yDown = 0
 
     init {
-        launcher.dragController.addDragListener(this)
+        launcher.dragController.addDragSessionListener(this)
         stateAnnouncer = DragViewStateAnnouncer.createFor(this)
 
         backgroundPadding = resources.getDimensionPixelSize(R.dimen.resize_frame_background_padding)
@@ -812,7 +812,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             mIsOpen = false
             dragLayer.removeView(this)
             widgetView.removeOnLayoutChangeListener(widgetViewLayoutListener)
-            launcher.dragController.removeDragListener(this)
+            launcher.dragController.removeDragSessionListener(this)
 
             // We are done with resizing the widget. Save the widget size & position to
             // LauncherModel
@@ -885,12 +885,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         }
     }
 
-    override fun onDragStart(dragObject: DragObject, options: DragOptions) {
+    override fun onDragSessionStart(dragObject: DragObject, options: DragOptions) {
         close(true)
-    }
-
-    override fun onDragEnd() {
-        // No-op
     }
 
     /** A mutable class for describing the range of two int values. */

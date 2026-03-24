@@ -45,7 +45,6 @@ import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BaseActivity;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.DragSource;
-import com.android.launcher3.DropTarget;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherModel;
@@ -79,8 +78,7 @@ import java.util.Set;
 /**
  * Launcher activity for secondary displays
  */
-public class SecondaryDisplayLauncher extends BaseActivity
-        implements BgDataModel.Callbacks, DragController.DragListener {
+public class SecondaryDisplayLauncher extends BaseActivity implements BgDataModel.Callbacks {
 
     private LauncherModel mModel;
     private SecondaryDragLayer mDragLayer;
@@ -126,8 +124,6 @@ public class SecondaryDisplayLauncher extends BaseActivity
         if (mSecondaryDisplayDelegate.enableTaskbarConnectedDisplays()) {
             mAppsButton.setVisibility(View.INVISIBLE);
         }
-
-        mDragController.addDragListener(this);
 
         if (LauncherModel.useModelRepositoryBinding()) {
             mModel.activate();
@@ -473,12 +469,6 @@ public class SecondaryDisplayLauncher extends BaseActivity
                     options);
         }
     }
-
-    @Override
-    public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) { }
-
-    @Override
-    public void onDragEnd() { }
 
     @Override
     protected void onActivityFlagsChanged(int changeBits) {
