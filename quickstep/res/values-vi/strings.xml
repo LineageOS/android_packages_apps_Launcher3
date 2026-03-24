@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"Ứng dụng hoặc tổ chức của bạn không cho phép thực hiện hành động này"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Các tiện ích hiện không được hỗ trợ, vui lòng chọn một ứng dụng khác"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"Sao chép"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"Lưu"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Xoay màn hình"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Ảnh động minh hoạ cách thanh tác vụ xuất hiện từ cuối màn hình và tự động ẩn khi người dùng không sử dụng"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Ảnh động minh hoạ cách ghim thanh tác vụ bằng nút bật/tắt để thanh tác vụ luôn hiển thị ở cuối màn hình"</string>

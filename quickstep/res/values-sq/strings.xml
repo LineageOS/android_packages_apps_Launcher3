@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"Ky veprim nuk lejohet nga aplikacioni ose organizata jote"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Miniaplikacionet nuk mbështeten për momentin. Zgjidh një aplikacion tjetër"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"Kopjo"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"Ruaj"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Rrotullo ekranin"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animacioni që tregon se si shfaqet shiriti i detyrave nga fundi i ekranit dhe si fshihet automatikisht kur nuk është në përdorim"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animacioni që tregon se si të gozhdosh shiritin e detyrave duke përdorur një çelës, në mënyrë që shiriti i detyrave të qëndrojë përgjithmonë i dukshëm në fund të ekranit"</string>
