@@ -267,14 +267,10 @@
     <string name="default_new_folder_name" msgid="8821062664729412079">"Thư mục mới"</string>
     <!-- no translation found for home_screen_files_rename_dialog_clear_button (1516608063079626727) -->
     <skip />
-    <!-- no translation found for home_screen_files_rename_dialog_neutral_button (961781261154618336) -->
-    <skip />
-    <!-- no translation found for home_screen_files_rename_dialog_positive_button (6506701192246379747) -->
-    <skip />
-    <!-- no translation found for home_screen_files_rename_dialog_file_title (3540941610992603887) -->
-    <skip />
-    <!-- no translation found for home_screen_files_rename_dialog_folder_title (2453152990256864379) -->
-    <skip />
+    <string name="home_screen_files_rename_dialog_neutral_button" msgid="961781261154618336">"Huỷ"</string>
+    <string name="home_screen_files_rename_dialog_positive_button" msgid="6506701192246379747">"Đổi tên"</string>
+    <string name="home_screen_files_rename_dialog_file_title" msgid="3540941610992603887">"Đổi tên tệp"</string>
+    <string name="home_screen_files_rename_dialog_folder_title" msgid="2453152990256864379">"Đổi tên thư mục"</string>
     <string name="something_went_wrong" msgid="1492883246069060632">"Đã xảy ra lỗi"</string>
     <string name="organizer_create_screen_title" msgid="1052454457895703433">"Tạo màn hình"</string>
     <string name="organizer_create_screen_description" msgid="3224132391919219061">"Chọn một danh mục để thêm ứng dụng và tiện ích trên điện thoại của bạn"</string>
