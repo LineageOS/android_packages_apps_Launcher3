@@ -265,8 +265,7 @@
     <string name="arch_shape_title" msgid="2213843822192871318">"アーチ"</string>
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"新しいフォルダ"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"新しいフォルダ"</string>
-    <!-- no translation found for home_screen_files_rename_dialog_clear_button (1516608063079626727) -->
-    <skip />
+    <string name="home_screen_files_rename_dialog_clear_button" msgid="1516608063079626727">"消去"</string>
     <string name="home_screen_files_rename_dialog_neutral_button" msgid="961781261154618336">"キャンセル"</string>
     <string name="home_screen_files_rename_dialog_positive_button" msgid="6506701192246379747">"名前を変更"</string>
     <string name="home_screen_files_rename_dialog_file_title" msgid="3540941610992603887">"ファイル名の変更"</string>

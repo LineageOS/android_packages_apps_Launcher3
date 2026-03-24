@@ -265,8 +265,7 @@
     <string name="arch_shape_title" msgid="2213843822192871318">"Lengkung"</string>
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"Folder baharu"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"Folder baharu"</string>
-    <!-- no translation found for home_screen_files_rename_dialog_clear_button (1516608063079626727) -->
-    <skip />
+    <string name="home_screen_files_rename_dialog_clear_button" msgid="1516608063079626727">"Kosongkan"</string>
     <string name="home_screen_files_rename_dialog_neutral_button" msgid="961781261154618336">"Batal"</string>
     <string name="home_screen_files_rename_dialog_positive_button" msgid="6506701192246379747">"Namakan semula"</string>
     <string name="home_screen_files_rename_dialog_file_title" msgid="3540941610992603887">"Namakan semula fail"</string>
