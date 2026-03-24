@@ -369,7 +369,7 @@ public class TaskbarLauncherStateController {
 
         mIconAlignment.finishAnimation();
 
-        mLauncher.setHotseatIconsAlpha(1f, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
+        updateHotseatIconAlpha(1f, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
 
         if (mStateListenerClosable != null) {
             mStateListenerClosable.close();

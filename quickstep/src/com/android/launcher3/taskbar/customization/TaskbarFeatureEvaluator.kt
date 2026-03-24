@@ -21,7 +21,6 @@ import androidx.annotation.AnyThread
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING
-import com.android.launcher3.LauncherPrefs.Companion.TASKBAR_PINNING_IN_DESKTOP_MODE
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.DisplayId
 import com.android.launcher3.dagger.LauncherAppComponent
@@ -73,12 +72,10 @@ constructor(
     val isPinned: Boolean
         get() =
             if (
-                desktopVisibilityController.isInDesktopModeAndNotInOverview(displayId) ||
+                desktopVisibilityController.isInDesktopMode(displayId) ||
                     displayInfo?.showDesktopTaskbarForFreeformDisplay == true
             ) {
                 true
-            } else if (desktopVisibilityController.isInDesktopMode(displayId)) {
-                launcherPrefs.get(TASKBAR_PINNING_IN_DESKTOP_MODE)
             } else {
                 launcherPrefs.get(TASKBAR_PINNING)
             }
