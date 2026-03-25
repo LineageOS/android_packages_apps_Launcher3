@@ -880,12 +880,10 @@ public class BubbleBarViewController {
         }
 
         if (Flags.fixBubbleNotificationShowingInLockScreen()) {
-            boolean containerHidden = mHiddenForSysui || mHiddenForNoBubbles;
             BubbleLog.d(
-                    "BubbleBarViewController.updateVisibilityForStateChange() containerHidden=%b"
-                        + " mHiddenForSysui=%b mHiddenForNoBubbles=%b",
-                    containerHidden, mHiddenForSysui, mHiddenForNoBubbles);
-            if (containerHidden) {
+                    "BubbleBarViewController.updateVisibilityForStateChange()  mHiddenForSysui=%b",
+                    mHiddenForSysui);
+            if (mHiddenForSysui) {
                 mBubbleBarContainer.setVisibility(INVISIBLE);
             } else {
                 mBubbleBarContainer.setVisibility(VISIBLE);
