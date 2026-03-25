@@ -20,6 +20,7 @@ package com.android.quickstep.util
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -266,9 +267,32 @@ class SplitSelectDataHolderTest {
         assertNotNull(launchData.secondShortcut)
         assertNotNull(launchData.secondTask.pendingIntent)
         assertEquals(launchData.secondTask.taskId, INVALID_TASK_ID)
+        assertNull(launchData.secondShortcut!!.activity)
 
         // Stage position should be swapped for this launch type
         assertEquals(STAGE_POSITION_BOTTOM_OR_RIGHT, launchData.initialStagePosition)
+    }
+
+    @Test
+    fun generateLaunchData_Task_Shortcut_withComponent() {
+        splitSelectDataHolder.setInitialTaskSelect(
+            sampleTaskInfo,
+            STAGE_POSITION_TOP_OR_LEFT,
+            sampleItemInfo,
+            null,
+        )
+        // Create a shortcut intent and explicitly set a component on it
+        val shortcutWithComponent = Intent(sampleShortcut)
+        val componentName = ComponentName(samplePackage, "TestActivity")
+        shortcutWithComponent.component = componentName
+        splitSelectDataHolder.setSecondTask(shortcutWithComponent, sampleUser, sampleItemInfo2)
+
+        val launchData = splitSelectDataHolder.getSplitLaunchData()
+
+        assertEquals(launchData.splitLaunchType, SPLIT_TASK_SHORTCUT)
+        assertNotNull(launchData.secondShortcut)
+        // Verify the activity component was correctly set
+        assertEquals(componentName, launchData.secondShortcut!!.activity)
     }
 
     @Test
