@@ -76,7 +76,7 @@ public class LauncherApplication extends Application implements AppFunctionConfi
     public AppFunctionConfiguration getAppFunctionConfiguration() {
         Log.d("LauncherApp", "getAppFunctionConfiguration");
         AppFunctionConfiguration.Builder builder = new AppFunctionConfiguration.Builder();
-        if (Flags.kondoPlanner()) {
+        if (Flags.condoPlanner()) {
             builder.addEnclosingClassFactory(WorkspaceAppFunctions.class,
                     () -> getAppComponent().getWorkspaceAppFunctions());
         }

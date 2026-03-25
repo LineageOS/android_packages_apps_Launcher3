@@ -646,9 +646,9 @@ flag {
 }
 
 flag {
-    name: "kondo_planner"
+    name: "condo_planner"
     namespace: "launcher"
-    description: "Enables the kondo planner experience."
+    description: "Enables the condo planner experience."
     bug: "450695990"
 }
 
