@@ -16,6 +16,9 @@
 
 package com.android.launcher3.taskbar;
 
+import static com.android.launcher3.Flags.enableLauncherIconShapes;
+import static com.android.launcher3.icons.BitmapInfo.FLAG_THEMED;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -44,7 +47,10 @@ import com.android.app.animation.Interpolators;
 import com.android.launcher3.R;
 import com.android.launcher3.Reorderable;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.graphics.ThemeManager;
+import com.android.launcher3.icons.BitmapInfo.DrawableCreationFlags;
 import com.android.launcher3.icons.IconNormalizer;
+import com.android.launcher3.icons.IconShape;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.Themes;
@@ -292,9 +298,16 @@ public class TaskbarOverflowView extends FrameLayout implements Reorderable {
 
         List<TaskbarOverflowItem> visibleItems = getVisibleItems();
         int itemsToShow = Math.min(visibleItems.size(), MAX_ITEMS_IN_PREVIEW);
+
+        ThemeManager themeManager = ThemeManager.INSTANCE.get(getContext());
+        @DrawableCreationFlags int creationFlags =
+                themeManager.isIconThemeEnabled() ? FLAG_THEMED : 0;
+        @Nullable IconShape iconShape =
+                enableLauncherIconShapes() ? themeManager.getIconShapeData().getValue() : null;
+
         for (int i = itemsToShow - 1; i >= 0; --i) {
             int indexDrawn = mOverflowType == OverflowType.PINNED ? i : itemsToShow - i - 1;
-            Drawable icon = visibleItems.get(indexDrawn).getDrawableIcon();
+            Drawable icon = visibleItems.get(indexDrawn).getDrawableIcon(creationFlags, iconShape);
             if (icon == null) {
                 continue;
             }
