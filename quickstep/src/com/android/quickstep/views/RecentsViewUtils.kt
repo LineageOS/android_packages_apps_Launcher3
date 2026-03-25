@@ -56,7 +56,6 @@ import com.android.launcher3.statehandlers.DesktopVisibilityController.Companion
 import com.android.launcher3.statehandlers.DesktopVisibilityController.DesktopVisibilityListener
 import com.android.launcher3.statemanager.BaseState
 import com.android.launcher3.util.IntArray
-import com.android.launcher3.util.Preconditions
 import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.SafeCloseable
 import com.android.quickstep.GestureState
@@ -109,14 +108,6 @@ constructor(
     private var isInOverview: Boolean = false
 
     private var automationChangesClosable: SafeCloseable? = null
-
-    var launchingTaskView: TaskView? = null
-        set(value) {
-            if (value != null) {
-                Preconditions.assertTrue(field == null)
-            }
-            field = value
-        }
 
     init {
         if (hideAutomatedTasksInOverview()) {
@@ -1053,12 +1044,6 @@ constructor(
                 else -> true
             }
         }
-
-    fun hasOngoingTaskViewLaunch() =
-        recentsView.desktopRecentsController?.isDesktopLaunchOngoing() == true ||
-            recentsView.splitSelectStateController?.isSplitPairLaunchOngoing == true ||
-            recentsView.sideTaskLaunchCallback?.isDestroyed == false ||
-            launchingTaskView != null
 
     companion object {
         class RecentsViewFloatProperty(

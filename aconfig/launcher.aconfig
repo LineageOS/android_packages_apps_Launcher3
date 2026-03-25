@@ -204,16 +204,6 @@ flag {
 }
 
 flag {
-    name: "accessibility_scroll_on_allapps"
-    namespace: "launcher"
-    description: "Scroll to item position if accessibility focused"
-    bug: "265392261"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "enable_all_apps_button_in_hotseat"
     namespace: "launcher"
     description: "Enables displaying the all apps button in the hotseat."
@@ -384,6 +374,13 @@ flag {
   namespace: "launcher"
   description: "Enable dragging and dropping app icons on the taskbar."
   bug: "442605300"
+}
+
+flag {
+  name: "enable_taskbar_drag_to_remove"
+  namespace: "launcher"
+  description: "Enable dragging to remove pinned apps on the taskbar."
+  bug: "495823552"
 }
 
 flag {
@@ -721,4 +718,14 @@ flag {
   namespace: "launcher"
   description: "Enables fixed QSB at the bottom of hotseat"
   bug: "489141317"
+}
+
+flag {
+  name: "translate_imeswitcher_3buttons_with_bubble"
+  namespace: "launcher"
+  description: "Translate the IME Switcher when 3-buttons Navigation with Bubble Icon"
+  bug: "494111189"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

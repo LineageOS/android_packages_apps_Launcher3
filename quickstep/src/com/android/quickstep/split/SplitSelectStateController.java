@@ -709,10 +709,6 @@ public class SplitSelectStateController {
 
     }
 
-    public boolean isSplitPairLaunchOngoing() {
-        return mLaunchingTaskView != null;
-    }
-
     /**
      * Launches the initially selected task/intent in fullscreen (note the same SystemUi APIs are
      * used as {@link #launchSplitTasks(int, Consumer)} because they are overloaded to launch both

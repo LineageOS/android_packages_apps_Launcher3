@@ -20,20 +20,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.android.launcher3.CellLayout
 import com.android.launcher3.Launcher
-import com.android.launcher3.LauncherApplication
-import com.android.launcher3.LauncherModel
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundContext
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.icons.BitmapRenderer
 import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.repository.HomeScreenRepository
 import com.android.launcher3.model.scheduleTransactionSuspending
+import com.android.launcher3.organizer.dagger.OrganizerScope
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -43,11 +39,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** View model used by the [WorkspaceOrganizerActivity] and its composables. */
+/** View model used by the [OrganizerActivity] and its composables. */
+@OrganizerScope
 class WorkspaceOrganizerViewModel
 @Inject
 constructor(
-    private val launcherModel: LauncherModel,
     private val homeScreenRepository: HomeScreenRepository,
     private val modelWriter: IModelWriter,
     @LightweightBackgroundContext(priority = UI)
@@ -174,7 +170,6 @@ constructor(
                             context.moveScreen(currentIndex, targetIndex, orderedScreenIds)
                         }
                     }
-                    launcherModel.reloadIfActive("workspace-organizer-move-screen")
                 } catch (e: Exception) {
                     _workspacePages.value = originalPages
                     workspaceOrganizerState =
@@ -215,7 +210,6 @@ constructor(
                             context.deleteScreen(page.screenId)
                         }
                     }
-                    launcherModel.reloadIfActive("workspace-organizer-remove-pages")
                 } catch (e: Exception) {
                     _workspacePages.value = originalPages
                     workspaceOrganizerState =
@@ -240,23 +234,5 @@ constructor(
     companion object {
         private const val BITMAP_SCALE_FACTOR = 4
         private const val CANVAS_SCALE_RATIO = 1f / BITMAP_SCALE_FACTOR
-
-        /** Returns a [ViewModelProvider.Factory] for [WorkspaceOrganizerViewModel]. */
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application =
-                    this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
-                        as LauncherApplication
-                val appComponent = application.appComponent
-                val launcher = requireNotNull(Launcher.ACTIVITY_TRACKER.getCreatedContext())
-                WorkspaceOrganizerViewModel(
-                    launcherModel = appComponent.launcherAppState.model,
-                    homeScreenRepository = appComponent.homeScreenRepository,
-                    modelWriter = launcher.modelWriter,
-                    lightweightBackgroundContext =
-                        appComponent.productionDispatchers.lightweightBackgroundUiDispatcher,
-                )
-            }
-        }
     }
 }

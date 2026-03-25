@@ -68,6 +68,9 @@ class CustomEventsTouchHandler(
 
     override var customActionsListener: CustomActionsListener? = null
 
+    // Whether mouse will drag via long-press-and-drag instead of immediate click-and-drag.
+    public var enableMouseLongPressForDrag = false
+
     /**
      * Processes a touch event.
      *
@@ -95,7 +98,7 @@ class CustomEventsTouchHandler(
             return true
         }
 
-        if (shouldStartMouseDrag(event)) {
+        if (shouldStartMouseDrag(event) && !enableMouseLongPressForDrag) {
             performActions(ACTION_START_DRAG)
             return true
         }
@@ -109,6 +112,11 @@ class CustomEventsTouchHandler(
         downY = event.y
         if (TouchUtil.isMouseRightClickDownOrMove(event)) {
             isRightClickActive = true
+            // Send a CANCEL action so that additional gestures aren't triggered (i.e. long-press).
+            val cancelEvent =
+                MotionEvent.obtain(event).apply { this.action = MotionEvent.ACTION_CANCEL }
+            gestureDetector.onTouchEvent(cancelEvent)
+            cancelEvent.recycle()
             performActions(ACTION_POPUP_MENU)
         }
         return true
@@ -117,6 +125,8 @@ class CustomEventsTouchHandler(
     override fun onLongPress(event: MotionEvent) {
         if (!isMouseEvent(event)) {
             performActions(ACTION_POPUP_MENU or ACTION_START_DRAG)
+        } else if (enableMouseLongPressForDrag) {
+            performActions(ACTION_START_DRAG)
         }
     }
 

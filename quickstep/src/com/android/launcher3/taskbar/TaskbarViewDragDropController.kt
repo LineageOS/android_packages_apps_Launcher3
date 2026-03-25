@@ -22,6 +22,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.util.size
 import com.android.launcher3.Alarm
 import com.android.launcher3.DropTarget
+import com.android.launcher3.Flags.enableTaskbarDragToRemove
 import com.android.launcher3.LauncherModel.Companion.useModelRepositoryBinding
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.OnAlarmListener
@@ -113,12 +114,16 @@ class TaskbarViewDragDropController(
 
     fun addDropTargets(dragController: DragController) {
         dragController.addDropTarget(taskbarPinningDropTarget)
-        dragController.addDropTarget(unpinDropTarget)
+        if (enableTaskbarDragToRemove()) {
+            dragController.addDropTarget(unpinDropTarget)
+        }
     }
 
     fun removeDropTargets(dragController: DragController) {
         dragController.removeDropTarget(taskbarPinningDropTarget)
-        dragController.removeDropTarget(unpinDropTarget)
+        if (enableTaskbarDragToRemove()) {
+            dragController.removeDropTarget(unpinDropTarget)
+        }
     }
 
     fun onTaskbarItemViewDragStart(itemView: View) {

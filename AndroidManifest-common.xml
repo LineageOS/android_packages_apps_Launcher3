@@ -183,31 +183,29 @@
             android:name="android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED"
             android:value="true" />
 
-
-        <activity android:name="com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerActivity"
-            android:excludeFromRecents="true"
+        <activity
+            android:name="com.android.launcher3.organizer.creation.screen.ui.OrganizerActivity"
             android:autoRemoveFromRecents="true"
-            android:launchMode="singleTop"
-            android:exported="true">
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@style/OrganizerTheme">
             <intent-filter>
-                <action android:name="com.android.launcher3.WORKSPACE_ORGANIZER" />
+                <action android:name="com.android.launcher3.ORGANIZER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
         <activity
-            android:name="com.android.launcher3.organizer.creation.screen.ui.spacecreator.SpaceCreatorActivity"
+            android:name="com.android.launcher3.organizer.creation.screen.ui.foldercreator.FolderCreatorActivity"
             android:autoRemoveFromRecents="true"
             android:excludeFromRecents="true"
-            android:exported="true"
-            android:launchMode="singleTop">
+            android:exported="false"
+            android:theme="@style/FolderCreatorTheme">
             <intent-filter>
-
-                <action android:name="com.android.launcher3.SCREEN_CREATION" />
+                <action android:name="com.android.launcher3.FOLDER_CREATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
 
     </application>
 </manifest>

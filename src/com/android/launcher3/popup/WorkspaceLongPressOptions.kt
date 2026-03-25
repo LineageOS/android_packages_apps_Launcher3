@@ -39,7 +39,8 @@ import com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_WIDG
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemCoordinates
 import com.android.launcher3.model.data.WorkspaceItemInfo
-import com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer.WorkspaceOrganizerActivity
+import com.android.launcher3.organizer.creation.screen.ui.OrganizerActivity
+import com.android.launcher3.organizer.creation.screen.ui.foldercreator.FolderCreatorActivity
 import com.android.launcher3.popup.PopupCategory.SYSTEM_SHORTCUT
 import com.android.launcher3.testing.TestLogging
 import com.android.launcher3.testing.shared.TestProtocol
@@ -103,6 +104,20 @@ object WorkspaceLongPressOptions {
         if (Flags.kondoPlanner()) {
             add(
                 PopupData(
+                    R.drawable.ic_create_new_folder,
+                    R.string.settings_folder_creation,
+                    SYSTEM_SHORTCUT,
+                    LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
+                ) { ac, _, _ ->
+                    ac.asContext()
+                        .startActivity(
+                            Intent(ac.asContext(), FolderCreatorActivity::class.java)
+                                .setPackage(ac.asContext().packageName)
+                        )
+                }
+            )
+            add(
+                PopupData(
                     R.drawable.kondo_planner_icon,
                     R.string.settings_home_organizer,
                     SYSTEM_SHORTCUT,
@@ -110,8 +125,12 @@ object WorkspaceLongPressOptions {
                 ) { ac, _, _ ->
                     ac.asContext()
                         .startActivity(
-                            Intent(ac.asContext(), WorkspaceOrganizerActivity::class.java)
+                            Intent(ac.asContext(), OrganizerActivity::class.java)
                                 .setPackage(ac.asContext().packageName)
+                                .putExtra(
+                                    OrganizerActivity.EXTRA_MODE,
+                                    OrganizerActivity.MODE_WORKSPACE,
+                                )
                         )
                 }
             )

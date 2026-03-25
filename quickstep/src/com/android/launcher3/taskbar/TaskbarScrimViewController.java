@@ -50,6 +50,7 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
     private final TaskbarScrimView mScrimView;
     private ObjectAnimator mScrimAlphaAnimator;
     private boolean mTaskbarVisible;
+    private boolean mShowingScrim = false;
     @SystemUiStateFlags
     private long mSysUiStateFlags;
 
@@ -109,6 +110,19 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
         }
         mSysUiStateFlags = stateFlags;
         showScrim(shouldShowScrimForExpandedBubbles(), computeScrimAlpha(), skipAnim);
+    }
+
+    /** Re-evaluates whether the scrim should be shown and updates its visibility. */
+    public void updateScrimVisibility(boolean skipAnim) {
+        if (!Flags.fixTaskbarScrimViewOnHome()) {
+            return;
+        }
+        boolean shouldShowScrim = shouldShowScrimForExpandedBubbles();
+        // If scrim visibility isn`t changed and should not be immediately applied - return
+        if (shouldShowScrim == mShowingScrim && !skipAnim) {
+            return;
+        }
+        updateStateForSysuiFlags(mSysUiStateFlags, skipAnim);
     }
 
     private boolean shouldShowScrim() {
@@ -181,6 +195,7 @@ public class TaskbarScrimViewController implements TaskbarControllers.LoggableTa
     private void showScrim(boolean showScrim, float alpha, boolean skipAnim) {
         mScrimView.setOnClickListener(showScrim ? (view) -> onClick() : null);
         mScrimView.setClickable(showScrim);
+        mShowingScrim = showScrim;
         cancelAlphaAnimationIfRunning();
         if (skipAnim) {
             mScrimAlpha.updateValue(alpha);

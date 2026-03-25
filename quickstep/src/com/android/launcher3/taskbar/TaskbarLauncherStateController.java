@@ -369,7 +369,7 @@ public class TaskbarLauncherStateController {
 
         mIconAlignment.finishAnimation();
 
-        mLauncher.setHotseatIconsAlpha(1f, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
+        updateHotseatIconAlpha(1f, ALPHA_CHANNEL_TASKBAR_ALIGNMENT);
 
         if (mStateListenerClosable != null) {
             mStateListenerClosable.close();
@@ -576,22 +576,29 @@ public class TaskbarLauncherStateController {
                     + ", mLauncherState: " + mLauncherState
                     + ", toAlignment: " + toAlignment);
         }
-        mControllers.bubbleControllers.ifPresent(controllers -> {
-            // Ignore state changes when taskbar is destroyed
-            if (mControllers.taskbarActivityContext.isDestroyed()) {
-                return;
-            }
-            // Show the bubble bar when on launcher home (hotseat icons visible) or in overview
-            boolean onOverview = isInLauncher && mLauncherState == LauncherState.OVERVIEW;
-            boolean hotseatIconsVisible = isInLauncher && mLauncherState.areElementsVisible(
-                    mLauncherUiState, HOTSEAT_ICONS);
-            BubbleLauncherState state = onOverview
-                    ? BubbleLauncherState.OVERVIEW
-                    : hotseatIconsVisible
-                            ? BubbleLauncherState.HOME
-                            : BubbleLauncherState.IN_APP;
-            controllers.bubbleStashController.setLauncherState(state);
-        });
+        mControllers.bubbleControllers.ifPresent(
+                controllers -> {
+                    // Ignore state changes when taskbar is destroyed
+                    if (mControllers.taskbarActivityContext.isDestroyed()) {
+                        return;
+                    }
+                    // Show the bubble bar when on launcher home (hotseat icons visible) or in
+                    // overview
+                    boolean onOverview = isInLauncher && mLauncherState == LauncherState.OVERVIEW;
+                    boolean hotseatIconsVisible =
+                            isInLauncher
+                                    && mLauncherState.areElementsVisible(
+                                            mLauncherUiState, HOTSEAT_ICONS);
+                    BubbleLauncherState state =
+                            onOverview
+                                    ? BubbleLauncherState.OVERVIEW
+                                    : hotseatIconsVisible
+                                            ? BubbleLauncherState.HOME
+                                            : BubbleLauncherState.IN_APP;
+                    controllers.bubbleStashController.setLauncherState(state);
+                    boolean skipAnim = !start || duration == 0;
+                    mControllers.taskbarScrimViewController.updateScrimVisibility(skipAnim);
+                });
 
         TaskbarStashController stashController = mControllers.taskbarStashController;
         stashController.updateStateForFlag(FLAG_IN_OVERVIEW,

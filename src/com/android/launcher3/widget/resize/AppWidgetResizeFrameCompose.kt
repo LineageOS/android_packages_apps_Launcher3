@@ -56,7 +56,7 @@ class AppWidgetResizeFrameCompose
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
     AppWidgetResizeFrameBase(context, attrs, defStyleAttr),
-    DragController.DragListener,
+    DragController.DragSessionListener,
     ResizeManager.ResizeListener,
     View.OnKeyListener {
     private val launcher: Launcher = Launcher.getLauncher(context)
@@ -104,6 +104,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         }
 
         getHitRect(tempRect)
+        // Hit rect might not yet be initialized if the resize frame intercepts the touch event
+        // (e.g., ACTION_UP from a right-click) before the first layout pass has completed.
+        if (tempRect.isEmpty) {
+            return false
+        }
+
         if (tempRect.contains(ev.x.toInt(), ev.y.toInt())) {
             return false // let the widget's OR our compose view's handling do its thing.
         }
@@ -116,12 +122,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         return popupTouchHandler.handleTouchEvent(popup, ev)
     }
 
-    override fun onDragStart(dragObject: DropTarget.DragObject?, options: DragOptions?) {
+    override fun onDragSessionStart(dragObject: DropTarget.DragObject?, options: DragOptions?) {
         close(/* animate= */ true) // close frame if user starts dragging widget.
-    }
-
-    override fun onDragEnd() {
-        // No-op
     }
 
     /** Retrieves the view where accessibility actions happen. */
@@ -138,7 +140,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             // to asynchronously call `close()` again (which happens with `AbstractFloatingView`s
             // that get removed without being closed).
             mIsOpen = false
-            launcher.dragController.removeDragListener(this)
+            launcher.dragController.removeDragSessionListener(this)
             launcher.dragLayer.removeView(this) // removing view should dispose composition.
         } finally {
             Trace.endSection()
@@ -186,7 +188,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         addView(composeView)
 
         val launcher = Launcher.getLauncher(context)
-        launcher.dragController.addDragListener(this)
+        launcher.dragController.addDragSessionListener(this)
     }
 
     /**

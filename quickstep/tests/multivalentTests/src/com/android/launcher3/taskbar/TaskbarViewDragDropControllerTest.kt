@@ -21,6 +21,8 @@ import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Process
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.view.View
 import android.view.View.GONE
 import android.view.View.MeasureSpec
@@ -30,6 +32,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.DropTarget
+import com.android.launcher3.Flags.FLAG_ENABLE_TASKBAR_DRAG_TO_REMOVE
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherSettings
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
@@ -99,10 +102,11 @@ class TaskbarViewDragDropControllerTest {
             params = SandboxParams(builderBase = mutatedComponentBuilder())
         )
     @get:Rule(order = 1) val animatorTestRule = TaskbarAnimatorTestRule(this)
-    @get:Rule(order = 2)
+    @get:Rule(order = 2) val setFlagsRule = SetFlagsRule()
+    @get:Rule(order = 3)
     val taskbarUnitTestRule = TaskbarUnitTestRule(context, this::onControllersInitialized)
 
-    @get:Rule(order = 3)
+    @get:Rule(order = 4)
     val desktopModeRule = TestRule { base, description ->
         object : Statement() {
             override fun evaluate() {
@@ -395,6 +399,7 @@ class TaskbarViewDragDropControllerTest {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_TO_REMOVE)
     fun unpinned_onDragEnter_showsTooltip() {
         taskbarViewDragDropController.setUpCallbacks(modelCallbacks)
         val dragObject = createDragObjectWithView(TEST_WORKSPACE_ITEM)
@@ -410,6 +415,7 @@ class TaskbarViewDragDropControllerTest {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_TO_REMOVE)
     fun unpinned_onDragOver_updatesTooltipPosition() {
         taskbarViewDragDropController.setUpCallbacks(modelCallbacks)
         val dragObject = createDragObjectWithView(TEST_WORKSPACE_ITEM)
@@ -515,6 +521,7 @@ class TaskbarViewDragDropControllerTest {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_TO_REMOVE)
     fun unpinned_onDrop_undoClicked_abortsDelete() {
         val hotseatItems = createTestHotseatItemsWithDifferentPackages(2) as Array<ItemInfo>
         updateTaskbarHotseatItems(hotseatItems)
@@ -554,6 +561,7 @@ class TaskbarViewDragDropControllerTest {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_TO_REMOVE)
     fun unpinned_onDrop_onDismiss_commitsDelete() {
         val hotseatItems = createTestHotseatItemsWithDifferentPackages(2) as Array<ItemInfo>
         updateTaskbarHotseatItems(hotseatItems)
@@ -601,6 +609,7 @@ class TaskbarViewDragDropControllerTest {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_TO_REMOVE)
     fun unpinned_onDrop_itemWithRunningTasks_undoClicked_abortsDelete() {
         val hotseatItems: Array<ItemInfo> =
             createTestHotseatItemsWithDifferentPackages(2)
@@ -647,6 +656,7 @@ class TaskbarViewDragDropControllerTest {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_TASKBAR_DRAG_TO_REMOVE)
     fun unpinned_onDrop_itemWithRunningTasks_onDismiss_commitsDelete() {
         val hotseatItems: Array<ItemInfo> =
             createTestHotseatItemsWithDifferentPackages(2)

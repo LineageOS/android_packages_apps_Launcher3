@@ -14,22 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.organizer.creation.screen.ui.workspaceorganizer
+package com.android.launcher3.organizer.dagger
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import com.android.launcher3.organizer.creation.screen.ui.BlurController
+import javax.inject.Scope
 
-class WorkspaceOrganizerActivity : ComponentActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent { WorkspaceOrganizer(onArrowBack = { finish() }) }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        BlurController(this).apply()
-    }
-}
+/** Scope annotation for items within the [OrganizerComponent]. */
+@MustBeDocumented @Retention(AnnotationRetention.RUNTIME) @Scope annotation class OrganizerScope

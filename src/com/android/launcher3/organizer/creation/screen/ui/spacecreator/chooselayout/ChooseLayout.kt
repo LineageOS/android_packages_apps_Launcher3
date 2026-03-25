@@ -85,7 +85,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChooseLayout(viewModel: SpaceCreatorViewModel, onBack: () -> Unit) {
+fun ChooseLayout(viewModel: SpaceCreatorViewModel, onBack: () -> Unit, onAdd: () -> Unit) {
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
@@ -126,7 +126,10 @@ fun ChooseLayout(viewModel: SpaceCreatorViewModel, onBack: () -> Unit) {
                     Modifier.fillMaxWidth().padding(bottom = ChooseLayoutDimens.contentSidePadding),
                 contentAlignment = Alignment.Center,
             ) {
-                AddButton()
+                AddButton {
+                    viewModel.addSelectedLayoutToWorkspace()
+                    onAdd.invoke()
+                }
             }
         },
         content = { padding -> ChooseLayoutContent(padding = padding, viewModel = viewModel) },
@@ -333,9 +336,9 @@ fun PaginationDots(pagerState: PagerState) {
 }
 
 @Composable
-fun AddButton() {
+fun AddButton(onClick: () -> Unit) {
     Button(
-        onClick = {},
+        onClick = onClick,
         modifier =
             Modifier.background(
                     color = colorResource(R.color.materialColorOnPrimary),

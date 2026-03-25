@@ -202,7 +202,7 @@ public class BaseOverview extends LauncherInstrumentation.VisibleContainer {
                 // In desktop-first mode clear-all does not go to a home
                 mLauncher.executeAndWaitForEvent(clickClearAll,
                         event -> TestProtocol.DISMISS_ANIMATION_ENDS_MESSAGE
-                                .equals(event.getClassName().toString()),
+                                .equals(event.getClassName()),
                         () -> "'Clear All' didn't complete",
                         "clicking 'Clear All'");
             } else {

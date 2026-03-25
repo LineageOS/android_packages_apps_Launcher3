@@ -18,6 +18,7 @@ package com.android.launcher3.taskbar
 
 import android.graphics.Rect
 import android.graphics.Region
+import android.os.Trace
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -115,6 +116,17 @@ class CueBarController(private val activity: TaskbarActivityContext) :
             AmbientCueJankMonitor(InteractionJankMonitor.getInstance(), composeView)
         cueBar =
             composeView.apply {
+                addOnAttachStateChangeListener(
+                    object : View.OnAttachStateChangeListener {
+                        override fun onViewAttachedToWindow(v: View) {
+                            Trace.beginAsyncSection("CueBarAttached", 0)
+                        }
+
+                        override fun onViewDetachedFromWindow(v: View) {
+                            Trace.endAsyncSection("CueBarAttached", 0)
+                        }
+                    }
+                )
                 setViewCompositionStrategy(
                     ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
                 )
