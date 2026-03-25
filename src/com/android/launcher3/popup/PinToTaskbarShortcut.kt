@@ -79,9 +79,9 @@ constructor(
 
         if (!isPin) {
             var infoToUnpin = mItemInfo
-            // If the shortcut is triggered from the all apps, find the info in the taskbar to
+            // If the shortcut is not triggered from the taskbar, find the info in the taskbar to
             // unpin. Otherwise, directly unpin the info on the taskbar.
-            if (mItemInfo.isInAllApps) {
+            if (mItemInfo.container != Favorites.CONTAINER_HOTSEAT) {
                 val targetKey = mItemInfo.componentKey
                 for (i in 0 until pinnedInfoList.size) {
                     val taskbarItem = pinnedInfoList.valueAt(i)
