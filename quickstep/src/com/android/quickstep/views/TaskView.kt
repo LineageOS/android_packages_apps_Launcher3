@@ -1320,14 +1320,12 @@ constructor(
                     /* v = */ this,
                     CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS,
                 )
-                recentsView?.setLaunchingTaskView(this)
                 it.add {
                     InteractionJankMonitorWrapper.end(CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS)
                     Log.d(
                         TAG,
                         "${taskIds.contentToString()} - launchWithAnimation - launchCompleted",
                     )
-                    recentsView?.setLaunchingTaskView(null)
                 }
             }
     }
@@ -1526,7 +1524,6 @@ constructor(
                 ) {
                     Log.d(TAG, "launchWithoutAnimation: launch animation finished")
                     failureListener.onTransitionFinished()
-                    recentsView?.setLaunchingTaskView(null)
                 }
                 .apply {
                     launchDisplayId = display?.displayId ?: Display.DEFAULT_DISPLAY
@@ -1537,17 +1534,15 @@ constructor(
                     disableStartingWindow = firstTaskContainer.shouldShowSplashView
                 }
         Executors.UI_HELPER_EXECUTOR.execute {
+            Log.d(
+                TAG,
+                "launchWithoutAnimation(isQuickSwitch: $isQuickSwitch) - " +
+                    "startActivityFromRecents: ${taskIds.contentToString()}",
+            )
             if (
-                ActivityManagerWrapper.getInstance()
+                !ActivityManagerWrapper.getInstance()
                     .startActivityFromRecents(firstTaskContainer.task.key, opts)
             ) {
-                Log.d(
-                    TAG,
-                    "launchWithoutAnimation(isQuickSwitch: $isQuickSwitch) - " +
-                        "startActivityFromRecents: ${taskIds.contentToString()}",
-                )
-                recentsView?.setLaunchingTaskView(this)
-            } else {
                 Log.d(TAG, "launchWithoutAnimation - task launch failed")
                 // If the call to start activity failed, then post the result immediately,
                 // otherwise, wait for the animation start callback from the activity options

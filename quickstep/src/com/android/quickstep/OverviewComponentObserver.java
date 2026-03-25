@@ -57,6 +57,7 @@ import com.android.launcher3.util.SimpleBroadcastReceiver;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.quickstep.util.ActiveGestureProtoLogProxy;
 import com.android.quickstep.views.RecentsViewContainer;
+import com.android.quickstep.window.RecentsWindowManager;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 
 import java.io.PrintWriter;
@@ -82,7 +83,7 @@ public final class OverviewComponentObserver {
     private final SimpleBroadcastReceiver mUserPreferenceChangeReceiver;
     private final SimpleBroadcastReceiver mOtherHomeAppUpdateReceiver;
 
-    private final PerDisplayRepository<FallbackWindowInterface> mFallbackWindowInterfaceRepository;
+    private final PerDisplayRepository<RecentsWindowManager> mRecentsWindowManagerRepository;
     private final LauncherActivityInterface mLauncherActivityInterface;
     private final FallbackActivityInterface mFallbackActivityInterface;
 
@@ -107,7 +108,7 @@ public final class OverviewComponentObserver {
     @Inject
     public OverviewComponentObserver(
             @ApplicationContext Context context,
-            PerDisplayRepository<FallbackWindowInterface> fallbackWindowInterfaceRepository,
+            PerDisplayRepository<RecentsWindowManager> recentsWindowManagerRepository,
             LauncherActivityInterface launcherActivityInterface,
             FallbackActivityInterface fallbackActivityInterface,
             DaggerSingletonTracker lifecycleTracker) {
@@ -116,7 +117,7 @@ public final class OverviewComponentObserver {
                 new SimpleBroadcastReceiver(context, MAIN_EXECUTOR, this::updateOverviewTargets);
         mOtherHomeAppUpdateReceiver =
                 new SimpleBroadcastReceiver(context, MAIN_EXECUTOR, this::updateOverviewTargets);
-        mFallbackWindowInterfaceRepository = fallbackWindowInterfaceRepository;
+        mRecentsWindowManagerRepository = recentsWindowManagerRepository;
         mLauncherActivityInterface = launcherActivityInterface;
         mFallbackActivityInterface = fallbackActivityInterface;
         // Set up primary intents
@@ -234,8 +235,11 @@ public final class OverviewComponentObserver {
         if (!mIsHomeDisabled && (defaultHome == null || mIsDefaultHome)) {
             // User default home is same as our home app. Use Overview integrated in Launcher.
             if (enableLauncherOverviewInWindow.isTrue()) {
+                RecentsWindowManager recentsWindowManager = mRecentsWindowManagerRepository.get(
+                        DEFAULT_DISPLAY);
                 mDefaultDisplayContainerInterface =
-                        mFallbackWindowInterfaceRepository.get(DEFAULT_DISPLAY);
+                        recentsWindowManager != null ? recentsWindowManager.getContainerInterface()
+                                : null;
             } else {
                 mDefaultDisplayContainerInterface = mLauncherActivityInterface;
             }
@@ -248,8 +252,11 @@ public final class OverviewComponentObserver {
         } else {
             // The default home app is a different launcher. Use the fallback Overview instead.
             if (enableFallbackOverviewInWindow.isTrue()) {
+                RecentsWindowManager recentsWindowManager = mRecentsWindowManagerRepository.get(
+                        DEFAULT_DISPLAY);
                 mDefaultDisplayContainerInterface =
-                        mFallbackWindowInterfaceRepository.get(DEFAULT_DISPLAY);
+                        recentsWindowManager != null ? recentsWindowManager.getContainerInterface()
+                                : null;
             } else {
                 mDefaultDisplayContainerInterface = mFallbackActivityInterface;
             }
@@ -360,7 +367,10 @@ public final class OverviewComponentObserver {
     @Nullable
     public BaseContainerInterface<?, ?> getContainerInterface(int displayId) {
         if (displayId != DEFAULT_DISPLAY) {
-            return mFallbackWindowInterfaceRepository.get(displayId);
+            RecentsWindowManager recentsWindowManager = mRecentsWindowManagerRepository.get(
+                    displayId);
+            return recentsWindowManager != null ? recentsWindowManager.getContainerInterface()
+                    : null;
         } else {
             return mDefaultDisplayContainerInterface;
         }
