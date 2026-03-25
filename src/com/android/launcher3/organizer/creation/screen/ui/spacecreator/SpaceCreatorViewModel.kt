@@ -25,7 +25,6 @@ import androidx.lifecycle.viewModelScope
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundContext
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
-import com.android.launcher3.model.BgDataModel
 import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
@@ -51,7 +50,7 @@ constructor(
     @LightweightBackgroundContext(priority = UI)
     private val lightweightBackgroundContext: CoroutineContext,
     private val modelWriter: IModelWriter,
-    private val bgDataModel: BgDataModel,
+    private val organizerTransactionContextFactory: OrganizerTransactionContext.Factory,
 ) : ViewModel() {
     var chooseLayoutState: ChooseLayoutState by mutableStateOf(ChooseLayoutState())
         private set
@@ -127,7 +126,7 @@ constructor(
                 val itemsInScreen =
                     chooseLayoutState.layouts.getOrNull(selectedLayoutIndex) ?: return@launch
                 modelWriter.scheduleTransactionSuspending { context ->
-                    OrganizerTransactionContext(context).addScreen(itemsInScreen, bgDataModel)
+                    organizerTransactionContextFactory.create(context).addScreen(itemsInScreen)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to persist screen")
