@@ -58,9 +58,6 @@ public class QuickstepAccessibilityDelegate extends LauncherAccessibilityDelegat
     }
 
     private void scrollToPositionIfNeeded(View view) {
-        if (!Flags.accessibilityScrollOnAllapps()) {
-            return;
-        }
         AllAppsRecyclerView contentView = mLauncher.getAppsView().getActiveRecyclerView();
         if (contentView instanceof SearchRecyclerView) {
             return;
