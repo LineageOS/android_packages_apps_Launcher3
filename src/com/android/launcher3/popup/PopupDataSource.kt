@@ -16,6 +16,8 @@
 
 package com.android.launcher3.popup
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Process
 import android.util.Log
@@ -23,6 +25,7 @@ import android.view.View
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.DropTargetHandler
+import com.android.launcher3.Flags.enableHomeScreenFilesCopyPaste
 import com.android.launcher3.Flags.enableHomeScreenFilesRenaming
 import com.android.launcher3.LauncherConstants
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
@@ -138,6 +141,22 @@ constructor(private val renameDialogFactory: HomeScreenFilesRenameDialogFactory)
             activityContext.startActivitySafely(view, itemInfo.intent, itemInfo)
         }
 
+    private val copyFileSystemItem =
+        PopupData(
+            iconResId = R.drawable.ic_home_screen_files_context_menu_copy,
+            labelResId = R.string.home_screen_files_context_menu_copy_label,
+            category = PopupCategory.SYSTEM_SHORTCUT_FIXED,
+            eventId = LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_COPY_VIA_CONTEXT_MENU,
+        ) { activityContext: ActivityContext, itemInfo: ItemInfo, _: View ->
+            val file = itemInfo.homeScreenFile ?: return@PopupData
+            activityContext
+                .asContext()
+                .getSystemService(ClipboardManager::class.java)
+                ?.setPrimaryClip(
+                    ClipData(/* label= */ "", arrayOf(file.mimeType), ClipData.Item(file.uri))
+                )
+        }
+
     private val renameFileSystemItem =
         PopupData(
             iconResId = R.drawable.ic_home_screen_files_context_menu_rename,
@@ -170,6 +189,9 @@ constructor(private val renameDialogFactory: HomeScreenFilesRenameDialogFactory)
         else
             buildList {
                 add(openHomeScreenFile)
+                if (enableHomeScreenFilesCopyPaste()) {
+                    add(copyFileSystemItem)
+                }
                 if (enableHomeScreenFilesRenaming()) {
                     add(renameFileSystemItem)
                 }

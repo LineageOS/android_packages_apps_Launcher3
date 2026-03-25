@@ -16,11 +16,14 @@
 
 package com.android.launcher3.popup
 
+import android.content.ClipboardManager
+import android.content.Context
 import android.net.Uri
 import android.os.Process
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import android.provider.DocumentsContract.Document.MIME_TYPE_DIR
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -45,12 +48,14 @@ import com.android.launcher3.views.BaseDragLayer
 import com.android.providers.media.flags.Flags.FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API
 import com.android.tools.dagger.mutation.annotations.BindValue
 import com.android.tools.dagger.mutation.annotations.MutatedComponent
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -145,45 +150,83 @@ class PopupDataRepositoryUnitTest {
 
     @Test
     @DisableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_COPY_PASTE,
         Flags.FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING,
         Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
         FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
     )
-    fun getPopupDataForFileSystemItemsWhenRenamingAndTrashingDisabled() {
-        testPopupDataForFileSystemItems(supportsRenaming = false, supportsTrashing = false)
+    fun getPopupDataForFileSystemItemsWhenFlagsDisabled() {
+        testPopupDataForFileSystemItems(
+            supportsCopyPaste = false,
+            supportsRenaming = false,
+            supportsTrashing = false,
+        )
     }
 
     @Test
     @EnableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_COPY_PASTE,
         Flags.FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING,
         Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
         FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
     )
-    fun getPopupDataForFileSystemItemsWhenRenamingAndTrashingEnabled() {
-        testPopupDataForFileSystemItems(supportsRenaming = true, supportsTrashing = true)
+    fun getPopupDataForFileSystemItemsWhenFlagsEnabled() {
+        testPopupDataForFileSystemItems(
+            supportsCopyPaste = true,
+            supportsRenaming = true,
+            supportsTrashing = true,
+        )
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_COPY_PASTE)
+    @DisableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING,
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
+        FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
+    )
+    fun getPopupDataForFileSystemItemsWhenCopyPasteEnabled() {
+        testPopupDataForFileSystemItems(
+            supportsCopyPaste = true,
+            supportsRenaming = false,
+            supportsTrashing = false,
+        )
     }
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING)
     @DisableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_COPY_PASTE,
         Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
         FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
     )
-    fun getPopupDataForFileSystemItemsWhenRenamingEnabledAndTrashingDisabled() {
-        testPopupDataForFileSystemItems(supportsRenaming = true, supportsTrashing = false)
+    fun getPopupDataForFileSystemItemsWhenRenamingEnabled() {
+        testPopupDataForFileSystemItems(
+            supportsCopyPaste = false,
+            supportsRenaming = true,
+            supportsTrashing = false,
+        )
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING)
     @EnableFlags(
         Flags.FLAG_ENABLE_HOME_SCREEN_FILES_TRASHING,
         FLAG_ENABLE_TRASH_AND_RESTORE_BY_FILE_PATH_API,
     )
-    fun getPopupDataForFileSystemItemsWhenRenamingDisabledAndTrashingEnabled() {
-        testPopupDataForFileSystemItems(supportsRenaming = false, supportsTrashing = true)
+    @DisableFlags(
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_COPY_PASTE,
+        Flags.FLAG_ENABLE_HOME_SCREEN_FILES_RENAMING,
+    )
+    fun getPopupDataForFileSystemItemsWhenTrashingEnabled() {
+        testPopupDataForFileSystemItems(
+            supportsCopyPaste = false,
+            supportsRenaming = false,
+            supportsTrashing = true,
+        )
     }
 
     private fun testPopupDataForFileSystemItems(
+        supportsCopyPaste: Boolean,
         supportsRenaming: Boolean,
         supportsTrashing: Boolean,
     ) {
@@ -195,6 +238,7 @@ class PopupDataRepositoryUnitTest {
                 isDirectory = false,
                 user = Process.myUserHandle(),
             ),
+            supportsCopyPaste,
             supportsRenaming,
             supportsTrashing,
         )
@@ -202,10 +246,11 @@ class PopupDataRepositoryUnitTest {
             HomeScreenFile(
                 uri = Uri.parse("content://media/external_primary/file/2"),
                 displayName = "folder",
-                mimeType = null,
+                mimeType = MIME_TYPE_DIR,
                 isDirectory = true,
                 user = Process.myUserHandle(),
             ),
+            supportsCopyPaste,
             supportsRenaming,
             supportsTrashing,
         )
@@ -213,11 +258,13 @@ class PopupDataRepositoryUnitTest {
 
     private fun testPopupDataForFileSystemItem(
         file: HomeScreenFile,
+        supportsCopyPaste: Boolean,
         supportsRenaming: Boolean,
         supportsTrashing: Boolean,
     ) {
         val activityContext = mock<ActivityContext>()
         val view = mock<View>()
+
         val item =
             WorkspaceItemInfo().apply {
                 id = 1
@@ -225,10 +272,17 @@ class PopupDataRepositoryUnitTest {
                 intent = HomeScreenFilesUtils.buildLaunchIntent(file.uri, file)
                 title = file.displayName
             }
+
         val popupData = popupDataMapper.getAllSupportedPopupActions(item)
         var popupDataIndex = 0
+        val popupDataSize = run {
+            var size = 2
+            if (supportsCopyPaste) size += 1
+            if (supportsRenaming) size += 1
+            size
+        }
 
-        assert(popupData!!.size == if (supportsRenaming) 3 else 2)
+        assert(popupData!!.size == popupDataSize)
         with(popupData[popupDataIndex++]) {
             assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
             assert(iconResId == R.drawable.ic_home_screen_files_context_menu_open_in_app)
@@ -237,6 +291,32 @@ class PopupDataRepositoryUnitTest {
 
             popupAction.invoke(activityContext, item, view)
             verify(activityContext, times(1)).startActivitySafely(view, item.intent, item)
+        }
+        if (supportsCopyPaste) {
+            with(popupData[popupDataIndex++]) {
+                assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
+                assert(iconResId == R.drawable.ic_home_screen_files_context_menu_copy)
+                assert(labelResId == R.string.home_screen_files_context_menu_copy_label)
+                assert(eventId == LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_COPY_VIA_CONTEXT_MENU)
+
+                val context = mock<Context>()
+                val clipboardManager = mock<ClipboardManager>()
+                whenever(activityContext.asContext()).thenReturn(context)
+                whenever(context.getSystemService(ClipboardManager::class.java))
+                    .thenReturn(clipboardManager)
+
+                popupAction.invoke(activityContext, item, view)
+
+                verify(clipboardManager)
+                    .setPrimaryClip(
+                        argThat {
+                            description.mimeTypeCount == 1 &&
+                                description.getMimeType(0) == file.mimeType &&
+                                itemCount == 1 &&
+                                getItemAt(0).uri == file.uri
+                        }
+                    )
+            }
         }
         if (supportsRenaming) {
             with(popupData[popupDataIndex++]) {
@@ -262,13 +342,11 @@ class PopupDataRepositoryUnitTest {
         with(popupData[popupDataIndex++]) {
             assert(category == PopupCategory.SYSTEM_SHORTCUT_FIXED)
             assert(iconResId == R.drawable.ic_home_screen_files_context_menu_move_to_trash)
-            if (supportsTrashing) {
-                assert(labelResId == R.string.home_screen_files_context_menu_move_to_trash_label)
-            } else {
-                assert(
-                    labelResId == R.string.home_screen_files_context_menu_delete_permanently_label
-                )
-            }
+            assertEquals(
+                if (supportsTrashing) R.string.home_screen_files_context_menu_move_to_trash_label
+                else R.string.home_screen_files_context_menu_delete_permanently_label,
+                labelResId,
+            )
             assert(eventId == LauncherEvent.LAUNCHER_HOME_SCREEN_FILES_DELETE_VIA_CONTEXT_MENU)
 
             val dropTargetHandler = mock<DropTargetHandler>()
