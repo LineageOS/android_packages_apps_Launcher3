@@ -743,7 +743,7 @@ public abstract class RecentsView<
      * Placeholder view indicating where the first split screen selected app will be placed
      */
     @Nullable
-    private SplitSelectStateController mSplitSelectStateController;
+    protected SplitSelectStateController mSplitSelectStateController;
 
     /**
      * The first task that split screen selection was initiated with. When split select state is
@@ -2531,8 +2531,6 @@ public abstract class RecentsView<
         //  This is was added because without it cancelling jobs was happening after work was
         //  scheduled for those jobs resulting in delays.
         mUtils.getTaskViews().forEach(TaskView::cancelJobs);
-
-        mUtils.setLaunchingTaskView(null);
 
         // These are relatively expensive and don't need to be done this frame (RecentsView isn't
         // visible anyway), so defer by a frame to get off the critical path, e.g. app to home.
@@ -5561,16 +5559,6 @@ public abstract class RecentsView<
         return mDesktopRecentsTransitionController;
     }
 
-    @Nullable
-    protected SplitSelectStateController getSplitSelectStateController() {
-        return mSplitSelectStateController;
-    }
-
-    @Nullable
-    protected RunnableList getSideTaskLaunchCallback() {
-        return mSideTaskLaunchCallback;
-    }
-
     /** Enables or disables modal state for RecentsView */
     public abstract void setModalStateEnabled(int taskId, boolean animate);
 
@@ -5999,13 +5987,5 @@ public abstract class RecentsView<
 
     public Map<TaskView, Integer> getTaskViewsDismissPrimaryTranslations() {
         return mTaskViewsDismissPrimaryTranslations;
-    }
-
-    protected void setLaunchingTaskView(@Nullable TaskView taskView) {
-        mUtils.setLaunchingTaskView(taskView);
-    }
-
-    public boolean hasOngoingTaskViewLaunch() {
-        return mUtils.hasOngoingTaskViewLaunch();
     }
 }
