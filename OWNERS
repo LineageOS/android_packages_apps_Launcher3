@@ -26,7 +26,6 @@ peanutbutter@google.com
 atsjenk@google.com
 hwwang@google.com
 mpodolian@google.com
-liranb@google.com
 
 # Overview eng team
 alexchau@google.com
@@ -78,3 +77,7 @@ per-file DeviceConfigWrapper.java = sunnygoyal@google.com, winsonc@google.com, a
 
 # Predictive Back
 per-file LauncherBackAnimationController.java = shanh@google.com, gallmann@google.com
+
+# Bubbles
+per-file res/** = file:/quickstep/src/com/android/launcher3/taskbar/bubbles/OWNERS
+per-file quickstep/res/** = file:/quickstep/src/com/android/launcher3/taskbar/bubbles/OWNERS
