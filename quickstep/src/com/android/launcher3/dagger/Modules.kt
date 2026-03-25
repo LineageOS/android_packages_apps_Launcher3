@@ -22,7 +22,6 @@ import android.net.Uri
 import android.os.SystemClock
 import android.uilatencystats.UiLatencyStatsManager
 import android.view.CrossWindowBlurListeners
-import android.widget.ImageView
 import com.android.app.displaylib.PerDisplayRepository
 import com.android.extensions.computercontrol.ComputerControlExtensions
 import com.android.internal.R
@@ -30,7 +29,6 @@ import com.android.internal.policy.DesktopModeCompatPolicy
 import com.android.internal.util.LatencyTracker
 import com.android.launcher3.AbstractFloatingViewHelper
 import com.android.launcher3.Flags.enableSystemDrag
-import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.Launcher
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger
@@ -39,7 +37,6 @@ import com.android.launcher3.display.DisplayControllerImpl
 import com.android.launcher3.dragndrop.SystemDragController
 import com.android.launcher3.dragndrop.SystemDragControllerImpl
 import com.android.launcher3.dragndrop.SystemDragControllerStub
-import com.android.launcher3.dragndrop.SystemDragListener
 import com.android.launcher3.homescreenfiles.HomeScreenFilesIconProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesIconProviderImpl
 import com.android.launcher3.homescreenfiles.HomeScreenFilesMediaStoreProvider
@@ -275,15 +272,11 @@ object SystemDragModule {
     @ActivityContextSingleton
     fun provideSystemDragController(
         context: ActivityContext,
-        idp: InvariantDeviceProfile,
+        factory: SystemDragControllerImpl.Factory,
     ): SystemDragController =
         // TODO(b/456787959): Fix drop targets and enable for other contexts.
         if (enableSystemDrag() && context is Launcher) {
-            SystemDragControllerImpl(
-                context,
-                { ctx, params -> SystemDragListener(ctx, idp, ::ImageView, params) },
-                HomeScreenFilesUtils.isFeatureEnabled,
-            )
+            factory.create(HomeScreenFilesUtils.isFeatureEnabled)
         } else {
             SystemDragControllerStub()
         }

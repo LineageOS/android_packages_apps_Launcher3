@@ -25,7 +25,11 @@ import android.view.DragEvent
 import android.view.View
 import android.view.View.DRAG_FLAG_DISABLE_DEFAULT_POINTER_ICON
 import android.view.View.DRAG_FLAG_OPAQUE
+import android.widget.ImageView
 import com.android.launcher3.views.ActivityContext
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlin.math.roundToInt
 
 /**
@@ -35,11 +39,14 @@ import kotlin.math.roundToInt
  * @param context The context for which to handle system-level drag-and-drop.
  * @param systemDragListenerFactory The factory used to create listeners for system-level
  *   drag-and-drop. A unique listener instance is created per handled drag-and-drop sequence.
+ * @param isHomeScreenFilesFeatureEnabled Whether the home screen files feature is enabled.
  */
-class SystemDragControllerImpl(
+class SystemDragControllerImpl
+@AssistedInject
+constructor(
     private val context: ActivityContext,
-    private val systemDragListenerFactory: SystemDragListenerFactory,
-    private val isHomeScreenFilesFeatureEnabled: Boolean,
+    private val systemDragListenerFactory: SystemDragListener.Factory,
+    @Assisted private val isHomeScreenFilesFeatureEnabled: Boolean,
 ) : SystemDragController() {
 
     private var systemDragListener: SystemDragListener? = null
@@ -95,7 +102,7 @@ class SystemDragControllerImpl(
     private fun continueDrag(event: DragEvent): Boolean? = systemDragListener?.onDrag(event)
 
     private fun createSystemDragListener(params: SystemDragParams? = null): SystemDragListener =
-        systemDragListenerFactory.get(context, params).also { listener ->
+        systemDragListenerFactory.create(::ImageView, params).also { listener ->
             systemDragListener = listener
             listener.setCleanupCallback {
                 if (systemDragListener == listener) {
@@ -163,5 +170,10 @@ class SystemDragControllerImpl(
 
     companion object {
         private const val TAG = "SystemDragControllerImpl"
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(isHomeScreenFilesFeatureEnabled: Boolean): SystemDragControllerImpl
     }
 }
