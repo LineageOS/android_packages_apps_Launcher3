@@ -69,6 +69,7 @@ class TaplTestTaskbarIconDrag : AbstractQuickStepTest() {
     @DesktopStability(flavors = LOCAL, bug = 490563735)
     fun testAppIconDragOnOverviewFromTaskBarToBubbleBar() {
         val overview = mLauncher.workspace.switchToOverview()
+        mLauncher.showTaskbarIfHidden()
         // test left drop target
         overview.taskbar!!
             .getAppIcon(TEST_APP_NAME)
@@ -92,6 +93,7 @@ class TaplTestTaskbarIconDrag : AbstractQuickStepTest() {
     @DesktopStability(flavors = LOCAL, bug = 490563735)
     fun testAppIconDragOnOverviewFromTaskBarAllAppsToBubbleBar() {
         val overview = mLauncher.workspace.switchToOverview()
+        mLauncher.showTaskbarIfHidden()
         // test right drop target
         overview.taskbar!!
             .openAllApps()

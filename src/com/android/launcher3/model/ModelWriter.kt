@@ -506,62 +506,7 @@ open class ModelWriter(
         }
     }
 
-    private class NoOpLauncherUiStateNotifier : LauncherUiStateNotifier {
-        override fun addCallback(callback: Callbacks) {}
-
-        override fun removeCallback(callback: Callbacks) {}
-
-        override fun notifyItemModifiedOptimistically(item: ItemInfo) {}
-
-        override fun notifyModelChanged(changeLog: ChangeLog, owner: Callbacks?) {}
-    }
-
     companion object {
         private const val TAG = "ModelWriter"
-
-        /**
-         * Creates a [ModelWriter] instance.
-         *
-         * @param context The application context.
-         * @param model The [LauncherModel] instance.
-         * @param bgDataModel The [BgDataModel] instance.
-         * @param verifyChanges Whether to verify UI consistency.
-         * @param cellPosMapper The [CellPosMapper] instance.
-         * @param modificationSource The [ModificationSource] of the changes made by this writer.
-         * @param owner The [Callbacks] instance that will be notified of changes. If null, no
-         *   callbacks will be notified.
-         * @param modelExecutor The [Executor] to use for model operations.
-         * @param uiExecutor The [Executor] to use for UI operations.
-         */
-        @JvmStatic
-        fun create(
-            context: Context,
-            model: LauncherModel,
-            bgDataModel: BgDataModel,
-            verifyChanges: Boolean,
-            cellPosMapper: CellPosMapper,
-            modificationSource: ModificationSource,
-            owner: Callbacks?,
-            modelExecutor: Executor = Executors.MODEL_EXECUTOR,
-            uiExecutor: Executor = Executors.MAIN_EXECUTOR,
-        ): IModelWriter =
-            ModelWriter(
-                context,
-                model,
-                bgDataModel,
-                cellPosMapper,
-                modificationSource,
-                launcherStateNotifier =
-                    owner?.let {
-                        DefaultLauncherUiStateNotifier(
-                            uiExecutor,
-                            bgDataModel,
-                            verifyChanges,
-                            model,
-                        )
-                    } ?: NoOpLauncherUiStateNotifier(),
-                owner,
-                modelExecutor,
-            )
     }
 }

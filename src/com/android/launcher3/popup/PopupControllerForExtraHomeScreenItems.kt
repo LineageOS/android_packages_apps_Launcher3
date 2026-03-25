@@ -20,13 +20,8 @@ import android.content.Context
 import android.os.Trace
 import android.view.View
 import com.android.launcher3.AppWidgetResizeFrame
-import com.android.launcher3.Flags
-import com.android.launcher3.R
 import com.android.launcher3.dragndrop.LauncherDragController
-import com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE
 import com.android.launcher3.model.data.ItemInfo
-import com.android.launcher3.popup.ui.PopupItem
-import com.android.launcher3.shortcuts.DeepShortcutView
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.widget.LauncherAppWidgetHostView
 
@@ -52,23 +47,8 @@ class PopupControllerForExtraHomeScreenItems<T>(
                     itemInfo = itemInfo,
                 )
             dragController.addDragListener(container)
-            if (Flags.expandableLongPressMenu()) {
-                popupDataRepository
-                    .getAllSupportedPopupActions(itemInfo)
-                    ?.map { popupData ->
-                        PopupItem(
-                            iconResId = popupData.iconResId,
-                            labelResId = popupData.labelResId,
-                            popupAction = {
-                                popupData.popupAction.invoke(activityContext, itemInfo, view)
-                            },
-                            category = popupData.category,
-                        )
-                    }
-                    ?.let { container.showComposePopup(systemShortcuts = it) }
-            } else {
-                addSystemShortcuts(container, itemInfo, itemView = view, activityContext)
-                container.show()
+            popupDataRepository.getAllSupportedPopupActions(itemInfo)?.let {
+                container.showForSystemShortcuts(it, activityContext, view)
             }
             showResizeFrameIfNeeded(activityContext, itemInfo, view)
         } finally {
@@ -87,35 +67,6 @@ class PopupControllerForExtraHomeScreenItems<T>(
         val resizeStrategy = DefaultPopupResizeStrategy()
         if (resizeStrategy.shouldShowResizeFrame(itemInfo, view, cellLayout)) {
             AppWidgetResizeFrame.showForWidget(view as LauncherAppWidgetHostView?, cellLayout)
-        }
-    }
-
-    private fun addSystemShortcuts(
-        popup: PopupContainer<T>,
-        itemInfo: ItemInfo,
-        itemView: View,
-        activityContext: ActivityContext,
-    ) {
-        popup.systemShortcutContainer =
-            popup.inflateAndAdd(R.layout.system_shortcut_rows_container, popup)
-        val popupData = popupDataRepository.getAllSupportedPopupActions(itemInfo)?.toList()
-        popupData?.forEach { systemShortcut ->
-            val view: DeepShortcutView =
-                popup.inflateAndAdd(R.layout.system_shortcut, popup.systemShortcutContainer)
-
-            view.iconView.setBackgroundResource(systemShortcut.iconResId)
-            view.bubbleText.setText(systemShortcut.labelResId)
-
-            view.tag = systemShortcut
-            view.setOnClickListener {
-                if (systemShortcut.eventId != IGNORE) {
-                    activityContext.statsLogManager
-                        .logger()
-                        .withItemInfo(itemInfo)
-                        .log(systemShortcut.eventId)
-                }
-                systemShortcut.popupAction.invoke(activityContext, itemInfo, itemView)
-            }
         }
     }
 

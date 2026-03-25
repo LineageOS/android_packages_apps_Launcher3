@@ -111,8 +111,7 @@
     <string name="blocked_by_policy" msgid="2071401072261365546">"Cette action n\'est pas autorisée par l\'application ou par votre organisation"</string>
     <string name="split_widgets_not_supported" msgid="1355743038053053866">"Les widgets ne sont actuellement pas pris en charge, veuillez sélectionner une autre appli"</string>
     <string name="action_image_copy" msgid="6877540054727709339">"Copier"</string>
-    <!-- no translation found for action_image_save (6205538612408306742) -->
-    <skip />
+    <string name="action_image_save" msgid="6205538612408306742">"Enregistrer"</string>
     <string name="accessibility_rotate_button" msgid="4771825231336502943">"Faire pivoter l\'écran"</string>
     <string name="taskbar_edu_swipe_animation_description" msgid="1690727240826006218">"Animation montrant comment la barre des tâches apparaît en bas de l\'écran et se cache automatiquement lorsqu\'elle n\'est pas utilisée"</string>
     <string name="taskbar_edu_pinning_animation_description" msgid="8148601093590683880">"Animation montrant comment épingler la barre des tâches à l\'aide d\'un bouton d\'activation pour qu\'elle reste visible en permanence en bas de l\'écran"</string>

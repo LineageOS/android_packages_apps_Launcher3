@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.launcher3.integration.optionspopup
+package com.android.launcher3.popup
 
 import android.content.Context
 import android.os.Environment
@@ -31,8 +31,8 @@ import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
 import com.android.launcher3.integration.util.LauncherActivityScenarioRule
 import com.android.launcher3.integration.util.events.ActivityTestEvents.createStateWaiter
+import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
-import com.android.launcher3.views.OptionsPopupView
 import com.google.common.truth.Truth.assertWithMessage
 import java.util.concurrent.TimeUnit
 import org.junit.Rule
@@ -42,12 +42,12 @@ import org.junit.runner.RunWith
 @SkipOnDeviceless
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-class OptionsPopupTest {
+class WorkspaceLongPressOptionsTest {
 
     companion object {
         const val APPS_OPTION_LABEL = "Apps list"
         const val CREATE_NEW_FOLDER_OPTION_LABEL = "New folder"
-        const val TAG = "OptionsPopupTest"
+        const val TAG = "WorkspaceLongPressOptionsTest"
     }
 
     @Rule @JvmField val limitDevicesRule = LimitDevicesRule()
@@ -62,7 +62,7 @@ class OptionsPopupTest {
         launcherActivity.executeOnLauncher {
             val appsOption = findOption(it, APPS_OPTION_LABEL)
             assertWithMessage("No option for apps found").that(appsOption).isNotNull()
-            appsOption!!.clickListener.onLongClick(it.rootView)
+            appsOption!!.popupAction.invoke(it, ItemInfo(), it.rootView)
         }
         allAppsStateWaiter.waitForSignal(TimeUnit.SECONDS.toMillis(10))
     }
@@ -87,7 +87,9 @@ class OptionsPopupTest {
                             .that(createNewFolderOption)
                             .isNotNull()
 
-                        createNewFolderOption!!.clickListener.onLongClick(launcher.rootView)
+                        createNewFolderOption!!
+                            .popupAction
+                            .invoke(launcher, ItemInfo(), launcher.rootView)
                     }
                 }
                 launcher.workspace.run { getScreenIdForPageIndex(currentPage) }
@@ -117,8 +119,10 @@ class OptionsPopupTest {
         }
     }
 
-    private fun findOption(launcher: Launcher, label: String): OptionsPopupView.OptionItem? =
-        OptionsPopupView.getOptions(launcher).find { it.label == label }
+    private fun findOption(launcher: Launcher, label: String): PopupData? =
+        WorkspaceLongPressOptions.getAll(launcher).find {
+            launcher.getString(it.labelResId) == label
+        }
 
     private fun isExternalStorageDirectoryMounted(): Boolean =
         Environment.getExternalStorageState(Environment.getExternalStorageDirectory()) ==

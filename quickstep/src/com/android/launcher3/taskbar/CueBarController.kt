@@ -76,6 +76,9 @@ class CueBarController(private val activity: TaskbarActivityContext) :
     val isExpanded: Boolean
         get() = ambientCueViewModel.isExpanded
 
+    val isVisible: Boolean
+        get() = ambientCueViewModel.isVisible
+
     private val ambientCueViewModel: AmbientCueViewModel =
         AmbientCueViewModel(
                 ambientCueInteractor = ambientCueInteractor,
@@ -148,12 +151,24 @@ class CueBarController(private val activity: TaskbarActivityContext) :
             }
     }
 
+    private fun animateStashHandleAlpha(show: Boolean) {
+        val stashedHandleAlpha =
+            taskbarControllers.stashedHandleViewController.stashedHandleAlpha.get(
+                StashedHandleViewController.ALPHA_INDEX_CUEBAR_HIDDEN
+            )
+        stashedHandleAlpha
+            .animateToValue(if (show) 1f else 0f)
+            .setDuration(STASHED_HANDLE_ALPHA_ANIMATION_DURATION_MS)
+            .start()
+    }
+
     private fun handleAnimationStateChange(state: AmbientCueAnimationState) {
         if (isHiding && state == AmbientCueAnimationState.END) {
             Log.d(TAG, "Animation finished and view is marked for hiding. Removing view.")
             if (cueBar != null && cueBar?.parent != null) {
                 taskbarControllers.taskbarOverlayController.hideWindow()
             }
+            animateStashHandleAlpha(true)
         }
     }
 
@@ -211,16 +226,11 @@ class CueBarController(private val activity: TaskbarActivityContext) :
         }
         taskbarControllers.sharedState?.cueBarVisible = isCueBarVisible
 
-        // Animate stashHandle alpha.
-        val stashedHandleAlpha =
-            taskbarControllers.stashedHandleViewController.stashedHandleAlpha.get(
-                StashedHandleViewController.ALPHA_INDEX_CUEBAR_HIDDEN
-            )
-        val targetAlpha = if (isCueBarVisible) 0f else 1f
-        stashedHandleAlpha
-            .animateToValue(targetAlpha)
-            .setDuration(STASHED_HANDLE_ALPHA_ANIMATION_DURATION_MS)
-            .start()
+        val context = taskbarControllers.taskbarActivityContext
+        if (context != null && context.isThreeButtonNav) {
+            taskbarControllers.navbarButtonsViewController?.setCueBarVisible(isCueBarVisible)
+        }
+        animateStashHandleAlpha(!isCueBarVisible)
 
         if (isCueBarVisible) {
             isHiding = false // Cancel any pending hide

@@ -16,6 +16,7 @@
  */
 package com.android.launcher3.workspacefunctions
 
+import com.android.launcher3.appfunctions.workspace.RemoveItemParamsSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceSpec
 import com.android.launcher3.appfunctions.workspace.WorkspaceTransaction
 
@@ -27,6 +28,11 @@ import com.android.launcher3.appfunctions.workspace.WorkspaceTransaction
  * executing database operations.
  */
 class WorkspaceTransactionImpl : WorkspaceTransaction {
+
+    override fun removeItem(target: RemoveItemParamsSpec): WorkspaceTransaction {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun commit(): WorkspaceSpec {
         TODO("Not yet implemented")
     }

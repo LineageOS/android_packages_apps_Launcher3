@@ -30,14 +30,17 @@ import androidx.compose.ui.platform.ComposeView
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.DragSource
 import com.android.launcher3.DropTarget.DragObject
+import com.android.launcher3.Flags
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherPrefs
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_VIEW
 import com.android.launcher3.R
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate
 import com.android.launcher3.dragndrop.DragController
 import com.android.launcher3.dragndrop.DragOptions
 import com.android.launcher3.folder.Folder
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent
+import com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -46,6 +49,7 @@ import com.android.launcher3.popup.ui.DeepShortcutClickEvent
 import com.android.launcher3.popup.ui.PopupItem
 import com.android.launcher3.popup.ui.PopupViewModel
 import com.android.launcher3.popup.ui.SystemShortcutClickEvent
+import com.android.launcher3.shortcuts.DeepShortcutView
 import com.android.launcher3.util.ShortcutUtil
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.views.BaseDragLayer
@@ -57,13 +61,12 @@ import com.android.launcher3.views.BaseDragLayer
  * @param context The context in which the popup is created.
  * @param originalView The view from which this popup was opened.
  */
-open class PopupContainer<T>(
+open class PopupContainer<T : ActivityContext>(
     context: Context?,
     val originalView: View,
     val itemInfo: ItemInfo,
     val updateIconUi: Boolean,
-) : ArrowPopup<T>(context), DragSource, DragController.DragListener, Popup
-    where T : Context, T : ActivityContext {
+) : ArrowPopup<T>(context), DragSource, DragController.DragListener, Popup {
     var deepShortcutDragHandler: DeepShortcutDragHandler? = null
     /** Here we hold the system shortcuts that we show for the Popup. */
     // TODO b/441320297
@@ -80,6 +83,8 @@ open class PopupContainer<T>(
     val viewModel = PopupViewModel()
 
     private val animationProxyView by lazy { View(context).apply { visibility = INVISIBLE } }
+
+    private var fixedDragLayerPos: Rect? = null
 
     /** Handles a deep shortcut click event. */
     private fun onDeepShortcutClick(item: WorkspaceItemInfo, iconBounds: Rect) {
@@ -110,6 +115,49 @@ open class PopupContainer<T>(
                 (it.runtimeStatusFlags and ItemInfoWithIcon.FLAG_NOT_PINNABLE) == 0
             } == true
         return mActivityContext is Launcher && isPinnable
+    }
+
+    fun showForSystemShortcuts(
+        systemShortcuts: List<PopupData>,
+        activityContext: ActivityContext,
+        itemView: View,
+    ) {
+        if (Flags.expandableLongPressMenu()) {
+            showComposePopup(
+                systemShortcuts =
+                    systemShortcuts.map { popupData ->
+                        PopupItem(
+                            iconResId = popupData.iconResId,
+                            labelResId = popupData.labelResId,
+                            popupAction = {
+                                popupData.popupAction.invoke(activityContext, itemInfo, itemView)
+                            },
+                            category = popupData.category,
+                        )
+                    }
+            )
+        } else {
+            systemShortcutContainer = inflateAndAdd(R.layout.system_shortcut_rows_container, this)
+            systemShortcuts.forEach { systemShortcut ->
+                val view: DeepShortcutView =
+                    inflateAndAdd(R.layout.system_shortcut, systemShortcutContainer)
+
+                view.iconView.setBackgroundResource(systemShortcut.iconResId)
+                view.bubbleText.setText(systemShortcut.labelResId)
+
+                view.tag = systemShortcut
+                view.setOnClickListener {
+                    if (systemShortcut.eventId != IGNORE) {
+                        activityContext.statsLogManager
+                            .logger()
+                            .withItemInfo(itemInfo)
+                            .log(systemShortcut.eventId)
+                    }
+                    systemShortcut.popupAction.invoke(activityContext, itemInfo, itemView)
+                }
+            }
+            show()
+        }
     }
 
     open fun showComposePopup(systemShortcuts: List<PopupItem>, deepShortcutCount: Int = 0) {
@@ -250,6 +298,10 @@ open class PopupContainer<T>(
 
     @CallSuper
     override fun getTargetObjectLocation(outPos: Rect) {
+        fixedDragLayerPos?.let {
+            outPos.set(it)
+            return
+        }
         popupContainer.getDescendantRectRelativeToSelf(originalView, outPos)
         outPos.top += originalView.paddingTop
         outPos.left += originalView.paddingLeft
@@ -355,13 +407,12 @@ open class PopupContainer<T>(
          * @param updateIconUi Whether to update the icon UI during drag and drop.
          * @return A new instance of [PopupContainer].
          */
-        @JvmStatic
-        fun <T> create(
+        fun <T : ActivityContext> create(
             context: Context,
             originalView: View,
             itemInfo: ItemInfo,
             updateIconUi: Boolean = true,
-        ): PopupContainer<T> where T : Context, T : ActivityContext {
+        ): PopupContainer<T> {
             val container = PopupContainer<T>(context, originalView, itemInfo, updateIconUi)
             container.id = R.id.popup_container
             container.clipChildren = false
@@ -373,6 +424,31 @@ open class PopupContainer<T>(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                 )
             return container
+        }
+
+        /**
+         * Shows a menu for the [view] with the provided [items]
+         *
+         * @param popupPos Position of the event relative to dragLayer, where the popup should be
+         *   anchored
+         */
+        @JvmOverloads
+        fun showForMenuItems(
+            activity: ActivityContext,
+            view: View,
+            items: List<PopupData>,
+            popupPos: Rect? = null,
+        ): PopupContainer<ActivityContext>? {
+            if (items.isEmpty()) return null
+            return create<ActivityContext>(
+                    activity.asContext(),
+                    view,
+                    view.tag as? ItemInfo ?: ItemInfo().apply { itemType = ITEM_TYPE_CUSTOM_VIEW },
+                )
+                .apply {
+                    fixedDragLayerPos = popupPos
+                    showForSystemShortcuts(items, activity, view)
+                }
         }
     }
 }

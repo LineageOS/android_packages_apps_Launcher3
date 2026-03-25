@@ -193,8 +193,10 @@ import com.android.launcher3.model.data.PredictedContainerInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pm.PinRequestHelper;
 import com.android.launcher3.popup.ArrowPopup;
+import com.android.launcher3.popup.PopupContainer;
 import com.android.launcher3.popup.PopupController;
 import com.android.launcher3.popup.SystemShortcut;
+import com.android.launcher3.popup.WorkspaceLongPressOptions;
 import com.android.launcher3.statemanager.StateManager;
 import com.android.launcher3.statemanager.StateManager.StateHandler;
 import com.android.launcher3.statemanager.StatefulActivity;
@@ -232,7 +234,6 @@ import com.android.launcher3.util.WallpaperThemeManager;
 import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.views.FloatingSurfaceView;
 import com.android.launcher3.views.ListenerView;
-import com.android.launcher3.views.OptionsPopupView;
 import com.android.launcher3.views.ScrimView;
 import com.android.launcher3.views.UpdateDeferrableView;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
@@ -2410,8 +2411,15 @@ public class Launcher extends StatefulActivity<LauncherState>
      * Shows the default options popup
      */
     public void showDefaultOptions(float x, float y) {
-        OptionsPopupView.show(this, getPopupTarget(x, y), OptionsPopupView.getOptions(this),
-                false);
+        Rect pos = new Rect();
+        pos.offsetTo((int) x, (int) y);
+        pos.inset(-20, -20);
+        PopupContainer.Companion.showForMenuItems(
+                this,
+                getRootView(),
+                WorkspaceLongPressOptions.getAll(this),
+                pos
+        );
     }
 
     @Override

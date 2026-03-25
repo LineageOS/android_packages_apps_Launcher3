@@ -958,10 +958,7 @@ public class TaskbarLauncherStateController {
                     mControllers.navbarButtonsViewController
                             .getTaskbarNavButtonTranslationYForInAppDisplay();
             DeviceProfile taskbarDp = mControllers.taskbarActivityContext.getDeviceProfile();
-            int offsetY =
-                    mControllers.taskbarStashController.isDeviceLocked()
-                            ? taskbarDp.getTaskbarOffsetY()
-                            : getDeviceProfile().getTaskbarOffsetY();
+            int offsetY = taskbarDp.getTaskbarOffsetY();
 
             int collapsedHeight =
                     mControllers.taskbarActivityContext.getDefaultTaskbarWindowSize();

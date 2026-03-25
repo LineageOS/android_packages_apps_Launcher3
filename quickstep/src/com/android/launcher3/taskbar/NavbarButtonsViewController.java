@@ -25,7 +25,6 @@ import static com.android.launcher3.Utilities.getDescendantCoordRelativeToAncest
 import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.taskbar.LauncherTaskbarUIController.IME_PROGRESS_INDEX;
 import static com.android.launcher3.taskbar.LauncherTaskbarUIController.SYSUI_SURFACE_PROGRESS_INDEX;
-import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableAutoStashConnectedDisplayTaskbar;
 import static com.android.launcher3.taskbar.TaskbarDesktopExperienceFlags.enableTaskbarA11yMoreOptionsButton;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_A11Y;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_BACK;
@@ -166,6 +165,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     private static final int FLAG_KEYBOARD_SHORTCUT_HELPER_SHOWING = 1 << 15;
     private static final int FLAG_TASKBAR_STASHED_ON_CD = 1 << 16;
     private static final int FLAG_SYSUI_DIALOG_SHOWING = 1 << 17;
+    private static final int FLAG_CUEBAR_VISIBLE = 1 << 18;
 
     /**
      * Flags where a UI could be over Taskbar surfaces, so the color override should be disabled.
@@ -538,7 +538,8 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         mPropertyHolders.add(new StatePropertyHolder(mRecentsButton,
                 flags -> (flags & FLAG_KEYGUARD_VISIBLE) == 0 && (flags & FLAG_DISABLE_RECENTS) == 0
                         && !mContext.isNavBarKidsModeActive() && !mContext.isGestureNav()
-                        && (flags & FLAG_TASKBAR_STASHED_ON_CD) == 0));
+                        && (flags & FLAG_TASKBAR_STASHED_ON_CD) == 0
+                        && (flags & FLAG_CUEBAR_VISIBLE) == 0));
 
         // A11y button
         mA11yButton = addButton(R.drawable.ic_sysbar_accessibility_button, BUTTON_A11Y,
@@ -599,6 +600,11 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         }
         return !mContext.isUserSetupComplete() && mIsExpressiveThemeEnabled
                 && !mContext.isSimpleViewEnabled();
+    }
+
+    public void setCueBarVisible(boolean isVisible) {
+        updateStateForFlag(FLAG_CUEBAR_VISIBLE, isVisible);
+        applyState();
     }
 
     /**
@@ -727,8 +733,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
 
     /** Should be called when the taskbar is stashed on CD to stash nav buttons. */
     public void setTaskbarStashedIfConnectedDisplay(boolean isTaskbarStashed) {
-        if (!enableAutoStashConnectedDisplayTaskbar.isTrue()
-                || mControllers.taskbarActivityContext.isPrimaryDisplay()) {
+        if (mControllers.taskbarActivityContext.isPrimaryDisplay()) {
             return;
         }
 

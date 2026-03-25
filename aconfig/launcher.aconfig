@@ -2,10 +2,17 @@ package: "com.android.launcher3"
 container: "system_ext"
 
 flag {
+    name: "enable_widgets_section_in_options_menu"
+    namespace: "launcher"
+    description: "Enable the Widgets section in the options popup menu dialog."
+    bug: "494308318"
+}
+
+flag {
     name: "enable_compose_for_options_popup_menu_dialog"
     namespace: "launcher"
     description: "Gate the refactor of OptionsPopupDialog to compose."
-    bug: "316027081"
+    bug: "494308318"
 }
 
 flag {
@@ -419,16 +426,6 @@ flag {
        purpose: PURPOSE_BUGFIX
      }
  }
-
-flag {
-  name: "enable_auto_stash_connected_display_taskbar"
-  namespace: "launcher"
-  description: "Enables auto stashing of connected display taskbar when in full or split screen"
-  bug: "394486228"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
 
 flag {
     name: "expandable_long_press_menu"

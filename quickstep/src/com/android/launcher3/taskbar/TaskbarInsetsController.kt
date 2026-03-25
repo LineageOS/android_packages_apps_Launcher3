@@ -51,6 +51,7 @@ import com.android.launcher3.DeviceProfile
 import com.android.launcher3.anim.AlphaUpdateListener
 import com.android.launcher3.folder.Folder
 import com.android.launcher3.taskbar.TaskbarControllers.LoggableTaskbarController
+import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.CUEBAR_IN_WINDOW
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.DEFAULT_TOUCH_REGION
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.DRAG_LAYER_INVISIBLE
 import com.android.launcher3.taskbar.TaskbarInsetsController.DebugTouchableRegion.Companion.FULLSCREEN_TASKBAR_WINDOW
@@ -355,13 +356,16 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
         val touchableInsets: Int
 
         // Prevents the taskbar from taking touches and conflicting with setup wizard
-        if (
-            context.isPhoneButtonNavMode &&
-                context.isUserSetupComplete &&
-                (!isImeVisible || !controllers.navbarButtonsViewController.isImeRenderingNavButtons)
-        ) {
-            touchableInsets = TOUCHABLE_INSETS_FRAME
-            debugTouchableRegion.lastSetTouchableReason = PHONE_MODE
+        if (context.isPhoneButtonNavMode && context.isUserSetupComplete &&
+            (!isImeVisible || !controllers.navbarButtonsViewController.isImeRenderingNavButtons)) {
+            if (controllers.cueBarController.isVisible) {
+                // Let touches pass through us.
+                touchableInsets = TOUCHABLE_INSETS_REGION
+                debugTouchableRegion.lastSetTouchableReason = CUEBAR_IN_WINDOW
+            } else {
+                touchableInsets = TOUCHABLE_INSETS_FRAME
+                debugTouchableRegion.lastSetTouchableReason = PHONE_MODE
+            }
         } else if (context.dragLayer.alpha < AlphaUpdateListener.ALPHA_CUTOFF_THRESHOLD) {
             // Let touches pass through us.
             touchableInsets = TOUCHABLE_INSETS_REGION
@@ -505,6 +509,7 @@ class TaskbarInsetsController(val context: TaskbarActivityContext) : LoggableTas
             const val FULLSCREEN_TASKBAR_WINDOW = "Taskbar is fullscreen"
             const val TRANSIENT_IN_OVERVIEW = "Transient Taskbar is in Overview"
             const val DEFAULT_TOUCH_REGION = "Using default touchable region"
+            const val CUEBAR_IN_WINDOW = "CueBar in window"
             const val ICONS_INVISIBLE =
                 "Icons are not visible, but other components such as 3 buttons might be"
         }

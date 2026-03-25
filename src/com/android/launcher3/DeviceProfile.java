@@ -21,6 +21,7 @@ import static com.android.launcher3.Utilities.dpiFromPx;
 import static com.android.launcher3.icons.IconNormalizer.ICON_VISIBLE_AREA_FACTOR;
 import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE;
 import static com.android.launcher3.testing.shared.ResourceUtils.pxFromDp;
+import static com.android.systemui.shared.Flags.enableRecentsInTaskbar;
 import static com.android.wm.shell.Flags.enableBubbleBar;
 
 import static java.lang.Math.max;
@@ -1046,7 +1047,18 @@ public class DeviceProfile {
         int launcherIconBottomSpace = Math.min(
                 (mHotseatProfile.getCellHeightPx() - getWorkspaceProfile().getIconSizePx()
                 ) / 2, mWorkspaceProfile.getGridVisualizationPaddingY());
-        return getHotseatBarBottomPadding() + launcherIconBottomSpace - taskbarIconBottomSpace;
+        // Taskbar Icon Alignment Animation is On
+        // We need this for taskbar icons to softly land on hotseat icons.
+        if (mTaskbarProfile.isTransientTaskbar() && !enableRecentsInTaskbar()) {
+            return getHotseatBarBottomPadding() + launcherIconBottomSpace - taskbarIconBottomSpace;
+        } else {
+            // when icon alignment animation is not on, we only use taskbar activity device profile,
+            // so we need to add the hot seat bottom padding + half of the hot seat cell item and
+            // subtract half of nav button container height for it to center.
+            int hotSeatIconHalf = mHotseatProfile.getCellHeightPx() / 2;
+            int navButtonContainerHalf = getTaskbarProfile().getHeight() / 2;
+            return mHotseatProfile.getBarBottomSpacePx() + hotSeatIconHalf - navButtonContainerHalf;
+        }
     }
 
     /** Returns the number of pixels required below OverviewActions. */

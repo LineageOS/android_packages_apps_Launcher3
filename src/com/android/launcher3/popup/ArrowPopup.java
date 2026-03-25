@@ -64,8 +64,7 @@ import com.android.launcher3.views.BaseDragLayer;
  *
  * @param <T> The activity on with the popup shows
  */
-public abstract class ArrowPopup<T extends Context & ActivityContext>
-        extends AbstractFloatingView {
+public abstract class ArrowPopup<T extends ActivityContext> extends AbstractFloatingView {
 
     // Duration values (ms) for popup open and close animations.
     protected int mOpenDuration = 276;
@@ -137,7 +136,7 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
         super(context, attrs, defStyleAttr);
         mInflater = LayoutInflater.from(context);
         mOutlineRadius = Themes.getDialogCornerRadius(context);
-        mActivityContext = ActivityContext.lookupContext(context);
+        mActivityContext = (T) ActivityContext.lookupContext(context);
         mIsRtl = Utilities.isRtl(getResources());
         mElevation = getResources().getDimension(R.dimen.deep_shortcuts_elevation);
 
