@@ -427,4 +427,14 @@ class ModelWriterTest : AbstractWorkspaceModelTest() {
         modelWriter.scheduleTransaction { nextTransactionExecuted = true }
         assertThat(nextTransactionExecuted).isTrue()
     }
+
+    @Test
+    fun scheduleTransaction_deleteAllItems_clearsModelAndDb() {
+        addToModel(item1, item2)
+        assertThat(bgDataModel.itemsIdMap.count()).isEqualTo(2)
+
+        modelWriter.scheduleTransaction { it.deleteAllItems() }
+
+        assertThat(bgDataModel.itemsIdMap.count()).isEqualTo(0)
+    }
 }
