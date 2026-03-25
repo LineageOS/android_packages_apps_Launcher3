@@ -313,7 +313,6 @@ constructor(
 
             override fun onTaskMovedToFront(taskInfo: ActivityManager.RunningTaskInfo) {
                 super.onTaskMovedToFront(taskInfo)
-                if (taskInfo.displayId != displayId) return
                 if (
                     taskInfo.configuration.windowConfiguration.activityType ==
                         WindowConfiguration.ACTIVITY_TYPE_HOME
@@ -324,7 +323,6 @@ constructor(
                 // The state will be cleaned up by the task launch callbacks
                 if (recentsView?.hasOngoingTaskViewLaunch() == true) return
                 if (!isStarted) return
-                RecentsWindowProtoLogProxy.logOnTaskMovedToFront(displayId, taskInfo)
                 stateManager.moveToRestState(/* isAnimated= */ true)
             }
         }
@@ -373,7 +371,7 @@ constructor(
     private val overviewOverlayLeashInvalidationCallback =
         object : IOverviewOverlayLeashInvalidationCallback.Stub() {
             override fun onOverviewOverlayLeashInvalidated() {
-                RecentsWindowProtoLogProxy.logOnOverviewOverlayLeashInvalidated(displayId)
+                RecentsWindowProtoLogProxy.logOnOverviewOverlayLeashInvalidated()
                 uiExecutor.execute {
                     stateManager.moveToRestState()
 
@@ -589,7 +587,7 @@ constructor(
 
     @UiThread
     private fun cleanUpSurfaceControlViewHostInternal() {
-        RecentsWindowProtoLogProxy.logCleanUpSurfaceControlViewHostInternal(displayId)
+        RecentsWindowProtoLogProxy.logCleanUpSurfaceControlViewHostInternal()
         if (Flags.updateRecentsWmWwmConfiguration()) {
             surfaceControlViewHost?.release()
             recentsWindowSurface?.let {
@@ -620,7 +618,7 @@ constructor(
 
     @UiThread
     fun showRecentsWindow(callbacks: RecentsAnimationCallbacks? = null) {
-        RecentsWindowProtoLogProxy.logStartRecentsWindow(displayId, isShowing(), windowView == null)
+        RecentsWindowProtoLogProxy.logStartRecentsWindow(isShowing(), windowView == null)
         if (isShowing()) {
             return
         }
@@ -633,7 +631,7 @@ constructor(
     }
 
     private fun hideRecentsWindow() {
-        RecentsWindowProtoLogProxy.logCleanup(displayId, isShowing())
+        RecentsWindowProtoLogProxy.logCleanup(isShowing())
         if (isShowing()) {
             AbstractFloatingView.closeAllOpenViews(this, /* animate= */ false)
             recentsView?.viewRootImpl?.touchModeChanged(true)
@@ -954,19 +952,19 @@ constructor(
 
     override fun onStateSetStart(state: RecentsState) {
         super.onStateSetStart(state)
-        RecentsWindowProtoLogProxy.logOnStateSetStart(displayId, state.toString())
+        RecentsWindowProtoLogProxy.logOnStateSetStart(state.toString())
     }
 
     override fun onStateSetEnd(state: RecentsState) {
         super.onStateSetEnd(state)
-        RecentsWindowProtoLogProxy.logOnStateSetEnd(displayId, state.toString())
+        RecentsWindowProtoLogProxy.logOnStateSetEnd(state.toString())
         state.applyRecentsWindowVisibility()
         AccessibilityManagerCompat.sendStateEventToTest(baseContext, state.toLauncherStateOrdinal())
     }
 
     override fun onRepeatStateSetAborted(state: RecentsState) {
         super.onRepeatStateSetAborted(state)
-        RecentsWindowProtoLogProxy.logOnRepeatStateSetAborted(displayId, state.toString())
+        RecentsWindowProtoLogProxy.logOnRepeatStateSetAborted(state.toString())
         state.applyRecentsWindowVisibility()
     }
 
