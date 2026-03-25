@@ -19,6 +19,7 @@ import static android.view.View.AccessibilityDelegate;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
+import static com.android.launcher3.Flags.translateImeswitcher3buttonsWithBubble;
 import static com.android.launcher3.LauncherAnimUtils.ROTATION_DRAWABLE_PERCENT;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_TRANSLATE_X;
 import static com.android.launcher3.Utilities.getDescendantCoordRelativeToAncestor;
@@ -30,8 +31,8 @@ import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_A1
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_BACK;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_HOME;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_IME_SWITCH;
-import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_RECENTS;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_MORE_OPTIONS;
+import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_RECENTS;
 import static com.android.launcher3.taskbar.TaskbarNavButtonController.BUTTON_SPACE;
 import static com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_KEYGUARD;
 import static com.android.launcher3.taskbar.TaskbarViewController.ALPHA_INDEX_SMALL_SCREEN;
@@ -39,10 +40,10 @@ import static com.android.launcher3.util.Executors.getTaskbarUiThread;
 import static com.android.launcher3.util.FlagDebugUtils.appendFlag;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BACK_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BACK_DISMISS_IME;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE;
@@ -1395,6 +1396,9 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             endExistingAnimation();
         }
         mNavButtonContainer.setTranslationX(getNavBarTranslationX(location));
+        if (translateImeswitcher3buttonsWithBubble()) {
+            mStartContextualContainer.setTranslationX(getImeSwitcherTranslationX(location));
+        }
         mBubbleBarTargetLocation = location;
         notifyRecentsButtonPosition();
     }
@@ -1462,6 +1466,20 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
             }
         }
         return (int) navBarTargetStartX - mNavButtonContainer.getLeft();
+    }
+
+    private float getImeSwitcherTranslationX(BubbleBarLocation location) {
+        if (!mContext.isUserSetupComplete()) {
+            // Skip additional translations on the nav bar container while in SUW layout
+            return 0;
+        }
+
+        if (location.isOnLeft(mNavButtonsView.isLayoutRtl())) {
+            return 0;
+        }
+
+        return mNavButtonContainer.getLeft() + mNavButtonContainer.getWidth()
+                - mStartContextualContainer.getWidth() - mStartContextualContainer.getLeft();
     }
 
     /** Adjusts the navigation buttons layout position according to the bubble bar location. */
