@@ -90,16 +90,22 @@ fun Modifier.dismissibleSheet(
             animationSpec = SETTLE_ANIMATION_SPEC,
         )
 
+    val anchoredDraggableModifier =
+        if (enableDragOnScrollToEnd) {
+            Modifier.anchoredDraggable(
+                state = sheetState.anchoredDraggableState,
+                orientation = Orientation.Vertical,
+                flingBehavior = flingBehavior,
+            )
+        } else {
+            Modifier
+        }
+
     val draggableModifier =
         this.onSizeChanged { size -> sheetState.updateAnchors(size.height.toFloat()) }
             .offset {
                 IntOffset(x = 0, y = sheetState.anchoredDraggableState.requireOffset().roundToInt())
             }
-            .anchoredDraggable(
-                state = sheetState.anchoredDraggableState,
-                orientation = Orientation.Vertical,
-                flingBehavior = flingBehavior,
-            )
             .nestedScroll(
                 SheetNestedScrollConnection(
                     sheetState = sheetState,
@@ -108,6 +114,7 @@ fun Modifier.dismissibleSheet(
                     enableDragOnScrollToEnd = enableDragOnScrollToEnd,
                 )
             )
+            .then(anchoredDraggableModifier)
 
     LaunchedEffect(Unit) { sheetState.expand() }
 
