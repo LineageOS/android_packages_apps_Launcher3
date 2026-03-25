@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -49,15 +48,18 @@ fun <T> DialogScope.DialogView(viewModel: T) where T : DialogViewModel<T> {
         throw IllegalStateException("Dialog must have a neutral or positive button.")
     }
 
-    // TODO(b/489770757): Update theme.
-    // TODO(b/489771722): Update typography.
-    MaterialTheme {
+    DialogTheme {
         Surface(
-            modifier = Modifier.testTag(DIALOG_TAG).width(dimensionResource(R.dimen.dialog_width))
+            modifier = Modifier.testTag(DIALOG_TAG).width(dimensionResource(R.dimen.dialog_width)),
+            color = DialogTheme.colorScheme.surfaceContainerHigh,
         ) {
             Column(modifier = Modifier.padding(dimensionResource(R.dimen.dialog_padding))) {
                 // Title.
-                Text(modifier = Modifier.testTag(TITLE_TAG), text = viewModel.title)
+                Text(
+                    modifier = Modifier.testTag(TITLE_TAG),
+                    text = viewModel.title,
+                    style = DialogTheme.typography.headlineSmall,
+                )
 
                 // Content.
                 Box(
