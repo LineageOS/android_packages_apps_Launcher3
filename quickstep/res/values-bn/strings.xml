@@ -154,6 +154,10 @@
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"উপরে/বাঁদিকে সরান"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"নিচে/ডানদিকে সরান"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"বাবল হিসেবে অ্যাপ খুলুন"</string>
+    <!-- no translation found for action_move_item_left (1553114361342866236) -->
+    <skip />
+    <!-- no translation found for action_move_item_right (682950193875586183) -->
+    <skip />
     <string name="quick_switch_pane_title" msgid="4677158207760585812">"সম্প্রতি ব্যবহৃত অ্যাপ"</string>
     <string name="quick_switch_content_description" msgid="2851244536728720005">"সাম্প্রতিক অ্যাপের তালিকা"</string>
     <string name="quick_switch_overflow" msgid="3679780650881041632">"{count,plural, =1{আরও অ্যাপ}one{আরও অ্যাপ}other{আরও অ্যাপ}}"</string>

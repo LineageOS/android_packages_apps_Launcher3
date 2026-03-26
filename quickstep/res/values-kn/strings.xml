@@ -66,7 +66,7 @@
     <string name="home_gesture_tutorial_title" msgid="3126834347496917376">"ಹೋಮ್‌ಗೆ ಹೋಗಿ"</string>
     <string name="home_gesture_tutorial_subtitle" msgid="7245995490408668778">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಗಿನಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="home_gesture_tutorial_success" msgid="1736295017642244751">"ಭೇಷ್!"</string>
-    <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಗಿನ ಅಂಚಿನಿಂದ ನೀವು ಸ್ವೈಪ್ ಮಾಡುತ್ತಿದ್ದೀರಿ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
+    <string name="overview_gesture_feedback_swipe_too_far_from_edge" msgid="6402349235265407385">"ನೀವು ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಗಿನ ಅಂಚಿನಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡುತ್ತಿದ್ದೀರಿ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="overview_gesture_feedback_home_detected" msgid="663432226180397138">"ಬೆರಳನ್ನು ಮೇಲೆತ್ತುವ ಮೊದಲು ವಿಂಡೋವನ್ನು ಹೆಚ್ಚು ಸಮಯ ಹಿಡಿದಿಡಲು ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="overview_gesture_feedback_wrong_swipe_direction" msgid="1191055451018584958">"ನೀವು ನೇರವಾಗಿ ಸ್ವೈಪ್ ಮಾಡಿದ್ದೀರಿ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ, ನಂತರ ವಿರಾಮಗೊಳಿಸಿ"</string>
     <string name="overview_gesture_feedback_complete_with_follow_up" msgid="3544611727467765026">"ಜೆಶ್ಚರ್‌ಗಳನ್ನು ಬಳಸುವುದು ಹೇಗೆಂದು ನೀವು ತಿಳಿದುಕೊಂಡಿರುವಿರಿ. ಜೆಶ್ಚರ್‌ಗಳನ್ನು ಆಫ್ ಮಾಡಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ."</string>
@@ -154,6 +154,10 @@
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"ಮೇಲಿನ/ಎಡಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"ಕೆಳಗಿನ/ಬಲಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"ಆ್ಯಪ್ ಅನ್ನು ಬಬಲ್ ಆಗಿ ತೆರೆಯಿರಿ"</string>
+    <!-- no translation found for action_move_item_left (1553114361342866236) -->
+    <skip />
+    <!-- no translation found for action_move_item_right (682950193875586183) -->
+    <skip />
     <string name="quick_switch_pane_title" msgid="4677158207760585812">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳು"</string>
     <string name="quick_switch_content_description" msgid="2851244536728720005">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್ ಪಟ್ಟಿ"</string>
     <string name="quick_switch_overflow" msgid="3679780650881041632">"{count,plural, =1{ಹೆಚ್ಚಿನ ಆ್ಯಪ್‌}one{ಹೆಚ್ಚಿನ ಆ್ಯಪ್‌ಗಳು}other{ಹೆಚ್ಚಿನ ಆ್ಯಪ್‌ಗಳು}}"</string>
