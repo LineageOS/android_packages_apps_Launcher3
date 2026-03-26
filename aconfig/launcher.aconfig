@@ -729,3 +729,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "enable_home_screen_files_copy_paste"
+  namespace: "launcher"
+  description: "Enables support for copy/paste of home screen files."
+  bug: "482073141"
+}

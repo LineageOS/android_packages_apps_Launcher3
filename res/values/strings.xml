@@ -251,6 +251,8 @@
     <string name="app_removed_from_taskbar">App removed from Taskbar</string>
     <!-- Label for remove item system shortcut [CHAR_LIMIT=20] -->
     <string name="remove_system_shortcut_label">Remove</string>
+    <!-- Context menu action for a file/folder on the home screen which copies the item. [CHAR_LIMIT=20] -->
+    <string name="home_screen_files_context_menu_copy_label">Copy</string>
     <!-- Context menu action for a file/folder on the home screen which opens the item using its corresponding application. [CHAR_LIMIT=20] -->
     <string name="home_screen_files_context_menu_open_in_app_label">Open</string>
     <!-- Context menu action for a file/folder on the home screen which renames the item. [CHAR_LIMIT=20] -->
