@@ -316,6 +316,9 @@ public class TaskAnimationManagerTest {
 
         SystemClock.sleep(RECENTS_ANIMATION_START_TIMEOUT_MS);
 
+        // Flush the main thread
+        runOnMainSync(() -> {});
+
         runOnMainSync(() -> assertNull("TaskAnimationManager was not cleaned up after the timeout:",
                 mTaskAnimationManager.getCurrentCallbacks()));
     }
