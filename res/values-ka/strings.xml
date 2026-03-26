@@ -115,7 +115,8 @@
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"გადარქმევა"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"სამუდამოდ წაშლა"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"წაშლილებში გადატანა"</string>
-    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"<xliff:g id="ITEM_NAME">%1$s</xliff:g> გადატანილია წაშლილებში"</string>
+    <!-- no translation found for home_screen_files_moved_to_trash_message (2848141584483641247) -->
+    <skip />
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"წაშლილებში გადატანა ვერ ხერხდება. წარმოიქმნა შეფერხება."</string>
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"მოქმედების გაუქმება ვერ ხერხდება. აღსადგენად გადადით Files აპში."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"ქმედებები"</string>
