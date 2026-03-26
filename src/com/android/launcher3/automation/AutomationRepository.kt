@@ -19,13 +19,14 @@ package com.android.launcher3.automation
 import android.os.UserHandle
 import com.android.launcher3.dagger.LauncherAppComponent
 import com.android.launcher3.util.DaggerSingletonObject
-import com.android.launcher3.util.ListenableStream
+import com.android.launcher3.util.ListenableDiffAwareRef
+import com.android.launcher3.util.PackageUserKey
 
 /** Repository to provide information related to automated apps */
 interface AutomationRepository {
 
-    /** Stream to listen for [AutomationChange] updates. */
-    val automationChanges: ListenableStream<AutomationChange>
+    /** Unified ref for the set of all automated packages and the changes occurring to them. */
+    val automatedPackages: ListenableDiffAwareRef<Set<PackageUserKey>, AutomationChange>
 
     /** Returns if the provided package is being automated for the provided user */
     fun isPackageAutomated(user: UserHandle, packageName: String): Boolean

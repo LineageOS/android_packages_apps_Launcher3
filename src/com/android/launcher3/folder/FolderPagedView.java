@@ -128,6 +128,7 @@ public class FolderPagedView extends PagedView<PageIndicatorDots> implements Cli
 
         mFocusIndicatorHelper = new ViewGroupFocusHelper(this);
         mViewCache = activityContext.getViewCache();
+        setClipChildren(false);
     }
 
     public void setFolder(Folder folder) {

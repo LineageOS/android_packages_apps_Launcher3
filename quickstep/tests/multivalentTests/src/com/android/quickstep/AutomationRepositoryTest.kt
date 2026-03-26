@@ -25,6 +25,7 @@ import com.android.extensions.computercontrol.ComputerControlExtensions
 import com.android.launcher3.automation.AutomationChange
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.IMMEDIATE_EXECUTOR
+import com.android.launcher3.util.PackageUserKey
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -70,7 +71,7 @@ class AutomationRepositoryTest {
     fun onAutomatedPackagesChanged_addPackage_dispatchesAutomationChange() {
         val receivedChanges = mutableListOf<AutomationChange>()
         // Given
-        automationRepo.automationChanges
+        automationRepo.automatedPackages.changes
             .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
             .use {
                 // When
@@ -99,7 +100,7 @@ class AutomationRepositoryTest {
             listOf(AUTOMATED_PACKAGE),
             USER_HANDLE,
         )
-        automationRepo.automationChanges
+        automationRepo.automatedPackages.changes
             .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
             .use {
                 // When
@@ -117,6 +118,21 @@ class AutomationRepositoryTest {
                     assertThat(removedPackages).isEqualTo(setOf(AUTOMATED_PACKAGE))
                 }
             }
+    }
+
+    @Test
+    fun automatedPackages_returnsCorrectPackages() {
+        // Given
+        automatedPackageListener.onAutomatedPackagesChanged(
+            AUTOMATING_PACKAGE,
+            listOf(AUTOMATED_PACKAGE),
+            USER_HANDLE,
+        )
+
+        // Then
+        val automatedPackages = automationRepo.automatedPackages.value
+        assertThat(automatedPackages)
+            .containsExactly(PackageUserKey(AUTOMATED_PACKAGE, USER_HANDLE))
     }
 
     @Test
@@ -195,7 +211,7 @@ class AutomationRepositoryTest {
             USER_HANDLE,
         )
 
-        automationRepo.automationChanges
+        automationRepo.automatedPackages.changes
             .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
             .use {
                 // When
@@ -225,7 +241,7 @@ class AutomationRepositoryTest {
             USER_HANDLE,
         )
 
-        automationRepo.automationChanges
+        automationRepo.automatedPackages.changes
             .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
             .use {
                 // When
@@ -254,7 +270,7 @@ class AutomationRepositoryTest {
             USER_HANDLE,
         )
         val otherAutomatedPackage = "com.test.automated2"
-        automationRepo.automationChanges
+        automationRepo.automatedPackages.changes
             .forEach(IMMEDIATE_EXECUTOR) { receivedChanges.add(it) }
             .use {
 

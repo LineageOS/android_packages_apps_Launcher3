@@ -27,10 +27,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.launcher3.AbstractFloatingView
 import com.android.launcher3.AbstractFloatingView.TYPE_TOUCH_CONTROLLER_NO_INTERCEPT
 import com.android.launcher3.AbstractFloatingViewHelper
+import com.android.launcher3.automation.AutomationChange
 import com.android.launcher3.automation.AutomationRepository
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.statemanager.StateManager
+import com.android.launcher3.util.ListenableDiffAwareRef
 import com.android.launcher3.util.MutableListenableStream
+import com.android.launcher3.util.PackageUserKey
 import com.android.launcher3.util.SplitConfigurationOptions
 import com.android.launcher3.util.TransformingTouchDelegate
 import com.android.quickstep.RotationTouchHelper
@@ -83,7 +86,10 @@ class RecentsViewUtilsTest {
 
     @Before
     fun setUp() {
-        whenever(automationRepository.automationChanges).thenReturn(MutableListenableStream())
+        val automatedPackagesMock =
+            mock<ListenableDiffAwareRef<Set<PackageUserKey>, AutomationChange>>()
+        whenever(automatedPackagesMock.changes).thenReturn(MutableListenableStream())
+        whenever(automationRepository.automatedPackages).thenReturn(automatedPackagesMock)
         whenever(recentsView.container).thenReturn(recentsViewContainer)
         utils =
             RecentsViewUtils(

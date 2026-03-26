@@ -33,6 +33,7 @@ import com.android.launcher3.automation.AutomationRepository;
 import com.android.launcher3.backuprestore.LauncherRestoreEventLogger;
 import com.android.launcher3.display.DisplayController;
 import com.android.launcher3.folder.FolderNameSuggestionLoader;
+import com.android.launcher3.graphics.GlowMaskCache;
 import com.android.launcher3.graphics.GridCustomizationsProxy;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.graphics.theme.ThemePreference;
@@ -188,6 +189,9 @@ public interface LauncherBaseAppComponent {
 
     /** Builder for organizer component */
     OrganizerComponent.Builder getOrganizerComponentBuilder();
+
+    /** Caches BitmapShaders for glow effects */
+    GlowMaskCache getGlowMaskCache();
 
     /** Builder for LauncherBaseAppComponent. */
     interface Builder {
