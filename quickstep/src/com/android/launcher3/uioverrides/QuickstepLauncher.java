@@ -522,8 +522,7 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
         int container = itemInfo.container;
         if (canPinAppWithContextMenu()
                 && DisplayController.getInfo(this).getShowDesktopTaskbarForFreeformDisplay()
-                && (container == CONTAINER_ALL_APPS
-                || container == CONTAINER_ALL_APPS_PREDICTION)) {
+                && canContainerHavePinContextMenu(container)) {
             TaskbarInteractor ti = mTaskbarInteractor;
             int maxPinnableCount = ti != null ? ti.getMaxPinnableCount() : -1;
             boolean supportPinAppsOverflow = ti != null && ti.getSupportsPinnedAppsOverflow();
@@ -556,6 +555,13 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
             shortcuts.add(APP_LOCK);
         }
         return shortcuts.stream();
+    }
+
+    private boolean canContainerHavePinContextMenu(int container) {
+        return container == CONTAINER_ALL_APPS
+                || container == CONTAINER_ALL_APPS_PREDICTION
+                || container == CONTAINER_DESKTOP
+                || container > 0; // container > 0 means the app is inside a folder.
     }
 
     private boolean canPinAppWithContextMenu() {

@@ -129,6 +129,40 @@ class TitledFloatingSheetTest {
     }
 
     @Test
+    fun swipeDownOnSheetClosesSheetWhenEnableDragOnScrollToEndIsTrue() {
+        composeTestRule.setContent {
+            FloatingSheetTestContent(shouldEnableDragOnScrollToEnd = true)
+        }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
+
+        composeTestRule.onNodeWithText(SHEET_TITLE).performTouchInput { swipeDown() }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertDoesNotExist()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertExists()
+    }
+
+    @Test
+    fun swipeDownOnSheetDoesNotCloseSheetWhenEnableDragOnScrollToEndIsFalse() {
+        composeTestRule.setContent {
+            FloatingSheetTestContent(shouldEnableDragOnScrollToEnd = false)
+        }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
+
+        composeTestRule.onNodeWithText(SHEET_TITLE).performTouchInput { swipeDown() }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasText(CONTENT_TEXT)).assertExists()
+        composeTestRule.onNode(hasText(CLOSED_TEXT)).assertDoesNotExist()
+    }
+
+    @Test
     fun closesIfHostActivityIsNotTopResumed() {
         composeTestRule.setContent { FloatingSheetTestContent() }
         composeTestRule.waitForIdle()

@@ -19,13 +19,15 @@ package com.android.launcher3.taskbar
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.content.Context
 import android.graphics.drawable.Drawable
+import com.android.launcher3.icons.BitmapInfo.DrawableCreationFlags
+import com.android.launcher3.icons.IconShape
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.ItemInfoWithIcon
 import com.android.quickstep.util.SingleTask
 
 interface TaskbarOverflowItem {
     /** The drawable icon for the item. */
-    val drawableIcon: Drawable?
+    fun getDrawableIcon(@DrawableCreationFlags creationFlags: Int, iconShape: IconShape?): Drawable?
 
     /** The unique identifier for the item. */
     val itemId: Int
@@ -34,8 +36,12 @@ interface TaskbarOverflowItem {
 // Wrapper for [Task]
 internal class TaskWrapper(private val context: Context, private val singleTask: SingleTask?) :
     TaskbarOverflowItem {
-    override val drawableIcon: Drawable?
-        get() = singleTask?.task?.icon ?: singleTask?.bitmapInfos?.firstOrNull()?.newIcon(context)
+    override fun getDrawableIcon(
+        @DrawableCreationFlags creationFlags: Int,
+        iconShape: IconShape?,
+    ): Drawable? =
+        singleTask?.task?.icon
+            ?: singleTask?.bitmapInfos?.firstOrNull()?.newIcon(context, creationFlags, iconShape)
 
     override val itemId: Int
         get() = singleTask?.task?.key?.id ?: INVALID_TASK_ID
@@ -44,8 +50,10 @@ internal class TaskWrapper(private val context: Context, private val singleTask:
 // Wrapper for [ItemInfo]
 internal class ItemInfoWrapper(val itemInfo: ItemInfo?, private val context: Context) :
     TaskbarOverflowItem {
-    override val drawableIcon: Drawable?
-        get() = (itemInfo as? ItemInfoWithIcon)?.bitmap?.newIcon(context)
+    override fun getDrawableIcon(
+        @DrawableCreationFlags creationFlags: Int,
+        iconShape: IconShape?,
+    ): Drawable? = (itemInfo as? ItemInfoWithIcon)?.newIcon(context, creationFlags)
 
     override val itemId: Int
         get() = itemInfo?.id ?: ItemInfo.NO_ID

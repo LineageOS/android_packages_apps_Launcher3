@@ -115,7 +115,8 @@
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"ಮರುಹೆಸರಿಸಿ"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"ಶಾಶ್ವತವಾಗಿ ಅಳಿಸಿ"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"ಟ್ರ್ಯಾಶ್‌ಗೆ ಸರಿಸಿ"</string>
-    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"<xliff:g id="ITEM_NAME">%1$s</xliff:g> ಟ್ರ್ಯಾಶ್‌ಗೆ ಸರಿಸಲಾಗಿದೆ"</string>
+    <!-- no translation found for home_screen_files_moved_to_trash_message (2848141584483641247) -->
+    <skip />
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"ಟ್ರ್ಯಾಶ್‌ಗೆ ಸರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ ಏನೋ ತಪ್ಪಾಗಿದೆ."</string>
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"ರದ್ದುಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ ಮರುಸ್ಥಾಪಿಸಲು Files ಆ್ಯಪ್‌ಗೆ ಹೋಗಿ."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"ಕ್ರಿಯೆಗಳು"</string>
@@ -265,8 +266,7 @@
     <string name="arch_shape_title" msgid="2213843822192871318">"ಕಮಾನು"</string>
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"ಹೊಸ ಫೋಲ್ಡರ್"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"ಹೊಸ ಫೋಲ್ಡರ್"</string>
-    <!-- no translation found for home_screen_files_rename_dialog_clear_button (1516608063079626727) -->
-    <skip />
+    <string name="home_screen_files_rename_dialog_clear_button" msgid="1516608063079626727">"ತೆರವುಗೊಳಿಸಿ"</string>
     <string name="home_screen_files_rename_dialog_neutral_button" msgid="961781261154618336">"ರದ್ದುಮಾಡಿ"</string>
     <string name="home_screen_files_rename_dialog_positive_button" msgid="6506701192246379747">"ಮರುಹೆಸರಿಸಿ"</string>
     <string name="home_screen_files_rename_dialog_file_title" msgid="3540941610992603887">"ಫೈಲ್‌ ಅನ್ನು ಮರುಹೆಸರಿಸಿ"</string>

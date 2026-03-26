@@ -19,6 +19,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.util.SparseArray
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_DESKTOP
 import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT
 import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
@@ -43,6 +44,7 @@ import com.google.common.truth.Truth.assertThat
 import javax.inject.Provider
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
 /** Tests for [LauncherWorkspaceTypeTranslator]. */
 @RunWith(AndroidJUnit4::class)
@@ -51,10 +53,8 @@ class LauncherWorkspaceTypeTranslatorTest {
     private val translatorRegistry: TranslatorRegistry by lazy {
         val workspaceItemTranslators =
             mutableMapOf<Class<*>, Provider<WorkspaceItemTranslator<*>>>()
-        val hotseatItemTranslators =
-            mutableMapOf<Class<*>, Provider<HotseatItemTranslator<*>>>()
-        val appInFolderTranslators =
-            mutableMapOf<Class<*>, Provider<AppInFolderTranslator<*>>>()
+        val hotseatItemTranslators = mutableMapOf<Class<*>, Provider<HotseatItemTranslator<*>>>()
+        val appInFolderTranslators = mutableMapOf<Class<*>, Provider<AppInFolderTranslator<*>>>()
 
         val registry =
             TranslatorRegistry(
@@ -86,7 +86,14 @@ class LauncherWorkspaceTypeTranslatorTest {
         }
         registry
     }
-    private val translator = LauncherWorkspaceTypeTranslator(translatorRegistry)
+
+    private val idp: InvariantDeviceProfile =
+        mock<InvariantDeviceProfile>().apply {
+            numRows = 5
+            numColumns = 4
+        }
+
+    private val translator = LauncherWorkspaceTypeTranslator(translatorRegistry, idp)
 
     @Test
     fun toSpec_spatialTransformation_groupsByScreenAndHotseat() {
@@ -259,4 +266,14 @@ class LauncherWorkspaceTypeTranslatorTest {
             this.cellY = y
             this.itemType = ITEM_TYPE_DEEP_SHORTCUT
         }
+
+    @Test
+    fun toSpec_setsGridDimensionsFromDeviceProfile() {
+        val workspace = MutableWorkspaceData()
+
+        val spec = translator.toSpec(workspace)
+
+        assertThat(spec.rows).isEqualTo(5)
+        assertThat(spec.columns).isEqualTo(4)
+    }
 }

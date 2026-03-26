@@ -22,7 +22,6 @@ import androidx.lifecycle.viewModelScope
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundContext
 import com.android.launcher3.concurrent.annotations.LightweightBackgroundPriority.UI
 import com.android.launcher3.model.IModelWriter
-import com.android.launcher3.model.WorkspaceItemSpaceFinder
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.scheduleTransactionSuspending
@@ -42,7 +41,7 @@ constructor(
     @LightweightBackgroundContext(priority = UI)
     private val lightweightBackgroundContext: CoroutineContext,
     private val modelWriter: IModelWriter,
-    private val workspaceItemSpaceFinder: WorkspaceItemSpaceFinder,
+    private val organizerTransactionContextFactory: OrganizerTransactionContext.Factory,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(FolderCreatorState())
@@ -109,7 +108,7 @@ constructor(
     private suspend fun persistAndBindFolders(folders: List<FolderInfo>) {
         try {
             modelWriter.scheduleTransactionSuspending { context ->
-                OrganizerTransactionContext(context).addFolders(folders, workspaceItemSpaceFinder)
+                organizerTransactionContextFactory.create(context).addFolders(folders)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to persist folders", e)

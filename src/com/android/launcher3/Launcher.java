@@ -192,7 +192,6 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.PredictedContainerInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pm.PinRequestHelper;
-import com.android.launcher3.popup.ArrowPopup;
 import com.android.launcher3.popup.PopupContainer;
 import com.android.launcher3.popup.PopupController;
 import com.android.launcher3.popup.SystemShortcut;
@@ -2818,19 +2817,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         // Overridden
     }
 
-    /** Opens the widget picker UI. Returns true if opened. */
-    public boolean openWidgetPicker() {
-        if (getPackageManager().isSafeMode()) {
-            Toast.makeText(this, R.string.safemode_widget_error, Toast.LENGTH_SHORT).show();
-            return false;
-        } else {
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setPackage(asContext().getPackageName());
-            asContext().startActivity(intent);
-            return true;
-        }
-    }
-
     /**
      * Returns the animation coordinator for playing one-off animations
      */
@@ -2863,8 +2849,15 @@ public class Launcher extends StatefulActivity<LauncherState>
      */
     @VisibleForTesting
     @Nullable
-    public ArrowPopup<?> getOptionsPopup() {
-        return findViewById(R.id.popup_container);
+    public AbstractFloatingView getOptionsPopup() {
+        // Try legacy ArrowPopup (which extends AbstractFloatingView)
+        View popup = findViewById(R.id.popup_container);
+        if (popup instanceof AbstractFloatingView) {
+            return (AbstractFloatingView) popup;
+        }
+
+        // Try to find the new Compose-based Dialog View
+        return AbstractFloatingView.getTopOpenView(this);
     }
 
     @Override

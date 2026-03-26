@@ -68,7 +68,7 @@ class BubbleBarViewControllerTest {
     }
 
     @Test
-    fun setHiddenForBubbles_true_hidesContainer() {
+    fun setHiddenForBubbles_true_showsContainer() {
         runOnTaskbarUiThreadSync {
             controller.setHiddenForBubbles(false)
             controller.setHiddenForBubbles(true)
@@ -80,7 +80,7 @@ class BubbleBarViewControllerTest {
         }
 
         assertThat(controller.isBubbleBarVisible).isFalse()
-        assertThat(controller.isBubbleBarContainerVisible).isFalse()
+        assertThat(controller.isBubbleBarContainerVisible).isTrue()
     }
 
     @Test
@@ -141,7 +141,7 @@ class BubbleBarViewControllerTest {
     }
 
     @Test
-    fun setHiddenForSysuiAndBubbles_unhidingForSysui_keepsContainerHidden() {
+    fun setHiddenForSysuiAndBubbles_unhidingForSysui_showsContainer() {
         runOnTaskbarUiThreadSync {
             // GIVEN bubble bar is hidden for sysui and for no bubbles
             controller.setHiddenForBubbles(false) // to make sure next call is not a no-op
@@ -157,7 +157,7 @@ class BubbleBarViewControllerTest {
 
         // THEN it remains hidden because there are no bubbles
         assertThat(controller.isBubbleBarVisible).isFalse()
-        assertThat(controller.isBubbleBarContainerVisible).isFalse()
+        assertThat(controller.isBubbleBarContainerVisible).isTrue()
     }
 
     @Test

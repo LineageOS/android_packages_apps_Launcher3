@@ -70,7 +70,7 @@ object WorkspaceLongPressOptions {
                     SYSTEM_SHORTCUT,
                     LAUNCHER_WIDGETSTRAY_BUTTON_TAP_OR_LONGPRESS,
                 ) { ac, _, _ ->
-                    (ac as? Launcher)?.openWidgetPicker()
+                    openWidgetPicker(ac.asContext())
                 }
             )
         }
@@ -101,7 +101,7 @@ object WorkspaceLongPressOptions {
             }
         )
 
-        if (Flags.kondoPlanner()) {
+        if (Flags.condoPlanner()) {
             add(
                 PopupData(
                     R.drawable.ic_create_new_folder,
@@ -118,7 +118,7 @@ object WorkspaceLongPressOptions {
             )
             add(
                 PopupData(
-                    R.drawable.kondo_planner_icon,
+                    R.drawable.condo_planner_icon,
                     R.string.settings_home_organizer,
                     SYSTEM_SHORTCUT,
                     LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
@@ -235,6 +235,23 @@ object WorkspaceLongPressOptions {
                     }
                 }
             }
+    }
+
+    /** Opens the widget picker UI. Returns true if opened. */
+    @JvmStatic
+    fun openWidgetPicker(ctx: Context): Boolean {
+        if (ctx.packageManager.isSafeMode) {
+            Toast.makeText(ctx, R.string.safemode_widget_error, Toast.LENGTH_SHORT).show()
+            return false
+        } else {
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.setPackage(ctx.packageName)
+            if (ctx !is android.app.Activity) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            ctx.startActivity(intent)
+            return true
+        }
     }
 
     // An intent extra to indicate the horizontal scroll of the wallpaper.

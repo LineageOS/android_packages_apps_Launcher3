@@ -477,6 +477,11 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         if (Utilities.isRunningInTestHarness()) {
             return false;
         }
+
+        if (mControllers.taskbarActivityContext.isDesktopFormFactor()) {
+            return false;
+        }
+
         TaskbarEduTooltipController eduController = mControllers.taskbarEduTooltipController;
         if (eduController.getBlockedBySysuiState()) {
             return false;
@@ -535,6 +540,15 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
                 mControllers.navbarButtonsViewController
                         .getOnTaskbarBackgroundNavButtonColorOverride().updateValue(progress);
             }
+            if (!com.android.wm.shell.Flags.fixBubblesStashIncorrectProgress()) {
+                if (isBubbleBarEnabled() && progressIndex != IME_PROGRESS_INDEX) {
+                    mControllers.bubbleControllers.ifPresent(
+                            c -> c.bubbleStashController.setInAppDisplayOverrideProgress(
+                                    mTaskbarInAppDisplayProgress.value));
+                }
+            }
+        }
+        if (com.android.wm.shell.Flags.fixBubblesStashIncorrectProgress()) {
             if (isBubbleBarEnabled() && progressIndex != IME_PROGRESS_INDEX) {
                 mControllers.bubbleControllers.ifPresent(
                         c -> c.bubbleStashController.setInAppDisplayOverrideProgress(

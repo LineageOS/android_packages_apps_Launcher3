@@ -29,6 +29,7 @@ import com.android.launcher3.icons.BitmapRenderer
 import com.android.launcher3.model.IModelWriter
 import com.android.launcher3.model.repository.HomeScreenRepository
 import com.android.launcher3.model.scheduleTransactionSuspending
+import com.android.launcher3.organizer.OrganizerTransactionContext
 import com.android.launcher3.organizer.dagger.OrganizerScope
 import java.lang.ref.WeakReference
 import javax.inject.Inject
@@ -46,6 +47,7 @@ class WorkspaceOrganizerViewModel
 constructor(
     private val homeScreenRepository: HomeScreenRepository,
     private val modelWriter: IModelWriter,
+    private val organizerTransactionContextFactory: OrganizerTransactionContext.Factory,
     @LightweightBackgroundContext(priority = UI)
     private val lightweightBackgroundContext: CoroutineContext,
 ) : ViewModel() {
@@ -165,8 +167,7 @@ constructor(
                 try {
                     withContext(lightweightBackgroundContext) {
                         modelWriter.scheduleTransactionSuspending {
-                            val context =
-                                WorkspaceOrganizerTransactionContext(it, homeScreenRepository)
+                            val context = organizerTransactionContextFactory.create(it)
                             context.moveScreen(currentIndex, targetIndex, orderedScreenIds)
                         }
                     }
@@ -205,8 +206,7 @@ constructor(
                 try {
                     withContext(lightweightBackgroundContext) {
                         modelWriter.scheduleTransactionSuspending {
-                            val context =
-                                WorkspaceOrganizerTransactionContext(it, homeScreenRepository)
+                            val context = organizerTransactionContextFactory.create(it)
                             context.deleteScreen(page.screenId)
                         }
                     }

@@ -27,6 +27,7 @@ import android.view.View
 import androidx.core.util.containsValue
 import androidx.core.util.size
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
 import com.android.launcher3.model.data.WorkspaceItemInfo
@@ -82,6 +83,25 @@ class PinToTaskbarShortcutTest {
         runOnTaskbarUiThreadSync { shortcut.onClick(null) }
 
         verify(shortcut).unpinItem(anyOrNull(), anyOrNull())
+        assertThat(pinnedInfoList.size).isEqualTo(0)
+    }
+
+    @Test
+    fun testUnpin_triggeredFromTaskbar_directlyRemovesTaskbarItem() {
+        populatePinnedInfoList(0)
+        assertThat(pinnedInfoList.size).isEqualTo(1)
+
+        // Simulate item clicked directly on the taskbar
+        val taskbarItem = pinnedInfoList[0]!!
+        taskbarItem.container = Favorites.CONTAINER_HOTSEAT
+
+        val shortcut = createShortcut(false, taskbarItem)
+        mockUnpinItem(shortcut)
+
+        runOnTaskbarUiThreadSync { shortcut.onClick(null) }
+
+        // Verify it unpins the clicked taskbar item directly
+        verify(shortcut).unpinItem(anyOrNull(), eq(taskbarItem))
         assertThat(pinnedInfoList.size).isEqualTo(0)
     }
 

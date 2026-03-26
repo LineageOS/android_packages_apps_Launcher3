@@ -27,6 +27,7 @@ import android.view.View.DRAG_FLAG_GLOBAL_URI_READ
 import android.view.View.DRAG_FLAG_GLOBAL_URI_WRITE
 import android.view.View.DRAG_FLAG_OPAQUE
 import android.view.View.DragShadowBuilder
+import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.launcher3.Flags.FLAG_ENABLE_SYSTEM_DRAG
 import com.android.launcher3.dragndrop.SystemDragController.Companion.DOCS_UI_EXTRA_PREFIX
@@ -70,7 +71,7 @@ class SystemDragControllerImplTest {
     @Mock private lateinit var mockContext: ActivityContext
     @Mock private lateinit var mockDragEvent: DragEvent
     @Mock private lateinit var mockSystemDragListener: SystemDragListener
-    @Mock private lateinit var mockSystemDragListenerFactory: SystemDragListenerFactory
+    @Mock private lateinit var mockSystemDragListenerFactory: SystemDragListener.Factory
 
     private lateinit var controller: SystemDragControllerImpl
 
@@ -291,7 +292,7 @@ class SystemDragControllerImplTest {
             )
             .thenReturn(withStartSystemDragSuccess)
 
-        whenever(mockSystemDragListenerFactory.get(mockContext, params))
+        whenever(mockSystemDragListenerFactory.create(::ImageView, params))
             .thenReturn(systemDragListener)
         whenever(systemDragListener.startDrag(screenPos)).thenReturn(dragView)
 
@@ -328,8 +329,8 @@ class SystemDragControllerImplTest {
         whenever(mockSystemDragListener.onDrag(mockDragEvent)).thenReturn(true)
     }
 
-    private fun initMock(mockSystemDragListenerFactory: SystemDragListenerFactory) {
-        whenever(mockSystemDragListenerFactory.get(any(), anyOrNull())).thenAnswer {
+    private fun initMock(mockSystemDragListenerFactory: SystemDragListener.Factory) {
+        whenever(mockSystemDragListenerFactory.create(any(), anyOrNull())).thenAnswer {
             mockSystemDragListener
         }
     }
