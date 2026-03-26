@@ -128,6 +128,7 @@ class PerDisplayTaskbarResource(
                 }
 
                 private fun onConfigurationChangedInternal(newConfig: Configuration) {
+                    if (isDestroyed) return
                     Trace.instantForTrack(
                         Trace.TRACE_TAG_APP,
                         "TaskbarManager",
