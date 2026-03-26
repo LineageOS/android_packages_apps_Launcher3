@@ -115,7 +115,8 @@
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"Yeniden adlandır"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Kalıcı olarak sil"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Çöp kutusuna taşı"</string>
-    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"<xliff:g id="ITEM_NAME">%1$s</xliff:g> dosyası çöp kutusuna taşındı"</string>
+    <!-- no translation found for home_screen_files_moved_to_trash_message (2848141584483641247) -->
+    <skip />
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Çöp kutusuna taşınamıyor. Bir hata oluştu."</string>
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Geri alınamıyor. Geri yüklemek için Files uygulamasına gidin."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"İşlemler"</string>
@@ -265,8 +266,7 @@
     <string name="arch_shape_title" msgid="2213843822192871318">"Kemer"</string>
     <string name="create_new_folder_button_text" msgid="4037052463794735069">"Yeni klasör"</string>
     <string name="default_new_folder_name" msgid="8821062664729412079">"Yeni klasör"</string>
-    <!-- no translation found for home_screen_files_rename_dialog_clear_button (1516608063079626727) -->
-    <skip />
+    <string name="home_screen_files_rename_dialog_clear_button" msgid="1516608063079626727">"Temizle"</string>
     <string name="home_screen_files_rename_dialog_neutral_button" msgid="961781261154618336">"İptal"</string>
     <string name="home_screen_files_rename_dialog_positive_button" msgid="6506701192246379747">"Yeniden adlandır"</string>
     <string name="home_screen_files_rename_dialog_file_title" msgid="3540941610992603887">"Dosyayı yeniden adlandırın"</string>

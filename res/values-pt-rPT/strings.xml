@@ -115,7 +115,8 @@
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"Mudar nome"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Eliminar definitivamente"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Mover para o lixo"</string>
-    <string name="home_screen_files_moved_to_trash_message" msgid="381256565590274395">"<xliff:g id="ITEM_NAME">%1$s</xliff:g> movido para o lixo"</string>
+    <!-- no translation found for home_screen_files_moved_to_trash_message (2848141584483641247) -->
+    <skip />
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Não é possível mover para o lixo. Algo correu mal."</string>
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Não é possível anular. Aceda à app Files para restaurar."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Ações"</string>
