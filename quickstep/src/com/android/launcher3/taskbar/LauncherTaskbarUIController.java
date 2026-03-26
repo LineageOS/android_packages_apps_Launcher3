@@ -540,6 +540,15 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
                 mControllers.navbarButtonsViewController
                         .getOnTaskbarBackgroundNavButtonColorOverride().updateValue(progress);
             }
+            if (!com.android.wm.shell.Flags.fixBubblesStashIncorrectProgress()) {
+                if (isBubbleBarEnabled() && progressIndex != IME_PROGRESS_INDEX) {
+                    mControllers.bubbleControllers.ifPresent(
+                            c -> c.bubbleStashController.setInAppDisplayOverrideProgress(
+                                    mTaskbarInAppDisplayProgress.value));
+                }
+            }
+        }
+        if (com.android.wm.shell.Flags.fixBubblesStashIncorrectProgress()) {
             if (isBubbleBarEnabled() && progressIndex != IME_PROGRESS_INDEX) {
                 mControllers.bubbleControllers.ifPresent(
                         c -> c.bubbleStashController.setInAppDisplayOverrideProgress(
