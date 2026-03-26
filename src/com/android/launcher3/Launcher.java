@@ -192,7 +192,6 @@ import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.PredictedContainerInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.pm.PinRequestHelper;
-import com.android.launcher3.popup.ArrowPopup;
 import com.android.launcher3.popup.PopupContainer;
 import com.android.launcher3.popup.PopupController;
 import com.android.launcher3.popup.SystemShortcut;
@@ -2850,8 +2849,15 @@ public class Launcher extends StatefulActivity<LauncherState>
      */
     @VisibleForTesting
     @Nullable
-    public ArrowPopup<?> getOptionsPopup() {
-        return findViewById(R.id.popup_container);
+    public AbstractFloatingView getOptionsPopup() {
+        // Try legacy ArrowPopup (which extends AbstractFloatingView)
+        View popup = findViewById(R.id.popup_container);
+        if (popup instanceof AbstractFloatingView) {
+            return (AbstractFloatingView) popup;
+        }
+
+        // Try to find the new Compose-based Dialog View
+        return AbstractFloatingView.getTopOpenView(this);
     }
 
     @Override

@@ -16,7 +16,6 @@
 
 package com.android.launcher3.popup
 
-import android.view.KeyEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
@@ -30,13 +29,12 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PopupMenuIntegrationTest : BaseLauncherActivityTest<Launcher>() {
 
-    val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    val device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
     @Test
     fun testDevicePressMenu() {
         launcherActivity.initializeActivity()
-        // This should trigger the popup menu to open, similar to UiDevice#pressMenu
-        launcherActivity.injectKeyEvent(KeyEvent.KEYCODE_MENU, false)
+        device.pressMenu()
         waitForLauncherCondition("Launcher didn't show PopupMenu") { it.optionsPopup != null }
         device.pressHome()
         waitForLauncherCondition("Launcher didn't hide PopupMenu") { it.optionsPopup == null }
