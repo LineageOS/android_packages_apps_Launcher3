@@ -25,8 +25,8 @@ import static org.junit.Assert.assertTrue;
 import android.platform.test.annotations.PlatinumTest;
 import android.view.View;
 
+import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.Launcher;
-import com.android.launcher3.popup.ArrowPopup;
 import com.android.launcher3.tapl.AllApps;
 import com.android.launcher3.tapl.AppIconMenu;
 import com.android.launcher3.tapl.AppIconMenuItem;
@@ -45,7 +45,7 @@ import org.junit.Test;
 public class TaplAppIconMenuTest extends AbstractLauncherUiTest<Launcher, View> {
 
     private boolean isOptionsPopupVisible(Launcher launcher) {
-        final ArrowPopup<?> popup = launcher.getOptionsPopup();
+        final AbstractFloatingView popup = launcher.getOptionsPopup();
         return popup != null && popup.isShown();
     }
 
