@@ -115,6 +115,7 @@ constructor(
             return !Utilities.isRunningInTestHarness() &&
                 !activityContext.isPhoneMode &&
                 !activityContext.isTinyTaskbar &&
+                !activityContext.isDesktopFormFactor &&
                 !UserManager.isDeviceInDemoMode(activityContext)
         }
 
@@ -284,7 +285,7 @@ constructor(
             showTooltipPages(tooltipEduCombinator.getFeaturesTooltipsEduPages())
             return
         }
-        if (blockedBySysuiState) {
+        if (blockedBySysuiState || activityContext.isDesktopFormFactor) {
             return
         }
         if (!isTooltipEnabled || tooltipStep > TOOLTIP_STEP_FEATURES) {
@@ -444,7 +445,12 @@ constructor(
      */
     fun maybeShowSearchEdu() {
         Preconditions.assertTaskbarUiThread()
-        if (isDestroyed || isTooltipOpen || blockedBySysuiState) {
+        if (
+            isDestroyed ||
+                isTooltipOpen ||
+                blockedBySysuiState ||
+                activityContext.isDesktopFormFactor
+        ) {
             return
         }
 

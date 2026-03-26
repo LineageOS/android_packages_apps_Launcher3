@@ -477,6 +477,11 @@ public class LauncherTaskbarUIController extends TaskbarUIController {
         if (Utilities.isRunningInTestHarness()) {
             return false;
         }
+
+        if (mControllers.taskbarActivityContext.isDesktopFormFactor()) {
+            return false;
+        }
+
         TaskbarEduTooltipController eduController = mControllers.taskbarEduTooltipController;
         if (eduController.getBlockedBySysuiState()) {
             return false;
