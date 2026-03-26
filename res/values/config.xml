@@ -221,6 +221,7 @@
     <dimen name="home_organizer_background_blur_radius">30dp</dimen>
 
     <!-- Home screen files -->
+    <string name="home_screen_files_file_icon_path_data" translatable="false">m 12.5,0 h 75 C 94.403542,0 100,5.5964375 100,12.5 v 75 c 0,6.903542 -5.596458,12.5 -12.5,12.5 h -75 C 5.5964375,100 0,94.403542 0,87.5 v -75 C 0,5.5964375 5.5964375,0 12.5,0 Z</string>
     <string name="home_screen_files_folder_icon_path_data" translatable="false">M10 4H4c-1.1 0,-1.99.9,-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2,-.9 2,-2V8c0,-1.1,-.9,-2,-2,-2h-8l-2,-2z</string>
     <integer name="home_screen_files_folder_icon_path_intrinsic_size">24</integer>
 </resources>

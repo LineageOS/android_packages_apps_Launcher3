@@ -19,27 +19,43 @@ package com.android.launcher3.model.data
 import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_FILE_SYSTEM_FILE
 import com.android.launcher3.automation.AutomationRepository
+import com.android.launcher3.dagger.LauncherAppComponent
+import com.android.launcher3.graphics.ThemeManager
+import com.android.launcher3.icons.BitmapInfo
+import com.android.launcher3.icons.FastBitmapDrawable
+import com.android.launcher3.icons.IconShape
 import com.android.launcher3.model.data.ItemInfoWithIcon.FLAG_AUTOMATED
 import com.android.launcher3.pm.PackageInstallInfo
 import com.android.launcher3.util.SandboxApplication
+import com.android.tools.dagger.mutation.annotations.BindValue
+import com.android.tools.dagger.mutation.annotations.MutatedComponent
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@MutatedComponent(target = LauncherAppComponent::class)
 class ItemInfoWithIconTest {
 
-    @get:Rule var context = SandboxApplication()
+    @get:Rule val mockito = MockitoJUnit.rule()
+    @get:Rule val app = SandboxApplication().withModelDependency()
+    @BindValue @Mock lateinit var themeManager: ThemeManager
     private lateinit var itemInfoWithIcon: TestItemInfoWithIcon
 
     @Before
     fun setup() {
+        app.initDaggerComponent(mutatedComponentBuilder())
         itemInfoWithIcon = TestItemInfoWithIcon()
     }
 
@@ -112,8 +128,21 @@ class ItemInfoWithIconTest {
 
         itemInfoWithIcon.checkAndApplyAutomationFlag(mockRepository)
 
-        Truth.assertThat(itemInfoWithIcon.runtimeStatusFlags and FLAG_AUTOMATED)
-            .isEqualTo(0)
+        Truth.assertThat(itemInfoWithIcon.runtimeStatusFlags and FLAG_AUTOMATED).isEqualTo(0)
+    }
+
+    @Test
+    fun newIcon_usesFileShapeDataForFileSystemFiles() {
+        val fileBitmapInfo = mock<BitmapInfo>()
+        val fileShapeData = mock<IconShape>()
+        val fileIcon = mock<FastBitmapDrawable>()
+
+        whenever(fileBitmapInfo.newIcon(any(), any(), eq(fileShapeData))).thenReturn(fileIcon)
+        whenever(themeManager.fileShapeData).thenReturn(fileShapeData)
+
+        itemInfoWithIcon.bitmap = fileBitmapInfo
+        itemInfoWithIcon.itemType = ITEM_TYPE_FILE_SYSTEM_FILE
+        Truth.assertThat(itemInfoWithIcon.newIcon(app)).isSameInstanceAs(fileIcon)
     }
 
     private class TestItemInfoWithIcon : ItemInfoWithIcon() {
