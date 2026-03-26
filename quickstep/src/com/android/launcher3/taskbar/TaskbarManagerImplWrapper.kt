@@ -161,7 +161,11 @@ class TaskbarManagerImplWrapper @Inject constructor(implProvider: Provider<Taskb
 
     /* TODO(b/404636836): Evaluate API calls on returned TaskbarActivityContext */
     override fun getTaskbarForDisplay(displayId: Int): TaskbarActivityContext? {
-        return impl.getTaskbarForDisplay(displayId)
+        return if (::impl.isInitialized) {
+            impl.getTaskbarForDisplay(displayId)
+        } else {
+            null
+        }
     }
 
     override fun updateStashControllerLauncherStateFlag(displayId: Int, isVisible: Boolean) {
