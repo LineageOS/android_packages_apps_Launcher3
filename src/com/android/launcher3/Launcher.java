@@ -2818,19 +2818,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         // Overridden
     }
 
-    /** Opens the widget picker UI. Returns true if opened. */
-    public boolean openWidgetPicker() {
-        if (getPackageManager().isSafeMode()) {
-            Toast.makeText(this, R.string.safemode_widget_error, Toast.LENGTH_SHORT).show();
-            return false;
-        } else {
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setPackage(asContext().getPackageName());
-            asContext().startActivity(intent);
-            return true;
-        }
-    }
-
     /**
      * Returns the animation coordinator for playing one-off animations
      */
