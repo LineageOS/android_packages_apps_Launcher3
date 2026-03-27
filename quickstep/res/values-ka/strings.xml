@@ -154,10 +154,8 @@
     <string name="move_drop_target_top_or_left" msgid="2988702185049595807">"ზემოთ/მარცხნივ გადატანა"</string>
     <string name="move_drop_target_bottom_or_right" msgid="5431393418797620162">"ქვემოთ/მარჯვნივ გადატანა"</string>
     <string name="open_app_as_a_bubble" msgid="6642626287247807473">"აპის გახსნა ბუშტის სახით"</string>
-    <!-- no translation found for action_move_item_left (1553114361342866236) -->
-    <skip />
-    <!-- no translation found for action_move_item_right (682950193875586183) -->
-    <skip />
+    <string name="action_move_item_left" msgid="1553114361342866236">"ერთეულის მარცხნივ გადატანა"</string>
+    <string name="action_move_item_right" msgid="682950193875586183">"ერთეულის მარჯვნივ გადატანა"</string>
     <string name="quick_switch_pane_title" msgid="4677158207760585812">"ბოლოდროინდელი აპები"</string>
     <string name="quick_switch_content_description" msgid="2851244536728720005">"ბოლოდროინდელი აპების სია"</string>
     <string name="quick_switch_overflow" msgid="3679780650881041632">"{count,plural, =1{სხვა აპი}other{სხვა აპი}}"</string>
