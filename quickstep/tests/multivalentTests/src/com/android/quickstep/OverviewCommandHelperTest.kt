@@ -19,7 +19,6 @@ package com.android.quickstep
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.content.Intent
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
 import androidx.test.annotation.UiThreadTest
@@ -50,7 +49,6 @@ import com.android.quickstep.views.KeyboardFocusTask
 import com.android.quickstep.views.RecentsView
 import com.android.quickstep.views.RecentsViewUtils
 import com.android.quickstep.views.TaskView
-import com.android.window.flags.Flags as WindowFlags
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -707,33 +705,6 @@ class OverviewCommandHelperTest {
             getTaskbarUiThread().submit {}.get()
             verify(taskbarUIController).openQuickSwitchView()
             verify(recentView, never()).setKeyboardFocusTask(any())
-        }
-
-    @Test
-    fun showWithFocusCommand_setsKeyboardFocusTaskToCurrentTask() =
-        testScope.runTest {
-            whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>()).thenReturn(null)
-            whenever(containerInterface.switchToRecentsIfVisible(any())).thenReturn(false)
-            val (swipeUpHandler, newGestureState) = setupGestureDependencies()
-            val command = sut.addCommand(CommandType.SHOW_WITH_FOCUS)!!
-
-            runCurrent()
-            assertThat(command.status).isEqualTo(CommandStatus.PROCESSING)
-            verify(swipeUpHandler).onGestureStarted(any())
-            verify(newGestureState).setHandlingAtomicEvent(GestureState.GestureEndTarget.RECENTS)
-            verify(recentView).setKeyboardFocusTask(KeyboardFocusTask.ExpectedCurrentTask)
-
-            // Make sure we can transition to completed state once we see an end callback.
-            val gestureAnimationEndCallbackCaptor = argumentCaptor<Runnable>()
-            verify(swipeUpHandler)
-                .setGestureAnimationEndCallback(gestureAnimationEndCallbackCaptor.capture())
-            whenever(containerInterface.getVisibleRecentsView<RecentsView<*, *>>())
-                .thenReturn(recentView)
-            gestureAnimationEndCallbackCaptor.firstValue.run()
-
-            runCurrent()
-            assertThat(command.status).isEqualTo(CommandStatus.COMPLETED)
-            verify(recentView).setKeyboardFocusTask(KeyboardFocusTask.Unfocused)
         }
 
     @Test
