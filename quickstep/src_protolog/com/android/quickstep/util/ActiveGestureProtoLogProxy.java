@@ -83,12 +83,29 @@ public class ActiveGestureProtoLogProxy {
         }
     }
 
-    public static void logAbsSwipeUpHandlerOnRecentsAnimationFinished() {
+    public static void logAbsSwipeUpHandlerOnRecentsAnimationStartTimedOut() {
+        ActiveGestureLog.INSTANCE.addLog(
+                /* event= */ "AbsSwipeUpHandler.onRecentsAnimationStartTimedOut");
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP, "AbsSwipeUpHandler.onRecentsAnimationStartTimedOut");
+        }
+    }
+
+    public static void logRecentsAnimationCallbacksOnRecentsAnimationFinished() {
         ActiveGestureLog.INSTANCE.addLog(
                 /* event= */ "RecentsAnimationCallbacks.onAnimationFinished",
                 ON_FINISH_RECENTS_ANIMATION);
         if (willProtoLog()) {
-            ProtoLog.d(PROTO_LOG_GROUP, "AbsSwipeUpHandler.onAnimationFinished");
+            ProtoLog.d(PROTO_LOG_GROUP, "RecentsAnimationCallbacks.onAnimationFinished");
+        }
+    }
+
+    public static void logRecentsAnimationCallbacksOnAnimationStartTimedOut() {
+        ActiveGestureLog.INSTANCE.addLog(
+                /* event= */ "RecentsAnimationCallbacks.onRecentsAnimationStartTimedOut");
+        if (willProtoLog()) {
+            ProtoLog.d(PROTO_LOG_GROUP,
+                    "RecentsAnimationCallbacks.onRecentsAnimationStartTimedOut");
         }
     }
 
