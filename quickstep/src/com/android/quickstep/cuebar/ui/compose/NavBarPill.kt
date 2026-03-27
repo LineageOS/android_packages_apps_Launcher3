@@ -121,6 +121,8 @@ fun NavBarPill(
     val collapseAnimationInProgress = remember { mutableStateOf(false) }
 
     var expandedSize by remember { mutableStateOf(IntSize.Zero) }
+    var pillBounds by remember { mutableStateOf<Rect?>(null) }
+    var eduBounds by remember { mutableStateOf<Rect?>(null) }
     val visibleState = remember { MutableTransitionState(false) }
     visibleState.targetState = visible
 
@@ -193,6 +195,22 @@ fun NavBarPill(
         }
     }
 
+    LaunchedEffect(pillBounds, eduBounds, showEducation) {
+        val currentPill = pillBounds ?: return@LaunchedEffect
+        val currentEdu = eduBounds
+        if (showEducation && currentEdu != null) {
+            val union = Rect(
+                left = minOf(currentPill.left, currentEdu.left),
+                top = minOf(currentPill.top, currentEdu.top),
+                right = maxOf(currentPill.right, currentEdu.right),
+                bottom = maxOf(currentPill.bottom, currentEdu.bottom),
+            )
+            onInteractiveBoundsMeasured(union)
+        } else {
+            onInteractiveBoundsMeasured(currentPill)
+        }
+    }
+
     val config = LocalConfiguration.current
     val isBoldTextEnabled = config.fontWeightAdjustment > 0
     val fontScale = config.fontScale
@@ -240,7 +258,13 @@ fun NavBarPill(
                 enter = fadeIn() + scaleIn(),
                 exit = fadeOut() + scaleOut(),
             ) {
-                FirstTimeEducation(Alignment.CenterHorizontally, onCloseClick = onCloseEducation)
+                FirstTimeEducation(
+                    Alignment.CenterHorizontally,
+                    onCloseClick = onCloseEducation,
+                    modifier = Modifier.onGloballyPositioned { coordinates ->
+                        eduBounds = coordinates.boundsInWindow()
+                    }
+                )
             }
         }
         Row(
@@ -260,7 +284,7 @@ fun NavBarPill(
                     }
                     .padding(bottom = 4.dp)
                     .onGloballyPositioned { coordinates ->
-                        onInteractiveBoundsMeasured(coordinates.boundsInWindow())
+                        pillBounds = coordinates.boundsInWindow()
                     },
         ) {
             val closeButtonSize = 28.dp
