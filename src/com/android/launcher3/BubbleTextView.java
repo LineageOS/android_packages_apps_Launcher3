@@ -669,7 +669,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     public int getIconCreationFlagsForInfo(ItemInfoWithIcon info) {
         // Set nonPendingIcon acts as a restart which should refresh the flag state when applicable.
         int flags = shouldUseTheme() ? FLAG_THEMED : 0;
-        // Remove badge on icons smaller than 48dp.
+        // Remove badge on icons smaller than 48dp. Except for in 2026 refresh which uses 40dp
+        // for small icon.
         if (mHideBadge || mDisplay == DISPLAY_SEARCH_RESULT_SMALL) {
             flags |= FLAG_NO_BADGE;
         }
