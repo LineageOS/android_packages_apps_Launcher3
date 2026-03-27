@@ -16,11 +16,13 @@
 
 package com.android.launcher3.widget;
 
+import static com.android.launcher3.anim.AnimatorListeners.forEndCallback;
 import static com.android.launcher3.graphics.PreloadIconDelegate.newPendingIcon;
 import static com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_PROVIDER_NOT_READY;
 import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
+import android.animation.ObjectAnimator;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -59,6 +61,7 @@ import com.android.launcher3.model.data.PackageItemInfo;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.SafeCloseable;
 import com.android.launcher3.util.Themes;
+import com.android.launcher3.util.ViewEx;
 import com.android.launcher3.widget.ListenableAppWidgetHost.ProviderChangedListener;
 
 import java.util.List;
@@ -74,7 +77,6 @@ public class PendingAppWidgetHostView extends LauncherAppWidgetHostView
 
     private static final int DEFERRED_ALPHA = 0x77;
     private static final long PENDING_WIDGET_FADE_OUT_MS = 200L;
-
     private final Rect mRect = new Rect();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -239,24 +241,29 @@ public class PendingAppWidgetHostView extends LauncherAppWidgetHostView
             // This occurs when LauncherAppWidgetHostView is used to render a preview layout.
             return;
         }
-
         if (mActivityContext instanceof Launcher launcher) {
-            // Remove the tag so that the Workspace doesn't mistakenly find this fading old view
-            // when searching for the newly inflated widget with the same appWidgetId.
-            setTag(null);
-            // Rebind the current widget (which was inflated in the wrong
-            // orientation), but don't delete it from the database.
+            // Remove and rebind the current widget (which was inflated in the wrong
+            // orientation), but don't delete it from the database
+            launcher.removeItem(this, info, false  /* deleteFromDb */,
+                    "widget removed because of configuration change");
             launcher.bindAppWidget(info);
+            animateShowReinflatedWidget(
+                    launcher.getWorkspace().getWidgetForAppWidgetId(info.appWidgetId));
 
-            // Keep the pending view around to fade it out on top of the new widget.
-            bringToFront();
-            setClickable(false);
-            animate()
-                    .alpha(0f)
-                    .setDuration(PENDING_WIDGET_FADE_OUT_MS)
-                    .withEndAction(() -> launcher.removeItem(this, info, /*deleteFromDb=*/ false,
-                            "pending widget removed after animation complete"))
-                    .start();
+        }
+    }
+
+    private void animateShowReinflatedWidget(View reInflatedWidget) {
+        if (reInflatedWidget != null) {
+            Drawable snapshot = ViewEx.captureSnapshotAsDrawable(
+                    this, "PendingWidgetFadeOut", getWidth(), getHeight());
+            snapshot.setBounds(0, 0, getWidth(), getHeight());
+            reInflatedWidget.getOverlay().add(snapshot);
+
+            ObjectAnimator anim = ObjectAnimator.ofInt(snapshot, "alpha", 255, 0);
+            anim.setDuration(PENDING_WIDGET_FADE_OUT_MS).addListener(forEndCallback(
+                    () -> reInflatedWidget.getOverlay().remove(snapshot)));
+            anim.start();
         }
     }
 
