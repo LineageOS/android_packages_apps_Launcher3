@@ -22,6 +22,7 @@ import android.os.Build
 import android.util.ArrayMap
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.InvariantDeviceProfile.DeviceType
+import com.android.launcher3.deviceprofile.parser.GridOption
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.display.LauncherDisplayInfo
 import com.android.launcher3.testing.shared.ResourceUtils
@@ -126,12 +127,13 @@ class DeviceEmulationData(
 
             @DeviceType val deviceType = info.deviceType
             val defaultGrid =
-                InvariantDeviceProfile.parseAllDefinedGridOptions(context, info)
-                    .stream()
-                    .filter { it.isEnabled(deviceType) }
-                    .map { it.name }
-                    .findFirst()
-                    .get()
+                GridOption.parseAllDefined(
+                        context,
+                        info,
+                        filter = { it.isEnabled(deviceType) },
+                        mapper = { option, _ -> option.name },
+                    )
+                    .first()
 
             return DeviceEmulationData(
                 name = code,

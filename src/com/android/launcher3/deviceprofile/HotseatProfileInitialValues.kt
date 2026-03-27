@@ -19,11 +19,11 @@ package com.android.launcher3.deviceprofile
 import android.content.res.Resources
 import android.util.DisplayMetrics
 import com.android.launcher3.InvariantDeviceProfile
-import com.android.launcher3.InvariantDeviceProfile.INDEX_DEFAULT
-import com.android.launcher3.InvariantDeviceProfile.INDEX_LANDSCAPE
-import com.android.launcher3.InvariantDeviceProfile.INDEX_TWO_PANEL_LANDSCAPE
-import com.android.launcher3.InvariantDeviceProfile.INDEX_TWO_PANEL_PORTRAIT
 import com.android.launcher3.R
+import com.android.launcher3.deviceprofile.parser.DeviceTypedMap.INDEX_DEFAULT
+import com.android.launcher3.deviceprofile.parser.DeviceTypedMap.INDEX_LANDSCAPE
+import com.android.launcher3.deviceprofile.parser.DeviceTypedMap.INDEX_TWO_PANEL_LANDSCAPE
+import com.android.launcher3.deviceprofile.parser.DeviceTypedMap.INDEX_TWO_PANEL_PORTRAIT
 import com.android.launcher3.responsive.CalculatedCellSpec
 import com.android.launcher3.responsive.CalculatedHotseatSpec
 import com.android.launcher3.testing.shared.ResourceUtils.pxFromDp
@@ -247,13 +247,10 @@ data class HotseatProfileInitialValues(
             // For foldable (two panel), we inline the qsb if we have the screen open and we are in
             // either Landscape or Portrait. This cal also be disabled in the device_profile.xml
             val twoPanelCanInline =
-                inv.inlineQsb[InvariantDeviceProfile.INDEX_TWO_PANEL_PORTRAIT] ||
-                    inv.inlineQsb[InvariantDeviceProfile.INDEX_TWO_PANEL_LANDSCAPE]
+                inv.inlineQsb[INDEX_TWO_PANEL_PORTRAIT] || inv.inlineQsb[INDEX_TWO_PANEL_LANDSCAPE]
 
             // In tablets we inline in both orientations but only if we have enough space in the QSB
-            val tabletInlineQsb =
-                inv.inlineQsb[InvariantDeviceProfile.INDEX_DEFAULT] ||
-                    inv.inlineQsb[InvariantDeviceProfile.INDEX_LANDSCAPE]
+            val tabletInlineQsb = inv.inlineQsb[INDEX_DEFAULT] || inv.inlineQsb[INDEX_LANDSCAPE]
             val canQsbInline =
                 (if (deviceProperties.isTwoPanels) twoPanelCanInline else tabletInlineQsb) &&
                     qsbHeight > 0
