@@ -196,7 +196,8 @@ public class RestoreDbTaskTest {
         assertEquals(10, getItemCountForProfile(mDb, myProfileId_old));
         assertEquals(6, getItemCountForProfile(mDb, workProfileId_old));
 
-        mTask.sanitizeDB(mContext, controller, controller.getDb(), bm, mMockRestoreEventLogger);
+        mTask.sanitizeDB(mContext, new LegacyRestoreDbTaskWriteDao(mDb),
+                controller, mDb, bm, mMockRestoreEventLogger);
 
         // All the data has been migrated to the new user ids
         assertEquals(0, getItemCountForProfile(mDb, myProfileId_old));
@@ -228,7 +229,8 @@ public class RestoreDbTaskTest {
         assertEquals(10, getItemCountForProfile(mDb, myProfileId_old));
         assertEquals(6, getItemCountForProfile(mDb, workProfileId_old));
 
-        mTask.sanitizeDB(mContext, controller, controller.getDb(), bm, mMockRestoreEventLogger);
+        mTask.sanitizeDB(mContext, new LegacyRestoreDbTaskWriteDao(mDb), controller, mDb, bm,
+                mMockRestoreEventLogger);
 
         // All the data has been migrated to the new user ids
         assertEquals(0, getItemCountForProfile(mDb, myProfileId_old));
@@ -241,6 +243,7 @@ public class RestoreDbTaskTest {
     public void givenLauncherPrefsHasNoIds_whenRestoreAppWidgetIdsIfExists_thenIdsAreRemoved() {
         // When
         mTask.restoreAppWidgetIdsIfExists(mContext, mMockController, mMockRestoreEventLogger,
+                new RestoreDbTaskWriteDao(mMockController),
                 this::getWidgetHostLazy);
         // Then
         assertThat(mPrefs.has(OLD_APP_WIDGET_IDS, APP_WIDGET_IDS)).isFalse();
@@ -258,6 +261,7 @@ public class RestoreDbTaskTest {
         // When
         setRestoredAppWidgetIds(mContext, expectedOldIds, expectedNewIds);
         mTask.restoreAppWidgetIdsIfExists(mContext, mMockController, mMockRestoreEventLogger,
+                new RestoreDbTaskWriteDao(mMockController),
                 this::getWidgetHostLazy);
 
         // Then
@@ -282,6 +286,7 @@ public class RestoreDbTaskTest {
         // When
         setRestoredAppWidgetIds(mContext, expectedOldIds, expectedNewIds);
         mTask.restoreAppWidgetIdsIfExists(mContext, mMockController, mMockRestoreEventLogger,
+                new RestoreDbTaskWriteDao(mMockController),
                 this::getWidgetHostLazy);
 
         // Then
@@ -312,6 +317,7 @@ public class RestoreDbTaskTest {
         // When
         setRestoredAppWidgetIds(mContext, expectedOldIds, expectedNewIds);
         mTask.restoreAppWidgetIdsIfExists(mContext, mMockController, mMockRestoreEventLogger,
+                new RestoreDbTaskWriteDao(mMockController),
                 this::getWidgetHostLazy);
 
         // Then
@@ -380,7 +386,7 @@ public class RestoreDbTaskTest {
         assertEquals(screenIds.length,
                 getCount(mDb, "select * from favorites where container = -100"));
 
-        new RestoreDbTask().removeScreenIdGaps(mDb);
+        new RestoreDbTask().removeScreenIdGaps(mDb, new LegacyRestoreDbTaskWriteDao(mDb));
 
         // verify screenId gaps removed
         int[] resultScreenIds = new int[screenIds.length];

@@ -212,7 +212,7 @@ constructor(
 
         if (Flags.enableAppAutomationIndicator()) {
             lifeCycle.addCloseable(
-                automationRepo.automationChanges.forEach(MODEL_EXECUTOR) { change ->
+                automationRepo.automatedPackages.changes.forEach(MODEL_EXECUTOR) { change ->
                     model.enqueueModelUpdateTask(AutomationChangedTask(change))
                 }
             )

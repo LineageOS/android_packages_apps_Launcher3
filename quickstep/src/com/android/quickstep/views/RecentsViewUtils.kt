@@ -112,7 +112,7 @@ constructor(
     init {
         if (hideAutomatedTasksInOverview()) {
             automationChangesClosable =
-                automationRepository.automationChanges.forEach(uiExecutor) {
+                automationRepository.automatedPackages.changes.forEach(uiExecutor) {
                     dismissAutomatedTasks(it)
                 }
         }

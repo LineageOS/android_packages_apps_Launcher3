@@ -18,16 +18,16 @@ package com.android.launcher3.automation
 
 import android.os.UserHandle
 import com.android.launcher3.dagger.LauncherAppSingleton
-import com.android.launcher3.util.ListenableStream
-import com.android.launcher3.util.MutableListenableStream
+import com.android.launcher3.util.ListenableDiffAwareRef
+import com.android.launcher3.util.MutableDiffAwareRef
+import com.android.launcher3.util.PackageUserKey
 import javax.inject.Inject
 
 @LauncherAppSingleton
 class AutomationNoOpRepository @Inject constructor() : AutomationRepository {
 
-    // No-op, uses empty, immutable AutomationState.
-    override val automationChanges: ListenableStream<AutomationChange> =
-        MutableListenableStream<AutomationChange>().asListenable()
+    override val automatedPackages: ListenableDiffAwareRef<Set<PackageUserKey>, AutomationChange> =
+        MutableDiffAwareRef<Set<PackageUserKey>, AutomationChange>(hashSetOf()).asListenable()
 
     override fun isPackageAutomated(user: UserHandle, packageName: String): Boolean = false
 

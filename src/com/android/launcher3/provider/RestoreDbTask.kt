@@ -43,7 +43,6 @@ import com.android.launcher3.model.LoaderTask
 import com.android.launcher3.model.ModelDbController
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.LauncherAppWidgetInfo
-import com.android.launcher3.model.data.LauncherAppWidgetInfo.FLAG_ID_NOT_VALID
 import com.android.launcher3.model.data.WorkspaceItemInfo
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.provider.LauncherDbUtils.SQLiteTransaction
@@ -51,8 +50,6 @@ import com.android.launcher3.provider.LauncherDbUtils.asSequence
 import com.android.launcher3.provider.LauncherDbUtils.dropTable
 import com.android.launcher3.provider.LauncherDbUtils.queryIntArray
 import com.android.launcher3.util.ApiWrapper
-import com.android.launcher3.util.ContentWriter
-import com.android.launcher3.util.ContentWriter.CommitParams
 import com.android.launcher3.util.IntArray as LIntArray
 import com.android.launcher3.util.LogConfig
 import com.android.launcher3.util.SQLiteTable
@@ -87,6 +84,7 @@ class RestoreDbTask {
     @Throws(Exception::class)
     fun sanitizeDB(
         context: Context,
+        restoreDbTaskWriteDao: IRestoreDbTaskWriteDao,
         controller: ModelDbController,
         db: SQLiteDatabase,
         backupManager: BackupManager,
@@ -121,38 +119,32 @@ class RestoreDbTask {
         }
 
         // Delete all entries which do not belong to any restored profile(s).
-        val selection = "profileId NOT IN (${profileMapping.keys.joinToString()})"
-        logFavoritesTable(db, "items to delete from unrestored profiles:", selection)
+        val selectionStr = "profileId NOT IN (${profileMapping.keys.joinToString()})"
+        logFavoritesTable(db, "items to delete from unrestored profiles:", selectionStr)
         restoreEventLogger.sendMetricsForFailedMigration(
             controller.getTable(),
             RestoreError.PROFILE_NOT_RESTORED,
         )
-        val itemsDeletedCount = db.delete(TABLE_NAME, selection, null)
+        val itemsDeletedCount =
+            restoreDbTaskWriteDao.deleteItemsFromUnrestoredProfiles(profileMapping.keys)
         FileLog.d(TAG, "$itemsDeletedCount total items from unrestored user(s) were deleted")
 
         // Mark all items as restored.
         val keepAllIcons = Utilities.isPropertyEnabled(LogConfig.KEEP_ALL_ICONS)
-        val values = ContentValues()
-        values.put(
-            Favorites.RESTORED,
+        val baseItemRestoreFlag =
             WorkspaceItemInfo.FLAG_RESTORED_ICON or
-                (if (keepAllIcons) WorkspaceItemInfo.FLAG_RESTORE_STARTED else 0),
-        )
-        db.update(Favorites.TABLE_NAME, values, null /* whereClause */, null /* whereArgs */)
+                (if (keepAllIcons) WorkspaceItemInfo.FLAG_RESTORE_STARTED else 0)
+        restoreDbTaskWriteDao.bulkUpdateRestoredFlag(baseItemRestoreFlag)
 
         // Mark widgets with appropriate restore flag.
-        values.put(
-            Favorites.RESTORED,
-            (LauncherAppWidgetInfo.FLAG_ID_NOT_VALID or
+        val widgetRestoreFlag =
+            LauncherAppWidgetInfo.FLAG_ID_NOT_VALID or
                 LauncherAppWidgetInfo.FLAG_PROVIDER_NOT_READY or
                 LauncherAppWidgetInfo.FLAG_UI_NOT_READY or
-                (if (keepAllIcons) LauncherAppWidgetInfo.FLAG_RESTORE_STARTED else 0)),
-        )
-        db.update(
-            Favorites.TABLE_NAME,
-            values,
-            "itemType = ?",
-            arrayOf(Favorites.ITEM_TYPE_APPWIDGET.toString()),
+                (if (keepAllIcons) LauncherAppWidgetInfo.FLAG_RESTORE_STARTED else 0)
+        restoreDbTaskWriteDao.bulkUpdateRestoredFlag(
+            widgetRestoreFlag,
+            Favorites.ITEM_TYPE_APPWIDGET,
         )
 
         // Migrate ids. To avoid any overlap, we initially move conflicting ids to a temp
@@ -169,15 +161,17 @@ class RestoreDbTask {
                     tempMigratedIds[shiftedNewId] = newId
                     tempLocationOffset++
                 }
-                migrateProfileId(db, oldId, shiftedNewId)
+                restoreDbTaskWriteDao.migrateProfileId(oldId, shiftedNewId)
             }
         }
 
         // Migrate ids from their temporary id to their actual final id.
-        tempMigratedIds.forEach { (oldId, newId) -> migrateProfileId(db, oldId, newId) }
+        tempMigratedIds.forEach { (oldId, newId) ->
+            restoreDbTaskWriteDao.migrateProfileId(oldId, newId)
+        }
 
         if (myProfileId != oldProfileId) {
-            changeDefaultColumn(db, myProfileId)
+            restoreDbTaskWriteDao.updateDefaultProfileId(myProfileId)
         }
 
         // If restored from a single display backup, remove gaps between screenIds
@@ -185,11 +179,11 @@ class RestoreDbTask {
             LauncherPrefs.get(context).get(LauncherPrefs.RESTORE_DEVICE) !=
                 InvariantDeviceProfile.TYPE_MULTI_DISPLAY
         ) {
-            removeScreenIdGaps(db)
+            removeScreenIdGaps(db, restoreDbTaskWriteDao)
         }
 
         // Override shortcuts
-        maybeOverrideShortcuts(context, controller, db, myProfileId)
+        maybeOverrideShortcuts(context, controller, db, myProfileId, restoreDbTaskWriteDao)
         return itemsDeletedCount
     }
 
@@ -198,7 +192,7 @@ class RestoreDbTask {
      *
      * e.g. [0, 3, 4, 6, 7] -> [0, 1, 2, 3, 4]
      */
-    fun removeScreenIdGaps(db: SQLiteDatabase) {
+    fun removeScreenIdGaps(db: SQLiteDatabase, writeDao: IRestoreDbTaskWriteDao) {
         FileLog.d(TAG, "Removing gaps between screenIds")
         val distinctScreens =
             queryIntArray(
@@ -214,24 +208,11 @@ class RestoreDbTask {
 
         // If there is no 0-screen, let there be an empty screen 0
         val startScreenId = if (distinctScreens.contains(0)) 0 else 1
-        val screenIdMapClause =
-            distinctScreens
-                .toArray()
-                .mapIndexed { index, screenId ->
-                    "WHEN $SCREEN == $screenId THEN ${index + startScreenId}"
-                }
-                .joinToString(" ")
-        val sql =
-            """
-            UPDATE $TABLE_NAME
-                SET $SCREEN =
-                    CASE
-                        $screenIdMapClause
-                        ELSE $SCREEN
-                    END
-            WHERE $CONTAINER = $CONTAINER_DESKTOP;
-            """
-        db.execSQL(sql)
+        writeDao.removeScreenIdGaps(
+            Favorites.CONTAINER_DESKTOP,
+            distinctScreens.toArray(),
+            startScreenId,
+        )
     }
 
     /** Updates profile id of all entries from {@param oldProfileId} to {@param newProfileId}. */
@@ -287,6 +268,7 @@ class RestoreDbTask {
         context: Context,
         controller: ModelDbController,
         restoreEventLogger: LauncherRestoreEventLogger,
+        writeDao: IRestoreDbTaskWriteDao,
         hostSupplier: Supplier<AppWidgetHost>,
     ) {
         val lp = LauncherPrefs.get(context)
@@ -295,6 +277,7 @@ class RestoreDbTask {
                 context,
                 controller,
                 restoreEventLogger,
+                writeDao,
                 LIntArray.fromConcatString(lp.get(LauncherPrefs.OLD_APP_WIDGET_IDS)).toArray(),
                 LIntArray.fromConcatString(lp.get(LauncherPrefs.APP_WIDGET_IDS)).toArray(),
                 hostSupplier.get(),
@@ -312,6 +295,7 @@ class RestoreDbTask {
         context: Context,
         controller: ModelDbController,
         launcherRestoreEventLogger: LauncherRestoreEventLogger,
+        writeDao: IRestoreDbTaskWriteDao,
         oldWidgetIds: IntArray,
         newWidgetIds: IntArray,
         host: AppWidgetHost,
@@ -362,22 +346,21 @@ class RestoreDbTask {
             // recreate the widget during loading with the correct host provider.
             val mainProfileId =
                 UserCache.INSTANCE[context].getSerialNumberForUser(Process.myUserHandle())
+
             val controllerProfileId = controller.getSerialNumberForUser(Process.myUserHandle())
             val oldWidgetId = oldWidgetIds[i].toString()
-            val where =
-                "$APPWIDGET_ID=? and ($RESTORED & $FLAG_ID_NOT_VALID) = $FLAG_ID_NOT_VALID and $PROFILE_ID=?"
-            val profileId = mainProfileId.toString()
-            val args = arrayOf(oldWidgetId, profileId)
             FileLog.d(
                 TAG,
-                "restoreAppWidgetIds: querying profile id=$profileId with controller profile ID=$controllerProfileId",
+                "restoreAppWidgetIds: querying profile id=$mainProfileId with controller profile ID=$controllerProfileId",
             )
-            val result =
-                ContentWriter(context, CommitParams(controller, where, args))
-                    .put(Favorites.APPWIDGET_ID, newWidgetIds[i])
-                    .put(Favorites.RESTORED, state)
-                    .commit()
-            if (result == 0) {
+            val wasUpdated =
+                writeDao.updateAppWidgetId(
+                    oldWidgetId = oldWidgetIds[i],
+                    newWidgetId = newWidgetIds[i],
+                    newRestoreState = state,
+                    profileId = mainProfileId,
+                )
+            if (!wasUpdated) {
                 // TODO(b/234700507): Remove the logs after the bug is fixed
                 FileLog.e(
                     TAG,
@@ -498,14 +481,28 @@ class RestoreDbTask {
 
         private fun performRestore(context: Context, controller: ModelDbController): Boolean {
             val db = controller.db
+
+            val restoreDbTaskWriteDao = LegacyRestoreDbTaskWriteDao(db)
             FileLog.d(TAG, "performRestore: starting restore from db")
             try {
                 SQLiteTransaction(db).use { t ->
                     val task = RestoreDbTask()
                     val backupManager = BackupManager(context)
                     val restoreEventLogger = newInstance(context)
-                    task.sanitizeDB(context, controller, db, backupManager, restoreEventLogger)
-                    task.restoreAppWidgetIdsIfExists(context, controller, restoreEventLogger) {
+                    task.sanitizeDB(
+                        context,
+                        restoreDbTaskWriteDao,
+                        controller,
+                        db,
+                        backupManager,
+                        restoreEventLogger,
+                    )
+                    task.restoreAppWidgetIdsIfExists(
+                        context,
+                        controller,
+                        restoreEventLogger,
+                        restoreDbTaskWriteDao,
+                    ) {
                         AppWidgetHost(context, LauncherWidgetHolder.APPWIDGET_HOST_ID)
                     }
                     t.commit()
@@ -583,6 +580,7 @@ class RestoreDbTask {
             controller: ModelDbController,
             db: SQLiteDatabase,
             currentUser: Long,
+            writeDao: IRestoreDbTaskWriteDao,
         ) {
             val activityOverrides = ApiWrapper.INSTANCE[context].activityOverrides
             if (activityOverrides == null || activityOverrides.isEmpty()) return
@@ -602,24 +600,21 @@ class RestoreDbTask {
                             val idIndex = c.getColumnIndexOrThrow(Favorites._ID)
                             val intentIndex = c.getColumnIndexOrThrow(Favorites.INTENT)
                             while (c.moveToNext()) {
-                                val override =
+                                val activityOverride =
                                     activityOverrides[
                                         Intent.parseUri(c.getString(intentIndex), 0)
                                             .component
                                             ?.packageName] ?: continue
-                                val values =
-                                    ContentValues().apply {
-                                        put(
-                                            PROFILE_ID,
-                                            controller.getSerialNumberForUser(override.user),
-                                        )
-                                        put(INTENT, AppInfo.makeLaunchIntent(override).toUri(0))
-                                    }
-                                db.update(
-                                    TABLE_NAME,
-                                    values,
-                                    "$_ID=?",
-                                    arrayOf(c.getInt(idIndex).toString()),
+
+                                val newProfileId =
+                                    controller.getSerialNumberForUser(activityOverride.user)
+                                val newIntentUri =
+                                    AppInfo.makeLaunchIntent(activityOverride).toUri(0)
+
+                                writeDao.updateShortcutOverride(
+                                    itemId = c.getInt(idIndex),
+                                    newIntentUri = newIntentUri,
+                                    newProfileId = newProfileId,
                                 )
                             }
                             t.commit()
