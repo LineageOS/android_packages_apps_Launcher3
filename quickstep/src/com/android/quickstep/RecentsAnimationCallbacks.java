@@ -177,9 +177,18 @@ public class RecentsAnimationCallbacks implements
 
     private void onAnimationFinished(RecentsAnimationController controller) {
         Utilities.postAsyncCallback(MAIN_EXECUTOR.getHandler(), () -> {
-            ActiveGestureProtoLogProxy.logAbsSwipeUpHandlerOnRecentsAnimationFinished();
+            ActiveGestureProtoLogProxy.logRecentsAnimationCallbacksOnRecentsAnimationFinished();
             for (RecentsAnimationListener listener : getListeners()) {
                 listener.onRecentsAnimationFinished(controller);
+            }
+        });
+    }
+
+    void onRecentsAnimationStartTimedOut() {
+        Utilities.postAsyncCallback(MAIN_EXECUTOR.getHandler(), () -> {
+            ActiveGestureProtoLogProxy.logRecentsAnimationCallbacksOnAnimationStartTimedOut();
+            for (RecentsAnimationListener listener : getListeners()) {
+                listener.onRecentsAnimationStartTimedOut();
             }
         });
     }
@@ -231,5 +240,10 @@ public class RecentsAnimationCallbacks implements
          */
         default void onTasksAppeared(@NonNull RemoteAnimationTarget[] appearedTaskTarget,
                 @Nullable TransitionInfo transitionInfo) {}
+
+        /**
+         * Callback made when the recents animation start times out in TaskAnimationManager.
+         */
+        default void onRecentsAnimationStartTimedOut() {}
     }
 }

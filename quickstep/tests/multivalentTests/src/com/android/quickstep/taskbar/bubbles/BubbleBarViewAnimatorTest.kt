@@ -613,6 +613,44 @@ class BubbleBarViewAnimatorTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_FIX_BUBBLE_BAR_VISIBILITY_UPDATE_DROPPED)
+    fun animateToInitialState_cancelledByNextBubble() {
+        setUpBubbleBar()
+        bubbleStashController.launcherState = BubbleLauncherState.IN_APP
+
+        val handle = View(context)
+        val handleAnimator = PhysicsAnimator.getInstance(handle)
+        bubbleStashController.handleAnimator = handleAnimator
+
+        var notifiedBubbleBarVisible = false
+        val onBubbleBarVisible = Runnable { notifiedBubbleBarVisible = true }
+        val animator =
+            BubbleBarViewAnimator(
+                bubbleBarView,
+                bubbleStashController,
+                flyoutController,
+                bubbleBarParentViewController,
+                onExpanded = emptyRunnable,
+                onBubbleBarVisible = onBubbleBarVisible,
+                onAnimationEnded = onAnimationEnded,
+                animatorScheduler,
+            )
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleBarView.visibility = INVISIBLE
+            animator.animateToInitialState(bubble, isInApp = true, isExpanding = false)
+            animator.animateBubbleBarForCollapsed(bubble, isExpanding = false)
+        }
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {}
+        PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(DynamicAnimation.TRANSLATION_Y)
+
+        // Verify that the bubble bar is visible at the end
+        assertThat(bubbleBarView.visibility).isEqualTo(VISIBLE)
+        assertThat(notifiedBubbleBarVisible).isTrue()
+    }
+
+    @Test
     fun animateToInitialState_whileDragging_inApp() {
         setUpBubbleBar()
         bubbleStashController.launcherState = BubbleLauncherState.IN_APP

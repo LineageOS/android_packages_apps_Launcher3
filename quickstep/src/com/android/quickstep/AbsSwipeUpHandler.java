@@ -1135,7 +1135,17 @@ public abstract class AbsSwipeUpHandler<
     @Override
     public void onRecentsAnimationCanceled(HashMap<Integer, ThumbnailData> thumbnailDatas) {
         ActiveGestureProtoLogProxy.logAbsSwipeUpHandlerOnRecentsAnimationCanceled();
-        mContextInitListener.unregister("AbsSwipeUpHandler.onRecentsAnimationCanceled");
+        cleanUpOnFailedRecentsAnimation("AbsSwipeUpHandler.onRecentsAnimationCanceled");
+    }
+
+    @Override
+    public void onRecentsAnimationStartTimedOut() {
+        ActiveGestureProtoLogProxy.logAbsSwipeUpHandlerOnRecentsAnimationStartTimedOut();
+        cleanUpOnFailedRecentsAnimation("AbsSwipeUpHandler.onRecentsAnimationStartTimedOut");
+    }
+
+    private void cleanUpOnFailedRecentsAnimation(@NonNull String reason) {
+        mContextInitListener.unregister(reason);
         mStateCallback.setStateOnUiThread(STATE_GESTURE_CANCELLED | STATE_HANDLER_INVALIDATED);
         // Defer clearing the controller and the targets until after we've updated the state
         mRecentsAnimationController = null;
@@ -1144,7 +1154,7 @@ public abstract class AbsSwipeUpHandler<
             mRecentsView.setRecentsAnimationTargets(null, null);
         }
         if (!mGestureState.useSyntheticRecentsTransition()) {
-            maybeHandleUnfinishedTaskLaunch("onRecentsAnimationCanceled");
+            maybeHandleUnfinishedTaskLaunch(reason);
         }
     }
 

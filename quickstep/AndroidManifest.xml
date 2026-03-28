@@ -48,6 +48,11 @@
     <uses-permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY" />
     <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_SYSTEM"/>
 
+    <uses-permission android:name="android.permission.PERSONAL_CONTEXT_PUBLISH_HINTS"/>
+    <uses-permission android:name="android.permission.PERSONAL_CONTEXT_RECEIVE_INSIGHTS"/>
+    <uses-permission android:name="android.permission.PERSONAL_CONTEXT_HOST_INSIGHT_SURFACE"/>
+    <uses-permission android:name="android.permission.PERSONAL_CONTEXT_READ_SETTINGS"/>
+
     <!--
     Permission required to access profiles which are otherwise hidden
     from being visible via APIs, e.g. private profile.

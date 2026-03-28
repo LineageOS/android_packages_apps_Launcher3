@@ -70,6 +70,7 @@ import androidx.annotation.UiThread;
 
 import com.android.app.displaylib.fakes.FakePerDisplayRepository;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherRootView;
 import com.android.launcher3.anim.AnimationSuccessListener;
 import com.android.launcher3.display.DisplayController;
@@ -332,6 +333,20 @@ public abstract class AbsSwipeUpHandlerTestCase<
     }
 
     @Test
+    public void testOnRecentsAnimationStartTimedOut_unregistersActivityInitListener() {
+        SWIPE_HANDLER swipeHandler = createSwipeHandler();
+
+        swipeHandler.onRecentsAnimationStartTimedOut();
+
+        runOnMainSync(() -> {
+            verify(mContextInitListener)
+                    .unregister(eq("AbsSwipeUpHandler.onRecentsAnimationStartTimedOut"));
+            assertTrue(swipeHandler.mStateCallback.hasStates(
+                    STATE_GESTURE_CANCELLED | STATE_HANDLER_INVALIDATED));
+        });
+    }
+
+    @Test
     public void testOnConsumerAboutToBeSwitched_unregistersActivityInitListener() {
         createSwipeHandler().onConsumerAboutToBeSwitched();
 
@@ -404,6 +419,21 @@ public abstract class AbsSwipeUpHandlerTestCase<
         swipeHandler.onActivityInit(/* alreadyOnHome= */ false);
         onRecentsAnimationStart(swipeHandler);
         swipeHandler.onRecentsAnimationCanceled(new HashMap<>());
+
+        runOnMainSync(() -> {
+            verify(mCurrentPageTaskView, never()).launchWithoutAnimation(anyBoolean(), any());
+            verify(mNextPageTaskView).launchWithoutAnimation(anyBoolean(), any());
+        });
+    }
+
+    @Test
+    public void testOnRecentsAnimationStartTimedOut_midQuickSwitch_launchesCorrectTask() {
+        SWIPE_HANDLER swipeHandler = createSwipeHandler();
+
+        when(mGestureState.getEndTarget()).thenReturn(GestureState.GestureEndTarget.NEW_TASK);
+
+        swipeHandler.onActivityInit(/* alreadyOnHome= */ false);
+        swipeHandler.onRecentsAnimationStartTimedOut();
 
         runOnMainSync(() -> {
             verify(mCurrentPageTaskView, never()).launchWithoutAnimation(anyBoolean(), any());
@@ -504,7 +534,7 @@ public abstract class AbsSwipeUpHandlerTestCase<
     }
 
     @Test
-    @EnableFlags(com.android.launcher3.Flags.FLAG_MSDL_FEEDBACK)
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
     public void onMotionPauseDetected_playsSwipeThresholdToken() {
         SWIPE_HANDLER handler = createSwipeHandler();
         MotionPauseDetector.OnMotionPauseListener listener = handler.getMotionPauseListener();

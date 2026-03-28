@@ -375,6 +375,9 @@ public class TaskbarDragController extends DragController implements
         // Drag might be cancelled during the DragView animation, so check mIsPreDrag again.
         if (mIsInPreDrag) {
             callOnDragStart();
+            if (enableTaskbarDragAndDrop()) {
+                handleMoveEvent(mLastTouch.x, mLastTouch.y);
+            }
         }
     }
 
