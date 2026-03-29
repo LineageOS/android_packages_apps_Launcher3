@@ -221,7 +221,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
 
         AllAppsStore.OnUpdateListener onAppsUpdated = this::onAppsUpdated;
         mAllAppsStore.addUpdateListener(onAppsUpdated);
-
+        initProfileStatus();
         // This is a focus listener that proxies focus from a view into the list view.  This is to
         // work around the search box from getting first focus and showing the cursor.
         setOnFocusChangeListener((v, hasFocus) -> {
@@ -1034,10 +1034,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     @VisibleForTesting
     public void onAppsUpdated() {
         Log.d(TAG, "onAppsUpdated; number of apps: " + mAllAppsStore.getApps().length);
-        mHasWorkApps = Stream.of(mAllAppsStore.getApps())
-                .anyMatch(mWorkManager.getItemInfoMatcher());
-        mHasPrivateApps = Stream.of(mAllAppsStore.getApps())
-                .anyMatch(mPrivateProfileManager.getItemInfoMatcher());
+        initProfileStatus();
         if (!isSearching()) {
             rebindAdapters();
         }
@@ -1135,6 +1132,13 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         } else {
             return mAH.get(AdapterHolder.WORK).mRecyclerView;
         }
+    }
+
+    private void initProfileStatus() {
+        mHasWorkApps = Stream.of(mAllAppsStore.getApps())
+                .anyMatch(mWorkManager.getItemInfoMatcher());
+        mHasPrivateApps = Stream.of(mAllAppsStore.getApps())
+                .anyMatch(mPrivateProfileManager.getItemInfoMatcher());
     }
 
     /**
