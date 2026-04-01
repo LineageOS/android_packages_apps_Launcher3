@@ -282,7 +282,6 @@ fun NavBarPill(
                                 1f
                             }
                     }
-                    .padding(bottom = 4.dp)
                     .onGloballyPositioned { coordinates ->
                         pillBounds = coordinates.boundsInWindow()
                     },
