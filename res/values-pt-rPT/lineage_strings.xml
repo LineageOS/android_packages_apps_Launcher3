@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">Mostrar as legendas dos ícones na gaveta de aplicações</string>
     <string name="drawer_open_keyboard_title">Deslize para iniciar a pesquisa</string>
     <string name="drawer_open_keyboard_summary">Abrir o teclado sempre que a gaveta de aplicações se tornar visível</string>
+    <string name="pref_sleep_gesture_title">Toque duplo para desligar o ecrã</string>
+    <string name="pref_sleep_gesture_summary">Toque duas vezes numa área vazia da página inicial para desligar o ecrã</string>
     <string name="trust_apps_manager_name">Aplicações Ocultas e Protegidas</string>
     <string name="trust_apps_auth_manager">Desbloquear para gerir as aplicações ocultas e protegidas</string>
     <string name="trust_apps_auth_open_app">Autenticar para abrir %1$s</string>

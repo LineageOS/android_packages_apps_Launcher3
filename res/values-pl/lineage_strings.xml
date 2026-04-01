@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">Pokazuj etykiety ikon w szufladzie</string>
     <string name="drawer_open_keyboard_title">Przesuń, aby rozpocząć wyszukiwanie</string>
     <string name="drawer_open_keyboard_summary">Otwieraj klawiaturę, gdy szuflada aplikacji staje się widoczna</string>
+    <string name="pref_sleep_gesture_title">Dwukrotnie dotknij aby uśpić</string>
+    <string name="pref_sleep_gesture_summary">Dwukrotnie dotknij pustego miejsca na ekranie głównym, aby wyłączyć ekran</string>
     <string name="trust_apps_manager_name">Ukryte i chronione aplikacje</string>
     <string name="trust_apps_auth_manager">Odblokuj, aby zarządzać ukrytymi i chronionymi aplikacjami</string>
     <string name="trust_apps_auth_open_app">Uwierzytelnij, aby otworzyć %1$s</string>

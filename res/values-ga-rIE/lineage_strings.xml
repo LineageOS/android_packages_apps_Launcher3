@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">Taispeáin lipéid deilbhín sa tarraiceán</string>
     <string name="drawer_open_keyboard_title">Svaidhpeáil chun cuardach a thosú</string>
     <string name="drawer_open_keyboard_summary">Méarchlár oscailte nuair a bhíonn tarraiceán app le feiceáil</string>
+    <string name="pref_sleep_gesture_title">Tapáil faoi dhó le codladh</string>
+    <string name="pref_sleep_gesture_summary">Tapáil faoi dhó ar an spás folamh ar an scáileán baile chun an scáileán a mhúchadh</string>
     <string name="trust_apps_manager_name">i bhfolach &amp; Aipeanna cosanta</string>
     <string name="trust_apps_auth_manager">Díghlasáil chun na haipeanna folaithe agus cosanta a bhainistiú</string>
     <string name="trust_apps_auth_open_app">Fíordheimhnigh %1$s a oscailt</string>
@@ -37,4 +39,11 @@
     <string name="trust_apps_info_protected">Teastaíonn fíordheimhniú ó fheidhmchláir chosanta a oscailt ón tosaitheoir</string>
     <string name="pref_suggestions_title">Moltaí</string>
     <string name="pref_suggestions_summary">Le haghaidh tarraiceán aip &amp; moltaí scáileán baile</string>
+    <string name="pebble_shape_title">Méaróg</string>
+    <string name="vessel_shape_title">Soitheach</string>
+    <string name="pure_square_shape_title">Cearnóg íon</string>
+    <string name="squircle_shape_title">Sciorcal</string>
+    <string name="tapered_rect_shape_title">Dronuilleogach barrchaolaithe</string>
+    <string name="teardrop_shape_title">Deora</string>
+    <string name="rounded_rect_shape_title">Dronuilleog chothrom</string>
 </resources>

@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">تارتمىدا سىنبەلگە بەلگىسىنى كۆرسىتىدۇ</string>
     <string name="drawer_open_keyboard_title">سىيرىلسا ئىزدەشنى باشلايدۇ</string>
     <string name="drawer_open_keyboard_summary">ئەپ تارتمىسى كۆرۈنسە ھەرپتاختىنى ئاچىدۇ</string>
+    <string name="pref_sleep_gesture_title">قوش چېكىلسە ئۇخلىتىدۇ</string>
+    <string name="pref_sleep_gesture_summary">ئېكراننى تاقاشتا باش ئېكراندىكى بوش ئورۇن قوش چېكىلىدۇ</string>
     <string name="trust_apps_manager_name">يوشۇرۇن ۋە قوغدالغان ئەپ</string>
     <string name="trust_apps_auth_manager">يوشۇرۇن ۋە قوغدالغان ئەپنى باشقۇرۇش ئۈچۈن قۇلۇپ ئېچىش كېرەك</string>
     <string name="trust_apps_auth_open_app">%1$s ئېچىشتا دەلىللىنىدۇ</string>

@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">Hiển thị nhãn biểu tượng trong ngăn kéo</string>
     <string name="drawer_open_keyboard_title">Vuốt để bắt đầu tìm kiếm</string>
     <string name="drawer_open_keyboard_summary">Mở bàn phím bất cứ khi nào ngăn kéo ứng dụng xuất hiện</string>
+    <string name="pref_sleep_gesture_title">Nhấn đúp để tắt màn hình</string>
+    <string name="pref_sleep_gesture_summary">Nhấn đúp vào khoảng trống trên màn hình chính để tắt màn hình</string>
     <string name="trust_apps_manager_name">Ứng dụng được Ẩn &amp; Bảo vệ</string>
     <string name="trust_apps_auth_manager">Mở khóa để quản lý các ứng dụng ẩn và được bảo vệ</string>
     <string name="trust_apps_auth_open_app">Xác thực để mở %1$s</string>
@@ -37,4 +39,11 @@
     <string name="trust_apps_info_protected">Các ứng dụng được bảo vệ yêu cầu xác thực để được mở từ trình khởi chạy</string>
     <string name="pref_suggestions_title">Đề xuất</string>
     <string name="pref_suggestions_summary">Đề xuất cho ngăn ứng dụng &amp;  màn hình chính</string>
+    <string name="pebble_shape_title">Đá cuội</string>
+    <string name="vessel_shape_title">Vessel</string>
+    <string name="pure_square_shape_title">Hình vuông</string>
+    <string name="squircle_shape_title">Vuông bo tròn</string>
+    <string name="tapered_rect_shape_title">Hình chữ nhật vát</string>
+    <string name="teardrop_shape_title">Giọt nước</string>
+    <string name="rounded_rect_shape_title">Hình chữ nhật bo tròn</string>
 </resources>

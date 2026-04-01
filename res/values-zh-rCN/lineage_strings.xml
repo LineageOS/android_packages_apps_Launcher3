@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">在抽屉里显示图标标签</string>
     <string name="drawer_open_keyboard_title">滑动以开始搜索</string>
     <string name="drawer_open_keyboard_summary">当应用抽屉可见时打开键盘</string>
+    <string name="pref_sleep_gesture_title">双击休眠</string>
+    <string name="pref_sleep_gesture_summary">双击主屏幕空白处即可关闭屏幕</string>
     <string name="trust_apps_manager_name">隐藏和保护应用</string>
     <string name="trust_apps_auth_manager">解锁以管理隐藏和受保护的应用</string>
     <string name="trust_apps_auth_open_app">认证以打开 %1$s</string>
@@ -37,4 +39,11 @@
     <string name="trust_apps_info_protected">需要经过认证才能从启动器打开受保护的应用</string>
     <string name="pref_suggestions_title">建议</string>
     <string name="pref_suggestions_summary">对于应用抽屉 &amp; 主屏幕的建议</string>
+    <string name="pebble_shape_title">鹅卵石形</string>
+    <string name="vessel_shape_title">船形</string>
+    <string name="pure_square_shape_title">正方形</string>
+    <string name="squircle_shape_title">圆角矩形</string>
+    <string name="tapered_rect_shape_title">八边形</string>
+    <string name="teardrop_shape_title">泪珠形</string>
+    <string name="rounded_rect_shape_title">圆角矩形</string>
 </resources>

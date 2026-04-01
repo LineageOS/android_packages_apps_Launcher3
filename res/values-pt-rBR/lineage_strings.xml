@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">Mostrar legendas na gaveta de apps</string>
     <string name="drawer_open_keyboard_title">Deslizar para iniciar pesquisa</string>
     <string name="drawer_open_keyboard_summary">Abrir o teclado sempre que a gaveta de apps se tornar visível</string>
+    <string name="pref_sleep_gesture_title">Toque duplo para desligar</string>
+    <string name="pref_sleep_gesture_summary">Toque duas vezes no espaço vazio da tela inicial para desligar a tela</string>
     <string name="trust_apps_manager_name">Apps ocultos e protegidos</string>
     <string name="trust_apps_auth_manager">Desbloqueie para gerenciar apps ocultos e protegidos</string>
     <string name="trust_apps_auth_open_app">Autentique-se para abrir %1$s</string>
@@ -37,4 +39,6 @@
     <string name="trust_apps_info_protected">Os apps protegidos requerem autenticação para serem abertos</string>
     <string name="pref_suggestions_title">Sugestões</string>
     <string name="pref_suggestions_summary">Para sugestões na gaveta de apps e na tela inicial</string>
+    <string name="pebble_shape_title">Pedrinha</string>
+    <string name="pure_square_shape_title">Quadrado completo</string>
 </resources>

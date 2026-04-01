@@ -27,6 +27,7 @@
     <string name="drawer_show_labels">Mostrar etiquetas de iconos en el cajón</string>
     <string name="drawer_open_keyboard_title">Desliza para iniciar la búsqueda</string>
     <string name="drawer_open_keyboard_summary">Abrir el teclado cuando el cajón de aplicaciones esté visible</string>
+    <string name="pref_sleep_gesture_title">Doble toque para suspender</string>
     <string name="trust_apps_manager_name">Aplicaciones ocultas y protegidas</string>
     <string name="trust_apps_auth_manager">Desbloquear para administrar las aplicaciones ocultas y protegidas</string>
     <string name="trust_apps_auth_open_app">Autenticarse para abrir %1$s</string>

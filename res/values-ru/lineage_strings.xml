@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">Отображать подписи значков в меню</string>
     <string name="drawer_open_keyboard_title">Проведите для начала поиска</string>
     <string name="drawer_open_keyboard_summary">Открывать клавиатуру, когда панель приложений становится видимой</string>
+    <string name="pref_sleep_gesture_title">Двойное нажатие для сна</string>
+    <string name="pref_sleep_gesture_summary">Для отключения экрана дважды коснитесь пустого места на нем</string>
     <string name="trust_apps_manager_name">Скрытые и защищенные приложения</string>
     <string name="trust_apps_auth_manager">Разблокируйте, для управления скрытыми и защищенными приложениями</string>
     <string name="trust_apps_auth_open_app">Авторизуйтесь, для открытия %1$s</string>
