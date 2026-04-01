@@ -25,8 +25,7 @@
         android:layout_gravity="center"
         android:orientation="horizontal"
         android:padding="4dp"
-        android:background="@drawable/page_indicator_rounded_background"
-        android:visibility="gone">
+        android:background="@drawable/page_indicator_rounded_background">
 
         <com.android.launcher3.pageindicators.PaginationArrow
             android:id="@+id/left_indicator_arrow"

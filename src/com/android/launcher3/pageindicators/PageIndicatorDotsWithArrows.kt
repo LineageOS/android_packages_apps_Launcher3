@@ -60,6 +60,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         pageIndicator.setMarkersCount(numMarkers)
         markersCount = numMarkers
         updateArrowVisibility()
+        updateBackgroundVisibility()
     }
 
     private fun updateArrowVisibility() {
@@ -85,9 +86,14 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     private fun setArrowsVisible(visible: Boolean) {
         val visibility = if (visible) View.VISIBLE else View.GONE
-        pageIndicatorContentContainer.visibility = visibility
         leftArrow.visibility = visibility
         rightArrow.visibility = visibility
+    }
+
+    private fun updateBackgroundVisibility() {
+        pageIndicatorContentContainer.background.alpha =
+            if (markersCount > 1 && Utilities.shouldEnableMouseInteractionChanges(context)) 255
+            else 0
     }
 
     /**
