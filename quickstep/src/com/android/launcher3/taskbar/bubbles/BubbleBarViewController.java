@@ -173,6 +173,8 @@ public class BubbleBarViewController {
 
     @Nullable
     private BubbleBarBoundsChangeListener mBoundsChangeListener;
+    @Nullable
+    private TaskbarControllers mTaskbarControllers;
 
     public BubbleBarViewController(TaskbarActivityContext activity, TaskbarUiState taskbarUiState,
             BubbleBarView barView,
@@ -214,6 +216,7 @@ public class BubbleBarViewController {
     /** Initializes controller. */
     public void init(TaskbarControllers controllers, BubbleControllers bubbleControllers,
             TaskbarViewPropertiesProvider taskbarViewPropertiesProvider) {
+        mTaskbarControllers = controllers;
         mTaskbarSharedState = controllers.getSharedState();
         mBubbleStashController = bubbleControllers.bubbleStashController;
         mBubbleBarController = bubbleControllers.bubbleBarController;
@@ -897,10 +900,12 @@ public class BubbleBarViewController {
                 mBubbleBarContainer.setVisibility(VISIBLE);
             }
         }
-
         if (Flags.fixBubbleInsetsWhenInvisible()) {
             // If bubble visibility changes, the insets need to update
-            mTaskbarInsetsController.onTaskbarOrBubblebarWindowHeightOrInsetsChanged();
+            if (mTaskbarControllers != null) {
+                mTaskbarControllers.runAfterInit(() ->
+                        mTaskbarInsetsController.onTaskbarOrBubblebarWindowHeightOrInsetsChanged());
+            }
         }
     }
 
