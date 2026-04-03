@@ -34,8 +34,10 @@ import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.taskbar.overlay.TaskbarOverlayContext
 import com.android.launcher3.util.Executors.ORDERED_BG_EXECUTOR
 import com.android.launcher3.util.Executors.getTaskbarUiThread
+import android.service.personalcontext.PersonalContextManager
 import com.android.quickstep.cuebar.data.repository.AmbientCueRepositoryImpl
 import com.android.quickstep.cuebar.domain.interactor.AmbientCueInteractor
+import com.android.quickstep.cuebar.logger.AmbientCueAceLogger
 import com.android.quickstep.cuebar.logger.AmbientCueLoggerImpl
 import com.android.quickstep.cuebar.ui.AmbientCueContainer
 import com.android.quickstep.cuebar.ui.utils.AmbientCueAnimationState
@@ -59,11 +61,16 @@ class CueBarController(private val activity: TaskbarActivityContext) :
     private var mOverlayContext: TaskbarOverlayContext? = null
     private var cueBar: View? = null
     private var isHiding = false
+    // Deprecated, please use ambientCueAceLogger instead.
     private val ambientCueLogger = AmbientCueLoggerImpl(activity.packageManager)
+    private val personalContextManager: PersonalContextManager? =
+        activity.getSystemService(PersonalContextManager::class.java)
+    private val ambientCueAceLogger = AmbientCueAceLogger(personalContextManager)
     val ambientCueRepository =
         AmbientCueRepositoryImpl(
             activity,
             ambientCueLogger,
+            ambientCueAceLogger,
             ORDERED_BG_EXECUTOR,
             getTaskbarUiThread(),
         )
@@ -86,6 +93,7 @@ class CueBarController(private val activity: TaskbarActivityContext) :
                 launcherPrefs = LauncherPrefs.get(activity),
                 scope = coroutineScope,
                 ambientCueLogger = ambientCueLogger,
+                ambientCueAceLogger = ambientCueAceLogger,
                 isDesktopFormFactor = activity.isDesktopFormFactor(),
                 uiExecutor = getTaskbarUiThread(),
             )

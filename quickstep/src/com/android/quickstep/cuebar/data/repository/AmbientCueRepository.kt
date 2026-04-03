@@ -66,6 +66,7 @@ import com.android.systemui.shared.system.TaskStackChangeListeners
 import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
+import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.Executor
 import javax.crypto.spec.SecretKeySpec
@@ -132,6 +133,7 @@ class AmbientCueRepositoryImpl
 constructor(
     taskbarActivityContext: TaskbarActivityContext,
     private val ambientCueLogger: AmbientCueLogger,
+    private val ambientCueAceLogger: AmbientCueAceLogger,
     @Background private val bgExecutor: Executor,
     @Ui private val uiExecutor: Executor,
 ) : AmbientCueRepository, InsightListener {
@@ -145,9 +147,6 @@ constructor(
     private val backgroundScope = CoroutineScope(bgExecutor.asCoroutineDispatcher())
     private val autofillManager: AutofillManager? =
         taskbarActivityContext.getSystemService(AutofillManager::class.java)
-    private val personalContextManager: PersonalContextManager? =
-        taskbarActivityContext.getSystemService(PersonalContextManager::class.java)
-    private val ambientCueAceLogger = AmbientCueAceLogger(personalContextManager)
 
     private val _actions = MutableListenableRef<List<ActionModel>>(emptyList())
     override val actions: MutableListenableRef<List<ActionModel>> = _actions
@@ -186,6 +185,10 @@ constructor(
     // The hint ID of the current displayed conversation hint. Used to determine if a
     // HintInvalidationInsight is for the current conversation.
     private var currentConversationHintId: UUID? = null
+
+    // The timestamp of the current conversation hint is generated. If an insight has an original
+    // hint with a timestamp earlier than this, it should be ignored.
+    private var currentConversationHintGenerationTimestamp: Instant? = null
 
     private val focusListener = AmbientCueFocusListener(WeakReference(this), bgExecutor)
 
@@ -284,6 +287,17 @@ constructor(
 
             val actions = mapInsightToActions(insight.getInsight())
 
+            insight
+                .getInsight()
+                .originHints
+                .map { it.contextHint }
+                .filterIsInstance<ContentCaptureConversationHint>()
+                .firstOrNull()
+                ?.let {
+                    currentConversationHintGenerationTimestamp =
+                        it.conversationEvent.clientEventTimestamp
+                }
+
             if (actions.isNotEmpty()) {
                 // Update the current conversation hint ID if the action is non-empty.
                 insight.getInsight().originHints
@@ -304,11 +318,23 @@ constructor(
     private fun hintEligibleForCueBar(contextHint: ContextHint): Boolean {
         return when (contextHint) {
             is BundleHint -> contextHint.dataBundle.getBoolean(RENDER_IN_CUE_BAR, false)
-            is ContentCaptureConversationHint ->
-                contextHint.conversationEvent is ConversationUpdateEvent ||
-                    contextHint.conversationEvent is ConversationExitEvent
+            is ContentCaptureConversationHint -> isValidConversationHint(contextHint)
             else -> false
         }
+    }
+
+    private fun isValidConversationHint(contextHint: ContentCaptureConversationHint): Boolean {
+        val event = contextHint.conversationEvent
+        val isValidEvent = event is ConversationUpdateEvent || event is ConversationExitEvent
+
+        val generationTimestamp = currentConversationHintGenerationTimestamp
+        val isValidTimestamp = generationTimestamp == null ||
+                event.clientEventTimestamp >= generationTimestamp
+        if (!isValidTimestamp) {
+            Log.i(TAG, "invalid timestamp: ${event.clientEventTimestamp} < $generationTimestamp")
+        }
+
+        return isValidEvent && isValidTimestamp
     }
 
     private fun insightEligibleForCueBar(insight: ContextInsight): Boolean {
@@ -501,7 +527,7 @@ constructor(
     }
 
     private fun reportInsightEvent(childInsight: ContextInsight, event: Int) {
-        ambientCueAceLogger.reportInsightEvent(childInsight, event)
+        ambientCueAceLogger.reportInsightEvent(event, childInsight)
     }
 
     override fun disconnectFromAce() {

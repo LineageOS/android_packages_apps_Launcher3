@@ -29,6 +29,7 @@ import com.android.launcher3.util.OnboardingPrefs
 import com.android.quickstep.cuebar.data.ActionModel
 import com.android.quickstep.cuebar.data.IconModel
 import com.android.quickstep.cuebar.domain.interactor.AmbientCueInteractor
+import com.android.quickstep.cuebar.logger.AmbientCueAceLogger
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.quickstep.cuebar.ui.viewmodel.AmbientCueViewModel
 import com.android.quickstep.cuebar.ui.viewmodel.PillStyleViewModel
@@ -61,6 +62,7 @@ class AmbientCueViewModelTest {
     @Mock private lateinit var mockInteractor: AmbientCueInteractor
     @Mock private lateinit var mockLauncherPrefs: LauncherPrefs
     @Mock private lateinit var mockAmbientCueLogger: AmbientCueLogger
+    @Mock private lateinit var mockAmbientCueAceLogger: AmbientCueAceLogger
     @Mock private lateinit var mockIconModel: IconModel
     @Mock private lateinit var mockDrawable: Drawable
 
@@ -122,6 +124,7 @@ class AmbientCueViewModelTest {
                 mockInteractor,
                 mockLauncherPrefs,
                 mockAmbientCueLogger,
+                mockAmbientCueAceLogger,
                 isDesktopFormFactor,
                 testScope,
                 uiExecutor,
@@ -289,6 +292,7 @@ class AmbientCueViewModelTest {
         viewModel.hide()
 
         verify(mockInteractor).setDeactivated(true)
+        verify(mockInteractor).reportCloseEvent()
         updateDeactivated(true)
 
         assertThat(viewModel.isVisible).isFalse()
