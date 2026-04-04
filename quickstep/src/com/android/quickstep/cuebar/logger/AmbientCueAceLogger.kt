@@ -21,6 +21,7 @@ import android.service.personalcontext.RenderToken
 import android.service.personalcontext.insight.ContextInsight
 import android.service.personalcontext.insight.PublishedContextInsight
 import android.service.personalcontext.insight.interaction.InsightEvent
+import android.util.Log
 import com.android.personalcontext.ace.common.FlatIndexUtils.flatIndexOf
 import com.android.personalcontext.ace.common.PackedIntUtils.packValue
 import com.android.personalcontext.ace.common.wrappers.wrap
@@ -29,6 +30,7 @@ import com.android.personalcontext.ace.common.wrappers.wrap
 class AmbientCueAceLogger(private val personalContextManager: PersonalContextManager?) {
     var lastPublishedInsight: PublishedContextInsight? = null
         private set
+
     var lastRenderToken: RenderToken? = null
         private set
 
@@ -38,30 +40,22 @@ class AmbientCueAceLogger(private val personalContextManager: PersonalContextMan
     }
 
     fun reportCloseEvent() {
-        val publishedInsight = lastPublishedInsight
-        val token = lastRenderToken
-        if (publishedInsight != null && token != null) {
-            val rootInsight = publishedInsight.insight
-            val flatIndex = publishedInsight.wrap().flatIndexOf(rootInsight)
-            val packedEvent = InsightEvent.EVENT_USER_DISMISS.packValue(flatIndex)
-            personalContextManager?.reportInsightEvent(
-                publishedInsight,
-                packedEvent,
-                token
-            )
-        }
+        reportInsightEvent(InsightEvent.EVENT_USER_DISMISS)
     }
 
-    fun reportInsightEvent(
-        childInsight: ContextInsight,
-        event: Int
-    ) {
+    fun reportInsightEvent(event: Int, childInsight: ContextInsight? = null) {
         val publishedInsight = lastPublishedInsight
         val token = lastRenderToken
         if (publishedInsight != null && token != null) {
-            val flatIndex = publishedInsight.wrap().flatIndexOf(childInsight)
+            val flatIndex =
+                if (childInsight != null) publishedInsight.wrap().flatIndexOf(childInsight) else 0
+            Log.d(TAG, "reportInsightEvent: $event, index: $flatIndex")
             val packedEvent = event.packValue(flatIndex)
             personalContextManager?.reportInsightEvent(publishedInsight, packedEvent, token)
         }
+    }
+
+    companion object {
+        private const val TAG = "AmbientCueAceLogger"
     }
 }

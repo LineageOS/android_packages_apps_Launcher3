@@ -51,6 +51,7 @@ import com.android.quickstep.cuebar.data.repository.AmbientCueRepositoryImpl.Com
 import com.android.quickstep.cuebar.data.repository.AmbientCueRepositoryImpl.Companion.MA_ACTION_TYPE_NAME
 import com.android.quickstep.cuebar.data.repository.AmbientCueRepositoryImpl.Companion.MR_ACTION_TYPE_NAME
 import com.android.quickstep.cuebar.data.repository.AmbientCueRepositoryImpl.Companion.RENDER_IN_CUE_BAR
+import com.android.quickstep.cuebar.logger.AmbientCueAceLogger
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
@@ -84,6 +85,7 @@ class AmbientCueRepositoryTest {
 
     @Mock private lateinit var mockTaskbarContext: TaskbarActivityContext
     @Mock private lateinit var mockAmbientCueLogger: AmbientCueLogger
+    private lateinit var ambientCueAceLogger: AmbientCueAceLogger
     @Mock private lateinit var mockBgExecutor: Executor
     @Mock private lateinit var mockUiExecutor: Executor
     @Mock private lateinit var mockAutofillManager: AutofillManager
@@ -102,10 +104,12 @@ class AmbientCueRepositoryTest {
         `when`(mockTaskbarContext.getSystemService(PersonalContextManager::class.java))
             .thenReturn(mockPersonalContextManager)
         `when`(mockTaskbarContext.applicationContext).thenReturn(context)
+        ambientCueAceLogger = AmbientCueAceLogger(mockPersonalContextManager)
         repositoryImpl =
             AmbientCueRepositoryImpl(
                 mockTaskbarContext,
                 mockAmbientCueLogger,
+                ambientCueAceLogger,
                 mockBgExecutor,
                 mockUiExecutor,
             )
@@ -297,6 +301,20 @@ class AmbientCueRepositoryTest {
         actionModel.onPerformLongClick.invoke()
 
         verify(mockPersonalContextManager).reportInsightEvent(publishedInsight, InsightEvent.EVENT_USER_LONG_PRESS, renderToken)
+    }
+
+    @Test
+    fun reportCloseEvent_reportsEventToPersonalContextManager() {
+        val insight = mockActionableInsight()
+        val publishedInsight = mock(PublishedContextInsight::class.java)
+        `when`(publishedInsight.insight).thenReturn(insight)
+        val renderToken = mock(RenderToken::class.java)
+
+        repository.onInsightReceived(publishedInsight, renderToken)
+        repository.reportCloseEvent()
+
+        verify(mockPersonalContextManager)
+            .reportInsightEvent(publishedInsight, InsightEvent.EVENT_USER_DISMISS, renderToken)
     }
 
     @Test

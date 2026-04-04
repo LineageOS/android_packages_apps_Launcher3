@@ -18,6 +18,7 @@ package com.android.quickstep.cuebar.ui.viewmodel
 
 import android.app.ActivityTaskManager
 import android.os.SystemClock
+import android.service.personalcontext.insight.interaction.InsightEvent
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.getValue
@@ -38,6 +39,7 @@ import com.android.launcher3.util.SafeCloseable
 import com.android.launcher3.widgetpicker.ui.ViewModel
 import com.android.quickstep.cuebar.data.ActionModel
 import com.android.quickstep.cuebar.domain.interactor.AmbientCueInteractor
+import com.android.quickstep.cuebar.logger.AmbientCueAceLogger
 import com.android.quickstep.cuebar.logger.AmbientCueLogger
 import com.android.systemui.shared.Flags.cueBarAceMigration
 import dagger.assisted.AssistedFactory
@@ -59,6 +61,7 @@ constructor(
     private val ambientCueInteractor: AmbientCueInteractor,
     private val launcherPrefs: LauncherPrefs,
     private val ambientCueLogger: AmbientCueLogger,
+    private val ambientCueAceLogger: AmbientCueAceLogger,
     private val isDesktopFormFactor: Boolean,
     private val scope: CoroutineScope,
     @Ui private val uiExecutor: Executor,
@@ -190,6 +193,7 @@ constructor(
             }
             ambientCueLogger.setPackageName(packageName)
             ambientCueLogger.setAmbientCueDisplayStatus(maCount, mrCount)
+            ambientCueAceLogger.reportInsightEvent(InsightEvent.EVENT_SHOW)
         } else if (!isRootAttached && isSessionStarted) {
             if (globallyFocusedTaskId != targetTaskId) {
                 ambientCueLogger.setLoseFocusMillis()
@@ -197,6 +201,7 @@ constructor(
             ambientCueLogger.flushAmbientCueEventReported()
             ambientCueLogger.clear()
             isSessionStarted = false
+            ambientCueAceLogger.reportInsightEvent(InsightEvent.EVENT_HIDE)
         }
         val isGestureNav = ambientCueInteractor.isGestureNav.value
         val isTaskBarVisible = ambientCueInteractor.isTaskBarVisible.value
