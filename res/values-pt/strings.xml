@@ -111,14 +111,12 @@
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"App adicionado à Barra de Tarefas"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"App removido da Barra de Tarefas"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Remover"</string>
-    <!-- no translation found for home_screen_files_context_menu_copy_label (8769381168712216221) -->
-    <skip />
+    <string name="home_screen_files_context_menu_copy_label" msgid="8769381168712216221">"Copiar"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Abrir"</string>
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"Renomear"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Excluir permanentemente"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Mover para a lixeira"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (2848141584483641247) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="2848141584483641247">"Item movido para a lixeira"</string>
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Não foi possível mover para a lixeira. Algo deu errado."</string>
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Não é possível desfazer esta ação. Acesse o app Files para restaurar."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Ações"</string>

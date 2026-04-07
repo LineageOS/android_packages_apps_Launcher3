@@ -111,14 +111,12 @@
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"टास्कबारमा एप हालियो"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"टास्कबारबाट एप हटाइयो"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"हटाउनुहोस्"</string>
-    <!-- no translation found for home_screen_files_context_menu_copy_label (8769381168712216221) -->
-    <skip />
+    <string name="home_screen_files_context_menu_copy_label" msgid="8769381168712216221">"कपी गर्नुहोस्"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"खोल्नुहोस्"</string>
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"नाम बदल्नुहोस्"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"सदाका लागि मेटाउनुहोस्"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"ट्र्यासमा सार्नुहोस्"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (2848141584483641247) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="2848141584483641247">"यो सामग्री सारेर ट्र्यासमा लगिएको छ"</string>
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"सारेर ट्र्यासमा लैजान सकिएन। कुनै समस्या आयो।"</string>
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"अन्डू गर्न सकिएन। रिस्टोर गर्न Files एपमा जानुहोस्।"</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"कारबाहीहरू"</string>
