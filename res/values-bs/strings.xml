@@ -111,14 +111,12 @@
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"Aplikacija je dodana na traku zadataka"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Aplikacija je uklonjena s trake zadataka"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Ukloni"</string>
-    <!-- no translation found for home_screen_files_context_menu_copy_label (8769381168712216221) -->
-    <skip />
+    <string name="home_screen_files_context_menu_copy_label" msgid="8769381168712216221">"Kopiraj"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Otvori"</string>
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"Promijeni naziv"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Izbriši trajno"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Premjesti u otpad"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (2848141584483641247) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="2848141584483641247">"Stavka je premještena u otpad"</string>
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Nije moguće premjestiti u otpad. Nešto nije uredu."</string>
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Nije moguće opozvati radnju. Idite u aplikaciju Files da vratite."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Radnje"</string>

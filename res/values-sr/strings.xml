@@ -111,8 +111,7 @@
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"Апликација је додата на траку задатака"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Апликација је уклоњена са траке задатака"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Уклони"</string>
-    <!-- no translation found for home_screen_files_context_menu_copy_label (8769381168712216221) -->
-    <skip />
+    <string name="home_screen_files_context_menu_copy_label" msgid="8769381168712216221">"Копирај"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Отвори"</string>
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"Преименуј"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Трајно избриши"</string>

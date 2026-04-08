@@ -93,7 +93,7 @@
     <string name="all_apps_search_results" msgid="5889367432531296759">"Результати пошуку"</string>
     <string name="all_apps_button_personal_label" msgid="1315764287305224468">"Список особистих додатків"</string>
     <string name="all_apps_button_work_label" msgid="7270707118948892488">"Список робочих додатків"</string>
-    <string name="remove_drop_target_label" msgid="7812859488053230776">"Видалити"</string>
+    <string name="remove_drop_target_label" msgid="7812859488053230776">"Вилучити"</string>
     <string name="uninstall_drop_target_label" msgid="4722034217958379417">"Видалити додаток"</string>
     <string name="app_info_drop_target_label" msgid="692894985365717661">"Про додаток"</string>
     <string name="install_private_system_shortcut_label" msgid="1616889277073184841">"Установити приватно"</string>
@@ -111,14 +111,12 @@
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"Додаток закріплено на панелі завдань"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Додаток вилучено з панелі завдань"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Вилучити"</string>
-    <!-- no translation found for home_screen_files_context_menu_copy_label (8769381168712216221) -->
-    <skip />
+    <string name="home_screen_files_context_menu_copy_label" msgid="8769381168712216221">"Копіювати"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Відкрити"</string>
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"Перейменувати"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Видалити назавжди"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Перемістити в кошик"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (2848141584483641247) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="2848141584483641247">"Елемент переміщено в кошик"</string>
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Неможливо перемістити в кошик. Сталася помилка."</string>
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Не вдається відмінити. Щоб відновити, перейдіть у додаток Файли."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Дії"</string>

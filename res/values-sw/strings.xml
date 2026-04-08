@@ -111,14 +111,12 @@
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"Programu imewekwa kwenye Upauzana"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Programu imeondolewa kwenye Upauzana"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Ondoa"</string>
-    <!-- no translation found for home_screen_files_context_menu_copy_label (8769381168712216221) -->
-    <skip />
+    <string name="home_screen_files_context_menu_copy_label" msgid="8769381168712216221">"Nakili"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Fungua"</string>
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"Badilisha jina"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Futa kabisa"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"Weka kwenye tupio"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (2848141584483641247) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="2848141584483641247">"Kipengee kimehamishiwa kwenye tupio"</string>
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"Imeshindwa kuweka kwenye tupio. Hitilafu fulani imetokea."</string>
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"Imeshindwa kutendua. Nenda kwenye programu ya Faili ili urejeshe."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"Vitendo"</string>

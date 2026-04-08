@@ -42,5 +42,5 @@
     <string name="widget_create_button" msgid="4796864288412584818">"创建"</string>
     <string name="widget_add_to_homescreen_button_label" msgid="5293968342564702338">"添加到主屏幕"</string>
     <string name="widget_cancel_pin_button_label" msgid="7548758841712339886">"取消"</string>
-    <string name="widget_touch_hold_instruction" msgid="7360267776497592789">"轻触并按住即可移动微件。"</string>
+    <string name="widget_touch_hold_instruction" msgid="7360267776497592789">"按住即可移动微件。"</string>
 </resources>

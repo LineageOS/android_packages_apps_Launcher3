@@ -111,8 +111,7 @@
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"Aplikacija je dodana v opravilno vrstico"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"Aplikacija je odstranjena iz opravilne vrstice"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"Odstrani"</string>
-    <!-- no translation found for home_screen_files_context_menu_copy_label (8769381168712216221) -->
-    <skip />
+    <string name="home_screen_files_context_menu_copy_label" msgid="8769381168712216221">"Kopiraj"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"Odpri"</string>
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"Preimenuj"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"Trajno izbriši"</string>

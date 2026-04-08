@@ -111,14 +111,12 @@
     <string name="app_added_to_taskbar" msgid="6348755169793615171">"செயல் பட்டியில் ஆப்ஸ் சேர்க்கப்பட்டது"</string>
     <string name="app_removed_from_taskbar" msgid="3471754847898675396">"செயல் பட்டியில் இருந்து ஆப்ஸ் அகற்றப்பட்டது"</string>
     <string name="remove_system_shortcut_label" msgid="3991201411148073972">"அகற்று"</string>
-    <!-- no translation found for home_screen_files_context_menu_copy_label (8769381168712216221) -->
-    <skip />
+    <string name="home_screen_files_context_menu_copy_label" msgid="8769381168712216221">"நகலெடு"</string>
     <string name="home_screen_files_context_menu_open_in_app_label" msgid="7930552598671791537">"திற"</string>
     <string name="home_screen_files_context_menu_rename_label" msgid="699579827537411711">"பெயர் மாற்று"</string>
     <string name="home_screen_files_context_menu_delete_permanently_label" msgid="8660443461874174185">"நிரந்தரமாக நீக்கு"</string>
     <string name="home_screen_files_context_menu_move_to_trash_label" msgid="1145655050674479315">"நீக்கு"</string>
-    <!-- no translation found for home_screen_files_moved_to_trash_message (2848141584483641247) -->
-    <skip />
+    <string name="home_screen_files_moved_to_trash_message" msgid="2848141584483641247">"நீக்கியவைக்கு ஃபைல் நகர்த்தப்பட்டது"</string>
     <string name="home_screen_files_move_to_trash_error_message" msgid="3836240816166417826">"நீக்க முடியாது. ஏதோ தவறாகிவிட்டது."</string>
     <string name="home_screen_files_restore_from_trash_error_message" msgid="994941644161090497">"செயல்தவிர்க்க முடியவில்லை. மீட்டெடுக்க Files ஆப்ஸிற்குச் செல்லவும்."</string>
     <string name="actions_popup_menu_button" msgid="2442187572711557413">"செயல்கள்"</string>
