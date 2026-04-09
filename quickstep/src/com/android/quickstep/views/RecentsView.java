@@ -2681,7 +2681,10 @@ public abstract class RecentsView<
         return getRunningTaskView() instanceof DesktopTaskView;
     }
 
-    private boolean isGestureActive() {
+    /**
+     * Returns if a gesture is currently active.
+     */
+    public boolean isGestureActive() {
         return mActiveGestureGroupedTaskInfo != null;
     }
 

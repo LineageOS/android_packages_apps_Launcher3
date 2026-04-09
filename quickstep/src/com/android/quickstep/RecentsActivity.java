@@ -458,7 +458,8 @@ public final class RecentsActivity extends StatefulActivity<RecentsState> implem
                     OVERVIEW_STATE_ORDINAL);
         }
 
-        if (mIsInRecentsViewVisibleState && !state.isRecentsViewVisible() && !isFinishing()) {
+        if (mIsInRecentsViewVisibleState && !state.isRecentsViewVisible() && !isFinishing()
+                && !mFallbackRecentsView.isGestureActive()) {
             Log.d(TAG, "onStateSetEnd - moveTaskToBack as Recents should no longer be visible");
             moveTaskToBack(/*nonRoot=*/true);
         }
