@@ -179,6 +179,7 @@ class TaskbarPinnedAppIconContainer(context: Context) :
                 // Might have been wrapped in TaskItemInfo by recents update.
                 itemView.tag = item
                 itemView.layoutParams = lp
+                setCellBindingInfo(itemView, item)
                 return@forEachIcon
             }
 
