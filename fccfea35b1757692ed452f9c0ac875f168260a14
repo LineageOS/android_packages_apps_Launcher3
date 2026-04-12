@@ -20,6 +20,23 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "1ba0e5dd_cd604ac5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2026-04-12T12:03:19Z",
+      "side": 1,
+      "message": "i actually made a similar fix for 22.2 btw https://review.lineageos.org/c/LineageOS/android_packages_apps_Trebuchet/+/426136",
+      "revId": "fccfea35b1757692ed452f9c0ac875f168260a14",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "0d4294e1_5e9eeaf0",
         "filename": "quickstep/src/com/android/launcher3/taskbar/TaskbarInteractor.kt",
         "patchSetId": 2
