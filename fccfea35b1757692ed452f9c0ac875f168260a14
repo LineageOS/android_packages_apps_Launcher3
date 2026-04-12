@@ -16,6 +16,29 @@
       "message": "Tested on device emulator and OnePlus 7 (codename guacamoleb)",
       "revId": "fccfea35b1757692ed452f9c0ac875f168260a14",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0d4294e1_5e9eeaf0",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/TaskbarInteractor.kt",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2026-04-12T12:03:15Z",
+      "side": 1,
+      "message": "kotlin doesn\u0027t complain about this?",
+      "range": {
+        "startLine": 194,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 21
+      },
+      "revId": "fccfea35b1757692ed452f9c0ac875f168260a14",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
