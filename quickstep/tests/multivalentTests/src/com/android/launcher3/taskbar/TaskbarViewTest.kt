@@ -47,6 +47,7 @@ import com.android.launcher3.taskbar.TaskbarViewTestUtil.createHotseatWorkspaceI
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecentTask
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createRecents
 import com.android.launcher3.taskbar.TaskbarViewTestUtil.createSplitTask
+import com.android.launcher3.taskbar.customization.util.TaskbarIconContainerLayoutParams
 import com.android.launcher3.taskbar.rules.TaskbarAnimatorTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule
 import com.android.launcher3.taskbar.rules.TaskbarUnitTestRule.ForceRtl
@@ -1314,6 +1315,28 @@ class TaskbarViewTest(deviceName: String, flags: FlagsParameterization) {
         } else {
             assertThat(viewController.shownTaskIds).doesNotContain(123)
         }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_TASKBAR_ICON_CONTAINER)
+    fun testUpdateItems_hotseatItemUnchanged_regeneratesCellInfo() {
+        val item = createHotseatWorkspaceItem(0)
+        runOnTaskbarUiThreadSync {
+            taskbarView.updateItems(arrayOf(item), emptyList(), emptyList())
+        }
+
+        val initialBindInfo =
+            (taskbarView.iconViews.last().layoutParams as TaskbarIconContainerLayoutParams).bindInfo
+        assertThat(initialBindInfo).isNotNull()
+
+        runOnTaskbarUiThreadSync {
+            taskbarView.updateItems(arrayOf(item), emptyList(), emptyList())
+        }
+
+        val finalBindInfo =
+            (taskbarView.iconViews.last().layoutParams as TaskbarIconContainerLayoutParams).bindInfo
+        assertThat(finalBindInfo).isNotNull()
+        assertThat(finalBindInfo).isNotSameInstanceAs(initialBindInfo)
     }
 
     /** Returns the number of expected recents outside of the overflow based on [hotseatSize]. */
