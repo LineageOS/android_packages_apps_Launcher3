@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1e89dde5_ccd01206",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 36912
+      },
+      "writtenOn": "2026-04-12T11:55:30Z",
+      "side": 1,
+      "message": "Tested on device emulator and OnePlus 7 (codename guacamoleb)",
+      "revId": "fccfea35b1757692ed452f9c0ac875f168260a14",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
