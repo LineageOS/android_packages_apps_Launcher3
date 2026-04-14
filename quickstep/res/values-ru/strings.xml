@@ -42,7 +42,7 @@
     <string name="hotseat_tip_gaps_filled" msgid="3035673010274223538">"Рекомендуемые приложения будут появляться на свободных местах."</string>
     <string name="hotsaet_tip_prediction_enabled" msgid="2233554377501347650">"Функция \"Рекомендуемые приложения\" включена."</string>
     <string name="hotsaet_tip_prediction_disabled" msgid="1506426298884658491">"Функция \"Рекомендуемые приложения\" отключена."</string>
-    <string name="gesture_tutorial_title" msgid="2750751261768388354">"Руководство: навигация с помощью жестов"</string>
+    <string name="gesture_tutorial_title" msgid="2750751261768388354">"Руководство: навигация жестами"</string>
     <string name="gesture_tutorial_rotation_prompt_title" msgid="7537946781362766964">"Поверните устройство"</string>
     <string name="gesture_tutorial_rotation_prompt" msgid="1664493449851960691">"Чтобы перейти к руководству по жестам, нужно повернуть устройство."</string>
     <string name="back_gesture_feedback_swipe_too_far_from_edge" msgid="4175100312909721217">"Проведите к центру прямо от правого или левого края экрана."</string>
