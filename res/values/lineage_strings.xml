@@ -73,4 +73,15 @@
     <string name="tapered_rect_shape_title">Tapered rect</string>
     <string name="teardrop_shape_title">Teardrop</string>
     <string name="rounded_rect_shape_title">Rounded rect</string>
+
+    <!-- Pause/Unpause app shortcuts -->
+    <string name="pause_app_drop_target_label">Pause app</string>
+    <string name="unpause_app_drop_target_label">Unpause app</string>
+    <string name="pause_app_dialog_title">Pause %1$s?</string>
+    <string name="pause_app_dialog_message">Notifications for %1$s will be paused</string>
+    <string name="pause_app_dialog_confirm">Pause</string>
+    <string name="paused_app_dialog_title">App paused</string>
+    <string name="paused_app_dialog_message">%1$s was paused from the launcher</string>
+    <string name="pause_app_failed">Failed to pause %1$s</string>
+    <string name="unpause_app_failed">Failed to unpause %1$s</string>
 </resources>
