@@ -579,4 +579,5 @@
     <string name="seven_sided_cookie_shape_title">7-sided cookie</string>
     <!-- label for arch shape option in customization picker -->
     <string name="arch_shape_title">Arch</string>
+
 </resources>
