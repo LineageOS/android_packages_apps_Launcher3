@@ -173,6 +173,8 @@ public class BubbleBarViewController {
 
     @Nullable
     private BubbleBarBoundsChangeListener mBoundsChangeListener;
+    @Nullable
+    private TaskbarControllers mTaskbarControllers;
 
     public BubbleBarViewController(TaskbarActivityContext activity, TaskbarUiState taskbarUiState,
             BubbleBarView barView,
@@ -214,6 +216,7 @@ public class BubbleBarViewController {
     /** Initializes controller. */
     public void init(TaskbarControllers controllers, BubbleControllers bubbleControllers,
             TaskbarViewPropertiesProvider taskbarViewPropertiesProvider) {
+        mTaskbarControllers = controllers;
         mTaskbarSharedState = controllers.getSharedState();
         mBubbleStashController = bubbleControllers.bubbleStashController;
         mBubbleBarController = bubbleControllers.bubbleBarController;
@@ -583,6 +586,7 @@ public class BubbleBarViewController {
         mBarView.setRelativePivot(x, y);
     }
 
+    // TODO (b/495910829) -- Fix up how bubble bar visibility is represented
     /**
      * Whether the bubble bar is visible or not.
      */
@@ -590,9 +594,16 @@ public class BubbleBarViewController {
         return mBarView.getVisibility() == VISIBLE;
     }
 
+    // TODO (b/495910829) -- Fix up how bubble bar visibility is represented
     /** Returns whether the bubble bar container is visible. */
     public boolean isBubbleBarContainerVisible() {
         return mBubbleBarContainer.getVisibility() == VISIBLE;
+    }
+
+    // TODO (b/495910829) -- Fix up how bubble bar visibility is represented
+    /** Returns whether the bubble bar container is visible. */
+    public boolean isBubbleBarAndContainerVisible() {
+        return isBubbleBarVisible() && isBubbleBarContainerVisible();
     }
 
     /** Whether the bubble bar has bubbles. */
@@ -887,6 +898,13 @@ public class BubbleBarViewController {
                 mBubbleBarContainer.setVisibility(INVISIBLE);
             } else {
                 mBubbleBarContainer.setVisibility(VISIBLE);
+            }
+        }
+        if (Flags.fixBubbleInsetsWhenInvisible()) {
+            // If bubble visibility changes, the insets need to update
+            if (mTaskbarControllers != null) {
+                mTaskbarControllers.runAfterInit(() ->
+                        mTaskbarInsetsController.onTaskbarOrBubblebarWindowHeightOrInsetsChanged());
             }
         }
     }
