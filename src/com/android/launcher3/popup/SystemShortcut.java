@@ -54,6 +54,14 @@ import com.android.launcher3.widget.WidgetsBottomSheet;
 import com.android.launcher3.widget.picker.model.data.WidgetPickerData;
 import com.android.wm.shell.shared.bubbles.logging.EntryPoint;
 
+import android.app.AlertDialog;
+import android.app.AppGlobals;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.os.RemoteException;
+import android.widget.Toast;
+import com.android.launcher3.util.ApplicationInfoWrapper;
+
 import java.util.Arrays;
 
 /**
@@ -579,4 +587,105 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             }
         }
     }
+
+    public static final Factory<ActivityContext> PAUSE_APP =
+            (activity, itemInfo, originalView) -> {
+                final android.content.ComponentName cn = itemInfo.getTargetComponent();
+                if (cn == null) return null;
+                final String packageName = cn.getPackageName();
+                final boolean suspended = new ApplicationInfoWrapper(
+                        (Context) activity, packageName, itemInfo.user).isSuspended();
+                if (suspended) {
+                    return new UnpauseApp<>(activity, itemInfo, originalView);
+                } else {
+                    return new PauseApp<>(activity, itemInfo, originalView);
+                }
+            };
+
+    public static class PauseApp<T extends ActivityContext> extends SystemShortcut<T> {
+        public PauseApp(T target, ItemInfo itemInfo, View originalView) {
+            super(R.drawable.hourglass_24px, R.string.pause_app_drop_target_label,
+                    target, itemInfo, originalView);
+        }
+
+        @Override
+        public void onClick(View view) {
+            final Context context = view.getContext();
+            final android.content.ComponentName cn = mItemInfo.getTargetComponent();
+            if (cn == null) return;
+            final String packageName = cn.getPackageName();
+            CharSequence appLabel;
+            try {
+                appLabel = context.getPackageManager().getApplicationLabel(
+                        context.getPackageManager().getApplicationInfo(packageName, 0));
+            } catch (PackageManager.NameNotFoundException e) {
+                appLabel = packageName;
+            }
+            final CharSequence finalLabel = appLabel;
+            dismissTaskMenuView();
+            new AlertDialog.Builder(context)
+                    .setTitle(context.getString(R.string.pause_app_dialog_title, finalLabel))
+                    .setMessage(context.getString(R.string.pause_app_dialog_message, finalLabel))
+                    .setPositiveButton(R.string.pause_app_dialog_confirm,
+                            (dialog, which) -> {
+                                try {
+                                    AppGlobals.getPackageManager().setPackagesSuspendedAsUser(
+                                            new String[]{packageName}, true,
+                                            null, null,
+                                            new android.content.pm.SuspendDialogInfo.Builder()
+                                                    .setNeutralButtonAction(
+                                                            android.content.pm.SuspendDialogInfo
+                                                                    .BUTTON_ACTION_UNSUSPEND)
+                                                    .build(),
+                                            0,
+                                            context.getOpPackageName(),
+                                            context.getUserId(),
+                                            mItemInfo.user.getIdentifier());
+                                } catch (RemoteException | SecurityException e) {
+                                    Log.e(TAG, "Failed to pause app: " + packageName, e);
+                                    Toast.makeText(context,
+                                            "Failed to pause " + finalLabel,
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        }
+    }
+
+    public static class UnpauseApp<T extends ActivityContext> extends SystemShortcut<T> {
+        public UnpauseApp(T target, ItemInfo itemInfo, View originalView) {
+            super(R.drawable.hourglass_24px, R.string.unpause_app_drop_target_label,
+                    target, itemInfo, originalView);
+        }
+
+        @Override
+        public void onClick(View view) {
+            final Context context = view.getContext();
+            final android.content.ComponentName cn = mItemInfo.getTargetComponent();
+            if (cn == null) return;
+            final String packageName = cn.getPackageName();
+            dismissTaskMenuView();
+            try {
+                AppGlobals.getPackageManager().setPackagesSuspendedAsUser(
+                        new String[]{packageName}, false,
+                        null, null, null, 0,
+                        context.getOpPackageName(),
+                        context.getUserId(),
+                        mItemInfo.user.getIdentifier());
+            } catch (RemoteException | SecurityException e) {
+                Log.e(TAG, "Failed to unpause app: " + packageName, e);
+                CharSequence appLabel;
+                try {
+                    appLabel = context.getPackageManager().getApplicationLabel(
+                            context.getPackageManager().getApplicationInfo(packageName, 0));
+                } catch (PackageManager.NameNotFoundException ex) {
+                    appLabel = packageName;
+                }
+                Toast.makeText(context, "Failed to unpause " + appLabel,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 }

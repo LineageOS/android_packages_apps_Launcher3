@@ -579,4 +579,13 @@
     <string name="seven_sided_cookie_shape_title">7-sided cookie</string>
     <!-- label for arch shape option in customization picker -->
     <string name="arch_shape_title">Arch</string>
+
+    <!-- Pause/Unpause app shortcuts -->
+    <string name="pause_app_drop_target_label">Pause app</string>
+    <string name="unpause_app_drop_target_label">Unpause app</string>
+    <string name="pause_app_dialog_title">Pause %1$s?</string>
+    <string name="pause_app_dialog_message">Notifications for %1$s will be paused</string>
+    <string name="pause_app_dialog_confirm">Pause</string>
+    <string name="paused_app_dialog_title">App paused</string>
+    <string name="paused_app_dialog_message">%1$s was paused from the launcher</string>
 </resources>
