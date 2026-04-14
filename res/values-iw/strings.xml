@@ -143,7 +143,7 @@
     <string name="default_scroll_format" msgid="7475544710230993317">"‏דף %1$d מתוך %2$d"</string>
     <string name="workspace_scroll_format" msgid="8458889198184077399">"‏מסך הבית %1$d מתוך %2$d"</string>
     <string name="workspace_new_page" msgid="257366611030256142">"מסך הבית חדש"</string>
-    <string name="app_running_state_description" msgid="5645053189564740904">"פעיל"</string>
+    <string name="app_running_state_description" msgid="5645053189564740904">"מצב פעיל"</string>
     <string name="app_minimized_state_description" msgid="710740620044902509">"ממוזער"</string>
     <string name="folder_opened" msgid="94695026776264709">"תיקייה פתוחה, <xliff:g id="WIDTH">%1$d</xliff:g> על <xliff:g id="HEIGHT">%2$d</xliff:g>"</string>
     <string name="folder_tap_to_close" msgid="4625795376335528256">"יש ללחוץ כדי לסגור את התיקייה"</string>

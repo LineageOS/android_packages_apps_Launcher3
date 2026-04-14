@@ -41,7 +41,7 @@
     <string name="app_pair_unlaunchable_at_screen_size" msgid="3446551575502685376">"ဤအက်ပ်တွဲချိတ်ခြင်းကို ဤစက်တွင် ပံ့ပိုးမထားပါ"</string>
     <string name="app_pair_needs_unfold" msgid="4588897528143807002">"ဤအက်ပ်တွဲချိတ်ခြင်းကို သုံးရန် စက်ကိုဖြန့်ပါ"</string>
     <string name="app_pair_not_available" msgid="3556767440808032031">"အက်ပ်တွဲချိတ်ခြင်းကို မရနိုင်ပါ"</string>
-    <string name="long_press_widget_to_add" msgid="3587712543577675817">"ဝိဂျက်ကို ရွှေ့ရန် တို့ပြီး ဖိထားပါ။"</string>
+    <string name="long_press_widget_to_add" msgid="3587712543577675817">"ဝိဂျက်ကို ရွှေ့ရန် ထိထားပါ။"</string>
     <string name="long_accessible_way_to_add" msgid="2733588281439571974">"ဝိဂျက်ကို ရွှေ့ရန် (သို့) စိတ်ကြိုက်လုပ်ဆောင်ချက်များကို သုံးရန် နှစ်ချက်တို့ပြီး ဖိထားပါ။"</string>
     <string name="widget_picker_widget_options_button_description" msgid="4770099264476852363">"နောက်ထပ် ရွေးစရာများ"</string>
     <string name="widget_picker_show_all_widgets_menu_item_title" msgid="9023638224586908119">"ဝိဂျက်အားလုံး ပြပါ"</string>
@@ -49,7 +49,7 @@
     <string name="widget_accessible_dims_format" msgid="3640149169885301790">"အလျား %1$d နှင့် အမြင့် %2$d"</string>
     <string name="widget_preview_context_description" msgid="9045841361655787574">"<xliff:g id="WIDGET_NAME">%1$s</xliff:g> ဝိဂျက်"</string>
     <string name="widget_preview_name_and_dims_content_description" msgid="8489038126122831595">"<xliff:g id="WIDGET_NAME">%1$s</xliff:g> ဝိဂျက်၊ အကျယ် %2$d နှင့် အမြင့် %3$d"</string>
-    <string name="add_item_request_drag_hint" msgid="8730547755622776606">"ဝိဂျက်ကို တို့ထိ၍ ဖိထားပြီး ပင်မစာမျက်နှာပေါ်တွင် နေရာအမျိုးမျိုးသို့ ရွှေ့နိုင်သည်"</string>
+    <string name="add_item_request_drag_hint" msgid="8730547755622776606">"ဝိဂျက်ကို ထိထားပြီး ပင်မစာမျက်နှာပေါ်တွင် နေရာအမျိုးမျိုးသို့ ရွှေ့နိုင်သည်"</string>
     <string name="add_to_home_screen" msgid="9168649446635919791">"ပင်မစာမျက်နှာတွင် ထည့်ရန်"</string>
     <string name="added_to_home_screen_accessibility_text" msgid="4451545765448884415">"<xliff:g id="WIDGET_NAME">%1$s</xliff:g> ဝိဂျက်ကို ပင်မစာမျက်နှာတွင် ထည့်လိုက်ပြီ"</string>
     <string name="suggested_widgets_header_title" msgid="1844314680798145222">"အကြံပြုချက်"</string>
