@@ -25,6 +25,8 @@
     <string name="pref_themed_icons_summary">Dilyn eiconau â thema a ddefnyddiwyd ar y sgrin gartref</string>
     <string name="desktop_show_labels">Dangos labeli eiconau ar y sgrin gartref</string>
     <string name="drawer_show_labels">Dangos labeli eiconau yn y drôr</string>
+    <string name="pref_sleep_gesture_title">Tap dwbl i gysgu</string>
+    <string name="pref_sleep_gesture_summary">Tap dwbl ar ofod gwag yn y sgrin gartref i ddiffodd y sgrin</string>
     <string name="trust_apps_manager_name">Apiau Cudd ac wedi\'u Gwarchod</string>
     <string name="trust_apps_auth_manager">Datglo i reoli apiau cudd ac apiau wedi\'u gwarchod</string>
     <string name="trust_apps_auth_open_app">Dilysu i agor %1$s</string>

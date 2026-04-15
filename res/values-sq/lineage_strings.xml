@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">Shfaq emërtimin e ikonave në menu</string>
     <string name="drawer_open_keyboard_title">Rrëshqitni për të filluar kërkimin</string>
     <string name="drawer_open_keyboard_summary">Hap tastierën çdo herë që sirtari i aplikacionit hapet</string>
+    <string name="pref_sleep_gesture_title">Trokit dy herë për të fjetur</string>
+    <string name="pref_sleep_gesture_summary">Trokit dy herë hapësirën bosh në ekranin kryesor për të fikur ekranin</string>
     <string name="trust_apps_manager_name">Programet e fshehura &amp; Mbrojtura</string>
     <string name="trust_apps_auth_manager">Zhbllokoje për të kontrolluar programet e fshehura dhe të siguruara</string>
     <string name="trust_apps_auth_open_app">Verifikohu për të hapur %1$s</string>
@@ -37,4 +39,11 @@
     <string name="trust_apps_info_protected">Aplikacionet e mbrojtura kushtëzojnë vërtetim nga hapja e menu -së</string>
     <string name="pref_suggestions_title">Sugjerimet</string>
     <string name="pref_suggestions_summary">Për sirtarin e aplikacioneve &amp; sugjerime për ekranin bazë</string>
+    <string name="pebble_shape_title">Gurëz</string>
+    <string name="vessel_shape_title">Anije</string>
+    <string name="pure_square_shape_title">Katror i pastër</string>
+    <string name="squircle_shape_title">Katror</string>
+    <string name="tapered_rect_shape_title">Drejtkëndësh i ngushtuar</string>
+    <string name="teardrop_shape_title">Pikë loti</string>
+    <string name="rounded_rect_shape_title">Drejtkëndësh i rrumbullakosur</string>
 </resources>
