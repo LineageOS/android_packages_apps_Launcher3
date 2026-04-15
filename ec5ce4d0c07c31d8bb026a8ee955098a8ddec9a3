@@ -16,6 +16,24 @@
       "message": "This was a original idea by the guys at Calyx, so attributions could have them as well\n\nRef:\n\nhttps://github.com/BlissRoms/platform_packages_apps_Launcher3/commit/61a66c3a66b23f406c5b7cbf6b0e405dc51cf087\nhttps://github.com/BlissRoms/platform_packages_apps_Launcher3/commit/297882c4d2ac4faac53da9a72b29513a69f59e35",
       "revId": "ec5ce4d0c07c31d8bb026a8ee955098a8ddec9a3",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2798f40_1f03a6fc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 36923
+      },
+      "writtenOn": "2026-04-15T21:40:44Z",
+      "side": 1,
+      "message": "Fine with any attribution from anywhere. It\u0027s just something from lawnchair that I missed and feel like its a good addition in Launcher3",
+      "parentUuid": "c33ea381_7f8b4176",
+      "revId": "ec5ce4d0c07c31d8bb026a8ee955098a8ddec9a3",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
