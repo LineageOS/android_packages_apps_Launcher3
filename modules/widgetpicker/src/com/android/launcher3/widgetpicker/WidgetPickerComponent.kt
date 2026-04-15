@@ -20,7 +20,6 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetAppIconsReposito
 import com.android.launcher3.widgetpicker.data.repository.WidgetUsersRepository
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
-import com.android.launcher3.widgetpicker.ui.CreateButtonProvider
 import com.android.launcher3.widgetpicker.ui.appcatalog.SingleAppWidgetsCatalog
 import com.android.launcher3.widgetpicker.ui.fullcatalog.FullWidgetsCatalog
 import com.android.launcher3.widgetpicker.ui.pin.PinAppWidgetCatalog
@@ -67,7 +66,6 @@ interface WidgetPickerComponent {
             widgetAppIconsRepository: WidgetAppIconsRepository,
             @WidgetPickerHostInfo @BindsInstance widgetHostInfo: WidgetHostInfo,
             @WidgetPickerBackground @BindsInstance backgroundContext: CoroutineContext,
-            @BindsInstance @WidgetPickerUi createButtonProvider: CreateButtonProvider,
         ): WidgetPickerComponent
     }
 

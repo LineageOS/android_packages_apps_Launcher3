@@ -63,7 +63,6 @@ import com.android.launcher3.widgetpicker.shared.model.WidgetId
 import com.android.launcher3.widgetpicker.shared.model.WidgetPreview
 import com.android.launcher3.widgetpicker.shared.model.isAppWidget
 import com.android.launcher3.widgetpicker.theme.LauncherWidgetPickerTheme
-import com.android.launcher3.widgetpicker.ui.CreateButtonProvider
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionSource
 import com.android.launcher3.widgetpicker.ui.WidgetPickerEventListeners
@@ -88,7 +87,6 @@ constructor(
     private val widgetAppIconsRepository: WidgetAppIconsRepository,
     @BackgroundContext private val backgroundContext: CoroutineContext,
     @ApplicationContext private val appContext: Context,
-    @LauncherAppSingleton private val createButtonProvider: CreateButtonProvider,
     private val apiWrapper: ApiWrapper,
 ) : WidgetPickerComposeWrapper {
 
@@ -272,7 +270,6 @@ constructor(
                             else SheetStyle.BOTTOM_SHEET,
                     ),
                 backgroundContext = backgroundContext,
-                createButtonProvider = createButtonProvider,
             )
     }
 
@@ -494,7 +491,6 @@ constructor(
             when (this) {
                 WidgetInteractionSource.FEATURED -> Favorites.CONTAINER_WIDGETS_PREDICTION
                 WidgetInteractionSource.SEARCH,
-                WidgetInteractionSource.CREATE_BUTTON,
                 WidgetInteractionSource.BROWSE -> Favorites.CONTAINER_WIDGETS_TRAY
 
                 WidgetInteractionSource.APP_SPECIFIC_PICKER ->

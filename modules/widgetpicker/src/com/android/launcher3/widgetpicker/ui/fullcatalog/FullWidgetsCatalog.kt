@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import com.android.launcher3.widgetpicker.WidgetPickerUi
 import com.android.launcher3.widgetpicker.shared.model.CloseBehavior
 import com.android.launcher3.widgetpicker.shared.model.SheetStyle
-import com.android.launcher3.widgetpicker.ui.CreateButtonProvider
 import com.android.launcher3.widgetpicker.ui.LocalWidgetPickerCuiReporter
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCui
 import com.android.launcher3.widgetpicker.ui.WidgetPickerCuiReporter
@@ -61,7 +60,6 @@ import javax.inject.Inject
 class FullWidgetsCatalog
 @Inject
 constructor(
-    @WidgetPickerUi private val createButtonProvider: CreateButtonProvider,
     private val viewModelFactory: FullWidgetsCatalogViewModel.Factory,
 ) {
     @Composable
@@ -88,7 +86,6 @@ constructor(
         ) {
             FullWidgetsCatalogContent(
                 viewModel = viewModel,
-                createButtonProvider = createButtonProvider,
                 isCompactHeight = isCompactHeight,
                 isCompactWidth = isCompactWidth,
                 eventListeners = eventListeners,
@@ -99,7 +96,6 @@ constructor(
     @Composable
     private fun FullWidgetsCatalogContent(
         viewModel: FullWidgetsCatalogViewModel,
-        createButtonProvider: CreateButtonProvider,
         isCompactHeight: Boolean,
         isCompactWidth: Boolean,
         eventListeners: WidgetPickerEventListeners,
@@ -131,7 +127,7 @@ constructor(
                 onDismissSheet = onDismissSheet,
                 onSheetOpen = onSheetOpen,
             ) {
-                ActiveScreen(viewModel, createButtonProvider, isCompactWidth, eventListeners)
+                ActiveScreen(viewModel, isCompactWidth, eventListeners)
             }
         } else {
             TitledBottomSheet(
@@ -150,7 +146,7 @@ constructor(
                 onSheetOpen = onSheetOpen,
                 onSheetProgress = eventListeners::onSheetProgress,
             ) {
-                ActiveScreen(viewModel, createButtonProvider, isCompactWidth, eventListeners)
+                ActiveScreen(viewModel, isCompactWidth, eventListeners)
             }
         }
     }
@@ -158,7 +154,6 @@ constructor(
     @Composable
     private fun ActiveScreen(
         viewModel: FullWidgetsCatalogViewModel,
-        createButtonProvider: CreateButtonProvider,
         isCompactWidth: Boolean,
         eventListeners: WidgetPickerEventListeners,
     ) {
@@ -170,7 +165,6 @@ constructor(
                     onWidgetInteraction = eventListeners::onWidgetInteraction,
                     showDragShadow = viewModel.showDragShadow,
                     viewModel = viewModel.landingScreenViewModel,
-                    createButtonProvider = createButtonProvider,
                 )
             }
 

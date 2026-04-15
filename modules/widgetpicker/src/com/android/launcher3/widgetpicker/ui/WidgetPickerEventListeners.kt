@@ -76,9 +76,6 @@ sealed class WidgetInteractionInfo(open val source: WidgetInteractionSource) {
 
 /** Indicates the section from which the widget is being added from. */
 enum class WidgetInteractionSource {
-    /** Widget added by using the "Create" button. */
-    CREATE_BUTTON,
-
     /** The UI section that features / recommends widgets to the user. */
     FEATURED,
 

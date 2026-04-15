@@ -37,7 +37,6 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository.InitializationOptions
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository.InitializationOptions.Companion.getWidgetAppId
 import com.android.launcher3.widgetpicker.datasource.FeaturedWidgetsDataSource
-import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProvider
 import com.android.launcher3.widgetpicker.datasource.WidgetsSearchAlgorithm
 import com.android.launcher3.widgetpicker.shared.model.PickableWidget
 import com.android.launcher3.widgetpicker.shared.model.WidgetApp
@@ -76,7 +75,6 @@ constructor(
     private val widgetsModel: WidgetsModel,
     private val featuredWidgetsDataSource: FeaturedWidgetsDataSource,
     private val searchAlgorithm: WidgetsSearchAlgorithm,
-    private val widgetCreatorAppPackageProvider: WidgetCreatorAppPackageProvider,
     private val databaseWidgetPreviewLoader: DatabaseWidgetPreviewLoader,
     @param:BackgroundContext private val backgroundContext: CoroutineContext,
 ) : WidgetsRepository {
@@ -119,36 +117,6 @@ constructor(
         _widgetItemsByPackage
             .map { apps -> apps.firstOrNull { it.id == widgetAppId } }
             .distinctUntilChanged()
-
-    override fun getCustomWidget(): PickableWidget? {
-        val widgetsMap = widgetsModel.widgetsByComponentKey
-        if (widgetsMap.isEmpty()) return null
-
-        val customWidgetAppPackage = widgetCreatorAppPackageProvider.get()?.packageName
-        if (!customWidgetAppPackage.isNullOrBlank()) {
-            val widget =
-                widgetsMap.entries
-                    .firstOrNull {
-                        it.value.widgetInfo != null &&
-                            it.value.widgetInfo.configure != null &&
-                            it.key.componentName.packageName == customWidgetAppPackage &&
-                            it.key.user == Process.myUserHandle()
-                    }
-                    ?.value
-
-            if (widget != null) {
-                val widgetAppId =
-                    WidgetAppId(
-                        packageName = widget.componentName.packageName,
-                        userHandle = widget.user,
-                        category = null,
-                    )
-
-                return widget.toPickableWidget(deviceProfile, widgetAppId)
-            }
-        }
-        return null
-    }
 
     override suspend fun getWidgetPreview(id: WidgetId): WidgetPreview {
         val componentKey = ComponentKey(id.componentName, id.userHandle)

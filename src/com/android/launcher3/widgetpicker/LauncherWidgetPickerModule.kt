@@ -22,8 +22,6 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
 import com.android.launcher3.widgetpicker.datasource.ConfigResourceFeaturedWidgetsDataSource
 import com.android.launcher3.widgetpicker.datasource.FeaturedWidgetsDataSource
 import com.android.launcher3.widgetpicker.datasource.InMemoryWidgetSearchAlgorithm
-import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProvider
-import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProviderImpl
 import com.android.launcher3.widgetpicker.datasource.WidgetsSearchAlgorithm
 import com.android.launcher3.widgetpicker.repository.WidgetAppIconsRepositoryImpl
 import com.android.launcher3.widgetpicker.repository.WidgetUsersRepositoryImpl
@@ -53,9 +51,4 @@ interface LauncherWidgetPickerModule {
 
     @Binds
     fun bindWidgetsSearchAlgorithm(impl: InMemoryWidgetSearchAlgorithm): WidgetsSearchAlgorithm
-
-    @Binds
-    fun bindWidgetCreatorAppPackageProvider(
-        impl: WidgetCreatorAppPackageProviderImpl
-    ): WidgetCreatorAppPackageProvider
 }
