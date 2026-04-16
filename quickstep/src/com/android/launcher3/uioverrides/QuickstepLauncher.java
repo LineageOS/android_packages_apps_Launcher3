@@ -1158,8 +1158,13 @@ public class QuickstepLauncher extends Launcher implements RecentsViewContainer,
     }
 
     private void handlePendingActivityRequest() {
+        // Check to see whether we're currently animating between states. If we are, ensure the
+        // ProxyActivity isn't cancelled while the Taskbar/Recents animation is still in progress.
+        boolean isTransitionRunning = getStateManager().isInTransition();
+
         if (mPendingActivityRequestCode != -1 && isInState(NORMAL)
-                && ((getActivityFlags() & ACTIVITY_STATE_DEFERRED_RESUMED) != 0)) {
+                && ((getActivityFlags() & ACTIVITY_STATE_DEFERRED_RESUMED) != 0)
+                && !isTransitionRunning) {
             // Remove any active ProxyActivityStarter task and send RESULT_CANCELED to Launcher.
             onActivityResult(mPendingActivityRequestCode, RESULT_CANCELED, null);
             // ProxyActivityStarter is started with clear task to reset the task after which it
