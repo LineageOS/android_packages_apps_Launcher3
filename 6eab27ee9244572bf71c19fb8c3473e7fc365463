@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1c358e78_1504b667",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 14010
+      },
+      "writtenOn": "2026-04-16T12:44:06Z",
+      "side": 1,
+      "message": "I\u0027m not sure why you\u0027re removing so much code in your changes, but chances are this small fix is all we need: https://github.com/crdroidandroid/android_packages_apps_Launcher3/commit/62dad1c1a5e562c5396cf78d1c5782d70a236738",
+      "revId": "6eab27ee9244572bf71c19fb8c3473e7fc365463",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
