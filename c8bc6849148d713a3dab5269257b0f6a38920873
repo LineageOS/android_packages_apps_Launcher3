@@ -16,6 +16,23 @@
       "message": "This could be removed as entirety is moved to lineage_strings.xml",
       "revId": "c8bc6849148d713a3dab5269257b0f6a38920873",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "546d2b56_22a5d752",
+        "filename": "res/values/strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 582,
+      "author": {
+        "id": 19979
+      },
+      "writtenOn": "2026-04-16T04:26:28Z",
+      "side": 1,
+      "message": "Remove this added newline",
+      "revId": "c8bc6849148d713a3dab5269257b0f6a38920873",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
