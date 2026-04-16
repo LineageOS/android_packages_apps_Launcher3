@@ -42,5 +42,5 @@
     <string name="widget_create_button" msgid="4796864288412584818">"ပြုလုပ်ရန်"</string>
     <string name="widget_add_to_homescreen_button_label" msgid="5293968342564702338">"ပင်မစာမျက်နှာတွင် ထည့်ရန်"</string>
     <string name="widget_cancel_pin_button_label" msgid="7548758841712339886">"မလုပ်တော့"</string>
-    <string name="widget_touch_hold_instruction" msgid="7360267776497592789">"ဝိဂျက်ကို ရွှေ့ရန် တို့ပြီး ဖိထားပါ။"</string>
+    <string name="widget_touch_hold_instruction" msgid="7360267776497592789">"ဝိဂျက်ကို ရွှေ့ရန် ထိထားပါ။"</string>
 </resources>

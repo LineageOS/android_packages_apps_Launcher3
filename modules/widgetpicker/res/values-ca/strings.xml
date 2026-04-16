@@ -42,5 +42,5 @@
     <string name="widget_create_button" msgid="4796864288412584818">"Crea"</string>
     <string name="widget_add_to_homescreen_button_label" msgid="5293968342564702338">"Afegeix a la pantalla d\'inici"</string>
     <string name="widget_cancel_pin_button_label" msgid="7548758841712339886">"Cancel·la"</string>
-    <string name="widget_touch_hold_instruction" msgid="7360267776497592789">"Mantén premut per moure un widget."</string>
+    <string name="widget_touch_hold_instruction" msgid="7360267776497592789">"Mantén premut un widget per moure\'l."</string>
 </resources>
