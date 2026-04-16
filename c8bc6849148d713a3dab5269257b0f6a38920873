@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6e007527_3b4c532b",
+        "filename": "res/values/strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 582,
+      "author": {
+        "id": 34519
+      },
+      "writtenOn": "2026-04-16T04:25:59Z",
+      "side": 1,
+      "message": "This could be removed as entirety is moved to lineage_strings.xml",
+      "revId": "c8bc6849148d713a3dab5269257b0f6a38920873",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
