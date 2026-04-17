@@ -18,24 +18,18 @@ package com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.android.launcher3.widgetpicker.shared.model.PickableWidget
 import com.android.launcher3.widgetpicker.shared.model.WidgetAppId
-import com.android.launcher3.widgetpicker.ui.CreateButtonProvider
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
 import com.android.launcher3.widgetpicker.ui.WidgetInteractionSource
 import com.android.launcher3.widgetpicker.ui.components.WidgetsGrid
 import com.android.launcher3.widgetpicker.ui.components.WidgetsSearchBar
-import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.LandingScreenDimensions.TopSearchRowItemSpacing
 import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.LandingScreenDimensions.WEIGHT_FILL_REMAINING_SPACE
 
 /**
@@ -46,7 +40,6 @@ import com.android.launcher3.widgetpicker.ui.fullcatalog.screens.landing.Landing
  * @param onWidgetInteraction callback for when user interacts with a widget.
  * @param showDragShadow indicates whether to show the drag shadow when user long presses on a
  *   widget to drag it.
- * @param createButtonProvider can be invoked to inject a button for widget creation.
  * @param viewModel the view model backing the state and data for the landing screen.
  */
 @Composable
@@ -55,23 +48,18 @@ fun LandingScreen(
     onEnterSearchMode: () -> Unit,
     onWidgetInteraction: (WidgetInteractionInfo) -> Unit,
     showDragShadow: Boolean,
-    createButtonProvider: CreateButtonProvider,
     viewModel: LandingScreenViewModel,
 ) {
     val browseState = viewModel.browseWidgetsState
 
     if (browseState is BrowseWidgetsState.Data) {
         val topSearchRow: @Composable () -> Unit =
-            remember(viewModel.customWidget) {
-                {
-                    TopSearchRow(
-                        widget = viewModel.customWidget,
-                        createButtonProvider = createButtonProvider,
-                        resetSectionSelections = viewModel::resetSelections,
-                        onEnterSearchMode = onEnterSearchMode,
-                        onWidgetInteraction = onWidgetInteraction,
-                    )
-                }
+            {
+                TopSearchRow(
+                    resetSectionSelections = viewModel::resetSelections,
+                    onEnterSearchMode = onEnterSearchMode,
+                    onWidgetInteraction = onWidgetInteraction,
+                )
             }
 
         LandingScreen(
@@ -97,8 +85,6 @@ fun LandingScreen(
 
 @Composable
 private fun TopSearchRow(
-    widget: PickableWidget?,
-    createButtonProvider: CreateButtonProvider,
     resetSectionSelections: () -> Unit,
     onEnterSearchMode: () -> Unit,
     onWidgetInteraction: (WidgetInteractionInfo) -> Unit,
@@ -116,20 +102,6 @@ private fun TopSearchRow(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        widget?.let {
-            Spacer(modifier = Modifier.width(TopSearchRowItemSpacing))
-            createButtonProvider.CreateButton(
-                modifier = Modifier,
-                onClick = {
-                    onWidgetInteraction(
-                        WidgetInteractionInfo.WidgetAddInfo(
-                            source = WidgetInteractionSource.CREATE_BUTTON,
-                            widgetInfo = widget.widgetInfo,
-                        )
-                    )
-                },
             )
         }
     }

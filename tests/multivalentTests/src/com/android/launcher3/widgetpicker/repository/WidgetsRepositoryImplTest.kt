@@ -65,9 +65,6 @@ import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository
 import com.android.launcher3.widgetpicker.data.repository.WidgetsRepository.InitializationOptions
 import com.android.launcher3.widgetpicker.datasource.FeaturedWidgetsDataSource
 import com.android.launcher3.widgetpicker.datasource.InMemoryWidgetSearchAlgorithm
-import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProvider
-import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProviderImpl
-import com.android.launcher3.widgetpicker.datasource.WidgetCreatorAppPackageProviderImpl.Companion.WIDGET_CREATE_ACTION
 import com.android.launcher3.widgetpicker.shared.model.PickableWidget
 import com.android.launcher3.widgetpicker.shared.model.WidgetApp
 import com.android.launcher3.widgetpicker.shared.model.WidgetAppId
@@ -137,14 +134,11 @@ class WidgetsRepositoryImplTest {
     private lateinit var launcherApps: LauncherApps
     private lateinit var generatedPreview: RemoteViews
 
-    private lateinit var mWidgetCreatorAppPackageProvider: WidgetCreatorAppPackageProvider
-
     private lateinit var underTest: WidgetsRepository
 
     @Before
     fun setup() {
         idp = InvariantDeviceProfile.INSTANCE[uiContext]
-        mWidgetCreatorAppPackageProvider = WidgetCreatorAppPackageProviderImpl(context)
 
         underTest =
             WidgetsRepositoryImpl(
@@ -154,7 +148,6 @@ class WidgetsRepositoryImplTest {
                 featuredWidgetsDataSource = FakeFeaturedDataSource,
                 searchAlgorithm = InMemoryWidgetSearchAlgorithm(testDispatcher),
                 backgroundContext = testDispatcher,
-                widgetCreatorAppPackageProvider = mWidgetCreatorAppPackageProvider,
                 databaseWidgetPreviewLoader =
                     DatabaseWidgetPreviewLoader(context, idp, iconCacheMock),
             )
@@ -405,53 +398,6 @@ class WidgetsRepositoryImplTest {
         }
 
     @Test
-    fun getCustomWidget_returnsPickableWidget() =
-        testScope.runTest {
-            context.packageManager.mockWidgetCreatorActivity(pkg = APP_1_PACKAGE_NAME)
-            underTest.initialize()
-            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-
-            val result = underTest.getCustomWidget()
-
-            assertThat(result).isNotNull()
-            assertThat(result?.id).isEqualTo(WidgetId(App1Widget1ProviderName, user))
-        }
-
-    @Test
-    fun getCustomWidget_noWidgetInCreatorApp_returnsNull() =
-        testScope.runTest {
-            context.packageManager.mockWidgetCreatorActivity(pkg = "com.unknown")
-            underTest.initialize()
-            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-
-            val result = underTest.getCustomWidget()
-
-            assertThat(result).isNull()
-        }
-
-    @Test
-    fun getCustomWidget_noMatchingActivity_returnsNull() =
-        testScope.runTest {
-            context.packageManager.mockWidgetCreatorActivity(pkg = null)
-            underTest.initialize()
-            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-
-            val result = underTest.getCustomWidget()
-
-            assertThat(result).isNull()
-        }
-
-    @Test
-    fun getCustomWidget_noWidgetsInitialized_returnsNull() =
-        testScope.runTest {
-            TestUtil.runOnExecutorSync(Executors.MODEL_EXECUTOR) {}
-
-            val result = underTest.getCustomWidget()
-
-            assertThat(result).isNull()
-        }
-
-    @Test
     fun getWidgetPreview_widgetInfoNotAvailable_returnsPlaceholder() =
         testScope.runTest {
             underTest.initialize()
@@ -611,25 +557,5 @@ class WidgetsRepositoryImplTest {
                     eligibleApps = emptyList()
                 }
             }
-    }
-
-    private fun PackageManager.mockWidgetCreatorActivity(pkg: String?) {
-        val resolveInfo =
-            pkg?.let {
-                ResolveInfo().apply {
-                    activityInfo =
-                        ActivityInfo().apply {
-                            packageName = pkg
-                            name = "ConfigActivity"
-                        }
-                }
-            } ?: return
-
-        doReturn(listOf(resolveInfo))
-            .whenever(this)
-            .queryIntentActivities(
-                argThat<Intent> { action == WIDGET_CREATE_ACTION },
-                ArgumentMatchers.eq(PackageManager.MATCH_SYSTEM_ONLY),
-            )
     }
 }

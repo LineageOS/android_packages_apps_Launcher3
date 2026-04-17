@@ -20,16 +20,8 @@ import android.platform.test.rule.AllowedDevices
 import android.platform.test.rule.DeviceProduct
 import android.platform.test.rule.LimitDevicesRule
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -63,9 +55,6 @@ import com.android.launcher3.widgetpicker.repository.FakeWidgetUsersRepository
 import com.android.launcher3.widgetpicker.repository.FakeWidgetsRepository
 import com.android.launcher3.widgetpicker.shared.model.WidgetHostInfo
 import com.android.launcher3.widgetpicker.shared.model.WidgetUserProfiles
-import com.android.launcher3.widgetpicker.shared.model.isAppWidget
-import com.android.launcher3.widgetpicker.ui.CreateButtonProvider
-import com.android.launcher3.widgetpicker.ui.WidgetInteractionInfo
 import com.android.launcher3.widgetpicker.ui.rememberViewModel
 import com.android.launcher3.widgetpicker.ui.theme.WidgetPickerTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -98,8 +87,6 @@ class LandingScreenTwoPaneTest {
     private lateinit var browseTabLabel: String
     private val featuredWidgetA = PERSONAL_TEST_APPS[0].widgets[0]
     private val featuredWidgetB = WORK_TEST_APPS[0].widgets[0]
-
-    private val customWidget = PERSONAL_TEST_APPS[0].widgets[0]
 
     @Before
     fun setUp() {
@@ -138,28 +125,15 @@ class LandingScreenTwoPaneTest {
     @Composable
     private fun TwoPaneTestContent() {
         val viewModel = rememberViewModel { viewModel }
-        var tappedCreate by remember { mutableStateOf(false) }
 
         WidgetPickerTheme {
             LandingScreen(
                 isCompact = false,
-                createButtonProvider = remember { CreateButtonProvider() },
                 onEnterSearchMode = {},
-                onWidgetInteraction = {
-                    if (it is WidgetInteractionInfo.WidgetAddInfo) {
-                        val widgetInfo = it.widgetInfo
-                        if (widgetInfo.isAppWidget() && widgetInfo == customWidget.widgetInfo) {
-                            tappedCreate = true
-                        }
-                    }
-                },
+                onWidgetInteraction = {},
                 showDragShadow = true,
                 viewModel = viewModel,
             )
-        }
-
-        if (tappedCreate) {
-            Box(modifier = Modifier.fillMaxSize()) { Text(CREATE_BTN_CLICK_SUCCESS) }
         }
 
         LaunchedEffect(Unit) { viewModel.onUiReady() }
@@ -398,39 +372,4 @@ class LandingScreenTwoPaneTest {
                 .assertIsNotDisplayed()
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun hasCustomWidget_showsCreateButton() =
-        testScope.runTest {
-            widgetsRepository.seedCustomWidget(customWidget.id)
-
-            composeTestRule.setContent { TwoPaneTestContent() }
-
-            runCurrent()
-            composeTestRule.waitForIdle()
-
-            composeTestRule.onNode(hasText(CREATE_BTN_TEXT)).assertIsDisplayed().performClick()
-
-            runCurrent()
-            composeTestRule.waitForIdle()
-
-            composeTestRule.onNode(hasText(CREATE_BTN_CLICK_SUCCESS)).assertIsDisplayed()
-        }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun noCustomWidget_noCreateButton() =
-        testScope.runTest {
-            composeTestRule.setContent { TwoPaneTestContent() }
-
-            runCurrent()
-            composeTestRule.waitForIdle()
-
-            composeTestRule.onNode(hasText(CREATE_BTN_TEXT)).assertDoesNotExist()
-        }
-
-    companion object {
-        private const val CREATE_BTN_CLICK_SUCCESS = "Tapped create"
-        private const val CREATE_BTN_TEXT = "Create"
-    }
 }

@@ -226,7 +226,6 @@ android_library {
     plugins: ["dagger2-compiler"],
     min_sdk_version: min_launcher3_sdk_version,
     srcs: [
-        "src/com/android/launcher3/widgetpicker/ui/CreateButtonProvider.kt",
         "src/com/android/launcher3/widgetpicker/ui/ViewModel.kt",
         "src/com/android/launcher3/widgetpicker/ui/fullcatalog/FullWidgetsCatalog.kt",
         "src/com/android/launcher3/widgetpicker/ui/fullcatalog/FullWidgetsCatalogViewModel.kt",

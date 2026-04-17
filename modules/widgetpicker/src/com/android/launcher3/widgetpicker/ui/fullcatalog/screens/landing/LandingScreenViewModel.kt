@@ -70,10 +70,6 @@ constructor(
     private var uiReady by mutableStateOf(false)
     private var pendingUpdate = AtomicReference<(() -> Unit)?>(null)
 
-    /** A widget that can be added directly from the button displayed at top of screen. */
-    var customWidget by mutableStateOf<PickableWidget?>(null)
-        private set
-
     /** Section within the landing screen that is currently showing. */
     var selectedSubSection by mutableStateOf(LandingScreenSubSection.FEATURED)
         private set
@@ -161,10 +157,6 @@ constructor(
                 if (personalEntry == null) {
                     BrowseWidgetsState.NoData
                 } else {
-                    if (customWidget == null) {
-                        customWidget = widgetsInteractor.getCustomWidget()
-                    }
-
                     BrowseWidgetsState.Data(
                         personalProfile = personalEntry.key,
                         personalWidgetApps =
