@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "783f07cc_cba47cf2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 29080
+      },
+      "writtenOn": "2026-04-17T20:57:10Z",
+      "side": 1,
+      "message": "@giovanniricca@proton.me has tested:\n1. The original patch\n2. My refactored version\n3. The revert of the linked commit\n\nUnfortunately, the bug is still reproducible in all 3 cases (but apparently it becomes harder to reproduce it)",
+      "revId": "b14b88b1c06498f2d9878d823a25e09a4b46b021",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
