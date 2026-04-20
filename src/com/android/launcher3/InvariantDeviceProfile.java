@@ -557,7 +557,7 @@ public class InvariantDeviceProfile {
     }
 
     /** Updates IDP using the provided context. Notifies listeners of change. */
-    private void onConfigChanged() {
+    public void onConfigChanged() {
         Object[] oldState = toModelState();
 
         // Re-init grid
@@ -862,10 +862,27 @@ public class InvariantDeviceProfile {
      * Currently we support: all apps row / column count.
      */
     private void applyPartnerDeviceProfileOverrides(Context context, DisplayMetrics dm) {
-        Partner p = Partner.get(context.getPackageManager());
-        if (p == null) {
+    Context safeContext = context.createDeviceProtectedStorageContext();
+    android.content.SharedPreferences prefs = safeContext.getSharedPreferences(
+            LauncherFiles.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
+    String rowVal = prefs.getString("custom_grid_rows", "5");
+    String colVal = prefs.getString("custom_grid_cols", "5");
+    try {
+        int customRows = Integer.parseInt(rowVal);
+        int customCols = Integer.parseInt(colVal);
+        if (customRows > 0 && customCols > 0) {
+            this.numRows = customRows;
+            this.numColumns = customCols;
+            this.dbFile = "launcher_custom_" + customRows + "_" + customCols + ".db";
             return;
         }
+    } catch (NumberFormatException e) {
+        Log.e(TAG, "Failed to parse custom grid: " + rowVal + "x" + colVal);
+    }
+
+    // Original Fallback Logic
+    Partner p = Partner.get(context.getPackageManager());
+        if (p == null) return;
         try {
             int numRows = p.getIntValue(RES_GRID_NUM_ROWS, -1);
             int numColumns = p.getIntValue(RES_GRID_NUM_COLUMNS, -1);
