@@ -110,4 +110,20 @@
         android:defaultValue="true"
         android:persistent="true" />
 
+    <ListPreference
+        android:key="custom_grid_rows"
+        android:title="Home screen rows"
+        android:summary="%s rows"
+        android:entries="@array/grid_size_entries"
+        android:entryValues="@array/grid_size_values"
+        android:defaultValue="5" />
+
+    <ListPreference
+        android:key="custom_grid_cols"
+        android:title="Home screen columns"
+        android:summary="%s columns"
+        android:entries="@array/grid_size_entries"
+        android:entryValues="@array/grid_size_values"
+        android:defaultValue="5" />
+
 </androidx.preference.PreferenceScreen>
