@@ -73,4 +73,8 @@
     <string name="tapered_rect_shape_title">Tapered rect</string>
     <string name="teardrop_shape_title">Teardrop</string>
     <string name="rounded_rect_shape_title">Rounded rect</string>
+
+    <!-- Custom grid -->
+    <string name="homescreen_columns">Set the amount of home screen columns</string>
+    <string name="homescreen_rows">Set the amount of home screen rows</string>
 </resources>

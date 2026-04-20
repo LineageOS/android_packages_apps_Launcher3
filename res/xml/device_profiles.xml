@@ -384,4 +384,13 @@
 
     </grid-option>
 
+    <grid-option
+        launcher:name="custom_grid"
+        launcher:numRows="5"
+        launcher:numColumns="5"
+        launcher:dbFile="launcher_custom.db">
+        <display-option
+            launcher:canBeDefault="true" />
+    </grid-option>
+
 </profiles>
