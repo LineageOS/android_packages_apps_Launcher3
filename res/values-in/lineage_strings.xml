@@ -21,12 +21,25 @@
     <string name="title_show_google_app">Tampilkan aplikasi Google</string>
     <string name="msg_minus_one_on_left">Ketika Anda mengusap ke kanan dari layar utama</string>
     <string name="msg_minus_one_on_right">Ketika Anda mengusap ke kiri dari layar utama</string>
+    <string name="pref_themed_icons_title">Gunakan ikon bertema di laci aplikasi</string>
+    <string name="pref_themed_icons_summary">Ikuti ikon bertema yang digunakan di layar beranda</string>
     <string name="desktop_show_labels">Tampilkan label ikon pada desktop</string>
     <string name="drawer_show_labels">Sembunyikan label ikon di panel</string>
+    <string name="drawer_open_keyboard_title">Geser untuk mulai mencari</string>
+    <string name="drawer_open_keyboard_summary">Buka keyboard setiap kali laci aplikasi terlihat</string>
+    <string name="pref_sleep_gesture_title">Ketuk dua kali untuk tidur</string>
+    <string name="trust_apps_manager_name">Apl Tersembunyi &amp; Apl yang dilindungi</string>
+    <string name="trust_apps_auth_manager">Buka kunci untuk mengelola aplikasi yang disembunyikan dan dilindungi</string>
     <string name="trust_apps_auth_open_app">Autentikasi untuk membuka %1$s</string>
     <string name="trust_apps_loading">Memuat\u2026</string>
     <string name="trust_apps_no_lock_error">Silakan mengatur kunci layar aman untuk membatasi akses aplikasi</string>
     <string name="trust_apps_help">Bantuan</string>
+    <string name="trust_apps_info_hidden">Aplikasi tersembunyi beserta widgetnya akan disembunyikan dari laci aplikasi</string>
     <string name="trust_apps_info_protected">Aplikasi yang dilindungi memerlukan otentikasi untuk dibuka dari peluncur</string>
     <string name="pref_suggestions_title">Saran</string>
+    <string name="pref_suggestions_summary">Untuk laci aplikasi &amp; saran layar beranda</string>
+    <string name="squircle_shape_title">Persegi membulat</string>
+    <string name="tapered_rect_shape_title">Persegi panjang meruncing</string>
+    <string name="teardrop_shape_title">Tetesan air</string>
+    <string name="rounded_rect_shape_title">Persegi panjang membulat</string>
 </resources>

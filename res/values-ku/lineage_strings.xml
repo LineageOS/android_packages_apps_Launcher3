@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018-2019 The LineageOS Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <string name="settings_lock_layout_title">قوفڵکردنی ڕێکخستنی پەڕە[cite: 13]</string>
+    <string name="settings_lock_layout_summary_on">وێنۆچکە و وێجێتەکان ناتوانرێن زیاد بکرێن، لاببرێن یان بجوڵێنرێن لە پەڕەی سەرەکیدا[cite: 13]</string>
+    <string name="settings_lock_layout_summary_off">وێنۆچکە و وێجێتەکان دەتوانرێن زیاد بکرێن، لاببرێن یان بجوڵێنرێن لە پەڕەی سەرەکیدا[cite: 13]</string>
+    <string name="settings_edit_widgets_error">ناتوانرێت وێجێت بۆ پەڕەی سەرەکی زیاد بکرێت[cite: 13]</string>
+    <string name="title_show_google_app">نیشاندانی ئەپی Google[cite: 13]</string>
+    <string name="msg_minus_one_on_left">کاتێک لە پەڕەی سەرەکییەوە بەرەو لای ڕاست دەڕۆیت[cite: 13]</string>
+    <string name="msg_minus_one_on_right">کاتێک لە پەڕەی سەرەکییەوە بەرەو لای چەپ دەڕۆیت[cite: 13]</string>
+    <string name="pref_themed_icons_title">بەکارهێنانی وێنۆچکە ڕووکارکراوەکان لە لیستی ئەپەکاندا[cite: 13]</string>
+    <string name="pref_themed_icons_summary">بەکاربردنی هەمان شێوازی وێنۆچکە ڕەنگاوڕەنگەکان کە لە پەڕەی سەرەکیدا هەن[cite: 13]</string>
+    <string name="desktop_show_labels">نیشاندانی ناوی وێنۆچکەکان لەسەر ڕوونمای سەرەکی[cite: 13]</string>
+    <string name="drawer_show_labels">نیشاندانی ناوی وێنۆچکەکان لە ناو لیستی ئەپەکاندا[cite: 13]</string>
+    <string name="drawer_open_keyboard_title">خلیسکاندن بۆ دەستپێکردنی گەڕان[cite: 13]</string>
+    <string name="drawer_open_keyboard_summary">کردنەوەی تەختەکلیل هەرکاتێک لیستی ئەپەکان دەردەکەوێت[cite: 13]</string>
+    <string name="pref_sleep_gesture_title">دووجار داگرتن بۆ خەواندن[cite: 13]</string>
+    <string name="pref_sleep_gesture_summary">دووجار داگرتن لەسەر شوێنی بەتاڵی پەڕەی سەرەکی بۆ کوژاندنەوەی ڕوونما[cite: 13]</string>
+    <string name="trust_apps_manager_name">ئەپە شاردراوە و پارێزراوەکان[cite: 13]</string>
+    <string name="trust_apps_auth_manager">بۆ بەڕێوەبردنی ئەپە شاردراوە و پارێزراوەکان پشکنینی ناسنامە ئەنجام بدە[cite: 13]</string>
+    <string name="trust_apps_auth_open_app">بۆ کردنەوەی %1$s ناسنامەکەت بپشکنە[cite: 13]</string>
+    <string name="trust_apps_loading">بار دەکرێت\u2026[cite: 13]</string>
+    <string name="trust_apps_no_lock_error">تکایە قوفڵێکی ڕوونمای پارێزراو دابنێ بۆ سنووردارکردنی دەستگەیشتن بە ئەپەکان[cite: 13]</string>
+    <string name="trust_apps_help">یارمەتی[cite: 13]</string>
+    <string name="trust_apps_info_hidden">ئەپە شاردراوەکان و وێجێتەکانیان لە ناو لیستی ئەپەکاندا نیشان نادرێن[cite: 13]</string>
+    <string name="trust_apps_info_protected">ئەپە پارێزراوەکان پێویستیان بە پشکنینی ناسنامە هەیە بۆ کردنەوەیان[cite: 13]</string>
+    <string name="pref_suggestions_title">پێشنیارەکان[cite: 13]</string>
+    <string name="pref_suggestions_summary">بۆ پێشنیارکردنی ئەپەکان لە لیستی ئەپەکان و پەڕەی سەرەکیدا[cite: 13]</string>
+    <string name="pebble_shape_title">بەردەخڕ[cite: 13]</string>
+    <string name="vessel_shape_title">بەلەم[cite: 13]</string>
+    <string name="pure_square_shape_title">چوارگۆشەی ڕێک[cite: 13]</string>
+    <string name="squircle_shape_title">چوارگۆشەی لێوارخڕ[cite: 13]</string>
+    <string name="tapered_rect_shape_title">لاکێشەی باریکبووەوە[cite: 13]</string>
+    <string name="teardrop_shape_title">دڵۆپە[cite: 13]</string>
+    <string name="rounded_rect_shape_title">لاکێشەی لێوارخڕ[cite: 13]</string>
+</resources>
