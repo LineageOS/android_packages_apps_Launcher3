@@ -22,13 +22,17 @@ import android.text.TextWatcher;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.ExtendedEditText;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.allapps.BaseAllAppsAdapter.AdapterItem;
+import com.android.launcher3.allapps.SearchRecyclerView;
+import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.search.SearchAlgorithm;
 import com.android.launcher3.search.SearchCallback;
 import com.android.launcher3.views.ActivityContext;
@@ -127,7 +131,21 @@ public class AllAppsSearchBarController
                 Log.i(TAG, "User tapped ime search button");
             }
             // selectFocusedView should return SearchTargetEvent that is passed onto onClick
-            return mLauncher.getAppsView().getMainAdapterProvider().launchHighlightedItem();
+            if (mLauncher.getAppsView().getMainAdapterProvider().launchHighlightedItem()) {
+                return true;
+            }
+
+            SearchRecyclerView rv = mLauncher.getAppsView().getSearchRecyclerView();
+            if (rv != null && rv.getChildCount() > 0) {
+                for (int i = 0; i < rv.getChildCount(); i++) {
+                    View child = rv.getChildAt(i);
+                    if (child instanceof BubbleTextView && child.getTag() instanceof ItemInfo) {
+                        ItemInfo itemInfo = (ItemInfo) child.getTag();
+                        return mLauncher.startActivitySafely(child, itemInfo.getIntent(), itemInfo) != null;
+                    }
+                }
+            }
+            return false;
         }
         return false;
     }
