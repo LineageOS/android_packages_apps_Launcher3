@@ -27,7 +27,7 @@
     <string name="drawer_show_labels">نیشاندانی ناوی وێنۆچکەکان لە ناو لیستی بەرنامەکاندا[cite: 13]</string>
     <string name="drawer_open_keyboard_title">خلیسکاندن بۆ دەستپێکردنی گەڕان[cite: 13]</string>
     <string name="drawer_open_keyboard_summary">کردنەوەی تەختەکلیل هەرکاتێک لیستی بەرنامەکان دەردەکەوێت[cite: 13]</string>
-    <string name="pref_sleep_gesture_title">دووجار داگرتن بۆ خەواندن[cite: 13]</string>
+    <string name="pref_sleep_gesture_title">دووجار داگرتن بۆ دواخستن[cite: 13]</string>
     <string name="pref_sleep_gesture_summary">دووجار داگرتن لەسەر شوێنی بەتاڵی پەڕەی سەرەکی بۆ کوژاندنەوەی ڕوونما[cite: 13]</string>
     <string name="trust_apps_manager_name">بەرنامە شاردراوە و پارێزراوەکان[cite: 13]</string>
     <string name="trust_apps_auth_manager">بۆ بەڕێوەبردنی بەرنامە شاردراوە و پارێزراوەکان پشکنینی ناسنامە ئەنجام بدە[cite: 13]</string>
