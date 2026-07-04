@@ -127,6 +127,8 @@ public class DeviceProfile {
     // Hotseat
     private HotseatProfile mHotseatProfile;
 
+    private final boolean mIsHotseatQsbEnabled;
+
     private SysuiProfile mSysuiProfile;
 
     // Widgets
@@ -177,6 +179,7 @@ public class DeviceProfile {
         );
         mHotseatProfile = new HotseatProfile(false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, false);
+        mIsHotseatQsbEnabled = false;
         mTaskbarProfile = new TaskbarProfile(0, 0, 0, 0, 0, false, false, false);
         mFolderProfile = new FolderProfile(0, 0, 0, 0, 0, new Point(), 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0);
@@ -230,6 +233,8 @@ public class DeviceProfile {
                         : Configuration.ORIENTATION_PORTRAIT,
                 mDeviceProperties.createWindowBounds());
 
+        mIsHotseatQsbEnabled = LauncherPrefs.isHotseatQsbEnabled(context);
+
         final Resources res = context.getResources();
 
         overviewProfile = OverviewProfile.Factory.createOverviewProfile(res);
@@ -273,7 +278,7 @@ public class DeviceProfile {
                     responsiveAspectRatio, mDeviceProperties.getHeightPx());
         }
 
-        int qsbHeight = res.getDimensionPixelSize(R.dimen.qsb_widget_height);
+        int qsbHeight = mIsHotseatQsbEnabled ? res.getDimensionPixelSize(R.dimen.qsb_widget_height) : 0;
 
         HotseatProfileInitialValues hotseatProfileInitialValues =
                 HotseatProfileInitialValues.Factory.createHotseatProfileInitialValues(
@@ -838,7 +843,8 @@ public class DeviceProfile {
             // This is needed because of b/235886078 since QSB needs to span to the icon borders
             int iconExtraSpacePx = getWorkspaceProfile().getIconSizePx() - getIconVisibleSizePx(
                     getWorkspaceProfile().getIconSizePx());
-            int qsbWidth = getAdditionalQsbSpace() + iconExtraSpacePx / 2;
+            int qsbWidth = (mIsHotseatQsbEnabled ? getAdditionalQsbSpace() : 0)
+                    + iconExtraSpacePx / 2;
 
             int availableWidthPxForHotseat = mDeviceProperties.getAvailableWidthPx() - Math.abs(
                     mWorkspaceProfile.getWorkspacePadding().width())
@@ -882,7 +888,9 @@ public class DeviceProfile {
                 startSpacing = (mDeviceProperties.getAvailableWidthPx() - hotseatWidth) / 2;
                 endSpacing = startSpacing;
             }
-            startSpacing += getAdditionalQsbSpace();
+            if (mIsHotseatQsbEnabled) {
+                startSpacing += getAdditionalQsbSpace();
+            }
 
             hotseatBarPadding.top = hotseatBarTopPadding;
             hotseatBarPadding.bottom = hotseatBarBottomPadding;
@@ -900,7 +908,7 @@ public class DeviceProfile {
                     getWorkspaceProfile().getIconSizePx());
             int sideSpacing =
                     (mDeviceProperties.getAvailableWidthPx() - (
-                            mHotseatProfile.getQsbWidth() + iconExtraSpacePx))
+                            getHotseatQsbWidth() + iconExtraSpacePx))
                             / 2;
             hotseatBarPadding.set(sideSpacing,
                     0,
@@ -966,8 +974,25 @@ public class DeviceProfile {
     }
 
     private int getAdditionalQsbSpace() {
+        if (!mIsHotseatQsbEnabled) return 0;
         return mHotseatProfile.isQsbInline() ? mHotseatProfile.getQsbWidth()
                 + mHotseatProfile.getBorderSpace() : 0;
+    }
+
+    public int getHotseatQsbWidth() {
+        if (!mIsHotseatQsbEnabled) return 0;
+        int iconExtraSpacePx = getWorkspaceProfile().getIconSizePx() - getIconVisibleSizePx(
+                getWorkspaceProfile().getIconSizePx());
+        if (mHotseatProfile.isQsbInline()) {
+            int columns = getPanelCount() * inv.numColumns;
+            return getWorkspaceProfile().getIconToIconWidthForColumns(columns)
+                    - getWorkspaceProfile().getIconSizePx() * mHotseatProfile.getNumShownIcons()
+                    - mHotseatProfile.getBorderSpace() * mHotseatProfile.getNumShownIcons()
+                    - iconExtraSpacePx;
+        } else {
+            return getWorkspaceProfile().getIconToIconWidthForColumns(
+                    mHotseatProfile.getColumnSpan()) - iconExtraSpacePx;
+        }
     }
 
     /**
@@ -986,6 +1011,7 @@ public class DeviceProfile {
      * Returns the number of pixels the QSB is translated from the bottom of the screen.
      */
     public int getQsbOffsetY() {
+        if (!mIsHotseatQsbEnabled) return 0;
         if (mHotseatProfile.isQsbInline()) {
             return getHotseatBarBottomPadding()
                     - ((getHotseatProfile().getQsbHeight()
@@ -998,10 +1024,14 @@ public class DeviceProfile {
         }
     }
 
+    public boolean isHotseatQsbEnabled() {
+        return mIsHotseatQsbEnabled;
+    }
+
     /**
      * Returns the number of pixels the hotseat is translated from the bottom of the screen.
      */
-    private int getHotseatBarBottomPadding() {
+    public int getHotseatBarBottomPadding() {
         // QSB on top or inline
         if (mDeviceProperties.getTaskbarConfiguration().isTaskbarPresent()
                 || mHotseatProfile.isQsbInline()) {
