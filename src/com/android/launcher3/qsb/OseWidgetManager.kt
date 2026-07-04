@@ -32,6 +32,8 @@ import com.android.launcher3.BaseActivity
 import com.android.launcher3.InvariantDeviceProfile
 import com.android.launcher3.InvariantDeviceProfile.OnIDPChangeListener
 import com.android.launcher3.LauncherConstants.ActivityCodes.REQUEST_RECONFIGURE_APPWIDGET
+import com.android.launcher3.LauncherPrefChangeListener
+import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
 import com.android.launcher3.dagger.ApplicationContext
 import com.android.launcher3.dagger.LauncherAppSingleton
@@ -69,6 +71,8 @@ constructor(
 
     private val executor = OSE_LOOPER
 
+    private var lastOseInfo: OSEInfo? = null
+
     init {
         tracker.addCloseable(widgetHost.addCallbacks(mutableState))
         tracker.addCloseable(oseManager.oseInfo.forEach(executor, this::handleOseInfoUpdate))
@@ -77,9 +81,27 @@ constructor(
         idp.addOnChangeListener(idpListener)
         tracker.addCloseable(themePreference.forEach(executor) { updateWidgetSizeAsync() })
         tracker.addCloseable { idp.removeOnChangeListener(idpListener) }
+
+        try {
+            val prefs = LauncherPrefs.get(context)
+            val listener = LauncherPrefChangeListener { key ->
+                if (key == LauncherPrefs.SHOW_HOTSEAT_QSB.sharedPrefKey) {
+                    executor.execute { handleQsbPreferenceChange() }
+                }
+            }
+            prefs.addListener(listener, LauncherPrefs.SHOW_HOTSEAT_QSB)
+            tracker.addCloseable { prefs.removeListener(listener, LauncherPrefs.SHOW_HOTSEAT_QSB) }
+        } catch (e: IllegalStateException) {}
     }
 
     private fun handleOseInfoUpdate(info: OSEInfo) {
+        lastOseInfo = info
+
+        if (!LauncherPrefs.isHotseatQsbEnabled(context)) {
+            releaseActiveWidget()
+            return
+        }
+
         // If the package is null, leave it to the current value as the OSEManager
         // may not have initialized yet
         val providerPkg =
@@ -126,6 +148,19 @@ constructor(
             widgetHost.setActiveWidget(INVALID_APPWIDGET_ID, null)
             dispatchNullValues()
         }
+    }
+
+    private fun handleQsbPreferenceChange() {
+        if (LauncherPrefs.isHotseatQsbEnabled(context)) {
+            lastOseInfo?.let { handleOseInfoUpdate(it) }
+        } else {
+            releaseActiveWidget()
+        }
+    }
+
+    private fun releaseActiveWidget() {
+        widgetHost.setActiveWidget(INVALID_APPWIDGET_ID, null)
+        dispatchNullValues()
     }
 
     private fun updateWidgetSizeAsync() {

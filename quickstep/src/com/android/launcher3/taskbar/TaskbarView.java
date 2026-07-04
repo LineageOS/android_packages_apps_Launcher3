@@ -186,7 +186,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
      */
     private boolean mAddedDividerForRecents;
 
-    private final View mQsb;
+    private final @Nullable View mQsb;
 
     private final float mTransientTaskbarMinWidth;
 
@@ -233,7 +233,11 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
         mTransientTaskbarMinWidth = resources.getDimension(R.dimen.transient_taskbar_min_width);
 
         // TODO: Disable touch events on QSB otherwise it can crash.
-        mQsb = LauncherComponentProvider.get(context).getQsbWidgetFactory().createView(this);
+        if (mActivityContext.getDeviceProfile().isHotseatQsbEnabled()) {
+            mQsb = LauncherComponentProvider.get(context).getQsbWidgetFactory().createView(this);
+        } else {
+            mQsb = null;
+        }
         onDeviceProfileChanged(mActivityContext.getDeviceProfile());
 
         final TaskbarSpecsEvaluator specsEvaluator = mActivityContext.getTaskbarSpecsEvaluator();
@@ -365,7 +369,8 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
             numStaticViews++;
         }
 
-        if (mActivityContext.getDeviceProfile().getHotseatProfile().isQsbInline()) {
+        if (mQsb != null
+                && mActivityContext.getDeviceProfile().getHotseatProfile().isQsbInline()) {
             addView(mQsb, mIsRtl ? numStaticViews : 0);
             mQsb.setVisibility(View.INVISIBLE);
             numStaticViews++;
@@ -397,10 +402,12 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     @Override
     public void onDeviceProfileChanged(DeviceProfile dp) {
         mShouldTryStartAlign = mActivityContext.shouldStartAlignTaskbar();
-        ViewGroup.LayoutParams lp = mQsb.getLayoutParams();
-        if (lp != null) {
-            lp.width = dp.getHotseatProfile().getQsbWidth();
-            lp.height = dp.getHotseatProfile().getQsbHeight();
+        if (mQsb != null) {
+            ViewGroup.LayoutParams lp = mQsb.getLayoutParams();
+            if (lp != null) {
+                lp.width = dp.getHotseatProfile().getQsbWidth();
+                lp.height = dp.getHotseatProfile().getQsbHeight();
+            }
         }
     }
 
@@ -1801,8 +1808,9 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
     }
 
     /**
-     * Returns the QSB in the taskbar.
+     * Returns the QSB in the taskbar, or null if QSB is not enabled.
      */
+    @Nullable
     public View getQsb() {
         return mQsb;
     }
