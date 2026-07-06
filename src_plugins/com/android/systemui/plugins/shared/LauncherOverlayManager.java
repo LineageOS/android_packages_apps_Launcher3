@@ -24,6 +24,11 @@ import java.io.PrintWriter;
  */
 public interface LauncherOverlayManager {
 
+    default void onDeviceProvideChanged() { }
+
+    default void onAttachedToWindow() { }
+    default void onDetachedFromWindow() { }
+
     default void dump(String prefix, PrintWriter w) { }
 
     default void openOverlay() { }
@@ -33,6 +38,14 @@ public interface LauncherOverlayManager {
     }
 
     default void hideOverlay(int duration) { }
+
+    default void onActivityStarted() { }
+
+    default void onActivityResumed() { }
+
+    default void onActivityPaused() { }
+
+    default void onActivityStopped() { }
 
     default void onActivityDestroyed() { }
 
