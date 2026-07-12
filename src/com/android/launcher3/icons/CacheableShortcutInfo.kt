@@ -65,14 +65,35 @@ constructor(
         @JvmStatic
         fun getIcon(context: Context, shortcutInfo: ShortcutInfo, density: Int): Drawable? {
             if (!BuildConfig.WIDGETS_ENABLED) {
+                Log.e(
+                    TAG,
+                    "getIcon: widgets disabled pkg=${shortcutInfo.getPackage()} " +
+                        "id=${shortcutInfo.id} activity=${shortcutInfo.activity} density=$density"
+                )
                 return null
             }
+
             try {
-                return context
-                    .getSystemService(LauncherApps::class.java)
-                    .getShortcutIconDrawable(shortcutInfo, density)
+                val drawable =
+                    context.getSystemService(LauncherApps::class.java)
+                        .getShortcutIconDrawable(shortcutInfo, density)
+
+                Log.e(
+                    TAG,
+                    "getIcon: pkg=${shortcutInfo.getPackage()} id=${shortcutInfo.id} " +
+                        "activity=${shortcutInfo.activity} density=$density " +
+                        "drawable=${drawable?.javaClass?.name} " +
+                        "intrinsic=${drawable?.intrinsicWidth}x${drawable?.intrinsicHeight}"
+                )
+
+                return drawable
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to get shortcut icon", e)
+                Log.e(
+                    TAG,
+                    "getIcon: failed pkg=${shortcutInfo.getPackage()} id=${shortcutInfo.id} " +
+                        "activity=${shortcutInfo.activity} density=$density",
+                    e
+                )
                 return null
             }
         }
@@ -106,6 +127,8 @@ constructor(
 /** Caching logic for CacheableShortcutInfo. */
 object CacheableShortcutCachingLogic : CachingLogic<CacheableShortcutInfo> {
 
+    private const val TAG = "CacheableShortcutCachingLogic"
+
     override fun getComponent(info: CacheableShortcutInfo): ComponentName =
         ShortcutKey.fromInfo(info.shortcutInfo).componentName
 
@@ -116,29 +139,49 @@ object CacheableShortcutCachingLogic : CachingLogic<CacheableShortcutInfo> {
     override fun getApplicationInfo(info: CacheableShortcutInfo) = info.appInfo.getInfo()
 
     override fun loadIcon(context: Context, cache: BaseIconCache, info: CacheableShortcutInfo) =
-        LauncherIcons.obtain(context).use { li ->
+    LauncherIcons.obtain(context).use { li ->
+        Log.e(
+            TAG,
+            "loadIcon: pkg=${info.shortcutInfo.getPackage()} id=${info.shortcutInfo.id} " +
+                "activity=${info.shortcutInfo.activity} user=${info.shortcutInfo.userHandle}"
+        )
+
+        val shortcutDrawable =
             CacheableShortcutInfo.getIcon(
-                    context,
-                    info.shortcutInfo,
-                    LauncherAppState.getIDP(context).fillResIconDpi,
-                )
-                ?.let { d ->
-                    li.createBadgedIconBitmap(
-                        d,
-                        IconOptions()
-                            .setExtractedColor(Themes.getColorAccent(context))
-                            .setSourceHint(
-                                getSourceHint(info, cache)
-                                    .copy(
-                                        isFileDrawable =
-                                            ApiWrapper.INSTANCE[context].isFileDrawable(
-                                                info.shortcutInfo
-                                            )
-                                    )
-                            ),
-                    )
-                } ?: info.fallbackIconProvider.invoke(li) ?: BitmapInfo.LOW_RES_INFO
+                context,
+                info.shortcutInfo,
+                LauncherAppState.getIDP(context).fillResIconDpi,
+            )
+
+        Log.e(
+            TAG,
+            "loadIcon: shortcutDrawable=" +
+                shortcutDrawable?.javaClass?.name +
+                " intrinsic=" +
+                shortcutDrawable?.intrinsicWidth +
+                "x" +
+                shortcutDrawable?.intrinsicHeight
+        )
+
+        shortcutDrawable?.let { d ->
+            li.createBadgedIconBitmap(
+                d,
+                IconOptions()
+                    .setExtractedColor(Themes.getColorAccent(context))
+                    .setSourceHint(
+                        getSourceHint(info, cache).copy(
+                            isFileDrawable =
+                                ApiWrapper.INSTANCE[context].isFileDrawable(
+                                    info.shortcutInfo
+                                )
+                        )
+                    ),
+            )
+        } ?: run {
+            Log.e(TAG, "loadIcon: shortcutDrawable null, using fallbackIconProvider")
+            info.fallbackIconProvider.invoke(li) ?: BitmapInfo.LOW_RES_INFO
         }
+    }
 
     override fun getFreshnessIdentifier(
         item: CacheableShortcutInfo,

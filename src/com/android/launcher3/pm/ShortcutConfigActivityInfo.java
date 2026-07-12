@@ -149,7 +149,14 @@ public abstract class ShortcutConfigActivityInfo implements CachedObject {
 
         @Override
         public Drawable getFullResIcon(BaseIconCache cache) {
-            return cache.getFullResIcon(mInfo.getActivityInfo());
+            Drawable icon = cache.getFullResIcon(mInfo.getActivityInfo());
+            Log.e(TAG, "getFullResIcon(VO): component=" + getComponent()
+                    + " label=" + mInfo.getLabel()
+                    + " drawable=" + icon
+                    + " class=" + (icon == null ? "null" : icon.getClass().getName())
+                    + " intrinsic=" + (icon == null ? -1 : icon.getIntrinsicWidth())
+                    + "x" + (icon == null ? -1 : icon.getIntrinsicHeight()));
+            return icon;
         }
 
         @Override
@@ -187,6 +194,11 @@ public abstract class ShortcutConfigActivityInfo implements CachedObject {
         for (UserHandle user : users) {
             for (LauncherActivityInfo activityInfo :
                     launcherApps.getShortcutConfigActivityList(packageName, user)) {
+                Log.e(TAG, "queryList: found shortcut-config activity="
+                        + activityInfo.getComponentName()
+                        + " user=" + user
+                        + " targetSdk="
+                        + activityInfo.getApplicationInfo().targetSdkVersion);
                 if (activityInfo.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.O) {
                     result.add(new ShortcutConfigActivityInfoVO(activityInfo));
                 }

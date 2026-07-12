@@ -23,8 +23,13 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
+import android.graphics.drawable.Drawable
+import android.util.Log
+import android.widget.FrameLayout
 import com.android.launcher3.BubbleTextView
 import com.android.launcher3.LauncherAppState
+import com.android.launcher3.Launcher
+import com.android.launcher3.LauncherState
 import com.android.launcher3.LauncherSettings.Favorites
 import com.android.launcher3.R
 import com.android.launcher3.apppairs.AppPairIcon
@@ -71,13 +76,14 @@ class ItemInflater<T>(
                 createShortcut(
                     info =
                         when (item) {
-                            is WorkspaceItemFactory -> item.makeWorkspaceItem(context)
                             is WorkspaceItemInfo -> item
+                            is WorkspaceItemFactory -> item.makeWorkspaceItem(context)
                             else -> return null
                         },
                     parent = parent,
                     container = container,
                 )
+
 
             Favorites.ITEM_TYPE_FOLDER ->
                 FolderIcon.inflateFolderAndIcon(

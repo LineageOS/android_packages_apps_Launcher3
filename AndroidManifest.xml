@@ -45,6 +45,10 @@
         android:supportsRtl="true"
         tools:replace="android:icon">
 
+        <meta-data
+            android:name="android.content.pm.shortcut"
+            android:resource="@xml/shortcuts" />
+        
         <!--
         Main launcher activity. When extending only change the name, and keep all the
         attributes and intent filters the same
@@ -92,5 +96,21 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".AllAppsShortcutConfigActivity"
+            android:exported="true"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:label="@string/all_apps_widget_label"
+            android:icon="@mipmap/all_apps_shortcut_icon"
+            android:roundIcon="@mipmap/all_apps_shortcut_icon"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
     </application>
 </manifest>

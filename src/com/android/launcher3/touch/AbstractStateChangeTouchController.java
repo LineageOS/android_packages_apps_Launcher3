@@ -48,6 +48,9 @@ import com.android.launcher3.states.StateAnimationConfig;
 import com.android.launcher3.util.FlingBlockCheck;
 import com.android.launcher3.util.TouchController;
 
+/** Added for changes to app drawer access */
+import com.android.launcher3.LauncherPrefs;
+
 /**
  * TouchController for handling state changes
  */
@@ -454,8 +457,13 @@ public abstract class AbstractStateChangeTouchController
         mCurrentAnimation = null;
     }
 
+    /** Added for changes to app drawer access */
     protected boolean shouldOpenAllApps(boolean isDragTowardPositive) {
+        if (LauncherPrefs.get(mLauncher.getApplicationContext()).get(LauncherPrefs.DISABLE_ALL_APPS_SWIPE)) {
+            return false;
+        }
         return (isDragTowardPositive && !mIsTrackpadReverseScroll)
-                || (!isDragTowardPositive && mIsTrackpadReverseScroll);
+            || (!isDragTowardPositive && mIsTrackpadReverseScroll);
     }
+
 }

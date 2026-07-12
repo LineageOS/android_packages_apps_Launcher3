@@ -73,4 +73,11 @@
     <string name="tapered_rect_shape_title">Tapered rect</string>
     <string name="teardrop_shape_title">Teardrop</string>
     <string name="rounded_rect_shape_title">Rounded rect</string>
+
+    <!-- New for app drawer access changes -->
+    <string name="pref_disable_all_apps_swipe_title">Disable app drawer swipe</string>
+    <string name="pref_disable_all_apps_swipe_summary">Disable the swipe up gesture to access the app drawer.</string>
+    <string name="pref_show_all_apps_button_title">Show app drawer button</string>
+    <string name="all_apps_widget_label">All Apps</string>
+    <string name="pref_show_all_apps_button_summary">Add a real app icon button to the hotseat to open the app drawer.</string>
 </resources>
