@@ -269,9 +269,17 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.shared.LauncherOverlayManager;
 import com.android.systemui.plugins.shared.LauncherOverlayManager.LauncherOverlayTouchProxy;
 
+import android.view.View;
+import android.view.Gravity;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+import com.android.launcher3.celllayout.CellLayoutLayoutParams;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -282,6 +290,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import android.net.Uri;
+import android.content.ContentValues;
+import android.util.Log;
+
 /**
  * Default launcher application.
  */
@@ -289,6 +301,8 @@ public class Launcher extends StatefulActivity<LauncherState>
         implements Callbacks, InvariantDeviceProfile.OnIDPChangeListener,
         PluginListener<LauncherOverlayPlugin> {
     public static final String TAG = "Launcher";
+
+    public static Launcher sLauncher;
 
     public static final ContextTracker.ActivityTracker<Launcher> ACTIVITY_TRACKER =
             new ContextTracker.ActivityTracker<>();
@@ -436,6 +450,9 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     @TargetApi(Build.VERSION_CODES.S)
     protected void onCreate(Bundle savedInstanceState) {
+        sLauncher = this; // Set the static reference
+        super.onCreate(savedInstanceState);
+
         TraceHelper.INSTANCE.beginSection(ON_CREATE_EVT);
         Trace.beginAsyncSection(DISPLAY_WORKSPACE_TRACE_METHOD_NAME, SINGLE_TRACE_COOKIE);
         Trace.beginAsyncSection(DISPLAY_ALL_APPS_TRACE_METHOD_NAME, SINGLE_TRACE_COOKIE);
@@ -1351,12 +1368,17 @@ public class Launcher extends StatefulActivity<LauncherState>
         int[] cellXY = mTmpAddItemCellCoordinates;
         CellLayout layout = getCellLayout(container, screenId);
 
+        final var pinRequest = PinRequestHelper.getPinItemRequest(data);
+        Log.e(TAG, "completeAddShortcut: data=" + data + " pinRequest=" + pinRequest);
+
         WorkspaceItemInfo info = PinRequestHelper.createWorkspaceItemFromPinItemRequest(
-                    this, PinRequestHelper.getPinItemRequest(data), 0);
+                    this, pinRequest, 0);
         if (info == null) {
             Log.e(TAG, "Unable to parse a valid shortcut result");
             return;
         }
+        Log.e(TAG, "completeAddShortcut: created WorkspaceItemInfo component="
+                + info.getTargetComponent() + " title=" + info.title);
 
         if (container < 0) {
             // Adding a shortcut to the Workspace.
@@ -1548,6 +1570,13 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
         TraceHelper.INSTANCE.beginSection(ON_NEW_INTENT_EVT);
         super.onNewIntent(intent);
+
+        if (intent != null && Intent.ACTION_ALL_APPS.equals(intent.getAction())) {
+            Log.e(TAG, "Launcher received ACTION_ALL_APPS - Opening Drawer");
+            if (getStateManager() != null) {
+                getStateManager().goToState(LauncherState.ALL_APPS, true, null);
+            }
+        }
 
         boolean alreadyOnHome = hasWindowFocus() && ((intent.getFlags() &
                 Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)

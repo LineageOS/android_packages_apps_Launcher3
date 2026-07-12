@@ -2986,6 +2986,10 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             // TODO(b/414409465) We could just create a new info making a copy with all the new
             //  needed values instead of choosing on each case what to modify.
             View view = mLauncher.getItemInflater().inflateItem(info, cellLayout, container);
+            if (view == null) {
+                Log.e(TAG, "Unable to inflate dropped item: " + info);
+                return;
+            }
             d.dragInfo = info = (ItemInfo) view.getTag();
 
             // First we find the cell nearest to point at which the item is
@@ -3050,7 +3054,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 CompletableFuture<Void> unused =
                         results.getFirst().handle((result, throwable) -> runOnUiThread(() -> {
                             if (throwable != null || !result) {
-                                mLauncher.removeItem(firstItemView, firstItemInfo, true);
+                                mLauncher.removeItem(firstItemView, firstItemInfo, true, "AllAppsRemoval");
                             }
                         }));
 
@@ -3450,7 +3454,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 } else if (info instanceof AppPairInfo api) {
                     // If an app pair's member apps are being removed, delete the whole app pair.
                     if (api.anyMatch(matcher)) {
-                        mLauncher.removeItem(child, info, persistChanges);
+                        mLauncher.removeItem(child, info, true, "AllAppsRemoval");
                     }
                 }
             }

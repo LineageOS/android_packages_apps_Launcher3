@@ -383,6 +383,10 @@ public class LauncherSettings {
          * Lookup flag to be used for items which are visible on the home screen
          */
         public static final CacheLookupFlag DESKTOP_ICON_FLAG = DEFAULT_LOOKUP_FLAG.withThemeIcon();
+
+        /**
+         * Constant for the ALL APPS ICON to lauch the app drawer.
+         */
     }
 
     /**

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="open_all_apps"
+        android:enabled="true"
+        android:icon="@mipmap/all_apps_shortcut_icon"
+        android:shortcutShortLabel="@string/all_apps_widget_label"
+        android:shortcutLongLabel="@string/all_apps_widget_label">
+
+        <intent
+            android:action="android.intent.action.ALL_APPS"
+            android:targetPackage="com.android.launcher3"
+            android:targetClass="com.android.launcher3.Launcher" />
+    </shortcut>
+
+</shortcuts>

@@ -302,6 +302,14 @@ public class IconCache extends BaseIconCache {
             bitmapInfo = getDefaultIcon(user);
         }
         if (isDefaultIcon(bitmapInfo, user)) return;
+        if (si.getShortcutInfo().getActivity() != null
+                && "com.android.launcher3.AllAppsShortcutConfigActivity".equals(
+                        si.getShortcutInfo().getActivity().getClassName())) {
+            Log.e(TAG, "getShortcutIcon: skipping badge for All Apps shortcut");
+            info.bitmap = bitmapInfo;
+            return;
+        }
+
         info.bitmap = bitmapInfo.withBadgeInfo(getShortcutInfoBadge(si.getShortcutInfo()));
     }
 
@@ -314,6 +322,11 @@ public class IconCache extends BaseIconCache {
 
     @VisibleForTesting
     protected ItemInfoWithIcon getShortcutInfoBadgeItem(ShortcutInfo shortcutInfo) {
+        Log.e(TAG, "getShortcutInfoBadgeItem: pkg=" + shortcutInfo.getPackage()
+                + " activity=" + shortcutInfo.getActivity()
+                + " user=" + shortcutInfo.getUserHandle()
+                + " extras=" + shortcutInfo.getExtras());
+
         // Check for badge override first.
         String pkg = shortcutInfo.getPackage();
         String override = shortcutInfo.getExtras() == null ? null
@@ -321,10 +334,13 @@ public class IconCache extends BaseIconCache {
         if (!TextUtils.isEmpty(override)
                 && mInstallSessionHelper.isTrustedPackage(pkg, shortcutInfo.getUserHandle())) {
             pkg = override;
+            Log.e(TAG, "getShortcutInfoBadgeItem: using override badge package=" + pkg);
         } else {
             // Try component based badge before trying the normal package badge
             ComponentName cn = shortcutInfo.getActivity();
             if (cn != null) {
+                Log.e(TAG, "getShortcutInfoBadgeItem: using activity badge path cn=" + cn);
+
                 // Get the app info for the source activity.
                 AppInfo appInfo = new AppInfo();
                 appInfo.user = shortcutInfo.getUserHandle();
@@ -333,11 +349,28 @@ public class IconCache extends BaseIconCache {
                         .addCategory(Intent.CATEGORY_LAUNCHER)
                         .setComponent(cn);
                 getTitleAndIcon(appInfo, DEFAULT_LOOKUP_FLAG);
+
+                Log.e(TAG, "getShortcutInfoBadgeItem: resolved activity badge appInfo="
+                        + " component=" + appInfo.componentName
+                        + " title=" + appInfo.title
+                        + " bitmap=" + appInfo.bitmap
+                        + " bitmapClass=" + (appInfo.bitmap == null ? "null"
+                        : appInfo.bitmap.getClass().getName()));
                 return appInfo;
             }
         }
+
+        Log.e(TAG, "getShortcutInfoBadgeItem: using package badge path pkg=" + pkg);
+
         PackageItemInfo pkgInfo = new PackageItemInfo(pkg, shortcutInfo.getUserHandle());
         getTitleAndIconForApp(pkgInfo, DEFAULT_LOOKUP_FLAG);
+
+        Log.e(TAG, "getShortcutInfoBadgeItem: package badge result title="
+                + pkgInfo.title
+                + " bitmap=" + pkgInfo.bitmap
+                + " bitmapClass="
+                + (pkgInfo.bitmap == null ? "null" : pkgInfo.bitmap.getClass().getName()));
+
         return pkgInfo;
     }
 

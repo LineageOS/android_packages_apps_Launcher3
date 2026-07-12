@@ -53,6 +53,21 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import com.android.launcher3.LauncherState;
+import com.android.launcher3.Utilities;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.FrameLayout;
+import android.view.Gravity;
+import android.util.Log;
+
+import com.android.launcher3.BubbleTextView;
+import com.android.launcher3.model.data.ItemInfoWithIcon;
+
+import android.net.Uri;
+import android.content.ContentValues;
+import com.android.launcher3.LauncherProvider;
+
 /**
  * View class that represents the bottom row of the home screen.
  */
@@ -157,6 +172,7 @@ public class Hotseat extends CellLayout implements Insettable {
     }
 
     public void resetLayout(boolean hasVerticalHotseat) {
+        Log.e("TREBUCHET_DEBUG", "resetLayout() called. hasVerticalHotseat: " + hasVerticalHotseat);
         ActivityContext activityContext = ActivityContext.lookupContext(getContext());
         boolean bubbleBarEnabled = activityContext.isBubbleBarEnabled();
         boolean hasBubbles = activityContext.hasBubbles();

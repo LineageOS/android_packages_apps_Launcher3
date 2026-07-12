@@ -110,4 +110,11 @@
         android:defaultValue="true"
         android:persistent="true" />
 
+    <SwitchPreferenceCompat
+        android:key="pref_disable_all_apps_swipe"
+        android:title="@string/pref_disable_all_apps_swipe_title"
+        android:summary="@string/pref_disable_all_apps_swipe_summary"
+        android:defaultValue="false"
+        android:persistent="true" />
+
 </androidx.preference.PreferenceScreen>

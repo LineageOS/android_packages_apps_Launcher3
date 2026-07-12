@@ -270,23 +270,66 @@ public class DatabaseWidgetPreviewLoader {
 
     private Bitmap generateShortcutPreview(
             ShortcutConfigActivityInfo info, int maxWidth, int maxHeight) {
-        int iconSize = mDeviceProfile.getAllAppsProfile().getIconSizePx();
         int padding = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.widget_preview_shortcut_padding);
 
-        int size = iconSize + 2 * padding;
-        if (maxHeight < size || maxWidth < size) {
+        boolean isAllAppsShortcut =
+                "com.android.launcher3.AllAppsShortcutConfigActivity".equals(
+                        info.getComponent().getClassName());
+
+        Log.e(TAG, "generateShortcutPreview: component=" + info.getComponent()
+                + " user=" + info.getUser()
+                + " label=" + info.getLabel()
+                + " maxWidth=" + maxWidth
+                + " maxHeight=" + maxHeight
+                + " padding=" + padding
+                + " isAllAppsShortcut=" + isAllAppsShortcut);
+
+        if (maxHeight < padding * 2 || maxWidth < padding * 2) {
             throw new RuntimeException("Max size is too small for preview");
         }
-        return BitmapRenderer.createHardwareBitmap(size, size, c -> {
-            LauncherIcons li = LauncherIcons.obtain(mContext);
-            Drawable icon = li.createBadgedIconBitmap(
-                    mutateOnMainThread(info.getFullResIcon(
-                            LauncherAppState.getInstance(mContext).getIconCache())))
-                    .newIcon(mContext);
-            li.recycle();
 
-            icon.setBounds(padding, padding, padding + iconSize, padding + iconSize);
+        return BitmapRenderer.createHardwareBitmap(maxWidth, maxHeight, c -> {
+            Drawable icon;
+            if (isAllAppsShortcut) {
+                icon = mContext.getDrawable(R.mipmap.all_apps_shortcut_icon);
+                Log.e(TAG, "generateShortcutPreview: using direct shortcut icon=" + icon
+                        + " class=" + (icon == null ? "null" : icon.getClass().getName())
+                        + " intrinsic=" + (icon == null ? -1 : icon.getIntrinsicWidth())
+                        + "x" + (icon == null ? -1 : icon.getIntrinsicHeight()));
+            } else {
+                LauncherIcons li = LauncherIcons.obtain(mContext);
+                Drawable rawIcon = mutateOnMainThread(info.getFullResIcon(
+                        LauncherAppState.getInstance(mContext).getIconCache()));
+                Log.e(TAG, "generateShortcutPreview: rawIcon=" + rawIcon
+                        + " class=" + (rawIcon == null ? "null" : rawIcon.getClass().getName())
+                        + " intrinsic=" + (rawIcon == null ? -1 : rawIcon.getIntrinsicWidth())
+                        + "x" + (rawIcon == null ? -1 : rawIcon.getIntrinsicHeight()));
+
+                icon = li.createBadgedIconBitmap(rawIcon).newIcon(mContext);
+                li.recycle();
+
+                Log.e(TAG, "generateShortcutPreview: badgedIcon=" + icon
+                        + " class=" + (icon == null ? "null" : icon.getClass().getName())
+                        + " intrinsic=" + (icon == null ? -1 : icon.getIntrinsicWidth())
+                        + "x" + (icon == null ? -1 : icon.getIntrinsicHeight()));
+            }
+
+            int iconSize = Math.max(1, Math.min(maxWidth, maxHeight) - (2 * padding));
+
+            if (isAllAppsShortcut) {
+                iconSize = (int) (iconSize * 1.2f);
+            }
+
+            iconSize = Math.min(iconSize, Math.min(maxWidth, maxHeight));
+
+            int left = (maxWidth - iconSize) / 2;
+            int top = (maxHeight - iconSize) / 2;
+
+            Log.e(TAG, "generateShortcutPreview: drawBounds="
+                    + left + "," + top + " - " + (left + iconSize) + "," + (top + iconSize));
+
+            icon.setBounds(left, top, left + iconSize, top + iconSize);
             icon.draw(c);
         });
     }

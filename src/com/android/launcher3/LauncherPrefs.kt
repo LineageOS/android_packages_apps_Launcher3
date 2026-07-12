@@ -237,6 +237,14 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
     }
 
     companion object {
+
+        /** Added for changes to app drawer access */
+        @JvmField
+        val DISABLE_ALL_APPS_SWIPE = backedUpItem("pref_disable_all_apps_swipe", false)
+
+        @JvmField
+        val SHOW_ALL_APPS_BUTTON = backedUpItem("pref_show_all_apps_button", false)
+
         @VisibleForTesting const val BOOT_AWARE_PREFS_KEY = "boot_aware_prefs"
 
         @JvmField val INSTANCE = DaggerSingletonObject(LauncherAppComponent::getLauncherPrefs)
