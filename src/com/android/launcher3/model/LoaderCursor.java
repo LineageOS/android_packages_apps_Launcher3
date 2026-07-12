@@ -574,7 +574,8 @@ public class LoaderCursor extends CursorWrapper {
             loadedItems.put(info.id, info);
             if ((info.itemType == ITEM_TYPE_APP_PAIR
                     || info.itemType == ITEM_TYPE_DEEP_SHORTCUT
-                    || info.itemType == ITEM_TYPE_APPLICATION)
+                    || info.itemType == ITEM_TYPE_APPLICATION
+                    )
                     && info.container != CONTAINER_DESKTOP
                     && info.container != CONTAINER_HOTSEAT) {
                 findOrMakeFolder(info.container, loadedItems).add(info);

@@ -58,6 +58,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.launcher3.BuildConfig;
 import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
+import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;
 import com.android.launcher3.lineage.LineageUtils;
@@ -67,6 +68,9 @@ import com.android.launcher3.util.DisplayController;
 import com.android.launcher3.util.SettingsCache;
 import com.android.settingslib.widget.SettingsBasePreferenceFragment;
 import com.android.settingslib.widget.SettingsThemeHelper;
+
+import android.content.ContentValues;
+import android.util.Log;
 
 /**
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
@@ -319,6 +323,11 @@ public class SettingsActivity extends FragmentActivity
             DisplayController.Info info = DisplayController.INSTANCE.get(getContext()).getInfo();
             LauncherApps launcherApps = getContext().getSystemService(LauncherApps.class);
             switch (preference.getKey()) {
+
+                /** Added for updates to allow swipe disable */
+                case "pref_disable_all_apps_swipe":
+                    return true; // Only needs persistence, no immediate UI refresh required
+
                 case NOTIFICATION_DOTS_PREFERENCE_KEY:
                     return BuildConfig.NOTIFICATION_DOTS_ENABLED;
                 case ALLOW_ROTATION_PREFERENCE_KEY:
