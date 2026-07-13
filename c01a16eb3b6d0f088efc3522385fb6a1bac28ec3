@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "88c2219a_3ca9ed1a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 37538
+      },
+      "writtenOn": "2026-07-13T00:18:13Z",
+      "side": 1,
+      "message": "Two goals of these changes:\n1. Option to disable swipe up to access the app drawer in Home Settings.\n2. A shortcut widget for the app drawer which can be placed on the desktop or hotseat.\n\nAdded this to improve accessibility for older folks who struggle with swipe gestures and to help simplify the launcher some for dementia. The swipe disable setting and the all apps setting can be used together or separately (one does not depend on the other). When I first started they did, but I broken them apart to enable flexibility and better leverage already existing ways that the launcher works. \n\nRough edges:\n- Preview in widget picker has the all apps icon smaller than actual. I cannot figure out how to make this visually match better. This is only for the All Apps icon and not other icons.\n- Dragging around the all apps icon does cause the smaller label icon in the bottom right to appear. It goes away once dragging is done and can be seen on the github readme demo gif video.\n- Exact text / verbiage for the app drawer swipe access toggle setting. \n\nReadme: \nhttps://github.com/robot-stefan/android_packages_apps_Launcher3/blob/lineage-23.2/README.md",
+      "revId": "c01a16eb3b6d0f088efc3522385fb6a1bac28ec3",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
