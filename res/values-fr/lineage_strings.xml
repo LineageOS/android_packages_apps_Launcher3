@@ -27,8 +27,8 @@
     <string name="drawer_show_labels">Afficher le libellé des icônes dans le tiroir</string>
     <string name="drawer_open_keyboard_title">Glisser pour commencer la recherche</string>
     <string name="drawer_open_keyboard_summary">Ouvrir le clavier chaque fois que le tiroir d\'applis devient visible</string>
-    <string name="pref_sleep_gesture_title">Appuyez deux fois pour mettre en veille</string>
-    <string name="pref_sleep_gesture_summary">Appuyez deux fois sur un espace libre de l\'écran d\'accueil pour éteindre l\'écran</string>
+    <string name="pref_sleep_gesture_title">Double-appui pour mettre en veille</string>
+    <string name="pref_sleep_gesture_summary">Appuyer deux fois sur un espace libre de l\'écran d\'accueil pour éteindre l\'écran</string>
     <string name="trust_apps_manager_name">Applications cachées &amp; protégées</string>
     <string name="trust_apps_auth_manager">Déverrouiller pour gérer les applications cachées et protégées</string>
     <string name="trust_apps_auth_open_app">S’authentifier pour ouvrir %1$s</string>
@@ -39,4 +39,11 @@
     <string name="trust_apps_info_protected">Les applications protégées nécessitent une authentification pour être ouvertes depuis le lanceur</string>
     <string name="pref_suggestions_title">Suggestions</string>
     <string name="pref_suggestions_summary">Pour les suggestions du tiroir d\'applications et de l\'écran d\'accueil</string>
+    <string name="pebble_shape_title">Galet</string>
+    <string name="vessel_shape_title">Bobine</string>
+    <string name="pure_square_shape_title">Carré parfait</string>
+    <string name="squircle_shape_title">Rondeur</string>
+    <string name="tapered_rect_shape_title">Rectangle effilé</string>
+    <string name="teardrop_shape_title">Goutte</string>
+    <string name="rounded_rect_shape_title">Rectangle arrondi</string>
 </resources>
