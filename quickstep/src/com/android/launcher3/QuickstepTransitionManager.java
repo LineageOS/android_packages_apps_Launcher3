@@ -62,6 +62,8 @@ import static com.android.launcher3.testing.shared.TestProtocol.WALLPAPER_OPEN_A
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
 import static com.android.launcher3.util.window.RefreshRateTracker.getSingleFrameMs;
+import static com.android.launcher3.icons.BitmapInfo.FLAG_CUSTOM_SHAPE;
+import static com.android.launcher3.shapes.IconShapeModel.DEFAULT_ICON_RADIUS;
 import static com.android.launcher3.views.FloatingIconView.SHAPE_PROGRESS_DURATION;
 import static com.android.quickstep.TaskViewUtils.findTaskViewToLaunch;
 import static com.android.quickstep.util.AnimUtils.clampToDuration;
@@ -135,6 +137,7 @@ import com.android.launcher3.anim.AnimationSuccessListener;
 import com.android.launcher3.anim.AnimatorListeners;
 import com.android.launcher3.compat.AccessibilityManagerCompat;
 import com.android.launcher3.dragndrop.DragLayer;
+import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.shortcuts.DeepShortcutView;
@@ -878,9 +881,19 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             }
         });
 
-        final float initialWindowRadius = supportsRoundedCornersOnWindows(mLauncher.getResources())
+        float initialWindowRadius = supportsRoundedCornersOnWindows(mLauncher.getResources())
                 ? Math.max(crop.width(), crop.height()) / 2f
                 : 0f;
+        if (initialWindowRadius > 0f && v instanceof BubbleTextView bubbleTextView) {
+            FastBitmapDrawable icon = bubbleTextView.getIcon();
+            if (icon != null && (icon.creationFlags & FLAG_CUSTOM_SHAPE) != 0) {
+                // SurfaceControl only supports rounded-rectangle crops. Match its initial corner
+                // radius to the selected icon model while FloatingIconView applies the exact path.
+                initialWindowRadius *= ThemeManager.INSTANCE.get(mLauncher).getIconState()
+                        .getShapeRadius() / DEFAULT_ICON_RADIUS;
+            }
+        }
+        final float windowRadiusStart = initialWindowRadius;
         final float finalShadowRadius = appTargetsAreTranslucent ? 0 : mMaxShadowRadius;
 
         MultiValueUpdateListener listener = new MultiValueUpdateListener() {
@@ -893,7 +906,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     clampToDuration(LINEAR, APP_LAUNCH_ALPHA_START_DELAY, APP_LAUNCH_ALPHA_DURATION,
                             APP_LAUNCH_DURATION));
 
-            FloatProp mWindowRadius = new FloatProp(initialWindowRadius,
+            FloatProp mWindowRadius = new FloatProp(windowRadiusStart,
                     getWindowCornerRadius(mLauncher), mOpeningInterpolator);
             FloatProp mShadowRadius = new FloatProp(0, finalShadowRadius,
                     mOpeningInterpolator);
