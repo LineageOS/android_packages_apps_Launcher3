@@ -16,6 +16,24 @@
       "message": "line length",
       "revId": "a26552e24da06a6218b1eb84c2e04299b76a2590",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b54256e2_054732d9",
+        "filename": "src/com/android/launcher3/allapps/search/AllAppsSearchBarController.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 37317
+      },
+      "writtenOn": "2026-07-17T19:09:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5cea1bd1_e58f5b49",
+      "revId": "a26552e24da06a6218b1eb84c2e04299b76a2590",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
