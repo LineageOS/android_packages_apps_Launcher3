@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e97f8362_b5fd06ec",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 37587
+      },
+      "writtenOn": "2026-07-29T06:19:47Z",
+      "side": 1,
+      "message": "Could you help me review this diff please? This diff fixes the issue that when custom icon shape is enabled, the app icon radius of the app launch animation mismatches that of the custom icon shape and causes inconsistant transient shape changes.",
+      "revId": "1f77d8afd4cbfb9cfb78c992f1ada6c95a75deaa",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
