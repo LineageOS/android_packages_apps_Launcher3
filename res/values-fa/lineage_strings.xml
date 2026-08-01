@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">نشان دادن نام نمادها در کشوی برنامه</string>
     <string name="drawer_open_keyboard_title">برای شروع جستجو انگشت خود را بکشید</string>
     <string name="drawer_open_keyboard_summary">هر زمان که کشوی برنامه نمایان شد، صفحه کلید را باز کنید</string>
+    <string name="pref_sleep_gesture_title">دو بار ضربه برای به خواب رفتن</string>
+    <string name="pref_sleep_gesture_summary">دو بار ضربه روی فضای خالی صفحه اصلی برای خاموش کردن صفحه</string>
     <string name="trust_apps_manager_name">برنامه‌های پنهان &amp; محافظت شده</string>
     <string name="trust_apps_auth_manager">برای مدیریت برنامه‌های پنهان و محافظت شده قفل را باز کنید</string>
     <string name="trust_apps_auth_open_app">احراز هویت برای باز کردن %1$s</string>
@@ -37,4 +39,11 @@
     <string name="trust_apps_info_protected">برای باز کردن برنامه‌های محافظت شده از صفحه اصلی نیاز به احراز هویت می‌باشد</string>
     <string name="pref_suggestions_title">پیشنهادات</string>
     <string name="pref_suggestions_summary">برای کشوی برنامه &amp; پیشنهادهای صفحه اصلی</string>
+    <string name="pebble_shape_title">سنگریزه</string>
+    <string name="vessel_shape_title">کشتی</string>
+    <string name="pure_square_shape_title">مربع خالص</string>
+    <string name="squircle_shape_title">مربع دایره ای</string>
+    <string name="tapered_rect_shape_title">راست مخروطی</string>
+    <string name="teardrop_shape_title">قطره اشک</string>
+    <string name="rounded_rect_shape_title">مستطیل گرد</string>
 </resources>
