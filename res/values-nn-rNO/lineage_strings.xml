@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">Vis ikonnamn i app-skuffa</string>
     <string name="drawer_open_keyboard_title">Sveip for å søkja</string>
     <string name="drawer_open_keyboard_summary">Opna tastaturet når app-skuffa vert synleg</string>
+    <string name="pref_sleep_gesture_title">Trykk to gonger for å sova</string>
+    <string name="pref_sleep_gesture_summary">Trykk to gonger på eit tomt område på startskjermen for å skru av skjermen.</string>
     <string name="trust_apps_manager_name">Gøymde og verna appar</string>
     <string name="trust_apps_auth_manager">Lås opp for å styra gøymde og verna appar</string>
     <string name="trust_apps_auth_open_app">Stadfest for å opna %1$s</string>
@@ -37,4 +39,11 @@
     <string name="trust_apps_info_protected">Verna appar krev stadfesting for å opnast frå startaren</string>
     <string name="pref_suggestions_title">Framlegg</string>
     <string name="pref_suggestions_summary">For framlegg i app-skuffa og på startskjermen</string>
+    <string name="pebble_shape_title">Småstein</string>
+    <string name="vessel_shape_title">Farty</string>
+    <string name="pure_square_shape_title">Reint kvadrat</string>
+    <string name="squircle_shape_title">Kvirkel</string>
+    <string name="tapered_rect_shape_title">Smalnande rektangel</string>
+    <string name="teardrop_shape_title">Tåredrope</string>
+    <string name="rounded_rect_shape_title">Avrunda rektangel</string>
 </resources>

@@ -40,5 +40,10 @@
     <string name="pref_suggestions_title">Sugestões</string>
     <string name="pref_suggestions_summary">Para sugestões na gaveta de apps e na tela inicial</string>
     <string name="pebble_shape_title">Pedrinha</string>
+    <string name="vessel_shape_title">Bote</string>
     <string name="pure_square_shape_title">Quadrado completo</string>
+    <string name="squircle_shape_title">Círculo quadrado</string>
+    <string name="tapered_rect_shape_title">Retângulo cônico</string>
+    <string name="teardrop_shape_title">Lágrima</string>
+    <string name="rounded_rect_shape_title">Retângulo arredondado</string>
 </resources>
