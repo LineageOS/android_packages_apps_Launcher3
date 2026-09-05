@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "961b622b_1be3881e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2026-09-05T16:30:06Z",
+      "side": 1,
+      "message": "still ugly as sin on foldables when UI size gets funky but so does pixel launcher soooooo",
+      "revId": "893121ae1bcf439284a5a21c5864e0ed465af285",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
