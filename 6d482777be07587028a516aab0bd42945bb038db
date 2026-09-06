@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "94208c48_6b3467b8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 6360
+      },
+      "writtenOn": "2026-09-06T15:40:24Z",
+      "side": 1,
+      "message": "already setting getAdditionalQsbSpace() to return 0 when QSB is enabled. Therefore, no relevant checks required in getHotseatLayoutPadding().",
+      "revId": "6d482777be07587028a516aab0bd42945bb038db",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
