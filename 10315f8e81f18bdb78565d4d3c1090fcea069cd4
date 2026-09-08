@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ed2ab108_268e90e2",
+        "filename": "src/com/android/launcher3/Hotseat.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 19979
+      },
+      "writtenOn": "2026-09-08T17:36:07Z",
+      "side": 0,
+      "message": "This looks like its just changed for the sake of churn",
+      "revId": "10315f8e81f18bdb78565d4d3c1090fcea069cd4",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}

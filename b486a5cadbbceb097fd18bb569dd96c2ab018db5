@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "595fa966_b6367999",
+        "filename": "src/com/android/launcher3/Hotseat.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 19979
+      },
+      "writtenOn": "2026-09-08T17:36:07Z",
+      "side": 1,
+      "message": "This should be an early return rather than an if block",
+      "revId": "b486a5cadbbceb097fd18bb569dd96c2ab018db5",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
