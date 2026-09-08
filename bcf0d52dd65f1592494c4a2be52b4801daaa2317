@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9b96972e_cea7c2ee",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 19979
+      },
+      "writtenOn": "2026-09-08T21:09:26Z",
+      "side": 1,
+      "message": "Re-adjusted more logic that appeared moved for the sake of churn in Hotseat that I wasn\u0027t explicit about in my previous comments",
+      "revId": "bcf0d52dd65f1592494c4a2be52b4801daaa2317",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
