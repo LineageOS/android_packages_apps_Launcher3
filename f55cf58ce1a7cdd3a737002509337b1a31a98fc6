@@ -39,6 +39,30 @@
       },
       "revId": "f55cf58ce1a7cdd3a737002509337b1a31a98fc6",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3349a21d_e0f26711",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/TaskbarActivityContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1580,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2026-09-16T08:51:35Z",
+      "side": 1,
+      "message": "given my previous attempt...I think forcing `isPhoneButtonNavMode()` to return true was wrong, because I\u0027m 99% sure I\u0027d have tried doing that before.",
+      "parentUuid": "29e94ace_0acb2c5c",
+      "range": {
+        "startLine": 1580,
+        "startChar": 42,
+        "endLine": 1580,
+        "endChar": 62
+      },
+      "revId": "f55cf58ce1a7cdd3a737002509337b1a31a98fc6",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
