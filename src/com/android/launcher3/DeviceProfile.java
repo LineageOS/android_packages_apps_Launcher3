@@ -904,10 +904,13 @@ public class DeviceProfile {
         } else if (mIsScalableGrid) {
             int iconExtraSpacePx = getWorkspaceProfile().getIconSizePx() - getIconVisibleSizePx(
                     getWorkspaceProfile().getIconSizePx());
-            int sideSpacing =
-                    (mDeviceProperties.getAvailableWidthPx() - (
-                            getHotseatQsbWidth() + iconExtraSpacePx))
-                            / 2;
+            // The hotseat is aligned with the QSB, however the QSB has no width when it is
+            // disabled, so fall back to the width of the columns that the hotseat spans.
+            int hotseatWidth = mIsHotseatQsbEnabled
+                    ? getHotseatQsbWidth() + iconExtraSpacePx
+                    : getWorkspaceProfile().getIconToIconWidthForColumns(
+                            mHotseatProfile.getColumnSpan());
+            int sideSpacing = (mDeviceProperties.getAvailableWidthPx() - hotseatWidth) / 2;
             hotseatBarPadding.set(sideSpacing,
                     0,
                     sideSpacing,
