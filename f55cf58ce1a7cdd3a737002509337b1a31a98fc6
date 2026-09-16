@@ -63,6 +63,30 @@
       },
       "revId": "f55cf58ce1a7cdd3a737002509337b1a31a98fc6",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a20db355_962c013a",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/TaskbarActivityContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1580,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2026-09-16T08:52:44Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "3349a21d_e0f26711",
+      "range": {
+        "startLine": 1580,
+        "startChar": 42,
+        "endLine": 1580,
+        "endChar": 62
+      },
+      "revId": "f55cf58ce1a7cdd3a737002509337b1a31a98fc6",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
