@@ -16,6 +16,29 @@
       "message": "funfact: i wanted to do that on 22.2 but failed - https://review.lineageos.org/c/LineageOS/android_packages_apps_Trebuchet/+/427506",
       "revId": "f55cf58ce1a7cdd3a737002509337b1a31a98fc6",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "29e94ace_0acb2c5c",
+        "filename": "quickstep/src/com/android/launcher3/taskbar/TaskbarActivityContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1580,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2026-09-16T08:42:53Z",
+      "side": 1,
+      "message": "can\u0027t we make this toggle aware?\n\nreading the setup\n\n```java\n    /**\n     * @return {@code true} if the device profile isn\u0027t a large screen profile and we are using a\n     * single window for taskbar and navbar.\n     */\n    public boolean isPhoneMode() {\n        return isDeviceProfileForPhoneMode(mDeviceProfile);\n    }\n\n    private boolean isDeviceProfileForPhoneMode(DeviceProfile deviceProfile) {\n        return deviceProfile.getDeviceProperties().isPhone()\n                \u0026\u0026 !deviceProfile.getDeviceProperties().getTaskbarConfiguration()\n                .isTaskbarPresent();\n    }\n\n    public boolean isTaskbarInMinimalState() {\n        return mControllers.taskbarViewController.isTaskbarInMinimalState();\n    }\n\n    /**\n     * @return {@code true} if {@link #isPhoneMode()} is true and we\u0027re using 3 button-nav\n     */\n    public boolean isPhoneButtonNavMode() {\n        return isPhoneMode() \u0026\u0026 isThreeButtonNav();\n    }\n```\n\nI\u0027m checking the sublte differences in getTaskbarPhoneDimensions and it seems to be a \"no\" but maybe I\u0027m missing something",
+      "range": {
+        "startLine": 1580,
+        "startChar": 42,
+        "endLine": 1580,
+        "endChar": 62
+      },
+      "revId": "f55cf58ce1a7cdd3a737002509337b1a31a98fc6",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
