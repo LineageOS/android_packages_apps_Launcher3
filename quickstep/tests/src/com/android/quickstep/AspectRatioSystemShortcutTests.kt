@@ -238,7 +238,8 @@ class AspectRatioSystemShortcutTests {
         val widthPx = widthDp * density / 160
         val heightPx = heightDp * density / 160
 
-        val screenBounds = WindowBounds(widthPx, heightPx, widthPx, heightPx, Surface.ROTATION_0)
+        val screenBounds = WindowBounds(widthPx, heightPx, widthPx, heightPx, Surface.ROTATION_0,
+            density)
         val deviceProfile =
             InvariantDeviceProfile.INSTANCE[context].getDeviceProfile(context)
                 .toBuilder()

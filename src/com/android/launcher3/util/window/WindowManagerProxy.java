@@ -157,7 +157,8 @@ public class WindowManagerProxy {
         normalizeWindowInsets(displayInfoContext,
                 showLockedTaskbarOnHome(displayInfoContext) || showDesktopTaskbarForFreeformDisplay(
                         displayInfoContext), windowMetrics.getWindowInsets(), insets);
-        return new WindowBounds(windowMetrics.getBounds(), insets, info.rotation);
+        return new WindowBounds(windowMetrics.getBounds(), insets, info.rotation,
+                (int) (windowMetrics.getDensity() * 160));
     }
 
     /**
@@ -322,7 +323,7 @@ public class WindowManagerProxy {
      */
     protected List<WindowBounds> estimateWindowBounds(Context context,
             final CachedDisplayInfo displayInfo) {
-        int densityDpi = context.getResources().getConfiguration().densityDpi;
+        int densityDpi = displayInfo.densityDpi;
         final int rotation = displayInfo.rotation;
 
         int minSize = Math.min(displayInfo.size.x, displayInfo.size.y);
@@ -400,7 +401,7 @@ public class WindowManagerProxy {
             } else {
                 insets.right = Math.max(insets.right, navbarWidth);
             }
-            result.add(new WindowBounds(bounds, insets, i));
+            result.add(new WindowBounds(bounds, insets, i, densityDpi));
         }
         return result;
     }
@@ -441,6 +442,7 @@ public class WindowManagerProxy {
     protected CachedDisplayInfo getDisplayInfo(WindowMetrics windowMetrics, int rotation) {
         Point size = new Point(windowMetrics.getBounds().right, windowMetrics.getBounds().bottom);
         return new CachedDisplayInfo(size, rotation,
+                (int) (windowMetrics.getDensity() * 160),
                 windowMetrics.getWindowInsets().getDisplayCutout());
     }
 
