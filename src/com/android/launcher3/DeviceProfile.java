@@ -209,7 +209,8 @@ public class DeviceProfile {
                 false,
                 false,
                 false,
-                false
+                false,
+                0
         );
         mBottomSheetProfile = new BottomSheetProfile(0, 0, 0, 0f, 0f);
         overviewProfile = new OverviewProfile(

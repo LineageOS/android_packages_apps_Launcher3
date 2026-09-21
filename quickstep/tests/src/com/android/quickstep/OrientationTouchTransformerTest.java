@@ -333,10 +333,12 @@ public class OrientationTouchTransformerTest {
     private DisplayController.Info createDisplayInfo(Size screenSize, int rotation) {
         Point displaySize = new Point(screenSize.getWidth(), screenSize.getHeight());
         RotationUtils.rotateSize(displaySize, rotation);
-        CachedDisplayInfo cachedDisplayInfo = new CachedDisplayInfo(displaySize, rotation);
+        CachedDisplayInfo cachedDisplayInfo = new CachedDisplayInfo(displaySize, rotation,
+                DisplayMetrics.DENSITY_DEFAULT);
         WindowBounds windowBounds = new WindowBounds(
                 new Rect(0, 0, displaySize.x, displaySize.y),
-                new Rect());
+                new Rect(),
+                DisplayMetrics.DENSITY_DEFAULT);
         WindowManagerProxy wmProxy = mock(WindowManagerProxy.class);
         doReturn(cachedDisplayInfo).when(wmProxy).getDisplayInfo(any());
         doReturn(windowBounds).when(wmProxy).getRealBounds(any(), any());
