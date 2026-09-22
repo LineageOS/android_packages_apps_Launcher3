@@ -324,7 +324,10 @@ constructor(@ApplicationContext private val encryptedContext: Context) {
         @JvmField val ENABLE_COMPOSITION_TRACING = backedUpItem(COMPOSITION_TRACING_PREF_KEY, false)
 
         @JvmField
-        val FIXED_LANDSCAPE_MODE = backedUpItem(SettingsActivity.FIXED_LANDSCAPE_MODE, false)
+        val FIXED_LANDSCAPE_MODE =
+            backedUpItem(SettingsActivity.FIXED_LANDSCAPE_MODE, Boolean::class.java) { context ->
+                context.resources.getBoolean(R.bool.config_fixedLandscapeModeDefault)
+            }
 
         @JvmField
         val WORKSPACE_ITEMS_LABEL_HIDDEN = backedUpItem("pref_workspace_items_label_hidden", false)

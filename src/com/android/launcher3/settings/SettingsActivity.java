@@ -337,6 +337,10 @@ public class SettingsActivity extends FragmentActivity
                     }
                     return mDeveloperOptionsEnabled;
                 case FIXED_LANDSCAPE_MODE:
+                    if (!getContext().getResources().getBoolean(
+                            R.bool.config_fixedLandscapeModeAvailable)) {
+                        return false;
+                    }
                     if ((InvariantDeviceProfile.INSTANCE.get(getContext()).deviceType
                                     == TYPE_MULTI_DISPLAY)
                             || (InvariantDeviceProfile.INSTANCE.get(getContext()).deviceType

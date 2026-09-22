@@ -95,6 +95,13 @@
         android:persistent="true" />
 
     <SwitchPreferenceCompat
+        android:key="pref_fixed_landscape_mode"
+        android:title="@string/landscape_mode_title"
+        android:summary="@string/landscape_mode_desc"
+        android:defaultValue="@bool/config_fixedLandscapeModeDefault"
+        android:persistent="true" />
+
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="pref_enable_minus_one"
         android:summary="@string/pref_show_google_now_summary"

@@ -19,4 +19,10 @@
     <!-- Sort sections of apps list, in case AlphabeticIndex (of current locale)
          returns duplicate labels for some reasons. -->
     <bool name="config_appsListSortSections">false</bool>
+
+    <!-- Whether the fixed landscape mode preference is shown -->
+    <bool name="config_fixedLandscapeModeAvailable">false</bool>
+
+    <!-- Default value for the fixed landscape mode preference -->
+    <bool name="config_fixedLandscapeModeDefault">false</bool>
 </resources>
