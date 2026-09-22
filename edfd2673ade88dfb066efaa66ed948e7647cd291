@@ -16,6 +16,24 @@
       "message": "It was even more simple if you just accounted for mForceAllowRotation here.",
       "revId": "edfd2673ade88dfb066efaa66ed948e7647cd291",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f1577c32_6c248366",
+        "filename": "src/com/android/launcher3/states/RotationHelper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2026-09-22T17:51:26Z",
+      "side": 1,
+      "message": "leaving open to come back to it, worth doing and then squashing next cycle.",
+      "parentUuid": "78952bfc_d98015f9",
+      "revId": "edfd2673ade88dfb066efaa66ed948e7647cd291",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ],
   "submitRequirementResults": [
