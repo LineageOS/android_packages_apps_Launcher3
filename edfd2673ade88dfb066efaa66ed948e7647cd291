@@ -3,6 +3,23 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "614df61d_72503e51",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2026-09-22T17:56:05Z",
+      "side": 1,
+      "message": "(CR a",
+      "revId": "edfd2673ade88dfb066efaa66ed948e7647cd291",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "78952bfc_d98015f9",
         "filename": "src/com/android/launcher3/states/RotationHelper.java",
         "patchSetId": 3
@@ -32,6 +49,24 @@
       "side": 1,
       "message": "leaving open to come back to it, worth doing and then squashing next cycle.",
       "parentUuid": "78952bfc_d98015f9",
+      "revId": "edfd2673ade88dfb066efaa66ed948e7647cd291",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cf4b0378_40e93aea",
+        "filename": "src/com/android/launcher3/states/RotationHelper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2026-09-22T17:56:05Z",
+      "side": 1,
+      "message": "https://review.lineageos.org/c/LineageOS/android_packages_apps_Launcher3/+/504308 Done",
+      "parentUuid": "f1577c32_6c248366",
       "revId": "edfd2673ade88dfb066efaa66ed948e7647cd291",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
