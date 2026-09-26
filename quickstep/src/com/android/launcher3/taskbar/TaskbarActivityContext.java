@@ -1424,7 +1424,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     public void setTaskbarWindowSize(int size) {
         // In landscape phone button nav mode, we should set the task bar width instead of height
         // because this is the only case in which the nav bar is not on the display bottom.
-        boolean landscapePhoneButtonNav = isPhoneButtonNavMode() && mDeviceProfile.getDeviceProperties().isLandscape();
+        boolean landscapePhoneButtonNav = isPhoneButtonNavMode() &&
+                (mDeviceProfile.getDeviceProperties().isLandscape() !=
+                        mDeviceProfile.getDeviceProperties().isDefaultLandscape());
         if ((landscapePhoneButtonNav ? mWindowLayoutParams.width : mWindowLayoutParams.height)
                 == size || mIsDestroyed) {
             return;
