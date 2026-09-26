@@ -39,7 +39,8 @@ data class DeviceProperties(
     val isExternalDisplay: Boolean,
     val isGestureMode: Boolean,
     val isRotationAllowed: Boolean,
-    val densityDpi: Int
+    val densityDpi: Int,
+    val isDefaultLandscape: Boolean
 ) {
     companion object Factory {
         // b/419264328 adding here all the improvements/cleanup for this class
@@ -79,6 +80,7 @@ data class DeviceProperties(
                 isGestureMode = isGestureMode,
                 isRotationAllowed = isRotationAllowed,
                 densityDpi = windowBounds.densityDpi,
+                isDefaultLandscape = info.isDefaultLandscape,
             )
         }
     }
