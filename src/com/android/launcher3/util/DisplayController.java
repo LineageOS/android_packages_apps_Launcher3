@@ -547,6 +547,14 @@ public class DisplayController {
             mIsDesktopFormFactor = isDesktopFormFactor;
         }
 
+
+        /**
+         * Returns whether the display is landscape at ROTATION_0
+         */
+        public boolean isDefaultLandscape() {
+            return normalizedDisplayInfo.size.x > normalizedDisplayInfo.size.y;
+        }
+
         /**
          * Returns whether the display is in desktop-first mode.
          */
