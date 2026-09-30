@@ -33,6 +33,24 @@
       "message": "We could also likely revert https://review.lineageos.org/c/LineageOS/android_packages_apps_Launcher3/+/491017",
       "revId": "bc2ad455397822fc32a411676f2b879c5097668b",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "49783d32_895fb09c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 28798
+      },
+      "writtenOn": "2026-09-30T14:50:02Z",
+      "side": 1,
+      "message": "Incase someone runs into 3-button on SUW, this fixes alignment of the back 3-button nav.",
+      "parentUuid": "0dab46e1_3aba14b9",
+      "revId": "bc2ad455397822fc32a411676f2b879c5097668b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
