@@ -133,6 +133,24 @@
       "message": "Quickstep also does\n```\n        if (blurOnMoreSurfaces()) {\n            getTheme().applyStyle(blurEnabled ? R.style.FolderBlurStyle\n                    : R.style.FolderBlurFallbackStyle, true);\n        }\n```",
       "revId": "0519d2d8f9149c01eef27ef2d200827092b9d85e",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9b12ec13_8f110178",
+        "filename": "quickstep/src/com/android/quickstep/RecentsActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2026-09-30T21:57:29Z",
+      "side": 1,
+      "message": "applied, flag is disabled on 17 release.",
+      "parentUuid": "8a6d23a4_c550663d",
+      "revId": "0519d2d8f9149c01eef27ef2d200827092b9d85e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
