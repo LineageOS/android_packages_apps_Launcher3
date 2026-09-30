@@ -37,6 +37,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "d1be6faa_b54468be",
+        "filename": "quickstep/src/com/android/quickstep/FallbackActivityInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2026-09-30T21:48:08Z",
+      "side": 1,
+      "message": "i could add it, but LauncherActivityInterface doesn\u0027t have it either.",
+      "parentUuid": "b57ac18c_42dac825",
+      "revId": "0519d2d8f9149c01eef27ef2d200827092b9d85e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "33140583_acbfd236",
         "filename": "quickstep/src/com/android/quickstep/FallbackActivityInterface.java",
         "patchSetId": 1
