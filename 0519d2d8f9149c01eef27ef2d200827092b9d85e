@@ -16,6 +16,63 @@
       "message": "works for me.",
       "revId": "0519d2d8f9149c01eef27ef2d200827092b9d85e",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b57ac18c_42dac825",
+        "filename": "quickstep/src/com/android/quickstep/FallbackActivityInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2026-09-30T21:39:04Z",
+      "side": 1,
+      "message": "```\n                        if (container.getDepthController() \u003d\u003d null) {\n                            return;\n                        }\n```\nseems to be missing",
+      "revId": "0519d2d8f9149c01eef27ef2d200827092b9d85e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "33140583_acbfd236",
+        "filename": "quickstep/src/com/android/quickstep/FallbackActivityInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2026-09-30T21:39:04Z",
+      "side": 1,
+      "message": "looking at how `FallbackWindowInterface extends BaseWindowInterface` does it this should probably live in `BaseActivityInterface`",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 146,
+        "endChar": 5
+      },
+      "revId": "0519d2d8f9149c01eef27ef2d200827092b9d85e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8a6d23a4_c550663d",
+        "filename": "quickstep/src/com/android/quickstep/RecentsActivity.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2026-09-30T21:39:04Z",
+      "side": 1,
+      "message": "Quickstep also does\n```\n        if (blurOnMoreSurfaces()) {\n            getTheme().applyStyle(blurEnabled ? R.style.FolderBlurStyle\n                    : R.style.FolderBlurFallbackStyle, true);\n        }\n```",
+      "revId": "0519d2d8f9149c01eef27ef2d200827092b9d85e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
