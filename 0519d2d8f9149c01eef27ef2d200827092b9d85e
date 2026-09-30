@@ -76,6 +76,30 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1647c96b_ce1e4091",
+        "filename": "quickstep/src/com/android/quickstep/FallbackActivityInterface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2026-09-30T21:50:07Z",
+      "side": 1,
+      "message": "can\u0027t get it to compile if i move it there.",
+      "parentUuid": "33140583_acbfd236",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 146,
+        "endChar": 5
+      },
+      "revId": "0519d2d8f9149c01eef27ef2d200827092b9d85e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8a6d23a4_c550663d",
