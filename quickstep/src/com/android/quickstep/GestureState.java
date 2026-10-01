@@ -32,6 +32,7 @@ import static com.android.quickstep.util.ActiveGestureErrorDetector.GestureEvent
 import static com.android.quickstep.util.ActiveGestureErrorDetector.GestureEvent.SET_END_TARGET_NEW_TASK;
 
 import android.content.Intent;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.SystemClock;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -278,7 +279,12 @@ public class GestureState implements RecentsAnimationCallbacks.RecentsAnimationL
 
     public static boolean displaySupportsHomeGesture(int displayId) {
         // The reject home transition runs if home is invoked on a display which lacks a home.
-        return displayId == DEFAULT_DISPLAY;
+        if (displayId == DEFAULT_DISPLAY) {
+            return true;
+        }
+        // Built-in secondary displays (e.g. on dual screen devices) have a home
+        Display display = DisplayManagerGlobal.getInstance().getRealDisplay(displayId);
+        return display != null && display.getType() == Display.TYPE_INTERNAL;
     }
 
     /**

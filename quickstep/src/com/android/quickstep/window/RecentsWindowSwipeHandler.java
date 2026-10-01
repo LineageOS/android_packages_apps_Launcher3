@@ -273,6 +273,7 @@ public class RecentsWindowSwipeHandler extends AbsSwipeUpHandler<RecentsWindowMa
             @Nullable IBinder launchCookie,
             @NonNull String reason) {
         ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
+        options.setLaunchDisplayId(mGestureState.getDisplayId());
         Intent intent = new Intent(mGestureState.getHomeIntent());
         if (gestureContractAnimationFactory != null) {
             TaskKey taskKey = null;

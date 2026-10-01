@@ -55,7 +55,16 @@ constructor(
 
     init {
         lifecycle.addCloseable(
-            overlayChangeHandler.addCallback { notifyConfigChange(Display.DEFAULT_DISPLAY) }
+            overlayChangeHandler.addCallback {
+                // Navigation mode overlays apply to all displays
+                if (Flags.enableTaskbarUiThread()) {
+                    threadSafePerDisplayInfo.forEach { (_, container) ->
+                        container.notifyConfigChange()
+                    }
+                } else {
+                    perDisplayInfo.forEach { _, container -> container.notifyConfigChange() }
+                }
+            }
         )
 
         // Initialize display listeners

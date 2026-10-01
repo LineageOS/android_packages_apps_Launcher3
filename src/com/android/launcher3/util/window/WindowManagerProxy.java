@@ -517,8 +517,7 @@ public class WindowManagerProxy {
      */
     public NavigationMode getNavigationMode(Context displayInfoContext) {
         // Always assume 3-button nav for external displays
-        int displayId = getDisplayId(displayInfoContext);
-        if (displayId != DEFAULT_DISPLAY) {
+        if (isExternalDisplay(displayInfoContext)) {
             return NavigationMode.THREE_BUTTONS;
         }
         // Otherwise get from Resource
