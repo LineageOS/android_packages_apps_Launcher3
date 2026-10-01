@@ -70,6 +70,7 @@ import com.android.launcher3.touch.ItemClickHandler.ItemClickProxy;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.Themes;
+import com.android.launcher3.util.window.WindowManagerProxy;
 import com.android.launcher3.views.BaseDragLayer;
 
 import java.util.Map;
@@ -121,7 +122,10 @@ public class SecondaryDisplayLauncher extends BaseActivity implements BgDataMode
         mDragLayer = findViewById(R.id.drag_layer);
         mAppsView = findViewById(R.id.apps_view);
         mAppsButton = findViewById(R.id.all_apps_button);
-        if (mSecondaryDisplayDelegate.enableTaskbarConnectedDisplays()) {
+        if (!WindowManagerProxy.INSTANCE.get(this).isExternalDisplay(this)) {
+            // Built-in displays open the app drawer by swiping up, like the default display
+            mAppsButton.setVisibility(View.GONE);
+        } else if (mSecondaryDisplayDelegate.enableTaskbarConnectedDisplays()) {
             mAppsButton.setVisibility(View.INVISIBLE);
         }
 
@@ -262,21 +266,30 @@ public class SecondaryDisplayLauncher extends BaseActivity implements BgDataMode
             return;
         }
 
+        boolean hasAppsButton = mAppsButton.getVisibility() != View.GONE;
         float openR = (float) Math.hypot(mAppsView.getWidth(), mAppsView.getHeight());
         float closeR = Themes.getDialogCornerRadius(this);
         float startR = mAppsButton.getWidth() / 2f;
 
-        float[] buttonPos = new float[]{startR, startR};
-        mDragLayer.getDescendantCoordRelativeToSelf(mAppsButton, buttonPos);
-        mDragLayer.mapCoordInSelfToDescendant(mAppsView, buttonPos);
+        // Reveal the app drawer from the apps button, or from the bottom edge it is swiped up from
+        float[] revealPos = new float[]{startR, startR};
+        if (hasAppsButton) {
+            mDragLayer.getDescendantCoordRelativeToSelf(mAppsButton, revealPos);
+            mDragLayer.mapCoordInSelfToDescendant(mAppsView, revealPos);
+        } else {
+            revealPos[0] = mAppsView.getWidth() / 2f;
+            revealPos[1] = mAppsView.getHeight();
+        }
         final Animator animator = ViewAnimationUtils.createCircularReveal(mAppsView,
-                (int) buttonPos[0], (int) buttonPos[1],
+                (int) revealPos[0], (int) revealPos[1],
                 show ? closeR : openR, show ? openR : closeR);
 
         if (show) {
             mAppDrawerShown = true;
             mAppsView.setVisibility(View.VISIBLE);
-            mAppsButton.setVisibility(View.INVISIBLE);
+            if (hasAppsButton) {
+                mAppsButton.setVisibility(View.INVISIBLE);
+            }
             mSecondaryDisplayDelegate.updateAppDivider();
         } else {
             mAppDrawerShown = false;
@@ -284,10 +297,12 @@ public class SecondaryDisplayLauncher extends BaseActivity implements BgDataMode
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mAppsView.setVisibility(View.INVISIBLE);
-                    mAppsButton.setVisibility(
-                            mSecondaryDisplayDelegate.enableTaskbarConnectedDisplays()
-                                    ? View.INVISIBLE
-                                    : View.VISIBLE);
+                    if (hasAppsButton) {
+                        mAppsButton.setVisibility(
+                                mSecondaryDisplayDelegate.enableTaskbarConnectedDisplays()
+                                        ? View.INVISIBLE
+                                        : View.VISIBLE);
+                    }
                     mAppsView.getSearchUiManager().resetSearch();
                 }
             });

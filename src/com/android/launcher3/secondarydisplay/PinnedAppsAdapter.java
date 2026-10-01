@@ -28,6 +28,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BubbleTextView;
@@ -42,11 +43,11 @@ import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.Executors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +56,9 @@ import java.util.stream.Collectors;
 public class PinnedAppsAdapter extends BaseAdapter implements OnSharedPreferenceChangeListener {
 
     private static final String PINNED_APPS_KEY = "pinned_apps";
+    private static final String PINNED_APPS_ORDER_KEY = "pinned_apps_order";
+    private static final String PINNED_APPS_ORDER_SEPARATOR = "\n";
+    private static final String PINNED_APPS_CELL_SEPARATOR = ";";
 
     private final SecondaryDisplayLauncher mLauncher;
     private final OnClickListener mOnClickListener;
@@ -62,20 +66,37 @@ public class PinnedAppsAdapter extends BaseAdapter implements OnSharedPreference
     private final SharedPreferences mPrefs;
     private final AllAppsStore mAllAppsList;
     private final AppInfoComparator mAppNameComparator;
+    private final int mNumColumns;
+    private final int mMaxNumRows;
+    private int mNumRows;
 
-    private final Set<ComponentKey> mPinnedApps = new HashSet<>();
-    private final ArrayList<AppInfo> mItems = new ArrayList<>();
+    // Pinned apps and the grid cell they are placed in
+    private final LinkedHashMap<ComponentKey, Integer> mPinnedApps = new LinkedHashMap<>();
+    private AppInfo[] mCells;
+    // Apps pinned before they could be placed are sorted by name until they are moved
+    private boolean mSortByName;
+
+    // App being dragged over the grid, shown in mDragCell until the drag ends
+    private ComponentKey mDragKey;
+    private AppInfo mDragApp;
+    private int mDragCell;
 
     public PinnedAppsAdapter(
             SecondaryDisplayLauncher launcher,
             AllAppsStore allAppsStore,
-            OnLongClickListener onLongClickListener) {
+            OnLongClickListener onLongClickListener,
+            int numColumns,
+            int numRows) {
         mLauncher = launcher;
         mOnClickListener = launcher.getItemOnClickListener();
         mOnLongClickListener = onLongClickListener;
         mAllAppsList = allAppsStore;
         mPrefs = launcher.getSharedPreferences(PINNED_APPS_KEY, MODE_PRIVATE);
         mAppNameComparator = new AppInfoComparator(launcher);
+        mNumColumns = numColumns;
+        mMaxNumRows = numRows;
+        mNumRows = numRows;
+        mCells = new AppInfo[numColumns * numRows];
 
         mAllAppsList.addUpdateListener(this::createFilteredAppsList);
     }
@@ -85,16 +106,26 @@ public class PinnedAppsAdapter extends BaseAdapter implements OnSharedPreference
      */
     @Override
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        if (PINNED_APPS_KEY.equals(key)) {
+        if (PINNED_APPS_KEY.equals(key) || PINNED_APPS_ORDER_KEY.equals(key)) {
             Executors.MODEL_EXECUTOR.submit(() -> {
-                Set<ComponentKey> apps = prefs.getStringSet(key, Collections.emptySet())
-                        .stream()
-                        .map(this::parseComponentKey)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toSet());
+                String order = prefs.getString(PINNED_APPS_ORDER_KEY, null);
+                boolean sortByName = order == null;
+                List<String> entries = sortByName
+                        ? new ArrayList<>(prefs.getStringSet(PINNED_APPS_KEY,
+                                Collections.emptySet()))
+                        : Arrays.asList(order.split(PINNED_APPS_ORDER_SEPARATOR));
+                LinkedHashMap<ComponentKey, Integer> apps = new LinkedHashMap<>();
+                for (String entry : entries) {
+                    String[] parts = entry.split(PINNED_APPS_CELL_SEPARATOR);
+                    ComponentKey app = parseComponentKey(parts[0]);
+                    if (app != null) {
+                        apps.putIfAbsent(app, parts.length > 1 ? parseCell(parts[1]) : -1);
+                    }
+                }
                 Executors.MAIN_EXECUTOR.submit(() -> {
                     mPinnedApps.clear();
-                    mPinnedApps.addAll(apps);
+                    mPinnedApps.putAll(apps);
+                    mSortByName = sortByName;
                     createFilteredAppsList();
                 });
             });
@@ -106,7 +137,7 @@ public class PinnedAppsAdapter extends BaseAdapter implements OnSharedPreference
      */
     @Override
     public int getCount() {
-        return mItems.size();
+        return mCells.length;
     }
 
     /**
@@ -114,7 +145,7 @@ public class PinnedAppsAdapter extends BaseAdapter implements OnSharedPreference
      */
     @Override
     public AppInfo getItem(int position) {
-        return mItems.get(position);
+        return mCells[position];
     }
 
     /**
@@ -142,17 +173,94 @@ public class PinnedAppsAdapter extends BaseAdapter implements OnSharedPreference
             int padding = mLauncher.getDeviceProfile().getWorkspaceProfile().getEdgeMarginPx();
             icon.setPadding(padding, padding, padding, padding);
         }
+        // Spread the rows over the height of the grid
+        int rowHeight = parent.getHeight() / mNumRows;
+        if (rowHeight > 0) {
+            icon.getLayoutParams().height = rowHeight;
+        }
 
-        icon.applyFromApplicationInfo(mItems.get(position));
+        AppInfo item = mCells[position];
+        if (item != null) {
+            icon.applyFromApplicationInfo(item);
+        }
+        // Keep empty cells in the layout so that apps can be placed in them
+        icon.setVisibility(item == null || item == mDragApp ? View.INVISIBLE : View.VISIBLE);
         return icon;
     }
 
     private void createFilteredAppsList() {
-        mItems.clear();
-        mPinnedApps.stream().map(mAllAppsList::getApp)
-                .filter(Objects::nonNull).forEach(mItems::add);
-        mItems.sort(mAppNameComparator);
+        Arrays.fill(mCells, null);
+        List<AppInfo> unplaced = new ArrayList<>();
+        mPinnedApps.forEach((key, cell) -> {
+            AppInfo app = mAllAppsList.getApp(key);
+            if (app == null || key.equals(mDragKey)) {
+                return;
+            }
+            if (mSortByName || cell < 0 || cell >= mCells.length || mCells[cell] != null) {
+                unplaced.add(app);
+            } else {
+                mCells[cell] = app;
+            }
+        });
+        if (mSortByName) {
+            unplaced.sort(mAppNameComparator);
+        }
+        if (mDragApp != null) {
+            AppInfo displaced = mCells[mDragCell];
+            mCells[mDragCell] = mDragApp;
+            if (displaced != null) {
+                // Swap with the dragged app if it was pinned already
+                Integer dragOrigin = mPinnedApps.get(mDragKey);
+                if (dragOrigin != null && dragOrigin >= 0 && dragOrigin < mCells.length
+                        && mCells[dragOrigin] == null) {
+                    mCells[dragOrigin] = displaced;
+                } else {
+                    unplaced.add(0, displaced);
+                }
+            }
+        }
+        for (AppInfo app : unplaced) {
+            int cell = getFirstEmptyCell();
+            if (cell < 0) {
+                break;
+            }
+            mCells[cell] = app;
+        }
         notifyDataSetChanged();
+    }
+
+    /**
+     * Fits as many rows into the grid as possible without cutting off app labels
+     */
+    public void updateNumRows(GridView grid) {
+        AppInfo[] apps = mAllAppsList.getApps();
+        if (grid.getHeight() == 0 || apps.length == 0) {
+            return;
+        }
+        BubbleTextView icon = (BubbleTextView) getView(0, null, grid);
+        icon.applyFromApplicationInfo(apps[0]);
+        icon.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        icon.measure(View.MeasureSpec.makeMeasureSpec(
+                        grid.getWidth() / mNumColumns, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        int numRows = Math.max(1, Math.min(mMaxNumRows,
+                grid.getHeight() / Math.max(1, icon.getMeasuredHeight())));
+        if (numRows != mNumRows) {
+            mNumRows = numRows;
+            mCells = new AppInfo[mNumColumns * numRows];
+            createFilteredAppsList();
+        } else {
+            notifyDataSetChanged();
+        }
+    }
+
+    private int getFirstEmptyCell() {
+        for (int i = 0; i < mCells.length; i++) {
+            if (mCells[i] == null) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -171,17 +279,115 @@ public class PinnedAppsAdapter extends BaseAdapter implements OnSharedPreference
     }
 
     /**
-     * Pins or unpins apps from home screen
+     * Pins the app in the given cell of the grid, or moves it there if it is already pinned. A
+     * negative cell places it in the first empty cell.
      */
-    public void update(ItemInfo info, Function<ComponentKey, Boolean> op) {
-        ComponentKey key = new ComponentKey(info.getTargetComponent(), info.user);
-        if (op.apply(key)) {
+    public void pinApp(ItemInfo info, int cell) {
+        ComponentKey key = getComponentKey(info);
+        AppInfo app = mAllAppsList.getApp(key);
+        if (app == null) {
+            return;
+        }
+        clearDragPreview();
+        if (cell < 0 || cell >= mCells.length) {
+            Integer currentCell = mPinnedApps.get(key);
+            cell = currentCell != null && currentCell >= 0 && currentCell < mCells.length
+                    && mCells[currentCell] == app ? currentCell : getFirstEmptyCell();
+            if (cell < 0) {
+                // The grid is full
+                return;
+            }
+        }
+        setDragPreview(info, cell);
+
+        LinkedHashMap<ComponentKey, Integer> apps = new LinkedHashMap<>();
+        for (int i = 0; i < mCells.length; i++) {
+            if (mCells[i] != null) {
+                apps.put(getComponentKey(mCells[i]), i);
+            }
+        }
+        // Keep pinned apps that aren't currently available, e.g. on a paused work profile
+        mPinnedApps.forEach(apps::putIfAbsent);
+        mDragKey = null;
+        mDragApp = null;
+        setPinnedApps(apps);
+    }
+
+    /**
+     * Unpins the app from the grid
+     */
+    public void unpinApp(ItemInfo info) {
+        // Keep the other apps in the cells they were in before the drag
+        clearDragPreview();
+        LinkedHashMap<ComponentKey, Integer> apps = new LinkedHashMap<>();
+        for (int i = 0; i < mCells.length; i++) {
+            if (mCells[i] != null) {
+                apps.put(getComponentKey(mCells[i]), i);
+            }
+        }
+        mPinnedApps.forEach(apps::putIfAbsent);
+        if (apps.remove(getComponentKey(info)) != null) {
+            setPinnedApps(apps);
+        }
+    }
+
+    /**
+     * Shows the given app in the given cell of the grid while it is being dragged
+     */
+    public void setDragPreview(ItemInfo info, int cell) {
+        ComponentKey key = getComponentKey(info);
+        AppInfo app = mAllAppsList.getApp(key);
+        if (app == null || cell < 0 || cell >= mCells.length
+                || (key.equals(mDragKey) && cell == mDragCell)) {
+            return;
+        }
+        mDragKey = key;
+        mDragApp = app;
+        mDragCell = cell;
+        createFilteredAppsList();
+    }
+
+    /**
+     * Returns the cell of the grid the dragged app is shown in, or -1 if there is none
+     */
+    public int getDragPreviewCell() {
+        return mDragApp == null ? -1 : mDragCell;
+    }
+
+    /**
+     * Stops showing the dragged app in the grid
+     */
+    public void clearDragPreview() {
+        if (mDragKey != null) {
+            mDragKey = null;
+            mDragApp = null;
             createFilteredAppsList();
-            Set<ComponentKey> copy = new HashSet<>(mPinnedApps);
-            Executors.MODEL_EXECUTOR.submit(() ->
-                    mPrefs.edit().putStringSet(PINNED_APPS_KEY,
-                                    copy.stream().map(this::encode).collect(Collectors.toSet()))
-                            .apply());
+        }
+    }
+
+    private void setPinnedApps(Map<ComponentKey, Integer> apps) {
+        mPinnedApps.clear();
+        mPinnedApps.putAll(apps);
+        mSortByName = false;
+        createFilteredAppsList();
+        String order = apps.entrySet().stream()
+                .map(e -> encode(e.getKey()) + PINNED_APPS_CELL_SEPARATOR + e.getValue())
+                .collect(Collectors.joining(PINNED_APPS_ORDER_SEPARATOR));
+        Executors.MODEL_EXECUTOR.submit(() -> mPrefs.edit()
+                .putString(PINNED_APPS_ORDER_KEY, order)
+                .remove(PINNED_APPS_KEY)
+                .apply());
+    }
+
+    private ComponentKey getComponentKey(ItemInfo info) {
+        return new ComponentKey(info.getTargetComponent(), info.user);
+    }
+
+    private int parseCell(String string) {
+        try {
+            return Integer.parseInt(string);
+        } catch (NumberFormatException e) {
+            return -1;
         }
     }
 
@@ -212,14 +418,7 @@ public class PinnedAppsAdapter extends BaseAdapter implements OnSharedPreference
      */
     public SystemShortcut getSystemShortcut(ItemInfo info, View originalView) {
         return new PinUnPinShortcut(mLauncher, info, originalView,
-                mPinnedApps.contains(new ComponentKey(info.getTargetComponent(), info.user)));
-    }
-
-    /**
-     * Pins app to home screen
-     */
-    public void addPinnedApp(ItemInfo info) {
-        update(info, mPinnedApps::add);
+                mPinnedApps.containsKey(new ComponentKey(info.getTargetComponent(), info.user)));
     }
 
     private class PinUnPinShortcut extends SystemShortcut<SecondaryDisplayLauncher> {
@@ -237,9 +436,9 @@ public class PinnedAppsAdapter extends BaseAdapter implements OnSharedPreference
         @Override
         public void onClick(View view) {
             if (mIsPinned) {
-                update(mItemInfo, mPinnedApps::remove);
+                unpinApp(mItemInfo);
             } else {
-                update(mItemInfo, mPinnedApps::add);
+                pinApp(mItemInfo, -1);
             }
             AbstractFloatingView.closeAllOpenViews(mLauncher);
         }

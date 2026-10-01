@@ -42,6 +42,18 @@
         android:contentDescription="@string/all_apps_button_label"
         android:onClick="onAppsButtonClicked" />
 
+    <TextView
+        android:id="@+id/remove_target"
+        style="@style/DropTargetButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|top"
+        android:drawableStart="@drawable/ic_remove_no_shadow"
+        android:gravity="center"
+        android:text="@string/remove_drop_target_label"
+        android:theme="@style/HomeScreenElementTheme"
+        android:visibility="invisible" />
+
     <com.android.launcher3.allapps.SecondaryLauncherAllAppsContainerView
         android:id="@+id/apps_view"
         android:layout_width="match_parent"

@@ -20,8 +20,11 @@ import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
 
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
+import static com.android.launcher3.touch.SingleAxisSwipeDetector.DIRECTION_NEGATIVE;
+import static com.android.launcher3.touch.SingleAxisSwipeDetector.DIRECTION_POSITIVE;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,10 +33,11 @@ import android.widget.GridView;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.DeviceProfile;
+import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget;
 import com.android.launcher3.R;
 import com.android.launcher3.allapps.ActivityAllAppsContainerView;
-import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.dragndrop.DragController;
 import com.android.launcher3.dragndrop.DragOptions;
 import com.android.launcher3.dragndrop.DragView;
 import com.android.launcher3.model.data.ItemInfo;
@@ -57,9 +61,13 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
 
     private View mAllAppsButton;
     private ActivityAllAppsContainerView<SecondaryDisplayLauncher> mAppsView;
+    private View mRemoveTarget;
 
     private GridView mWorkspace;
     private PinnedAppsAdapter mPinnedAppsAdapter;
+
+    // Source of drags started from the pinned apps grid
+    private final DragSource mWorkspaceDragSource = (target, d, success) -> { };
 
     public SecondaryDragLayer(Context context, AttributeSet attrs) {
         super(context, attrs, 1 /* alphaChannelCount */);
@@ -96,12 +104,27 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         mAllAppsButton = findViewById(R.id.all_apps_button);
 
         mAppsView = findViewById(R.id.apps_view);
+        mRemoveTarget = findViewById(R.id.remove_target);
         // Setup workspace
         mWorkspace = findViewById(R.id.workspace_grid);
         mPinnedAppsAdapter = new PinnedAppsAdapter(mContainer, mAppsView.getAppsStore(),
-                this::onIconLongClicked);
+                this::onIconLongClicked, mContainer.getDeviceProfile().inv.numColumns,
+                mContainer.getDeviceProfile().inv.numRows);
         mWorkspace.setAdapter(mPinnedAppsAdapter);
         mWorkspace.setNumColumns(mContainer.getDeviceProfile().inv.numColumns);
+        // Fit the rows to the height of the grid once it and the apps are known
+        mAppsView.getAppsStore().addUpdateListener(
+                () -> mPinnedAppsAdapter.updateNumRows(mWorkspace));
+        mWorkspace.addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    if (bottom - top != oldBottom - oldTop) {
+                        post(() -> mPinnedAppsAdapter.updateNumRows(mWorkspace));
+                    }
+                });
+
+        RemoveDropTarget removeDropTarget = new RemoveDropTarget();
+        mContainer.getDragController().addDropTarget(removeDropTarget);
+        mContainer.getDragController().addDragListener(removeDropTarget);
     }
 
     /**
@@ -136,46 +159,35 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child == mAppsView) {
-                int horizontalPadding = (2 * grid.getWorkspaceProfile()
-                        .getDesiredWorkspaceHorizontalMarginPx())
-                        + grid.getWorkspaceProfile().getCellLayoutPaddingPx().left
-                        + grid.getWorkspaceProfile().getCellLayoutPaddingPx().right;
-                int verticalPadding =
-                        grid.getWorkspaceProfile().getCellLayoutPaddingPx().top
-                                + grid.getWorkspaceProfile().getCellLayoutPaddingPx().bottom;
-
-                int maxWidth =
-                        grid.getAllAppsProfile().getCellWidthPx()
-                                * grid.getAllAppsProfile().getNumShownAllAppsColumns()
-                                + horizontalPadding;
-                int appsWidth = Math.min(width - getPaddingLeft() - getPaddingRight(), maxWidth);
-
-                int maxHeight =
-                        grid.getAllAppsProfile().getCellHeightPx()
-                                * grid.getAllAppsProfile().getNumShownAllAppsColumns()
-                                + verticalPadding;
-                int appsHeight = Math.min(height - getPaddingTop() - getPaddingBottom(), maxHeight);
-
+                // Fill the screen, like the app drawer on the default display
                 mAppsView.measure(
-                        makeMeasureSpec(appsWidth, EXACTLY), makeMeasureSpec(appsHeight, EXACTLY));
+                        makeMeasureSpec(width - getPaddingLeft() - getPaddingRight(), EXACTLY),
+                        makeMeasureSpec(height - getPaddingTop() - getPaddingBottom(), EXACTLY));
             } else if (child == mAllAppsButton) {
                 int appsButtonSpec = makeMeasureSpec(
                         grid.getWorkspaceProfile().getIconSizePx(), EXACTLY
                 );
                 mAllAppsButton.measure(appsButtonSpec, appsButtonSpec);
             } else if (child == mWorkspace) {
+                // Leave room for the all apps button below the grid
                 measureChildWithMargins(mWorkspace, widthMeasureSpec, 0, heightMeasureSpec,
-                        grid.getWorkspaceProfile().getIconSizePx()
-                                + grid.getWorkspaceProfile().getEdgeMarginPx());
+                        mAllAppsButton.getVisibility() == GONE ? 0
+                                : grid.getWorkspaceProfile().getIconSizePx()
+                                        + grid.getWorkspaceProfile().getEdgeMarginPx());
             } else {
                 measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
             }
         }
     }
 
-    private class SecondaryDisplayAllAppsTouchController implements TouchController {
+    private class SecondaryDisplayAllAppsTouchController implements TouchController,
+            SingleAxisSwipeDetector.Listener {
 
         private final SingleAxisSwipeDetector mSwipeDetector;
+        // Opens the app drawer when swiping up on the home screen, and closes it when swiping
+        // down while it is scrolled to the top
+        private final SingleAxisSwipeDetector mDrawerSwipeDetector;
+        private boolean mNoIntercept;
 
         public SecondaryDisplayAllAppsTouchController() {
             mSwipeDetector = new SingleAxisSwipeDetector(
@@ -199,12 +211,16 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
             );
             mSwipeDetector.setDetectableScrollConditions(
                     SingleAxisSwipeDetector.DIRECTION_POSITIVE, false /* ignoreSlop */);
+            mDrawerSwipeDetector = new SingleAxisSwipeDetector(
+                    getContext(), this, SingleAxisSwipeDetector.VERTICAL);
         }
 
         @Override
         public boolean onControllerTouchEvent(MotionEvent ev) {
             if (!usingTwoFingerSwipeOnConnectedDisplay(ev)) {
-                return false;
+                // Consume the rest of the gesture that closed the app drawer on touch down
+                return !mDrawerSwipeDetector.isDraggingOrSettling()
+                        || mDrawerSwipeDetector.onTouchEvent(ev);
             }
             return mSwipeDetector.onTouchEvent(ev);
         }
@@ -215,20 +231,43 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
                 return true;
             }
 
-            if (!mContainer.isAppDrawerShown()) {
+            if (AbstractFloatingView.getTopOpenView(mContainer) != null
+                    || mContainer.getDragController().isDragging()) {
                 return false;
             }
 
-            if (AbstractFloatingView.getTopOpenView(mContainer) != null) {
+            boolean drawerShown = mContainer.isAppDrawerShown();
+            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                if (drawerShown && !isEventOverView(mContainer.getAppsView(), ev)) {
+                    mContainer.showAppDrawer(false);
+                    return true;
+                }
+                mNoIntercept = drawerShown
+                        && !mContainer.getAppsView().shouldContainerScroll(ev);
+                mDrawerSwipeDetector.setDetectableScrollConditions(
+                        drawerShown ? DIRECTION_NEGATIVE : DIRECTION_POSITIVE,
+                        false /* ignoreSlop */);
+            }
+            if (mNoIntercept) {
                 return false;
             }
+            mDrawerSwipeDetector.onTouchEvent(ev);
+            return mDrawerSwipeDetector.isDraggingOrSettling();
+        }
 
-            if (ev.getAction() == MotionEvent.ACTION_DOWN
-                    && !isEventOverView(mContainer.getAppsView(), ev)) {
-                mContainer.showAppDrawer(false);
-                return true;
-            }
-            return false;
+        @Override
+        public void onDragStart(boolean start, float startDisplacement) {
+            mContainer.showAppDrawer(!mContainer.isAppDrawerShown());
+        }
+
+        @Override
+        public boolean onDrag(float displacement) {
+            return true;
+        }
+
+        @Override
+        public void onDragEnd(float velocity) {
+            mDrawerSwipeDetector.finishedScrolling();
         }
 
         private boolean usingTwoFingerSwipeOnConnectedDisplay(MotionEvent ev) {
@@ -237,8 +276,90 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         }
     }
 
+    /**
+     * Drop target to unpin apps dragged from the pinned apps grid
+     */
+    private class RemoveDropTarget implements DropTarget, DragController.DragListener {
+
+        @Override
+        public boolean isDropEnabled() {
+            return mRemoveTarget.getVisibility() == VISIBLE;
+        }
+
+        @Override
+        public void onDrop(DragObject dragObject, DragOptions options) {
+            mPinnedAppsAdapter.unpinApp(dragObject.dragInfo);
+            // Let the drag end right away, there is no drop animation
+            dragObject.deferDragViewCleanupPostAnimation = false;
+        }
+
+        @Override
+        public void onDragEnter(DragObject dragObject) {
+            mRemoveTarget.setSelected(true);
+        }
+
+        @Override
+        public void onDragOver(DragObject dragObject) { }
+
+        @Override
+        public void onDragExit(DragObject dragObject) {
+            mRemoveTarget.setSelected(false);
+        }
+
+        @Override
+        public boolean acceptDrop(DragObject dragObject) {
+            return true;
+        }
+
+        @Override
+        public void prepareAccessibilityDrop() { }
+
+        @Override
+        public void getHitRectRelativeToDragLayer(Rect outRect) {
+            // Accept drops across the whole width above the bottom of the target
+            outRect.set(0, 0, getWidth(), mRemoveTarget.getBottom());
+        }
+
+        @Override
+        public View getDropView() {
+            return null;
+        }
+
+        @Override
+        public void onDragStart(DragObject dragObject, DragOptions options) {
+            if (dragObject.dragSource == mWorkspaceDragSource) {
+                mRemoveTarget.setVisibility(VISIBLE);
+            }
+        }
+
+        @Override
+        public void onDragEnd() {
+            mRemoveTarget.setVisibility(INVISIBLE);
+            mRemoveTarget.setSelected(false);
+            mPinnedAppsAdapter.clearDragPreview();
+        }
+    }
+
     public PinnedAppsAdapter getPinnedAppsAdapter() {
         return mPinnedAppsAdapter;
+    }
+
+    /**
+     * Shows the dragged app in the cell of the pinned apps grid it is being dragged over
+     */
+    void onDragOverWorkspace(DropTarget.DragObject dragObject) {
+        float[] point = new float[]{dragObject.x, dragObject.y};
+        mapCoordInSelfToDescendant(mWorkspace, point);
+        // Empty cells are invisible, so pointToPosition() would skip them
+        Rect cellRect = new Rect();
+        for (int i = 0; i < mWorkspace.getChildCount(); i++) {
+            mWorkspace.getChildAt(i).getHitRect(cellRect);
+            if (cellRect.contains((int) point[0], (int) point[1])) {
+                mPinnedAppsAdapter.setDragPreview(dragObject.dragInfo,
+                        mWorkspace.getFirstVisiblePosition() + i);
+                return;
+            }
+        }
     }
 
     boolean onIconLongClicked(View v) {
@@ -260,8 +381,9 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         // order of this list will reflect in the popup
         List<SystemShortcut<?>> systemShortcuts = new ArrayList<>();
         systemShortcuts.add(APP_INFO.getShortcut(mContainer, item, v));
-        // Hide redundant pin shortcut for app drawer icons if drag-n-drop is enabled.
-        if (!FeatureFlags.SECONDARY_DRAG_N_DROP_TO_PIN.get() || !mContainer.isAppDrawerShown()) {
+        // App drawer icons are pinned by dragging them to the home screen
+        boolean fromAppDrawer = mContainer.isAppDrawerShown();
+        if (!fromAppDrawer) {
             systemShortcuts.add(mPinnedAppsAdapter.getSystemShortcut(item, v));
         }
         int deepShortcutCount = popupDataProvider.getShortcutCountForItem(item);
@@ -276,14 +398,16 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
                 systemShortcuts);
         container.requestFocus();
 
-        if (!FeatureFlags.SECONDARY_DRAG_N_DROP_TO_PIN.get() || !mContainer.isAppDrawerShown()) {
-            return true;
-        }
-
         DragOptions options = new DragOptions();
-        DeviceProfile grid = mContainer.getDeviceProfile();
-        options.intrinsicIconScaleFactor = (float) grid.getAllAppsProfile().getIconSizePx()
-                / grid.getWorkspaceProfile().getIconSizePx();
+        DragSource source;
+        if (fromAppDrawer) {
+            DeviceProfile grid = mContainer.getDeviceProfile();
+            options.intrinsicIconScaleFactor = (float) grid.getAllAppsProfile().getIconSizePx()
+                    / grid.getWorkspaceProfile().getIconSizePx();
+            source = mContainer.getAppsView();
+        } else {
+            source = mWorkspaceDragSource;
+        }
         options.preDragCondition = container.createPreDragCondition();
         if (options.preDragCondition == null) {
             options.preDragCondition = new DragOptions.PreDragCondition() {
@@ -299,7 +423,7 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
                     mDragView = dragObject.dragView;
                     if (!shouldStartDrag(0)) {
                         mDragView.setOnScaleAnimEndCallback(() ->
-                                mContainer.beginDragShared(v, mContainer.getAppsView(), options));
+                                mContainer.beginDragShared(v, source, options));
                     }
                 }
 
@@ -309,7 +433,7 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
                 }
             };
         }
-        mContainer.beginDragShared(v, mContainer.getAppsView(), options);
+        mContainer.beginDragShared(v, source, options);
         return true;
     }
 }

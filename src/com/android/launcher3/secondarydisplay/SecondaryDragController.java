@@ -20,6 +20,7 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 
 import android.graphics.Rect;
 import android.view.HapticFeedbackConstants;
+import android.view.View;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.DropTarget;
@@ -57,22 +58,33 @@ public class SecondaryDragController extends DragController {
 
             @Override
             public void onDrop(DragObject dragObject, DragOptions options) {
-                ((SecondaryDragLayer) mActivity.getDragLayer()).getPinnedAppsAdapter().addPinnedApp(
-                        dragObject.dragInfo);
-                dragObject.dragView.remove();
+                PinnedAppsAdapter adapter =
+                        ((SecondaryDragLayer) mActivity.getDragLayer()).getPinnedAppsAdapter();
+                adapter.pinApp(dragObject.dragInfo, adapter.getDragPreviewCell());
+                // Let the drag end right away, there is no drop animation
+                dragObject.deferDragViewCleanupPostAnimation = false;
             }
 
             @Override
             public void onDragEnter(DragObject dragObject) {
-                if (getDistanceDragged() > mActivity.getResources().getDimensionPixelSize(
-                        R.dimen.drag_distanceThreshold)) {
-                    mActivity.showAppDrawer(false);
-                    AbstractFloatingView.closeAllOpenViews(mActivity);
-                }
+                onDragOver(dragObject);
             }
 
             @Override
-            public void onDragOver(DragObject dragObject) { }
+            public void onDragOver(DragObject dragObject) {
+                if (mActivity.isAppDrawerShown()) {
+                    if (getDistanceDragged() > mActivity.getResources().getDimensionPixelSize(
+                            R.dimen.drag_distanceThreshold)) {
+                        mActivity.showAppDrawer(false);
+                        AbstractFloatingView.closeAllOpenViews(mActivity);
+                    }
+                    return;
+                }
+                if (!mIsInPreDrag) {
+                    ((SecondaryDragLayer) mActivity.getDragLayer())
+                            .onDragOverWorkspace(dragObject);
+                }
+            }
 
             @Override
             public void onDragExit(DragObject dragObject) { }
@@ -87,6 +99,11 @@ public class SecondaryDragController extends DragController {
 
             @Override
             public void getHitRectRelativeToDragLayer(Rect outRect) { }
+
+            @Override
+            public View getDropView() {
+                return null;
+            }
         };
         return target;
     }
