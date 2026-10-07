@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018-2019 The LineageOS Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <string name="pref_themed_icons_title">இழுவையிற் கருப்பொருள் படவுருபயன்படுத்து</string>
+    <string name="pref_themed_icons_summary">முகப்பிற்கருப்பொருள் படவுருபின்பற்று</string>
+    <string name="pebble_shape_title">கூழாங்கல்</string>
+    <string name="vessel_shape_title">கலம்</string>
+    <string name="pure_square_shape_title">தூயசதுரம்</string>
+    <string name="squircle_shape_title">வட்டச்சதுரம்</string>
+    <string name="tapered_rect_shape_title">குவிசெவ்வகம்</string>
+    <string name="teardrop_shape_title">நீர்த்துளி</string>
+    <string name="rounded_rect_shape_title">வளைசெவ்வகம்</string>
+    <string name="pref_suggestions_title">பரிந்துரை</string>
+    <string name="pref_suggestions_summary">செயலி இழுவை, முகப்புத்திரை பரிந்துரைக்கு</string>
+    <string name="settings_lock_layout_title">தளவமைப்பைப் பூட்டு</string>
+    <string name="settings_lock_layout_summary_on">முகப்புத்திரையில் படவுருவும், இடுக்கையும் சேர்க்கவோ, அகற்றவோ, நகர்த்தவோ இயலாது</string>
+    <string name="settings_lock_layout_summary_off">முகப்புத்திரையில் படவுருவும், இடுக்கையும் சேர்க்கவோ, அகற்றவோ, நகர்த்தவோ இயலும்</string>
+    <string name="settings_edit_widgets_error">முகப்புத்திரையில் இடுக்கைகளைச் சேர்க்கவியலாது</string>
+    <string name="desktop_show_labels">முகப்பிற் படவுருப்பெயர் காட்டு</string>
+    <string name="drawer_show_labels">இழுவையிற் படவுருப்பெயர் காட்டு</string>
+    <string name="drawer_open_keyboard_title">தேடல்தொடங்கத் தள்ளுக</string>
+    <string name="drawer_open_keyboard_summary">இழுவைதோன்றின் விசைப்பலகைதிற</string>
+    <string name="title_show_google_app">கூகுள் செயலி காட்டு</string>
+    <string name="msg_minus_one_on_left">முதன்மைமுகப்பிற் வலந்தள்ளுகையில்</string>
+    <string name="msg_minus_one_on_right">முதன்மைமுகப்பிற் இடந்தள்ளுகையில்</string>
+    <string name="pref_sleep_gesture_title">உறங்க இருமுறை தட்டு</string>
+    <string name="pref_sleep_gesture_summary">திரையணைக்க முகப்பின் ெவறுவெளியில் இருமுறை தட்டு</string>
+    <string name="trust_apps_manager_name">மறைப்பாதுகாப்புச் செயலி</string>
+    <string name="trust_apps_auth_manager">மறைப்பாதுகாப்புச் செயலியாளப் பூட்டுத்திற</string>
+    <string name="trust_apps_auth_open_app">%1$s திறக்க மெய்ப்பி</string>
+    <string name="trust_apps_loading">ஏற்றல்\u2026</string>
+    <string name="trust_apps_no_lock_error">செயலி அணுகலைக் கட்டுப்படுத்தப் பூட்டுத்திரையை அமை</string>
+    <string name="trust_apps_help">உதவி</string>
+    <string name="trust_apps_info_hidden">மறைச்செயலியும் அவற்றின் இடுக்கையும் இழுவையிலிருந்து மறைந்தது</string>
+    <string name="trust_apps_info_protected">பாதுகாப்புச்செயலியை முகப்பிலிருந்து திறக்க மெய்ப்பிப்பு வேண்டியது</string>
+</resources>
