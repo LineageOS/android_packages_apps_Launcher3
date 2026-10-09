@@ -2274,6 +2274,9 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     private boolean shouldLaunchInDesktop(ItemInfo info) {
+        if (!mDesktopState.isDesktopModeSupportedOnDisplay(getDisplayId())) {
+            return false;
+        }
         final Task nonDesktopTask =
                 mControllers.taskbarRecentAppsController.getNonDesktopTask(info);
         if (DisplayController.getInfo(this).isInDesktopFirstMode && nonDesktopTask != null) {
@@ -2289,7 +2292,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                 return false;
             }
         }
-        // Always launch in freeform if in external display.
+        // Desktop-capable secondary displays launch in freeform.
         return  !isPrimaryDisplay() || isTaskbarShowingDesktopTasks();
     }
 
