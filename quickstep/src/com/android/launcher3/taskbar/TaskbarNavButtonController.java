@@ -56,6 +56,7 @@ import androidx.annotation.StringRes;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.R;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.testing.TestLogging;
@@ -168,6 +169,9 @@ public class TaskbarNavButtonController implements TaskbarControllers.LoggableTa
                 logEvent(LAUNCHER_TASKBAR_HOME_BUTTON_TAP);
                 mSystemUiProxy.updateContextualEduStats(/* isTrackpadGesture= */ false,
                         GestureType.HOME);
+                if (mControllers != null) {
+                    AbstractFloatingView.closeAllOpenViews(mControllers.getTaskbarActivityContext());
+                }
                 mSystemUiProxy.onKeyEvent(KeyEvent.KEYCODE_HOME, mDisplayId);
                 break;
             case BUTTON_RECENTS:
