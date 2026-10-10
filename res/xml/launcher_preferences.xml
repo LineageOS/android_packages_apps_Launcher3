@@ -73,14 +73,12 @@
         android:defaultValue="false"
         android:persistent="true" />
 
-    <androidx.preference.PreferenceScreen
+    <SwitchPreferenceCompat
         android:key="pref_suggestions"
         android:title="@string/pref_suggestions_title"
-        android:summary="@string/pref_suggestions_summary"
-        android:persistent="false">
-
-        <intent android:action="android.settings.ACTION_CONTENT_SUGGESTIONS_SETTINGS" />
-    </androidx.preference.PreferenceScreen>
+        android:summary="@string/pref_suggestions_toggle_summary"
+        android:defaultValue="true"
+        android:persistent="true" />
 
     <SwitchPreferenceCompat
         android:key="pref_desktop_show_labels"
