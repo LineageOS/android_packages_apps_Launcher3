@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Suggestions toggle -->
+    <string name="pref_suggestions_toggle_summary">Show app suggestions in the app drawer and on the home screen</string>
+
+</resources>

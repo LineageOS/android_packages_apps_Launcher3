@@ -72,6 +72,11 @@ public class PredictionUpdateTask implements ModelUpdateTask {
         IconCache iconCache = taskController.getIconCache();
         Context context = taskController.getContext();
 
+        if (!mTargets.isEmpty()
+                && !LauncherPrefs.get(context).get(LauncherPrefs.SUGGESTIONS_ENABLED)) {
+            return;
+        }
+
         // TODO: remove this
         LauncherPrefs.get(context).put(LAST_PREDICTION_ENABLED, !mTargets.isEmpty());
 
