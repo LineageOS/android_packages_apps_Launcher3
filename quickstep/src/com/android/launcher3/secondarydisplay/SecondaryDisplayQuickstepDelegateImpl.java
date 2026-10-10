@@ -17,6 +17,7 @@ package com.android.launcher3.secondarydisplay;
 
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
 import static com.android.launcher3.util.OnboardingPrefs.ALL_APPS_VISITED_COUNT;
+import static com.android.quickstep.TaskAnimationManager.EXTRA_START_RECENTS_ANIMATION;
 import static com.android.quickstep.fallback.RecentsState.HIDDEN;
 import static com.android.window.flags.Flags.useInputReportedFocusForAccessibility;
 
@@ -24,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -42,6 +44,7 @@ import com.android.launcher3.views.ActivityContext;
 import com.android.quickstep.BaseContainerInterface;
 import com.android.quickstep.OverviewComponentObserver;
 import com.android.quickstep.sysuiconnection.SysUIConnectionTracker;
+import com.android.quickstep.views.RecentsView;
 import com.android.quickstep.views.RecentsViewContainer;
 import com.android.quickstep.window.RecentsWindowManager;
 
@@ -157,12 +160,20 @@ public final class SecondaryDisplayQuickstepDelegateImpl extends SecondaryDispla
     }
 
     @Override
-    void onHomeIntent() {
-        // When recents was opened on top of the secondary display launcher, going home doesn't
-        // trigger a transition that would hide it, so hide it here instead
+    void onHomeIntent(Intent intent) {
+        // Starting recents also brings Home forward; leave its animation and window intact.
+        if (intent.getBooleanExtra(EXTRA_START_RECENTS_ANIMATION, false)) return;
         RecentsWindowManager recentsWindowManager = getVisibleRecentsWindowManager();
         if (recentsWindowManager != null) {
-            recentsWindowManager.getStateManager().goToState(HIDDEN, false /* animated */);
+            RecentsView<?, ?> recentsView = recentsWindowManager.getOverviewPanel();
+            if (recentsView != null) {
+                recentsView.switchToScreenshot(() -> recentsView.finishRecentsAnimation(
+                        true /* toHome */, false /* shouldPip */,
+                        () -> recentsWindowManager.getStateManager().goToState(
+                                HIDDEN, false /* animated */)));
+            } else {
+                recentsWindowManager.getStateManager().goToState(HIDDEN, false /* animated */);
+            }
         }
     }
 
