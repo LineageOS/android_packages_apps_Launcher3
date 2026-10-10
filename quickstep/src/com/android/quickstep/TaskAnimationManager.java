@@ -78,6 +78,8 @@ import javax.inject.Inject;
 public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAnimationListener {
 
     private static final String TAG = "TaskAnimationManager";
+    public static final String EXTRA_START_RECENTS_ANIMATION =
+            "com.android.quickstep.extra.START_RECENTS_ANIMATION";
 
     @VisibleForTesting
     public static final long RECENTS_ANIMATION_START_TIMEOUT_MS = 5000L;
@@ -433,6 +435,8 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
         mCallbacks.addListener(gestureState);
         mCallbacks.addListener(listener);
 
+        final Intent recentsIntent = new Intent(intent)
+                .putExtra(EXTRA_START_RECENTS_ANIMATION, true);
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setPendingIntentBackgroundActivityStartMode(
                 ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
@@ -463,12 +467,12 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
 
         if (containerInterface.getCreatedContainer()
                 instanceof RecentsWindowManager recentsWindowManager) {
-            mRecentsAnimationStartPending = getSystemUiProxy().startRecentsTransition(intent,
+            mRecentsAnimationStartPending = getSystemUiProxy().startRecentsTransition(recentsIntent,
                     options, mCallbacks, gestureState.useSyntheticRecentsTransition(), null,
                     mDisplayId);
             MAIN_EXECUTOR.execute(() -> recentsWindowManager.showRecentsWindow(mCallbacks));
         } else {
-            mRecentsAnimationStartPending = getSystemUiProxy().startRecentsTransition(intent,
+            mRecentsAnimationStartPending = getSystemUiProxy().startRecentsTransition(recentsIntent,
                     options, mCallbacks, false /* useSyntheticRecentsTransition */, null,
                     mDisplayId);
         }
