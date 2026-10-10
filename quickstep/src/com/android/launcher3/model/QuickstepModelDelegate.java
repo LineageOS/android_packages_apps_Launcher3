@@ -42,6 +42,8 @@ import androidx.annotation.WorkerThread;
 
 import com.android.launcher3.ConstantItem;
 import com.android.launcher3.InvariantDeviceProfile;
+import com.android.launcher3.LauncherModel;
+import com.android.launcher3.LauncherPrefChangeListener;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.dagger.ApplicationContext;
 import com.android.launcher3.logger.LauncherAtom;
@@ -57,6 +59,8 @@ import com.android.quickstep.logging.SettingsChangeLogger;
 import com.android.quickstep.logging.StatsLogCompatManager;
 import com.android.quickstep.util.ContextualSearchStateManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
+
+import java.util.Collections;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -87,6 +91,12 @@ public class QuickstepModelDelegate extends ModelDelegate {
 
     protected boolean mActive = true;
 
+    private final LauncherPrefChangeListener mPredictionsPrefListener = key -> {
+        if (LauncherPrefs.SUGGESTIONS_ENABLED.getSharedPrefKey().equals(key)) {
+            updatePredictionsEnabledState();
+        }
+    };
+
     @Inject
     public QuickstepModelDelegate(@ApplicationContext Context context,
             InvariantDeviceProfile idp,
@@ -108,7 +118,17 @@ public class QuickstepModelDelegate extends ModelDelegate {
     }
 
     @Override
+    public void init(LauncherModel model, AllAppsList appsList, BgDataModel dataModel) {
+        super.init(model, appsList, dataModel);
+        LauncherPrefs.get(mContext)
+                .addListener(mPredictionsPrefListener, LauncherPrefs.SUGGESTIONS_ENABLED);
+    }
+
+    @Override
     public void loadAndAddExtraModelItems(@NonNull IntSparseArrayMap<ItemInfo> outLoadedItems) {
+        if (!isPredictionsEnabled()) {
+            return;
+        }
         loadAndBindPredictedItems(
                 mIDP.numDatabaseHotseatIcons, mHotseatPredictionState, outLoadedItems);
         loadAndBindPredictedItems(mIDP.numDatabaseAllAppsColumns, mAllPredictionAppsState,
@@ -251,6 +271,8 @@ public class QuickstepModelDelegate extends ModelDelegate {
             }
         }
         destroyPredictors();
+        LauncherPrefs.get(mContext)
+                .removeListener(mPredictionsPrefListener, LauncherPrefs.SUGGESTIONS_ENABLED);
     }
 
     private void destroyPredictors() {
@@ -258,10 +280,28 @@ public class QuickstepModelDelegate extends ModelDelegate {
         mHotseatPredictionState.destroyPredictor();
     }
 
+    private boolean isPredictionsEnabled() {
+        return LauncherPrefs.get(mContext).get(LauncherPrefs.SUGGESTIONS_ENABLED);
+    }
+
+    private void updatePredictionsEnabledState() {
+        mModel.enqueueModelUpdateTask((taskController, dataModel, apps) -> {
+            if (isPredictionsEnabled()) {
+                recreatePredictors();
+                return;
+            }
+            destroyPredictors();
+            new PredictionUpdateTask(mAllPredictionAppsState, Collections.emptyList())
+                    .execute(taskController, dataModel, apps);
+            new PredictionUpdateTask(mHotseatPredictionState, Collections.emptyList())
+                    .execute(taskController, dataModel, apps);
+        });
+    }
+
     @WorkerThread
     private void recreatePredictors() {
         destroyPredictors();
-        if (!mActive) {
+        if (!mActive || !isPredictionsEnabled()) {
             return;
         }
 
@@ -281,7 +321,7 @@ public class QuickstepModelDelegate extends ModelDelegate {
     @WorkerThread
     private void recreateHotseatPredictor() {
         mHotseatPredictionState.destroyPredictor();
-        if (mActive) {
+        if (mActive && isPredictionsEnabled()) {
             registerHotseatPredictor(mContext);
         }
     }
