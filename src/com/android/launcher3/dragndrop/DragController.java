@@ -664,7 +664,9 @@ public class DragController implements DragDriver.EventListener, TouchController
         }
 
         if (!Utilities.isWorkspaceEditAllowed(mActivity.getDragLayer().getContext())) {
-            cancelDrag();
+            if (mDragDriver != null) {
+                cancelDrag();
+            }
             return false;
         }
 
