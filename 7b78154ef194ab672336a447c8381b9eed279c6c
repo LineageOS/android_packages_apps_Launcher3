@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cad8acf8_36e8583a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 28798
+      },
+      "writtenOn": "2026-10-13T09:07:54Z",
+      "side": 1,
+      "message": "Google did not prepare 3-button nav at all for SUW, they just defaulted to gesture and assumed no one will use 3-buttons",
+      "revId": "7b78154ef194ab672336a447c8381b9eed279c6c",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
