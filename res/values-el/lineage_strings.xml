@@ -27,6 +27,8 @@
     <string name="drawer_show_labels">Εμφάνιση ετικετών εικονιδίων στο συρτάρι</string>
     <string name="drawer_open_keyboard_title">Σύρετε για έναρξη αναζήτησης</string>
     <string name="drawer_open_keyboard_summary">Άνοιγμα πληκτρολογίου κάθε φορά που το συρτάρι εφαρμογών γίνεται ορατό</string>
+    <string name="pref_sleep_gesture_title">Διπλό πάτημα για αναστολή</string>
+    <string name="pref_sleep_gesture_summary">Πατήστε δύο φορές στον κενό χώρο της αρχικής οθόνης για απενεργοποίηση της οθόνης</string>
     <string name="trust_apps_manager_name">Κρυφές &amp; προστατευόμενες εφαρμογές</string>
     <string name="trust_apps_auth_manager">Ξεκλειδώστε για να διαχειριστείτε τις κρυφές και προστατευόμενες εφαρμογές</string>
     <string name="trust_apps_auth_open_app">Απαιτείται έλεγχος ταυτότητας για να ανοίξετε το \"%1$s\"</string>
@@ -37,4 +39,11 @@
     <string name="trust_apps_info_protected">Οι προστατευόμενες εφαρμογές απαιτούν έλεγχο ταυτότητας για να ανοιχτούν από την αρχική σελίδα η το συρτάρι</string>
     <string name="pref_suggestions_title">Προτάσεις</string>
     <string name="pref_suggestions_summary">Εμφάνιση προτεινόμενων εφαρμογών στο συρτάρι &amp; την αρχική οθόνη</string>
+    <string name="pebble_shape_title">Βότσαλο</string>
+    <string name="vessel_shape_title">Σκάφος</string>
+    <string name="pure_square_shape_title">Τέλειο τετράγωνο</string>
+    <string name="squircle_shape_title">Στρογγυλεμένο τετράγωνο</string>
+    <string name="tapered_rect_shape_title">Κωνικό ορθογώνιο</string>
+    <string name="teardrop_shape_title">Δάκρυ</string>
+    <string name="rounded_rect_shape_title">Στρογγυλεμένο ορθογώνιο</string>
 </resources>
