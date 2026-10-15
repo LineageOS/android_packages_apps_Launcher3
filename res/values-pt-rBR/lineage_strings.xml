@@ -31,6 +31,8 @@
     <string name="settings_edit_widgets_error">Não é possível adicionar widgets à tela inicial</string>
     <string name="desktop_show_labels">Mostrar legendas na tela inicial</string>
     <string name="drawer_show_labels">Mostrar legendas na gaveta de apps</string>
+    <string name="pref_show_hotseat_qsb_title">Mostrar barra de pesquisa</string>
+    <string name="pref_show_hotseat_qsb_summary">Na parte inferior da sua tela inicial</string>
     <string name="drawer_open_keyboard_title">Deslizar para iniciar pesquisa</string>
     <string name="drawer_open_keyboard_summary">Abrir o teclado sempre que a gaveta de apps se tornar visível</string>
     <string name="title_show_google_app">Mostrar app do Google</string>

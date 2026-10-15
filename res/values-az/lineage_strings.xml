@@ -31,6 +31,8 @@
     <string name="settings_edit_widgets_error">Əsas ekrana vicet əlavə etmək mümkün deyil</string>
     <string name="desktop_show_labels">Masaüstündə ikon etiketlərini göstər</string>
     <string name="drawer_show_labels">Siyirmədə ikon etiketlərini göstər</string>
+    <string name="pref_show_hotseat_qsb_title">Axtarış çubuğunu göstər</string>
+    <string name="pref_show_hotseat_qsb_summary">Ana ekranınızın alt hissəsində</string>
     <string name="drawer_open_keyboard_title">Axtarışı başlatmaq üçün sürüşdür</string>
     <string name="drawer_open_keyboard_summary">Tətbiq siyirməsi göründükdə klaviatura açılsın</string>
     <string name="title_show_google_app">Google tətbiqini göstər</string>

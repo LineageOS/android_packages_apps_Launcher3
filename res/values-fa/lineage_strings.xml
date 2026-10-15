@@ -31,6 +31,8 @@
     <string name="settings_edit_widgets_error">افزودن ابزارک به صفحه اصلی امکان‌پذیر نیست</string>
     <string name="desktop_show_labels">نشان دادن نام برنامه ها در خانه</string>
     <string name="drawer_show_labels">نشان دادن نام نمادها در کشوی برنامه</string>
+    <string name="pref_show_hotseat_qsb_title">نمایش نوار جستجو</string>
+    <string name="pref_show_hotseat_qsb_summary">در پایین صفحه اصلی شما</string>
     <string name="drawer_open_keyboard_title">برای شروع جستجو انگشت خود را بکشید</string>
     <string name="drawer_open_keyboard_summary">هر زمان که کشوی برنامه نمایان شد، صفحه کلید را باز کنید</string>
     <string name="title_show_google_app">نمایش برنامه گوگل</string>

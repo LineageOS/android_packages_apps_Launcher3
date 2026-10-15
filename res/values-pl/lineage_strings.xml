@@ -31,6 +31,8 @@
     <string name="settings_edit_widgets_error">Nie można dodać widżetów do ekranu głównego</string>
     <string name="desktop_show_labels">Pokazuj etykiety ikon na pulpicie</string>
     <string name="drawer_show_labels">Pokazuj etykiety ikon w szufladzie</string>
+    <string name="pref_show_hotseat_qsb_title">Pokaż pasek wyszukiwania</string>
+    <string name="pref_show_hotseat_qsb_summary">Na dole ekranu głównego</string>
     <string name="drawer_open_keyboard_title">Przesuń, aby rozpocząć wyszukiwanie</string>
     <string name="drawer_open_keyboard_summary">Otwieraj klawiaturę, gdy szuflada aplikacji staje się widoczna</string>
     <string name="title_show_google_app">Pokazuj aplikację Google</string>

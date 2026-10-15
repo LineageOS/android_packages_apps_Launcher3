@@ -31,6 +31,8 @@
     <string name="settings_edit_widgets_error">אין אפשרות להוסיף יישומונים למסך הבית</string>
     <string name="desktop_show_labels">הצגת שמות היישומים במסך הבית</string>
     <string name="drawer_show_labels">הצגת שמות היישומים במגירת היישומים</string>
+    <string name="pref_show_hotseat_qsb_title">הצגת סרגל חיפוש</string>
+    <string name="pref_show_hotseat_qsb_summary">בתחתית מסך הבית</string>
     <string name="drawer_open_keyboard_title">החלקה לתחילת חיפוש</string>
     <string name="drawer_open_keyboard_summary">הפעל מקלדת, כשמגירת האפליקציה מוצגת</string>
     <string name="title_show_google_app">הצגת יישום Google</string>

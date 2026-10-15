@@ -31,6 +31,8 @@
     <string name="settings_edit_widgets_error">Không thể thêm tiện ích con vào màn hình chính</string>
     <string name="desktop_show_labels">Hiển thị nhãn biểu tượng trên bàn làm việc</string>
     <string name="drawer_show_labels">Hiển thị nhãn biểu tượng trong ngăn kéo</string>
+    <string name="pref_show_hotseat_qsb_title">Hiển thị thanh tìm kiếm</string>
+    <string name="pref_show_hotseat_qsb_summary">Ở cuối màn hình chính của bạn</string>
     <string name="drawer_open_keyboard_title">Vuốt để bắt đầu tìm kiếm</string>
     <string name="drawer_open_keyboard_summary">Mở bàn phím bất cứ khi nào ngăn kéo ứng dụng xuất hiện</string>
     <string name="title_show_google_app">Hiển thị ứng dụng Google</string>
