@@ -221,6 +221,7 @@
     <string name="uninstall_drop_target_label">Uninstall</string>
     <!-- Label for app info drop target. [CHAR_LIMIT=20] -->
     <string name="app_info_drop_target_label">App info</string>
+    <string name="launch_on_bottom_screen">Launch on bottom screen</string>
     <!-- Label for install to private profile shortcut label. [CHAR_LIMIT=20] -->
     <string name="install_private_system_shortcut_label">Install in private</string>
     <!-- Label for uninstall app private profile shortcut.-->

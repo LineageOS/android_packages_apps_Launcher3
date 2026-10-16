@@ -14,11 +14,16 @@ import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURC
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
+import android.hardware.display.DisplayManager;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.Log;
+import android.app.ActivityOptions;
+import android.view.Display;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
@@ -195,6 +200,48 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
     }
 
     public static final Factory<ActivityContext> APP_INFO = AppInfo::new;
+
+    /** Show a second-screen launch action only for launchable apps on the Thor. */
+    public static final Factory<ActivityContext> LAUNCH_ON_BOTTOM_SCREEN =
+            (context, itemInfo, originalView) -> {
+                if (!"odin2thor".equals(Build.DEVICE)
+                        || itemInfo.itemType != LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
+                        || itemInfo.getTargetComponent() == null
+                        || context.asContext().getSystemService(DisplayManager.class)
+                                .getDisplay(1) == null) {
+                    return null;
+                }
+                return new LaunchOnBottomScreen<>(context, itemInfo, originalView);
+            };
+
+    public static class LaunchOnBottomScreen<T extends ActivityContext> extends SystemShortcut<T> {
+        private static final int BOTTOM_DISPLAY_ID = 1;
+
+        public LaunchOnBottomScreen(T target, ItemInfo itemInfo, @NonNull View originalView) {
+            super(R.drawable.splitscreen_24px, R.string.launch_on_bottom_screen,
+                    target, itemInfo, originalView, false);
+        }
+
+        @Override
+        public void onClick(View view) {
+            Context context = mTarget.asContext();
+            DisplayManager displays = context.getSystemService(DisplayManager.class);
+            Display bottom = displays.getDisplay(BOTTOM_DISPLAY_ID);
+            if (bottom == null) {
+                return;
+            }
+            AbstractFloatingView.closeAllOpenViews(mTarget);
+            ActivityOptions options = mTarget.getActivityLaunchOptions(view, mItemInfo).options;
+            options.setLaunchDisplayId(bottom.getDisplayId());
+            try {
+                context.getSystemService(LauncherApps.class).startMainActivity(
+                        mItemInfo.getTargetComponent(), mItemInfo.user, null,
+                        options.toBundle());
+            } catch (RuntimeException e) {
+                Log.e(TAG, "Unable to launch app on bottom screen", e);
+            }
+        }
+    }
 
     public static class AppInfo<T extends ActivityContext> extends SystemShortcut<T> {
 
