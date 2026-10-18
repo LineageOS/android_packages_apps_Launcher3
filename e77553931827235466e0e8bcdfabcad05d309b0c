@@ -57,6 +57,24 @@
       "parentUuid": "8dfbd22b_a383208b",
       "revId": "e77553931827235466e0e8bcdfabcad05d309b0c",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1c8ed735_a7fd5f7f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2026-10-18T19:12:17Z",
+      "side": 1,
+      "message": "That\u0027s fine. I was avoiding potentially deviating UX on other devices. This is easier to merge because it\u0027s opt-in.\n\nBut I\u0027m fine with whichever. Let me know which you want.",
+      "parentUuid": "bc22394e_8302ee2e",
+      "revId": "e77553931827235466e0e8bcdfabcad05d309b0c",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
