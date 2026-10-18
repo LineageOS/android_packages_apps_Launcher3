@@ -34,6 +34,24 @@
       "parentUuid": "8d9215f9_1a172619",
       "revId": "4073083746dfdcc17f023ca766029847b28c32bc",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e1a3a261_b69ac8f4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2026-10-18T20:56:50Z",
+      "side": 1,
+      "message": "I re-added the overlay guard.",
+      "parentUuid": "a3933d4e_487d4048",
+      "revId": "4073083746dfdcc17f023ca766029847b28c32bc",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
