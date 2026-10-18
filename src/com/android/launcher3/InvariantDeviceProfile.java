@@ -50,6 +50,7 @@ import android.os.Trace;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Surface;
 
 import androidx.annotation.DimenRes;
 import androidx.annotation.IntDef;
@@ -274,6 +275,7 @@ public class InvariantDeviceProfile {
         mMainExecutor = mainExecutor;
 
         String gridName = prefs.get(GRID_NAME);
+        maybeDefaultToFixedLandscape(gridName);
         initGrid(gridName);
         mThemeManager.generateIconShape(iconBitmapSize);
 
@@ -322,6 +324,26 @@ public class InvariantDeviceProfile {
                 mMainExecutor, i -> onConfigChanged());
         localeReceiver.register(actionsFilter(Intent.ACTION_LOCALE_CHANGED));
         lifeCycle.addCloseable(localeReceiver);
+    }
+
+    /**
+     * Devices with a landscape natural orientation (e.g. gaming handhelds) are permanently in the
+     * phone landscape layout, which has no room for workspace labels. Default them to fixed
+     * landscape mode, unless the user has already picked a value.
+     */
+    private void maybeDefaultToFixedLandscape(String gridName) {
+        if (mPrefs.has(FIXED_LANDSCAPE_MODE)) return;
+        LauncherDisplayInfo info = mDisplayController.getInfo();
+        if (info.isLargeScreen(info.realBounds)) return;
+        Point size = info.currentSize;
+        boolean isRotated = info.rotation == Surface.ROTATION_90
+                || info.rotation == Surface.ROTATION_270;
+        boolean isNaturalLandscape = isRotated ? size.y > size.x : size.x > size.y;
+        if (!isNaturalLandscape) return;
+        if (gridName != null) {
+            mPrefs.put(NON_FIXED_LANDSCAPE_GRID_NAME, gridName);
+        }
+        mPrefs.put(FIXED_LANDSCAPE_MODE, true);
     }
 
     private void initGrid(String gridName) {
