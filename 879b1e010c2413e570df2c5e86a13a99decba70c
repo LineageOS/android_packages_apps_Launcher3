@@ -22,6 +22,30 @@
       },
       "revId": "879b1e010c2413e570df2c5e86a13a99decba70c",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b002df1c_170722b4",
+        "filename": "src/com/android/launcher3/InvariantDeviceProfile.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2026-10-19T16:12:31Z",
+      "side": 1,
+      "message": "leftover from previous patchiest where I exposed a toggle for it.",
+      "parentUuid": "47a0b6fc_e506a235",
+      "range": {
+        "startLine": 331,
+        "startChar": 7,
+        "endLine": 331,
+        "endChar": 49
+      },
+      "revId": "879b1e010c2413e570df2c5e86a13a99decba70c",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
