@@ -22,9 +22,13 @@ import static android.view.View.MeasureSpec.makeMeasureSpec;
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
 
 import android.content.Context;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowInsets;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 
 import com.android.launcher3.AbstractFloatingView;
@@ -57,6 +61,8 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
 
     private View mAllAppsButton;
     private ActivityAllAppsContainerView<SecondaryDisplayLauncher> mAppsView;
+
+    private final Rect mDrawerBounds = new Rect();
 
     private GridView mWorkspace;
     private PinnedAppsAdapter mPinnedAppsAdapter;
@@ -131,31 +137,32 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         int height = MeasureSpec.getSize(heightMeasureSpec);
         setMeasuredDimension(width, height);
 
+        WindowInsets windowInsets = getRootWindowInsets();
+        Insets systemInsets = windowInsets == null ? Insets.NONE
+                : windowInsets.getInsetsIgnoringVisibility(
+                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        int gap = getResources().getDimensionPixelSize(R.dimen.secondary_drawer_edge_gap);
+        mDrawerBounds.set(
+                Math.max(getPaddingLeft(), systemInsets.left + gap),
+                Math.max(getPaddingTop(), systemInsets.top + gap),
+                width - Math.max(getPaddingRight(), systemInsets.right + gap),
+                height - Math.max(getPaddingBottom(), systemInsets.bottom + gap));
+
         DeviceProfile grid = mContainer.getDeviceProfile();
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child == mAppsView) {
-                int horizontalPadding = (2 * grid.getWorkspaceProfile()
-                        .getDesiredWorkspaceHorizontalMarginPx())
-                        + grid.getWorkspaceProfile().getCellLayoutPaddingPx().left
-                        + grid.getWorkspaceProfile().getCellLayoutPaddingPx().right;
-                int verticalPadding =
-                        grid.getWorkspaceProfile().getCellLayoutPaddingPx().top
-                                + grid.getWorkspaceProfile().getCellLayoutPaddingPx().bottom;
-
-                int maxWidth =
-                        grid.getAllAppsProfile().getCellWidthPx()
-                                * grid.getAllAppsProfile().getNumShownAllAppsColumns()
-                                + horizontalPadding;
-                int appsWidth = Math.min(width - getPaddingLeft() - getPaddingRight(), maxWidth);
-
-                int maxHeight =
-                        grid.getAllAppsProfile().getCellHeightPx()
-                                * grid.getAllAppsProfile().getNumShownAllAppsColumns()
-                                + verticalPadding;
-                int appsHeight = Math.min(height - getPaddingTop() - getPaddingBottom(), maxHeight);
-
+                // Secondary all-apps is a floating panel. Keep its surface and content
+                // inside the usable display, including three-button navigation insets.
+                FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) child.getLayoutParams();
+                lp.leftMargin = Math.max(0, mDrawerBounds.left - getPaddingLeft());
+                lp.topMargin = Math.max(0, mDrawerBounds.top - getPaddingTop());
+                lp.rightMargin = Math.max(0, width - mDrawerBounds.right - getPaddingRight());
+                lp.bottomMargin = Math.max(0,
+                        height - mDrawerBounds.bottom - getPaddingBottom());
+                int appsWidth = Math.max(1, Math.round(mDrawerBounds.width() * 0.94f));
+                int appsHeight = Math.max(1, Math.round(mDrawerBounds.height() * 0.88f));
                 mAppsView.measure(
                         makeMeasureSpec(appsWidth, EXACTLY), makeMeasureSpec(appsHeight, EXACTLY));
             } else if (child == mAllAppsButton) {
@@ -171,6 +178,13 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
                 measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
             }
         }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        // A partially visible final row must not paint into the navigation area.
+        mAppsView.setClipBounds(new Rect(0, 0, mAppsView.getWidth(), mAppsView.getHeight()));
     }
 
     private class SecondaryDisplayAllAppsTouchController implements TouchController {
