@@ -22,6 +22,8 @@ import static android.view.View.MeasureSpec.makeMeasureSpec;
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -62,6 +64,7 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
     private View mAllAppsButton;
     private ActivityAllAppsContainerView<SecondaryDisplayLauncher> mAppsView;
 
+    private SecondaryDrawerResizeController mDrawerResize;
     private final Rect mDrawerBounds = new Rect();
 
     private GridView mWorkspace;
@@ -102,6 +105,7 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         mAllAppsButton = findViewById(R.id.all_apps_button);
 
         mAppsView = findViewById(R.id.apps_view);
+        mDrawerResize = new SecondaryDrawerResizeController(this, mAppsView);
         // Setup workspace
         mWorkspace = findViewById(R.id.workspace_grid);
         mPinnedAppsAdapter = new PinnedAppsAdapter(mContainer, mAppsView.getAppsStore(),
@@ -117,6 +121,7 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mPinnedAppsAdapter.init();
+        mDrawerResize.attach();
     }
 
     /**
@@ -126,6 +131,7 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mPinnedAppsAdapter.destroy();
+        mDrawerResize.detach();
     }
 
     /**
@@ -161,8 +167,8 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
                 lp.rightMargin = Math.max(0, width - mDrawerBounds.right - getPaddingRight());
                 lp.bottomMargin = Math.max(0,
                         height - mDrawerBounds.bottom - getPaddingBottom());
-                int appsWidth = Math.max(1, Math.round(mDrawerBounds.width() * 0.94f));
-                int appsHeight = Math.max(1, Math.round(mDrawerBounds.height() * 0.88f));
+                int appsWidth = Math.max(1, Math.round(mDrawerBounds.width() * mDrawerResize.getWidthRatio()));
+                int appsHeight = Math.max(1, Math.round(mDrawerBounds.height() * mDrawerResize.getHeightRatio()));
                 mAppsView.measure(
                         makeMeasureSpec(appsWidth, EXACTLY), makeMeasureSpec(appsHeight, EXACTLY));
             } else if (child == mAllAppsButton) {
@@ -185,6 +191,46 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         super.onLayout(changed, left, top, right, bottom);
         // A partially visible final row must not paint into the navigation area.
         mAppsView.setClipBounds(new Rect(0, 0, mAppsView.getWidth(), mAppsView.getHeight()));
+        mDrawerResize.layout(mDrawerBounds);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        return mDrawerResize != null && mDrawerResize.touch(event)
+                || super.dispatchTouchEvent(event);
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        if (mAppsView != null && mAppsView.isShown()) {
+            info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                    R.id.secondary_drawer_expand,
+                    getContext().getString(R.string.secondary_drawer_expand)));
+            info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                    R.id.secondary_drawer_shrink,
+                    getContext().getString(R.string.secondary_drawer_shrink)));
+            info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                    R.id.secondary_drawer_reset,
+                    getContext().getString(R.string.secondary_drawer_reset)));
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (mAppsView != null && mAppsView.isShown()) {
+            if (action == R.id.secondary_drawer_expand) {
+                mDrawerResize.resizeBy(0.1f);
+                return true;
+            } else if (action == R.id.secondary_drawer_shrink) {
+                mDrawerResize.resizeBy(-0.1f);
+                return true;
+            } else if (action == R.id.secondary_drawer_reset) {
+                mDrawerResize.reset();
+                return true;
+            }
+        }
+        return super.performAccessibilityAction(action, arguments);
     }
 
     private class SecondaryDisplayAllAppsTouchController implements TouchController {

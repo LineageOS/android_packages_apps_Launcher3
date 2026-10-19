@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2026 The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <item type="id" name="secondary_drawer_expand" />
+    <item type="id" name="secondary_drawer_shrink" />
+    <item type="id" name="secondary_drawer_reset" />
+</resources>
