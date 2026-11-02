@@ -1179,12 +1179,13 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     }
 
     private NavButtonLayoutter getLayoutterForCurrentState() {
+        int rotation = mWindowManagerProxy.getRotation(mContext);
         return NavButtonLayoutFactory.Companion.getUiLayoutter(
                         mContext.getDeviceProfile(), mNavButtonsView, mImeSwitcherButton,
                         mA11yButton, mMoreOptionsButton, mSpace, mContext.getResources(),
                         mContext.isNavBarKidsModeActive(),
                         !mContext.isUserSetupComplete(), mContext.isThreeButtonNav(),
-                        mContext.isPhoneMode(), mWindowManagerProxy.getRotation(mContext));
+                        mContext.isPhoneMode(), mContext.getPhoneNavBarGravity(rotation));
     }
 
     private void updateButtonsBackground() {

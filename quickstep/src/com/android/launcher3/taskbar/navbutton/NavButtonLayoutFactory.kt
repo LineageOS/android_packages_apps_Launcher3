@@ -17,8 +17,7 @@
 package com.android.launcher3.taskbar.navbutton
 
 import android.content.res.Resources
-import android.view.Surface.ROTATION_90
-import android.view.Surface.Rotation
+import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -66,7 +65,7 @@ class NavButtonLayoutFactory {
             isInSetup: Boolean,
             isThreeButtonNav: Boolean,
             phoneMode: Boolean,
-            @Rotation surfaceRotation: Int,
+            navBarGravity: Int,
         ): NavButtonLayoutter {
             val navButtonContainer =
                 navButtonsView.requireViewById<LinearLayout>(ID_END_NAV_BUTTONS)
@@ -97,11 +96,7 @@ class NavButtonLayoutFactory {
                     )
                 }
                 isPhoneNavMode -> {
-                    if (
-                        deviceProfile.deviceProperties.isLandscape ==
-                                deviceProfile.deviceProperties.isDefaultLandscape
-                        || !deviceProfile.deviceProperties.canNavBarMove
-                    ) {
+                    if (navBarGravity == Gravity.BOTTOM) {
                         navButtonsView.setIsVertical(false)
                         PhonePortraitNavLayoutter(
                             resources,
@@ -116,7 +111,7 @@ class NavButtonLayoutFactory {
                             homeButton,
                             recentsButton,
                         )
-                    } else if (surfaceRotation == ROTATION_90) {
+                    } else if (navBarGravity == Gravity.END) {
                         navButtonsView.setIsVertical(true)
                         PhoneLandscapeNavLayoutter(
                             resources,

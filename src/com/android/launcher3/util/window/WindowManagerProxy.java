@@ -151,6 +151,13 @@ public class WindowManagerProxy {
     }
 
     /**
+     * Returns the rotation at which the display is in its "landscape" orientation
+     */
+    private int getLandscapeRotation(Context context) {
+        return isDefaultLandscape(context) ? Surface.ROTATION_0 : Surface.ROTATION_90;
+    }
+
+    /**
      * Returns an updated insets, accounting for various Launcher UI specific overrides like taskbar
      */
     public WindowInsets normalizeWindowInsets(Context context,
@@ -179,26 +186,24 @@ public class WindowManagerProxy {
         boolean isLargeScreen = config.smallestScreenWidthDp > MIN_TABLET_WIDTH;
         boolean isGesture = isGestureNav(context);
         boolean isPortrait = config.screenHeightDp > config.screenWidthDp;
-        boolean isDefaultLandscape = isDefaultLandscape(context);
 
         int navBarHeight = getDimenByName(systemRes,
                 isPortrait ? NAVBAR_HEIGHT : NAVBAR_HEIGHT_LANDSCAPE);
 
+        boolean navBarOnSide = !isPortrait;
         int bottomNav = isLargeScreen
                 ? isTaskbarEnabled(context) ? 0 : getDimenByName(systemRes, NAVBAR_HEIGHT)
-                : ((isPortrait != isDefaultLandscape || isGesture
-                        ? navBarHeight
-                        : 0)
-                + cutoutInsets.bottom);
+                : ((!navBarOnSide || isGesture ? navBarHeight : 0) + cutoutInsets.bottom);
         int leftNav = navInsets.left;
         int rightNav = navInsets.right;
-        if (!isLargeScreen && !isGesture && isPortrait == isDefaultLandscape) {
+        if (!isLargeScreen && !isGesture && navBarOnSide) {
             // In 3-button landscape/seascape, Launcher should always have nav insets regardless if
             // it's initiated from fullscreen apps.
             int navBarWidth = getDimenByName(systemRes, NAVBAR_LANDSCAPE_LEFT_RIGHT_SIZE);
-            switch (getRotation(context)) {
-                case Surface.ROTATION_90 -> rightNav = navBarWidth;
-                case Surface.ROTATION_270 -> leftNav = navBarWidth;
+            if (getRotation(context) == getLandscapeRotation(context)) {
+                rightNav = navBarWidth;
+            } else {
+                leftNav = navBarWidth;
             }
         }
         Insets newNavInsets = Insets.of(leftNav, navInsets.top, rightNav, bottomNav);

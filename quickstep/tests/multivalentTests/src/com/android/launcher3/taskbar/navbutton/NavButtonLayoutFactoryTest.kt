@@ -2,9 +2,9 @@ package com.android.launcher3.taskbar.navbutton
 
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.view.Surface
-import android.view.Surface.ROTATION_270
-import android.view.Surface.Rotation
+import android.view.Gravity.BOTTOM
+import android.view.Gravity.END
+import android.view.Gravity.START
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -45,7 +45,7 @@ class NavButtonLayoutFactoryTest {
     private val mockSpace: Space = mock()
     private val mockConfiguration: Configuration = mock()
 
-    private var surfaceRotation = Surface.ROTATION_0
+    private var navBarGravity = BOTTOM
 
     @Before
     fun setup() {
@@ -85,7 +85,7 @@ class NavButtonLayoutFactoryTest {
                 isInSetup = false,
                 isThreeButtonNav = false,
                 phoneMode = false,
-                surfaceRotation = surfaceRotation,
+                navBarGravity = navBarGravity,
             )
         assert(layoutter is KidsNavLayoutter)
     }
@@ -99,7 +99,7 @@ class NavButtonLayoutFactoryTest {
                 isInSetup = true,
                 isThreeButtonNav = false,
                 phoneMode = false,
-                surfaceRotation = surfaceRotation,
+                navBarGravity = navBarGravity,
             )
         assert(layoutter is SetupNavLayoutter)
     }
@@ -113,7 +113,7 @@ class NavButtonLayoutFactoryTest {
                 isInSetup = false,
                 isThreeButtonNav = false,
                 phoneMode = false,
-                surfaceRotation = surfaceRotation,
+                navBarGravity = navBarGravity,
             )
         assert(layoutter is TaskbarNavLayoutter)
     }
@@ -127,7 +127,7 @@ class NavButtonLayoutFactoryTest {
                 isInSetup = false,
                 isThreeButtonNav = false,
                 phoneMode = false,
-                surfaceRotation = surfaceRotation,
+                navBarGravity = navBarGravity,
             )
         }
     }
@@ -141,7 +141,7 @@ class NavButtonLayoutFactoryTest {
                 isInSetup = false,
                 isThreeButtonNav = true,
                 phoneMode = true,
-                surfaceRotation = surfaceRotation,
+                navBarGravity = navBarGravity,
             )
         assert(layoutter is PhonePortraitNavLayoutter)
     }
@@ -156,7 +156,7 @@ class NavButtonLayoutFactoryTest {
                 isInSetup = false,
                 isThreeButtonNav = true,
                 phoneMode = true,
-                surfaceRotation = surfaceRotation,
+                navBarGravity = END,
             )
         assert(layoutter is PhoneLandscapeNavLayoutter)
     }
@@ -171,7 +171,7 @@ class NavButtonLayoutFactoryTest {
                 isInSetup = false,
                 isThreeButtonNav = true,
                 phoneMode = true,
-                surfaceRotation = ROTATION_270,
+                navBarGravity = START,
             )
         assert(layoutter is PhoneSeascapeNavLayoutter)
     }
@@ -186,7 +186,7 @@ class NavButtonLayoutFactoryTest {
                 isInSetup = false,
                 isThreeButtonNav = false,
                 phoneMode = true,
-                surfaceRotation = surfaceRotation,
+                navBarGravity = navBarGravity,
             )
         assert(layoutter is PhoneGestureLayoutter)
     }
@@ -200,7 +200,7 @@ class NavButtonLayoutFactoryTest {
         isInSetup: Boolean,
         isThreeButtonNav: Boolean,
         phoneMode: Boolean,
-        @Rotation surfaceRotation: Int,
+        navBarGravity: Int,
     ): NavButtonLayoutFactory.NavButtonLayoutter {
         return NavButtonLayoutFactory.getUiLayoutter(
             deviceProfile = mockDeviceProfile,
@@ -210,7 +210,7 @@ class NavButtonLayoutFactoryTest {
             isInSetup = isInSetup,
             isThreeButtonNav = isThreeButtonNav,
             phoneMode = phoneMode,
-            surfaceRotation = surfaceRotation,
+            navBarGravity = navBarGravity,
             imeSwitcher = mockImeSwitcher,
             a11yButton = mockA11yButton,
             moreOptionsButton = mockMoreOptionsButton,

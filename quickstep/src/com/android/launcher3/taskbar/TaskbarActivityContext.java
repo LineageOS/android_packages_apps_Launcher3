@@ -950,22 +950,32 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             WindowManager.LayoutParams lp) {
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
         lp.height = WindowManager.LayoutParams.MATCH_PARENT;
-        lp.gravity = Gravity.BOTTOM;
+        lp.gravity = getPhoneNavBarGravity(rot);
 
-        // Override with per-rotation specific values
-        switch (rot) {
-            case Surface.ROTATION_0, Surface.ROTATION_180 -> {
-                lp.height = mLastRequestedNonFullscreenSize;
-            }
-            case Surface.ROTATION_90 -> {
-                lp.width = mLastRequestedNonFullscreenSize;
-                lp.gravity = Gravity.END;
-            }
-            case Surface.ROTATION_270 -> {
-                lp.width = mLastRequestedNonFullscreenSize;
-                lp.gravity = Gravity.START;
-            }
+        if (lp.gravity == Gravity.BOTTOM) {
+            lp.height = mLastRequestedNonFullscreenSize;
+        } else {
+            lp.width = mLastRequestedNonFullscreenSize;
         }
+    }
+
+    private int getLandscapeRotation() {
+        return mDeviceProfile.getDeviceProperties().isDefaultLandscape()
+                ? Surface.ROTATION_0 : Surface.ROTATION_90;
+    }
+
+    public int getPhoneNavBarGravity(int rotation) {
+        if (!mDeviceProfile.getDeviceProperties().getCanNavBarMove()) {
+            return Gravity.BOTTOM;
+        }
+        int landscapeRotation = getLandscapeRotation();
+        if (rotation == landscapeRotation) {
+            return Gravity.END;
+        }
+        if (rotation == (landscapeRotation + 2) % 4) {
+            return Gravity.START;
+        }
+        return Gravity.BOTTOM;
     }
 
     public void onConfigurationChanged(@Config int configChanges) {
@@ -1603,9 +1613,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         // In landscape phone button nav mode, we should set the task bar width instead of height
         // because this is the only case in which the nav bar is not on the display bottom.
         boolean landscapePhoneButtonNav = isPhoneButtonNavMode()
-                && mDeviceProfile.getDeviceProperties().getCanNavBarMove()
-                && (mDeviceProfile.getDeviceProperties().isLandscape() !=
-                        mDeviceProfile.getDeviceProperties().isDefaultLandscape());
+                && getPhoneNavBarGravity(getDisplay().getRotation()) != Gravity.BOTTOM;
         if ((landscapePhoneButtonNav ? mWindowLayoutParams.width : mWindowLayoutParams.height)
                 == size || mIsDestroyed) {
             return;
