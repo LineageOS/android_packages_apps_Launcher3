@@ -26,6 +26,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.GridView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BubbleTextView;
@@ -71,7 +72,7 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         super.recreateControllers();
         TouchController statusBarController =
             ApiWrapper.INSTANCE.get(getContext())
-                .createStatusBarTouchController(mContainer, () -> true);
+                .createStatusBarTouchController(mContainer, this::canOpenStatusBar);
 
         if (statusBarController != null) {
             mControllers = new TouchController[]{
@@ -85,6 +86,20 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
                 mContainer.getDragController()
             };
         }
+    }
+
+    private boolean canOpenStatusBar() {
+        if (mContainer.isOnlyAppDrawer()) {
+            // System decors are hidden in this mode, don't bring the shade back.
+            return false;
+        }
+        if (!mContainer.isAppDrawerShown()) {
+            return true;
+        }
+        // Only let swipes down open the shade once the apps list is scrolled to the top,
+        // otherwise they would never reach the list.
+        RecyclerView rv = mAppsView.getActiveRecyclerView();
+        return rv == null || !rv.canScrollVertically(-1);
     }
 
     /**
@@ -136,28 +151,35 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child == mAppsView) {
-                int horizontalPadding = (2 * grid.getWorkspaceProfile()
-                        .getDesiredWorkspaceHorizontalMarginPx())
-                        + grid.getWorkspaceProfile().getCellLayoutPaddingPx().left
-                        + grid.getWorkspaceProfile().getCellLayoutPaddingPx().right;
-                int verticalPadding =
-                        grid.getWorkspaceProfile().getCellLayoutPaddingPx().top
-                                + grid.getWorkspaceProfile().getCellLayoutPaddingPx().bottom;
+                if (mContainer.isOnlyAppDrawer()) {
+                    measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
+                } else {
+                    int horizontalPadding = (2 * grid.getWorkspaceProfile()
+                            .getDesiredWorkspaceHorizontalMarginPx())
+                            + grid.getWorkspaceProfile().getCellLayoutPaddingPx().left
+                            + grid.getWorkspaceProfile().getCellLayoutPaddingPx().right;
+                    int verticalPadding =
+                            grid.getWorkspaceProfile().getCellLayoutPaddingPx().top
+                                    + grid.getWorkspaceProfile().getCellLayoutPaddingPx().bottom;
 
-                int maxWidth =
-                        grid.getAllAppsProfile().getCellWidthPx()
-                                * grid.getAllAppsProfile().getNumShownAllAppsColumns()
-                                + horizontalPadding;
-                int appsWidth = Math.min(width - getPaddingLeft() - getPaddingRight(), maxWidth);
+                    int maxWidth =
+                            grid.getAllAppsProfile().getCellWidthPx()
+                                    * grid.getAllAppsProfile().getNumShownAllAppsColumns()
+                                    + horizontalPadding;
+                    int appsWidth = Math.min(
+                            width - getPaddingLeft() - getPaddingRight(), maxWidth);
 
-                int maxHeight =
-                        grid.getAllAppsProfile().getCellHeightPx()
-                                * grid.getAllAppsProfile().getNumShownAllAppsColumns()
-                                + verticalPadding;
-                int appsHeight = Math.min(height - getPaddingTop() - getPaddingBottom(), maxHeight);
+                    int maxHeight =
+                            grid.getAllAppsProfile().getCellHeightPx()
+                                    * grid.getAllAppsProfile().getNumShownAllAppsColumns()
+                                    + verticalPadding;
+                    int appsHeight = Math.min(
+                            height - getPaddingTop() - getPaddingBottom(), maxHeight);
 
-                mAppsView.measure(
-                        makeMeasureSpec(appsWidth, EXACTLY), makeMeasureSpec(appsHeight, EXACTLY));
+                    mAppsView.measure(
+                            makeMeasureSpec(appsWidth, EXACTLY),
+                            makeMeasureSpec(appsHeight, EXACTLY));
+                }
             } else if (child == mAllAppsButton) {
                 int appsButtonSpec = makeMeasureSpec(
                         grid.getWorkspaceProfile().getIconSizePx(), EXACTLY
@@ -261,7 +283,8 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
         List<SystemShortcut<?>> systemShortcuts = new ArrayList<>();
         systemShortcuts.add(APP_INFO.getShortcut(mContainer, item, v));
         // Hide redundant pin shortcut for app drawer icons if drag-n-drop is enabled.
-        if (!FeatureFlags.SECONDARY_DRAG_N_DROP_TO_PIN.get() || !mContainer.isAppDrawerShown()) {
+        if (!mContainer.isOnlyAppDrawer()
+                && (!FeatureFlags.SECONDARY_DRAG_N_DROP_TO_PIN.get() || !mContainer.isAppDrawerShown())) {
             systemShortcuts.add(mPinnedAppsAdapter.getSystemShortcut(item, v));
         }
         int deepShortcutCount = popupDataProvider.getShortcutCountForItem(item);
@@ -276,7 +299,9 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
                 systemShortcuts);
         container.requestFocus();
 
-        if (!FeatureFlags.SECONDARY_DRAG_N_DROP_TO_PIN.get() || !mContainer.isAppDrawerShown()) {
+        if (mContainer.isOnlyAppDrawer()
+                || !FeatureFlags.SECONDARY_DRAG_N_DROP_TO_PIN.get()
+                || !mContainer.isAppDrawerShown()) {
             return true;
         }
 

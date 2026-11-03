@@ -25,4 +25,7 @@
 
     <!-- Use fixed landscape mode by default -->
     <bool name="config_defaultFixedLandscape">false</bool>
+
+    <!-- Use a full-screen AppDrawer for SecondaryDisplayLauncher -->
+    <bool name="config_secondaryLauncherOnlyAppDrawer">false</bool>
 </resources>
