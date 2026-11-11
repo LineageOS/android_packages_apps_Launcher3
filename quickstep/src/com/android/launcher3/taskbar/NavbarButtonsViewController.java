@@ -1410,8 +1410,8 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         boolean isNavbarOnRight = location.isOnLeft(mNavButtonsView.isLayoutRtl());
         DeviceProfile dp = mContext.getDeviceProfile();
         float navBarTargetStartX;
-        if (!mContext.isUserSetupComplete()) {
-            // Skip additional translations on the nav bar container while in SUW layout
+        if (!mContext.isUserSetupComplete() || mContext.isPhoneMode()) {
+            // Skip additional translations on the nav bar container while in SUW or phone layout
             return 0;
         } else if (mContext.shouldStartAlignTaskbar()) {
             int navBarSpacing = dp.getHotseatProfile().getInlineNavButtonsEndSpacingPx();
@@ -1444,8 +1444,8 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
     }
 
     private float getImeSwitcherTranslationX(BubbleBarLocation location) {
-        if (!mContext.isUserSetupComplete()) {
-            // Skip additional translations on the nav bar container while in SUW layout
+        if (!mContext.isUserSetupComplete() || mContext.isPhoneMode()) {
+            // Skip additional translations on the nav bar container while in SUW or phone layout
             return 0;
         }
 
@@ -1463,7 +1463,7 @@ public class NavbarButtonsViewController implements TaskbarControllers.LoggableT
         // screen.
         Rect transientTaskbarIconLayoutBoundsInParent = mControllers.taskbarViewController
                 .getTransientTaskbarIconLayoutBoundsInParent();
-        if (mContext.getDeviceProfile().getDeviceProperties().isPhone()
+        if (mContext.isPhoneMode()
                 || transientTaskbarIconLayoutBoundsInParent.isEmpty()
                 || mNavButtonsView.getWidth() == 0) {
             return;
