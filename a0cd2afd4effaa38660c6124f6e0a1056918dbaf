@@ -16,6 +16,24 @@
       "message": "This causes default navbar position to be on the left, like a rotated phone",
       "revId": "a0cd2afd4effaa38660c6124f6e0a1056918dbaf",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d77e1723_5b3c1b92",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2026-11-12T13:13:57Z",
+      "side": 1,
+      "message": "on the right*",
+      "parentUuid": "489dfd4a_852751fb",
+      "revId": "a0cd2afd4effaa38660c6124f6e0a1056918dbaf",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
