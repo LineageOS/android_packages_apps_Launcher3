@@ -25,6 +25,7 @@ import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
 import android.view.Menu;
+import android.view.View;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.Launcher;
@@ -111,6 +112,20 @@ public class KeyboardShortcutsDelegate {
      * @see android.view.KeyEvent
      */
     public Boolean onKeyDown(int keyCode, KeyEvent event) {
+        // L1/R1 scrolling
+        if (mLauncher.isInState(NORMAL) && AbstractFloatingView.getTopOpenView(mLauncher) == null) {
+            boolean isL1 = keyCode == KeyEvent.KEYCODE_BUTTON_L1;
+            boolean isR1 = keyCode == KeyEvent.KEYCODE_BUTTON_R1;
+
+            if ((isL1 && mLauncher.getWorkspace().scrollLeft())
+                    || (isR1 && mLauncher.getWorkspace().scrollRight())) {
+                int direction = isL1 ? View.FOCUS_LEFT : View.FOCUS_RIGHT;
+                mLauncher.getWorkspace().setOnPageTransitionEndCallback(() ->
+                        mLauncher.getWorkspace().getPageAt(mLauncher.getWorkspace().getNextPage())
+                                .requestFocus(direction));
+                return true;
+            }
+        }
         // Ignore escape if pressed in conjunction with any modifier keys.
         if (keyCode == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers()) {
             AbstractFloatingView topView = AbstractFloatingView.getTopOpenView(mLauncher);
