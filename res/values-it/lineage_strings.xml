@@ -31,6 +31,8 @@
     <string name="settings_edit_widgets_error">Non è possibile aggiungere widget alla schermata home</string>
     <string name="desktop_show_labels">Mostra nomi icone nella schermata home</string>
     <string name="drawer_show_labels">Mostra nomi icone nel drawer</string>
+    <string name="pref_show_hotseat_qsb_title">Mostra barra di ricerca</string>
+    <string name="pref_show_hotseat_qsb_summary">Nella parte inferiore della schermata home</string>
     <string name="drawer_open_keyboard_title">Scorri per iniziare la ricerca</string>
     <string name="drawer_open_keyboard_summary">Mostra la tastiera ogni volta che il menù delle applicazioni diventa visibile</string>
     <string name="title_show_google_app">Mostra l\'app Google</string>
