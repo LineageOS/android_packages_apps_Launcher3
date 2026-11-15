@@ -31,6 +31,8 @@
     <string name="settings_edit_widgets_error">முகப்புத்திரையில் இடுக்கைகளைச் சேர்க்கவியலாது</string>
     <string name="desktop_show_labels">முகப்பிற் படவுருப்பெயர் காட்டு</string>
     <string name="drawer_show_labels">இழுவையிற் படவுருப்பெயர் காட்டு</string>
+    <string name="pref_show_hotseat_qsb_title">தேடல் பட்டையைக் காண்பி</string>
+    <string name="pref_show_hotseat_qsb_summary">முகப்புத் திரையின் அடிப்பகுதியில்</string>
     <string name="drawer_open_keyboard_title">தேடல்தொடங்கத் தள்ளுக</string>
     <string name="drawer_open_keyboard_summary">இழுவைதோன்றின் விசைப்பலகைதிற</string>
     <string name="title_show_google_app">கூகுள் செயலி காட்டு</string>
