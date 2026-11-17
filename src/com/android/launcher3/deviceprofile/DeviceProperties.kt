@@ -52,6 +52,7 @@ data class DeviceProperties(
     val densityDpi: Int,
     val isDefaultLandscape: Boolean,
     val cutout: Rect = Rect(),
+    val navBarCanMoveConfig: Boolean = true,
 ) {
 
     /**
@@ -59,7 +60,7 @@ data class DeviceProperties(
      * screens always keep it at the bottom, mirroring the framework's config_navBarCanMove.
      */
     val canNavBarMove: Boolean
-        get() = isPhone
+        get() = isPhone && navBarCanMoveConfig
 
     fun createWindowBounds() =
         WindowBounds(widthPx, heightPx, availableWidthPx, availableHeightPx, rotationHint, densityDpi)
@@ -108,6 +109,7 @@ data class DeviceProperties(
                 densityDpi = windowBounds.densityDpi,
                 isDefaultLandscape = info.isDefaultLandscape,
                 cutout = info.cutout,
+                navBarCanMoveConfig = info.navBarCanMove,
             )
         }
     }

@@ -30,6 +30,7 @@ import com.android.launcher3.InvariantDeviceProfile.DeviceType
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.logging.FileLog
+import com.android.launcher3.testing.shared.ResourceUtils
 import com.android.launcher3.util.FlagDebugUtils.appendFlag
 import com.android.launcher3.util.NavigationMode
 import com.android.launcher3.util.WindowBounds
@@ -99,6 +100,10 @@ constructor(
      */
     val isDefaultLandscape: Boolean =
         normalizedDisplayInfo.size.x > normalizedDisplayInfo.size.y
+
+    /** Returns the framework's config_navBarCanMove */
+    val navBarCanMove: Boolean =
+        ResourceUtils.getBoolByName("config_navBarCanMove", context.resources, true)
 
     // Used for testing
     init {
