@@ -21,7 +21,6 @@ import static android.content.res.Configuration.UI_MODE_NIGHT_YES;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.launcher3.LauncherPrefs.GRID_NAME;
-import static com.android.launcher3.LauncherPrefs.NON_FIXED_LANDSCAPE_GRID_NAME;
 import static com.android.launcher3.WorkspaceLayoutManager.FIRST_SCREEN_ID;
 import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.widget.LauncherWidgetHolder.APPWIDGET_HOST_ID;
@@ -162,9 +161,7 @@ public class PreviewSurfaceRenderer {
         if (gridName == null) {
             gridName = LauncherPrefs.get(context).get(GRID_NAME);
         }
-        if (Objects.equals(gridName, FIXED_LANDSCAPE_GRID)) {
-            gridName = LauncherPrefs.get(context).get(NON_FIXED_LANDSCAPE_GRID_NAME);
-        }
+        boolean isFixedLandscape = Objects.equals(gridName, FIXED_LANDSCAPE_GRID);
 
         mPreviewContext = new PreviewContext(
                 context.createDisplayContext(display),
@@ -172,7 +169,8 @@ public class PreviewSurfaceRenderer {
                 widgetHostId,
                 layoutXml,
                 mWorkspacePageId,
-                bundle.getBoolean(KEY_WORKSPACE_ITEMS_LABELS_HIDDEN, false)
+                bundle.getBoolean(KEY_WORKSPACE_ITEMS_LABELS_HIDDEN, false),
+                isFixedLandscape
         );
 
         mViewRoot = new FrameLayout(mPreviewContext);
