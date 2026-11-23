@@ -67,6 +67,7 @@ constructor(
     layoutXml: String? = null,
     workspacePageId: Int = WorkspaceLayoutManager.FIRST_SCREEN_ID,
     workspaceHideItemsLabel: Boolean = false,
+    isFixedLandscape: Boolean = false,
 ) : SandboxContext(base) {
     private val mPrefName: String
 
@@ -77,7 +78,7 @@ constructor(
         mPrefName = "preview-$randomUid"
         val prefs = ProxyPrefs(this, getSharedPreferences(mPrefName, MODE_PRIVATE))
         prefs.putOrRemove(LauncherPrefs.GRID_NAME, gridName)
-        prefs.put(LauncherPrefs.FIXED_LANDSCAPE_MODE, false)
+        prefs.put(LauncherPrefs.FIXED_LANDSCAPE_MODE, isFixedLandscape)
         if (com.android.systemui.shared.Flags.workspaceItemsLabelHidden()) {
             prefs.put(LauncherPrefs.WORKSPACE_ITEMS_LABEL_HIDDEN, workspaceHideItemsLabel)
         }

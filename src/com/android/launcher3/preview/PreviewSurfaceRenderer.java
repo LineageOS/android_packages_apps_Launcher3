@@ -162,7 +162,8 @@ public class PreviewSurfaceRenderer {
         if (gridName == null) {
             gridName = LauncherPrefs.get(context).get(GRID_NAME);
         }
-        if (Objects.equals(gridName, FIXED_LANDSCAPE_GRID)) {
+        boolean isFixedLandscape = Objects.equals(gridName, FIXED_LANDSCAPE_GRID);
+        if (isFixedLandscape) {
             gridName = LauncherPrefs.get(context).get(NON_FIXED_LANDSCAPE_GRID_NAME);
         }
 
@@ -172,7 +173,8 @@ public class PreviewSurfaceRenderer {
                 widgetHostId,
                 layoutXml,
                 mWorkspacePageId,
-                bundle.getBoolean(KEY_WORKSPACE_ITEMS_LABELS_HIDDEN, false)
+                bundle.getBoolean(KEY_WORKSPACE_ITEMS_LABELS_HIDDEN, false),
+                isFixedLandscape
         );
 
         mViewRoot = new FrameLayout(mPreviewContext);
