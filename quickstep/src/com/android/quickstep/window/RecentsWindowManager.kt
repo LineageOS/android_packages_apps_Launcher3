@@ -78,6 +78,7 @@ import com.android.launcher3.dagger.WindowContext
 import com.android.launcher3.desktop.DesktopRecentsTransitionController
 import com.android.launcher3.display.DisplayController
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.secondarydisplay.SecondaryDisplayLauncher
 import com.android.launcher3.statehandlers.DepthController
 import com.android.launcher3.statemanager.StateManager
 import com.android.launcher3.statemanager.StateManager.AtomicAnimationFactory
@@ -876,6 +877,7 @@ constructor(
 
     override fun onStateSetStart(state: RecentsState) {
         super.onStateSetStart(state)
+        SecondaryDisplayLauncher.setHiddenByRecents(displayId, state.isRecentsViewVisible())
         RecentsWindowProtoLogProxy.logOnStateSetStart(state.toString())
     }
 

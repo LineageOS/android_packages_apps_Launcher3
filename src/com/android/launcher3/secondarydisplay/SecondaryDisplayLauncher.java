@@ -30,6 +30,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -78,6 +79,7 @@ import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.BaseDragLayer;
 
+import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,6 +87,9 @@ import java.util.Set;
  * Launcher activity for secondary displays
  */
 public class SecondaryDisplayLauncher extends BaseActivity implements BgDataModel.Callbacks {
+
+    private static final SparseArray<WeakReference<SecondaryDisplayLauncher>> sInstances =
+            new SparseArray<>();
 
     private LauncherModel mModel;
     private SecondaryDragLayer mDragLayer;
@@ -136,6 +141,7 @@ public class SecondaryDisplayLauncher extends BaseActivity implements BgDataMode
         mWorkspaceGrid = findViewById(R.id.workspace_grid);
         mBottomSheetHandle = mAppsView.findViewById(R.id.bottom_sheet_handle);
         mBottomSheetHandleArea = mAppsView.findViewById(R.id.bottom_sheet_handle_area);
+        sInstances.put(mDisplayId, new WeakReference<>(this));
 
         if (mOnlyAppDrawer) {
             hideSystemBars();
@@ -253,6 +259,16 @@ public class SecondaryDisplayLauncher extends BaseActivity implements BgDataMode
             topView.onBackInvoked();
         } else {
             showAppDrawer(false);
+        }
+    }
+
+    /** Hides the launcher on the given display while recents is shown on top of it. */
+    @UiThread
+    public static void setHiddenByRecents(int displayId, boolean hidden) {
+        WeakReference<SecondaryDisplayLauncher> ref = sInstances.get(displayId);
+        SecondaryDisplayLauncher launcher = ref != null ? ref.get() : null;
+        if (launcher != null) {
+            launcher.mDragLayer.setAlpha(hidden ? 0f : 1f);
         }
     }
 
