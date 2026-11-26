@@ -207,6 +207,13 @@ public class SecondaryDisplayLauncher extends BaseActivity implements BgDataMode
         controller.hide(WindowInsets.Type.systemBars());
     }
 
+    private void showSystemBars() {
+        WindowInsetsController controller = getWindow().getInsetsController();
+        if (controller != null) {
+            controller.show(WindowInsets.Type.systemBars());
+        }
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -269,6 +276,14 @@ public class SecondaryDisplayLauncher extends BaseActivity implements BgDataMode
         SecondaryDisplayLauncher launcher = ref != null ? ref.get() : null;
         if (launcher != null) {
             launcher.mDragLayer.setAlpha(hidden ? 0f : 1f);
+            if (launcher.mOnlyAppDrawer) {
+                // Bars had to be revealed to get to recents, keep them visible there
+                if (hidden) {
+                    launcher.showSystemBars();
+                } else {
+                    launcher.hideSystemBars();
+                }
+            }
         }
     }
 
